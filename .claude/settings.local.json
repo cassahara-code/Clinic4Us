@@ -10,7 +10,15 @@
       "Bash(timeout:*)",
       "Bash(curl:*)",
       "Bash(npm run build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(rm:*)",
+      "Bash(node:*)",
+      "Bash(cp:*)",
+      "Bash(git commit:*)",
+      "Bash(sed:*)",
+      "Bash(cd:*)",
+      "Read(//c/Users/Cassa/OneDrive/Área de Trabalho/PROJETOS/**)"
     ],
     "deny": [],
     "ask": []

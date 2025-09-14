@@ -4,11 +4,57 @@ import logo from '../images/logo_clinic4us.png';
 import hiltonCeo from '../images/hilton_ceo.png';
 import atalitaFono from '../images/atalita_fono.png';
 import laizaResolve from '../images/laiza_resolve.png';
+import formContactImage from '../images/form_contact_image.jpg';
+import freeEvaluationImage from '../images/free_evaluation.jpg';
+import ingridResolve from '../images/ingrid_resolve.png';
+import hellenStudio from '../images/hellen_studio.png';
+import fernandaNinho from '../images/fernanda_ninho.png';
 
 const LandingPage: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
+  const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
+  const [showTrialSuccess, setShowTrialSuccess] = useState(false);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [showSubscriptionSuccess, setShowSubscriptionSuccess] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{
+    name: string;
+    price: string;
+    period: string;
+    features: string[];
+  } | null>(null);
+  const [trialFormData, setTrialFormData] = useState({
+    nomeCompleto: '',
+    email: '',
+    whatsapp: '',
+    qtdProfissionais: ''
+  });
+  const [trialSelectedCountry, setTrialSelectedCountry] = useState({
+    code: 'BR',
+    name: 'Brasil',
+    prefix: '+55',
+    flag: 'BR'
+  });
+  const [isTrialCountryDropdownOpen, setIsTrialCountryDropdownOpen] = useState(false);
+  const [subscriptionFormData, setSubscriptionFormData] = useState({
+    nomeCompleto: '',
+    email: '',
+    cpfCnpj: '',
+    razaoSocial: '',
+    telefone: '',
+    endereco: '',
+    numero: '',
+    complemento: '',
+    bairro: '',
+    cidade: '',
+    uf: '',
+    cep: '',
+    cardNumber: '',
+    cardName: '',
+    cardExpiry: '',
+    cardCvv: ''
+  });
   const [formData, setFormData] = useState({
     nomeCompleto: '',
     email: '',
@@ -100,6 +146,95 @@ const LandingPage: React.FC = () => {
     setShowThankYou(false);
   };
 
+  const openTrialModal = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsTrialModalOpen(true);
+  };
+
+  const closeTrialModal = () => {
+    setIsTrialModalOpen(false);
+    setShowTrialSuccess(false);
+    setTrialFormData({
+      nomeCompleto: '',
+      email: '',
+      whatsapp: '',
+      qtdProfissionais: ''
+    });
+    setTrialSelectedCountry({
+      code: 'BR',
+      name: 'Brasil',
+      prefix: '+55',
+      flag: 'BR'
+    });
+  };
+
+  const openSubscriptionModal = (planName: string, planPrice: string, planPeriod: string, planFeatures: string[]) => {
+    setSelectedPlan({ name: planName, price: planPrice, period: planPeriod, features: planFeatures });
+    setIsSubscriptionModalOpen(true);
+  };
+
+  const closeSubscriptionModal = () => {
+    setIsSubscriptionModalOpen(false);
+    setShowSubscriptionSuccess(false);
+    setSelectedPlan(null);
+    setSubscriptionFormData({
+      nomeCompleto: '',
+      email: '',
+      cpfCnpj: '',
+      razaoSocial: '',
+      telefone: '',
+      endereco: '',
+      numero: '',
+      complemento: '',
+      bairro: '',
+      cidade: '',
+      uf: '',
+      cep: '',
+      cardNumber: '',
+      cardName: '',
+      cardExpiry: '',
+      cardCvv: ''
+    });
+  };
+
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleTrialSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!trialFormData.nomeCompleto) {
+      alert('Por favor, informe seu nome completo!');
+      return;
+    }
+
+    if (!trialFormData.email) {
+      alert('Por favor, informe seu email!');
+      return;
+    }
+
+    if (!isValidEmail(trialFormData.email)) {
+      alert('Por favor, informe um email válido!');
+      return;
+    }
+
+    if (!trialFormData.whatsapp) {
+      alert('Por favor, informe seu WhatsApp!');
+      return;
+    }
+
+    if (!trialFormData.qtdProfissionais) {
+      alert('Por favor, selecione a quantidade de profissionais!');
+      return;
+    }
+
+    // Simulação de envio - aqui você integraria com sua API
+    console.log('Dados para teste grátis:', trialFormData, 'País:', trialSelectedCountry);
+    setShowTrialSuccess(true);
+  };
+
   const formatWhatsApp = (value: string, country: string = 'BR') => {
     // Remove todos os caracteres não numéricos
     const numbers = value.replace(/\D/g, '');
@@ -147,6 +282,197 @@ const LandingPage: React.FC = () => {
       ...prev,
       whatsapp: ''
     }));
+  };
+
+  const handleTrialInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    if (name === 'whatsapp') {
+      const formatted = formatWhatsApp(value, trialSelectedCountry.code);
+      setTrialFormData(prev => ({
+        ...prev,
+        [name]: formatted
+      }));
+    } else {
+      setTrialFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handleTrialCountryChange = (country: typeof trialSelectedCountry) => {
+    setTrialSelectedCountry(country);
+    // Limpar o campo WhatsApp quando mudar o país
+    setTrialFormData(prev => ({
+      ...prev,
+      whatsapp: ''
+    }));
+  };
+
+  const formatCardNumber = (value: string) => {
+    // Remove todos os caracteres não numéricos
+    const numbers = value.replace(/\D/g, '');
+    // Adiciona espaços a cada 4 dígitos
+    return numbers.replace(/(\d{4})(?=\d)/g, '$1 ').substr(0, 19);
+  };
+
+  const formatCardExpiry = (value: string) => {
+    // Remove todos os caracteres não numéricos
+    const numbers = value.replace(/\D/g, '');
+    // Formato MM/YY
+    if (numbers.length >= 2) {
+      return numbers.slice(0, 2) + '/' + numbers.slice(2, 4);
+    }
+    return numbers;
+  };
+
+  const formatCPFCNPJ = (value: string) => {
+    // Remove todos os caracteres não numéricos
+    const numbers = value.replace(/\D/g, '');
+    
+    if (numbers.length <= 11) {
+      // Formato CPF: 000.000.000-00
+      return numbers
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    } else {
+      // Formato CNPJ: 00.000.000/0000-00
+      return numbers
+        .replace(/(\d{2})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1/$2')
+        .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+    }
+  };
+
+  const formatCEP = (value: string) => {
+    // Remove todos os caracteres não numéricos
+    const numbers = value.replace(/\D/g, '');
+    // Formato 00000-000
+    return numbers.replace(/(\d{5})(\d)/, '$1-$2').substr(0, 9);
+  };
+
+  const isCNPJ = (cpfCnpj: string) => {
+    // Remove caracteres não numéricos
+    const numbers = cpfCnpj.replace(/\D/g, '');
+    // CNPJ tem 14 dígitos, CPF tem 11
+    return numbers.length > 11;
+  };
+
+  const buscarCEP = async (cep: string) => {
+    // Remove caracteres não numéricos
+    const cleanCEP = cep.replace(/\D/g, '');
+    
+    // Verifica se o CEP tem 8 dígitos
+    if (cleanCEP.length !== 8) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
+      const data = await response.json();
+      
+      if (!data.erro) {
+        // Preenche automaticamente os campos de endereço
+        setSubscriptionFormData(prev => ({
+          ...prev,
+          endereco: data.logradouro || '',
+          bairro: data.bairro || '',
+          cidade: data.localidade || '',
+          uf: data.uf || ''
+        }));
+      } else {
+        // CEP não encontrado
+        console.log('CEP não encontrado');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+    }
+  };
+
+  const handleSubscriptionInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    let formattedValue = value;
+    
+    if (name === 'cardNumber') {
+      formattedValue = formatCardNumber(value);
+    } else if (name === 'cardExpiry') {
+      formattedValue = formatCardExpiry(value);
+    } else if (name === 'cpfCnpj') {
+      formattedValue = formatCPFCNPJ(value);
+      // Se mudou de CNPJ para CPF, limpar razão social
+      if (!isCNPJ(formattedValue)) {
+        setSubscriptionFormData(prev => ({
+          ...prev,
+          [name]: formattedValue,
+          razaoSocial: ''
+        }));
+        return;
+      }
+    } else if (name === 'cep') {
+      formattedValue = formatCEP(value);
+      // Buscar endereço automaticamente quando CEP estiver completo
+      const cleanCEP = formattedValue.replace(/\D/g, '');
+      if (cleanCEP.length === 8) {
+        buscarCEP(formattedValue);
+      }
+    } else if (name === 'cardCvv') {
+      formattedValue = value.replace(/\D/g, '').substr(0, 4);
+    }
+    
+    setSubscriptionFormData(prev => ({
+      ...prev,
+      [name]: formattedValue
+    }));
+  };
+
+  const handleSubscriptionSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validação básica (complemento é opcional)
+    let requiredFields = ['nomeCompleto', 'email', 'cpfCnpj', 'telefone', 'endereco', 'numero', 'bairro', 'cidade', 'uf', 'cep', 'cardNumber', 'cardName', 'cardExpiry', 'cardCvv'];
+    
+    // Se for CNPJ, incluir razão social como campo obrigatório
+    if (isCNPJ(subscriptionFormData.cpfCnpj)) {
+      requiredFields.push('razaoSocial');
+    }
+    
+    for (const field of requiredFields) {
+      if (!subscriptionFormData[field as keyof typeof subscriptionFormData]) {
+        const fieldNames: { [key: string]: string } = {
+          'nomeCompleto': 'Nome Completo',
+          'email': 'Email',
+          'cpfCnpj': 'CPF/CNPJ',
+          'razaoSocial': 'Razão Social',
+          'telefone': 'Telefone',
+          'endereco': 'Endereço',
+          'numero': 'Número',
+          'complemento': 'Complemento',
+          'bairro': 'Bairro',
+          'cidade': 'Cidade',
+          'uf': 'UF',
+          'cep': 'CEP',
+          'cardNumber': 'Número do Cartão',
+          'cardName': 'Nome no Cartão',
+          'cardExpiry': 'Validade do Cartão',
+          'cardCvv': 'CVV'
+        };
+        alert(`Por favor, preencha o campo ${fieldNames[field] || field}!`);
+        return;
+      }
+    }
+
+    if (!isValidEmail(subscriptionFormData.email)) {
+      alert('Por favor, informe um email válido!');
+      return;
+    }
+
+    // Simulação de processamento - aqui você integraria com o Mercado Pago
+    console.log('Dados da assinatura:', subscriptionFormData, 'Plano selecionado:', selectedPlan);
+    setShowSubscriptionSuccess(true);
   };
 
   const clearForm = () => {
@@ -215,7 +541,7 @@ ${formData.mensagem}
           <div className="nav-actions">
             <button 
               className="cta-button desktop-cta"
-              onClick={(e) => openContactModal(e, "Informações sobre o sistema")}
+              onClick={openTrialModal}
             >
               Teste Grátis
             </button>
@@ -247,7 +573,7 @@ ${formData.mensagem}
                 </ul>
                 <button 
                   className="cta-button mobile-cta" 
-                  onClick={(e) => { openContactModal(e, "Informações sobre o sistema"); closeMobileMenu(); }}
+                  onClick={(e) => { openTrialModal(e); closeMobileMenu(); }}
                 >
                   Teste Grátis
                 </button>
@@ -266,9 +592,9 @@ ${formData.mensagem}
             <div className="hero-buttons">
               <button 
                 className="cta-primary"
-                onClick={(e) => openContactModal(e, "Informações sobre o sistema")}
+                onClick={openTrialModal}
               >
-                Começar Teste Gratuito
+                Teste Grátis
               </button>
               <button 
                 className="cta-secondary"
@@ -460,9 +786,14 @@ ${formData.mensagem}
               </ul>
               <button 
                 className="plan-button"
-                onClick={(e) => openContactModal(e, "Informações sobre o sistema")}
+                onClick={() => openSubscriptionModal(
+                  'Clínica Starter', 
+                  '197', 
+                  '/mês', 
+                  ['Até 2 profissionais', 'Agenda básica', 'Prontuários eletrônicos', '500 pacientes', 'Relatórios básicos', 'Suporte por email']
+                )}
               >
-                Começar Teste
+                Assinar
               </button>
             </div>
 
@@ -492,9 +823,14 @@ ${formData.mensagem}
               </ul>
               <button 
                 className="plan-button"
-                onClick={(e) => openContactModal(e, "Informações sobre o sistema")}
+                onClick={() => openSubscriptionModal(
+                  'Clínica Pro', 
+                  '397', 
+                  '/mês', 
+                  ['Até 8 profissionais', 'Agenda avançada com lembretes', 'Prontuários + assinatura digital', '2.000 pacientes', 'Planos de ação', 'Formulários customizados', 'Relatórios avançados', 'Gestão financeira', 'Suporte telefônico']
+                )}
               >
-                Começar Teste
+                Assinar
               </button>
             </div>
 
@@ -641,60 +977,51 @@ ${formData.mensagem}
             <div className="testimonial-card">
               <div className="testimonial-header">
                 <div className="client-photo">
-                  <div className="image-placeholder client-placeholder">
-                    <p>👨‍⚕️</p>
-                    <small>Foto do Dr. Carlos</small>
-                  </div>
+                  <img src={fernandaNinho} alt="Fernanda Bragança" className="client-image" />
                 </div>
                 <div className="client-info">
-                  <h4>Dr. Carlos Silva</h4>
-                  <p>Fisioterapeuta</p>
-                  <p>Clínica Vida Saudável</p>
+                  <h4>Fernanda Bragança</h4>
+                  <p>Consultora de Atendimento</p>
+                  <p>Instituto Ninho</p>
                 </div>
               </div>
               <div className="testimonial-content">
                 <div className="stars">⭐⭐⭐⭐⭐</div>
-                <p>"O CLINIC4US revolucionou nossa clínica. Aumentamos nossa eficiência em 40% e nossos pacientes adoram o agendamento online."</p>
+                <p>"A organização da agenda de diversos profissionais é bem tranquila, fornece uma visão gerencial dos compromissos diminuindo erros e otimizando os atendimentos."</p>
               </div>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
                 <div className="client-photo">
-                  <div className="image-placeholder client-placeholder">
-                    <p>👩‍⚕️</p>
-                    <small>Foto da Dra. Ana</small>
-                  </div>
+                  <img src={ingridResolve} alt="Ingrid Barbosa" className="client-image" />
                 </div>
                 <div className="client-info">
-                  <h4>Dra. Ana Rodrigues</h4>
-                  <p>Psicóloga</p>
-                  <p>Centro de Terapias</p>
+                  <h4>Ingrid Barbosa</h4>
+                  <p>Assessoria Remota</p>
+                  <p>Resolve</p>
                 </div>
               </div>
               <div className="testimonial-content">
                 <div className="stars">⭐⭐⭐⭐⭐</div>
-                <p>"Gestão financeira nunca foi tão simples. Os relatórios me ajudam a tomar decisões estratégicas para crescer minha clínica."</p>
+                <p>"A gestão financeira nunca foi tão simples. Os relatórios me ajudam a tomar decisões estratégicas juntamente com nossos clientes."</p>
               </div>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
                 <div className="client-photo">
-                  <div className="image-placeholder client-placeholder">
-                    <p>👨‍⚕️</p>
-                    <small>Foto do Dr. João</small>
-                  </div>
+                  <img src={hellenStudio} alt="Hellen Kleine" className="client-image" />
                 </div>
                 <div className="client-info">
-                  <h4>Dr. João Martins</h4>
-                  <p>Nutrólogo</p>
-                  <p>NutriClínica</p>
+                  <h4>Hellen Kleine</h4>
+                  <p>Fisioterapeuta e Psicomotricista</p>
+                  <p>Studio Kids Motriz</p>
                 </div>
               </div>
               <div className="testimonial-content">
                 <div className="stars">⭐⭐⭐⭐⭐</div>
-                <p>"Prontuários eletrônicos seguros e planos de ação personalizados. Meus pacientes têm resultados muito melhores agora."</p>
+                <p>"Prontuários eletrônicos seguros e planos de ação personalizados. O acompanhamento e a gestão estão muito melhores agora."</p>
               </div>
             </div>
           </div>
@@ -710,9 +1037,9 @@ ${formData.mensagem}
             <div className="cta-buttons">
               <button 
                 className="cta-primary large"
-                onClick={(e) => openContactModal(e, "Informações sobre o sistema")}
+                onClick={openTrialModal}
               >
-                Começar Teste Gratuito de 30 Dias
+Teste Grátis de 7 Dias
               </button>
               <button 
                 className="cta-secondary large"
@@ -842,7 +1169,6 @@ ${formData.mensagem}
                 <div className="contact-modal-header">
                   <div className="modal-logo-title">
                     <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                    <h2>Entre em Contato</h2>
                   </div>
                   <button className="close-modal-button" onClick={closeContactModal}>
                     &times;
@@ -851,16 +1177,13 @@ ${formData.mensagem}
                 
                 <div className="modal-content-wrapper">
                   <div className="modal-image-section">
-                    <div className="image-placeholder modal-contact-placeholder">
-                      <p>🏥</p>
-                      <h3>Fale Conosco</h3>
-                      <small>Imagem: Profissional de saúde sorrindo ou equipe médica em ambiente clínico</small>
+                    <div className="modal-contact-image">
+                      <img src={formContactImage} alt="Profissional de saúde" className="contact-image" />
+                      <div className="contact-image-overlay">
+                        <h3>Fale Conosco</h3>
+                      </div>
                     </div>
                     <div className="contact-benefits">
-                      <div className="benefit-item">
-                        <span className="benefit-icon">⚡</span>
-                        <span>Resposta em até 2 horas</span>
-                      </div>
                       <div className="benefit-item">
                         <span className="benefit-icon">🎯</span>
                         <span>Demonstração personalizada</span>
@@ -873,121 +1196,121 @@ ${formData.mensagem}
                   </div>
                   
                   <form onSubmit={handleSubmit} className="contact-form">
-              <div className="form-group">
-                <label htmlFor="nomeCompleto">Nome Completo *</label>
-                <input
-                  type="text"
-                  id="nomeCompleto"
-                  name="nomeCompleto"
-                  value={formData.nomeCompleto}
-                  onChange={handleInputChange}
-                  placeholder="Digite seu nome completo"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="email">Email *</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="seu@email.com"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="whatsapp">WhatsApp *</label>
-                <div className="phone-input-container">
-                  <div className="country-selector">
-                    <div 
-                      className="country-select-custom"
-                      onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-                    >
-                      <span className="selected-country">
-                        <span className="country-prefix">{selectedCountry.prefix}</span>
-                      </span>
-                      <span className="dropdown-arrow">▼</span>
+                    <div className="form-group">
+                      <label htmlFor="nomeCompleto">Nome Completo *</label>
+                      <input
+                        type="text"
+                        id="nomeCompleto"
+                        name="nomeCompleto"
+                        value={formData.nomeCompleto}
+                        onChange={handleInputChange}
+                        placeholder="Digite seu nome completo"
+                        required
+                      />
                     </div>
-                    {isCountryDropdownOpen && (
-                      <div className="country-dropdown">
-                        {countries.map((country) => (
-                          <div
-                            key={country.code}
-                            className={`country-option ${country.code === selectedCountry.code ? 'selected' : ''}`}
-                            onClick={() => {
-                              handleCountryChange(country);
-                              setIsCountryDropdownOpen(false);
-                            }}
+
+                    <div className="form-group">
+                      <label htmlFor="email">Email *</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="seu@email.com"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="whatsapp">WhatsApp *</label>
+                      <div className="phone-input-container">
+                        <div className="country-selector">
+                          <div 
+                            className="country-select-custom"
+                            onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
                           >
-                            <span className="country-info">
-                              <span className="country-prefix">{country.prefix}</span>
-                              <span className="country-name">{country.name}</span>
+                            <span className="selected-country">
+                              <span className="country-prefix">{selectedCountry.prefix}</span>
                             </span>
+                            <span className="dropdown-arrow">▼</span>
                           </div>
-                        ))}
+                          {isCountryDropdownOpen && (
+                            <div className="country-dropdown">
+                              {countries.map((country) => (
+                                <div
+                                  key={country.code}
+                                  className={`country-option ${country.code === selectedCountry.code ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    handleCountryChange(country);
+                                    setIsCountryDropdownOpen(false);
+                                  }}
+                                >
+                                  <span className="country-info">
+                                    <span className="country-prefix">{country.prefix}</span>
+                                    <span className="country-name">{country.name}</span>
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <input
+                          type="tel"
+                          id="whatsapp"
+                          name="whatsapp"
+                          value={formData.whatsapp}
+                          onChange={handleInputChange}
+                          placeholder={selectedCountry.code === 'BR' ? '(11) 99999-9999' : 
+                                      selectedCountry.code === 'US' ? '(123) 456-7890' : 
+                                      '123 456 789'}
+                          className="phone-input"
+                          required
+                        />
                       </div>
-                    )}
-                  </div>
-                  <input
-                    type="tel"
-                    id="whatsapp"
-                    name="whatsapp"
-                    value={formData.whatsapp}
-                    onChange={handleInputChange}
-                    placeholder={selectedCountry.code === 'BR' ? '(11) 99999-9999' : 
-                                selectedCountry.code === 'US' ? '(123) 456-7890' : 
-                                '123 456 789'}
-                    className="phone-input"
-                    required
-                  />
-                </div>
-              </div>
+                    </div>
 
-              <div className="form-group">
-                <label htmlFor="assunto">Assunto *</label>
-                <select
-                  id="assunto"
-                  name="assunto"
-                  value={formData.assunto}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Selecione um assunto</option>
-                  <option value="Informações sobre o sistema">Informações sobre o sistema</option>
-                  <option value="Demonstração do produto">Demonstração do produto</option>
-                  <option value="Planos e preços">Planos e preços</option>
-                  <option value="Suporte técnico">Suporte técnico</option>
-                  <option value="Parceria comercial">Parceria comercial</option>
-                  <option value="Outros">Outros</option>
-                </select>
-              </div>
+                    <div className="form-group">
+                      <label htmlFor="assunto">Assunto *</label>
+                      <select
+                        id="assunto"
+                        name="assunto"
+                        value={formData.assunto}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        <option value="">Selecione um assunto</option>
+                        <option value="Informações sobre o sistema">Informações sobre o sistema</option>
+                        <option value="Demonstração do produto">Demonstração do produto</option>
+                        <option value="Planos e preços">Planos e preços</option>
+                        <option value="Suporte técnico">Suporte técnico</option>
+                        <option value="Parceria comercial">Parceria comercial</option>
+                        <option value="Outros">Outros</option>
+                      </select>
+                    </div>
 
-              <div className="form-group">
-                <label htmlFor="mensagem">Mensagem *</label>
-                <textarea
-                  id="mensagem"
-                  name="mensagem"
-                  value={formData.mensagem}
-                  onChange={handleInputChange}
-                  placeholder="Digite sua mensagem aqui..."
-                  rows={4}
-                  required
-                />
-              </div>
+                    <div className="form-group">
+                      <label htmlFor="mensagem">Mensagem *</label>
+                      <textarea
+                        id="mensagem"
+                        name="mensagem"
+                        value={formData.mensagem}
+                        onChange={handleInputChange}
+                        placeholder="Digite sua mensagem aqui..."
+                        rows={4}
+                        required
+                      />
+                    </div>
 
-              <div className="form-actions">
-                <button type="button" className="clear-button" onClick={clearForm}>
-                  Limpar Campos
-                </button>
-                <button type="submit" className="submit-button">
-                  Enviar Mensagem
-                </button>
-              </div>
-            </form>
+                    <div className="form-actions">
+                      <button type="button" className="clear-button" onClick={clearForm}>
+                        Limpar Campos
+                      </button>
+                      <button type="submit" className="submit-button">
+                        Enviar Mensagem
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </>
             ) : (
@@ -1011,6 +1334,517 @@ ${formData.mensagem}
           </div>
         </div>
       )}
+
+      {/* Modal de Teste Grátis */}
+      {isTrialModalOpen && (
+        <div className="contact-modal-overlay" onClick={closeTrialModal}>
+          <div className="contact-modal" onClick={(e) => e.stopPropagation()}>
+            {!showTrialSuccess ? (
+              <>
+                <div className="contact-modal-header">
+                  <div className="modal-logo-title">
+                    <img src={logo} alt="CLINIC4US" className="modal-logo" />
+                  </div>
+                  <button className="close-modal-button" onClick={closeTrialModal}>
+                    &times;
+                  </button>
+                </div>
+                
+                <div className="modal-content-wrapper">
+                  <div className="modal-image-section">
+                    <div className="modal-contact-image">
+                      <img src={freeEvaluationImage} alt="Teste Grátis CLINIC4US" className="contact-image" />
+                      <div className="contact-image-overlay">
+                        <h3>Teste Grátis</h3>
+                      </div>
+                    </div>
+                    <div className="contact-benefits">
+                      <div className="benefit-item">
+                        <span className="benefit-icon">🎯</span>
+                        <span>7 dias de teste completo</span>
+                      </div>
+                      <div className="benefit-item">
+                        <span className="benefit-icon">💡</span>
+                        <span>Sem compromisso</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <form onSubmit={handleTrialSubmit} className="contact-form">
+                    <div className="form-group">
+                      <label htmlFor="trialNomeCompleto">Nome Completo *</label>
+                      <input
+                        type="text"
+                        id="trialNomeCompleto"
+                        name="nomeCompleto"
+                        value={trialFormData.nomeCompleto}
+                        onChange={handleTrialInputChange}
+                        placeholder="Digite seu nome completo"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="trialEmail">Email *</label>
+                      <input
+                        type="email"
+                        id="trialEmail"
+                        name="email"
+                        value={trialFormData.email}
+                        onChange={handleTrialInputChange}
+                        placeholder="seu@email.com"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="trialWhatsapp">WhatsApp *</label>
+                      <div className="phone-input-container">
+                        <div className="country-selector">
+                          <div 
+                            className="country-select-custom"
+                            onClick={() => setIsTrialCountryDropdownOpen(!isTrialCountryDropdownOpen)}
+                          >
+                            <span className="selected-country">
+                              <span className="country-prefix">{trialSelectedCountry.prefix}</span>
+                            </span>
+                            <span className="dropdown-arrow">▼</span>
+                          </div>
+                          {isTrialCountryDropdownOpen && (
+                            <div className="country-dropdown">
+                              {countries.map((country) => (
+                                <div
+                                  key={country.code}
+                                  className={`country-option ${country.code === trialSelectedCountry.code ? 'selected' : ''}`}
+                                  onClick={() => {
+                                    handleTrialCountryChange(country);
+                                    setIsTrialCountryDropdownOpen(false);
+                                  }}
+                                >
+                                  <span className="country-info">
+                                    <span className="country-prefix">{country.prefix}</span>
+                                    <span className="country-name">{country.name}</span>
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <input
+                          type="tel"
+                          id="trialWhatsapp"
+                          name="whatsapp"
+                          value={trialFormData.whatsapp}
+                          onChange={handleTrialInputChange}
+                          placeholder={trialSelectedCountry.code === 'BR' ? '(11) 99999-9999' : 
+                                      trialSelectedCountry.code === 'US' ? '(123) 456-7890' : 
+                                      '123 456 789'}
+                          className="phone-input"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="trialQtdProfissionais">Sua empresa tem quantos profissionais? *</label>
+                      <select
+                        id="trialQtdProfissionais"
+                        name="qtdProfissionais"
+                        value={trialFormData.qtdProfissionais}
+                        onChange={handleTrialInputChange}
+                        required
+                      >
+                        <option value="">Selecione a quantidade</option>
+                        <option value="1">1 profissional</option>
+                        <option value="2-5">2 a 5 profissionais</option>
+                        <option value="6-10">6 a 10 profissionais</option>
+                        <option value="11-20">11 a 20 profissionais</option>
+                        <option value="21-50">21 a 50 profissionais</option>
+                        <option value="50+">Mais de 50 profissionais</option>
+                      </select>
+                    </div>
+
+                    <div className="form-actions">
+                      <button type="submit" className="submit-button">
+Teste Grátis
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                
+                <div className="trial-disclaimer" style={{
+                  margin: window.innerWidth <= 768 ? '1.5rem 24px 24px 24px' : '2rem 32px 32px 32px', 
+                  padding: '20px', 
+                  backgroundColor: '#f8fafc', 
+                  borderRadius: '8px', 
+                  fontSize: '0.9rem', 
+                  lineHeight: '1.5',
+                  borderLeft: '4px solid #03B4C6'
+                }}>
+                  <p>
+                    <strong>Avaliação gratuita</strong><br/>
+                    Ao se inscrever para a avaliação gratuita da plataforma CLINIC4US, você receberá um e-mail de validação. 
+                    Verifique sua caixa de entrada (e também a pasta de spam ou promoções, se necessário), siga as instruções 
+                    e aproveite o período de testes de 7 dias. Após este período a conta será inativada automaticamente.
+                  </p>
+                  <p style={{marginBottom: '0'}}>
+                    Em caso de dúvidas, entre em contato com nossa equipe de suporte.
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="thank-you-screen">
+                <div className="thank-you-header">
+                  <img src={logo} alt="CLINIC4US" className="modal-logo" />
+                  <button className="close-modal-button" onClick={closeTrialModal}>
+                    &times;
+                  </button>
+                </div>
+                <div className="thank-you-content">
+                  <div className="thank-you-icon">✓</div>
+                  <h2>Cadastro Realizado!</h2>
+                  <p>Verifique seu email para ativar sua conta de teste.</p>
+                  <button className="thank-you-close-button" onClick={closeTrialModal}>
+                    Fechar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Assinatura */}
+      {isSubscriptionModalOpen && selectedPlan && (
+        <div className="contact-modal-overlay" onClick={closeSubscriptionModal}>
+          <div className="contact-modal subscription-modal" onClick={(e) => e.stopPropagation()}>
+            {!showSubscriptionSuccess ? (
+              <>
+                <div className="contact-modal-header">
+                  <div className="modal-logo-title">
+                    <img src={logo} alt="CLINIC4US" className="modal-logo" />
+                  </div>
+                  <button className="close-modal-button" onClick={closeSubscriptionModal}>
+                    &times;
+                  </button>
+                </div>
+                
+                <div className="subscription-content">
+                  <div className="subscription-plan-summary">
+                    <h3>Assinatura - {selectedPlan.name}</h3>
+                    <div className="plan-price-display">
+                      <span className="currency">R$</span>
+                      <span className="amount">{selectedPlan.price}</span>
+                      <span className="period">{selectedPlan.period}</span>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleSubscriptionSubmit} className="subscription-form">
+                    <div className="form-section">
+                      <h4>Dados Pessoais</h4>
+                      
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="subNomeCompleto">Nome Completo *</label>
+                          <input
+                            type="text"
+                            id="subNomeCompleto"
+                            name="nomeCompleto"
+                            value={subscriptionFormData.nomeCompleto}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="Digite seu nome completo"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="subEmail">Email *</label>
+                          <input
+                            type="email"
+                            id="subEmail"
+                            name="email"
+                            value={subscriptionFormData.email}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="seu@email.com"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="subCpfCnpj">CPF/CNPJ *</label>
+                          <input
+                            type="text"
+                            id="subCpfCnpj"
+                            name="cpfCnpj"
+                            value={subscriptionFormData.cpfCnpj}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="subTelefone">Telefone *</label>
+                          <input
+                            type="tel"
+                            id="subTelefone"
+                            name="telefone"
+                            value={subscriptionFormData.telefone}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="(11) 99999-9999"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Campo Razão Social - aparece apenas se for CNPJ */}
+                      {isCNPJ(subscriptionFormData.cpfCnpj) && (
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label htmlFor="subRazaoSocial">Razão Social *</label>
+                            <input
+                              type="text"
+                              id="subRazaoSocial"
+                              name="razaoSocial"
+                              value={subscriptionFormData.razaoSocial}
+                              onChange={handleSubscriptionInputChange}
+                              placeholder="Nome da empresa conforme CNPJ"
+                              required
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="subCep">CEP *</label>
+                          <input
+                            type="text"
+                            id="subCep"
+                            name="cep"
+                            value={subscriptionFormData.cep}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="00000-000"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="subEndereco">Endereço *</label>
+                          <input
+                            type="text"
+                            id="subEndereco"
+                            name="endereco"
+                            value={subscriptionFormData.endereco}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="Nome da rua/avenida"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="subNumero">Número *</label>
+                          <input
+                            type="text"
+                            id="subNumero"
+                            name="numero"
+                            value={subscriptionFormData.numero}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="123"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="subComplemento">Complemento</label>
+                          <input
+                            type="text"
+                            id="subComplemento"
+                            name="complemento"
+                            value={subscriptionFormData.complemento}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="Apto, sala, bloco (opcional)"
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="subBairro">Bairro *</label>
+                          <input
+                            type="text"
+                            id="subBairro"
+                            name="bairro"
+                            value={subscriptionFormData.bairro}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="Nome do bairro"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="subCidade">Cidade *</label>
+                          <input
+                            type="text"
+                            id="subCidade"
+                            name="cidade"
+                            value={subscriptionFormData.cidade}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="Nome da cidade"
+                            required
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="subUf">UF *</label>
+                          <input
+                            type="text"
+                            id="subUf"
+                            name="uf"
+                            value={subscriptionFormData.uf}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="SP"
+                            maxLength={2}
+                            style={{ textTransform: 'uppercase' }}
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="form-section">
+                      <h4>Dados do Cartão de Crédito</h4>
+                      
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="subCardNumber">Número do Cartão *</label>
+                          <input
+                            type="text"
+                            id="subCardNumber"
+                            name="cardNumber"
+                            value={subscriptionFormData.cardNumber}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="0000 0000 0000 0000"
+                            maxLength={19}
+                            required
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="subCardName">Nome no Cartão *</label>
+                          <input
+                            type="text"
+                            id="subCardName"
+                            name="cardName"
+                            value={subscriptionFormData.cardName}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="Nome como impresso no cartão"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label htmlFor="subCardExpiry">Validade *</label>
+                          <input
+                            type="text"
+                            id="subCardExpiry"
+                            name="cardExpiry"
+                            value={subscriptionFormData.cardExpiry}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="MM/YY"
+                            maxLength={5}
+                            required
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="subCardCvv">CVV *</label>
+                          <input
+                            type="text"
+                            id="subCardCvv"
+                            name="cardCvv"
+                            value={subscriptionFormData.cardCvv}
+                            onChange={handleSubscriptionInputChange}
+                            placeholder="000"
+                            maxLength={4}
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="subscription-summary">
+                      <div className="summary-row">
+                        <span>Plano {selectedPlan.name}:</span>
+                        <span>R$ {selectedPlan.price}{selectedPlan.period}</span>
+                      </div>
+                      <div className="summary-row total">
+                        <strong>Total:</strong>
+                        <strong>R$ {selectedPlan.price}{selectedPlan.period}</strong>
+                      </div>
+                    </div>
+
+                    <div className="form-actions">
+                      <button type="submit" className="submit-button subscription-button">
+                        Confirmar Assinatura
+                      </button>
+                    </div>
+
+                    <div className="subscription-security">
+                      <p>🔒 Pagamento 100% seguro. Seus dados estão protegidos.</p>
+                      <p>💳 Aceitamos todos os cartões de crédito principais.</p>
+                    </div>
+                  </form>
+                </div>
+              </>
+            ) : (
+              <div className="thank-you-screen">
+                <div className="thank-you-header">
+                  <img src={logo} alt="CLINIC4US" className="modal-logo" />
+                  <button className="close-modal-button" onClick={closeSubscriptionModal}>
+                    &times;
+                  </button>
+                </div>
+                <div className="thank-you-content">
+                  <div className="thank-you-icon">✓</div>
+                  <h2>Assinatura Confirmada!</h2>
+                  <p>Bem-vindo ao {selectedPlan?.name}!</p>
+                  <p>Você receberá as instruções de acesso por email em breve.</p>
+                  <button className="thank-you-close-button" onClick={closeSubscriptionModal}>
+                    Começar a Usar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Botão flutuante do WhatsApp */}
+      <a 
+        href="https://wa.me/5511972918369" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="whatsapp-float"
+        aria-label="Falar no WhatsApp"
+      >
+        <svg 
+          width="24" 
+          height="24" 
+          viewBox="0 0 24 24" 
+          fill="currentColor"
+        >
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.51 3.488"/>
+        </svg>
+      </a>
     </div>
   );
 };
