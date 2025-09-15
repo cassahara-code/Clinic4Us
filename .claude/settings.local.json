@@ -18,7 +18,8 @@
       "Bash(git commit:*)",
       "Bash(sed:*)",
       "Bash(cd:*)",
-      "Read(//c/Users/Cassa/OneDrive/Área de Trabalho/PROJETOS/**)"
+      "Read(//c/Users/Cassa/OneDrive/Área de Trabalho/PROJETOS/**)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

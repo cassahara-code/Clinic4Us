@@ -859,7 +859,7 @@ ${formData.mensagem}
               </ul>
               <button 
                 className="plan-button"
-                onClick={(e) => openContactModal(e, "Informações sobre o sistema")}
+                onClick={() => window.open('https://wa.me/5511972918369?text=Olá! Gostaria de saber mais sobre o plano Enterprise do CLINIC4US.', '_blank')}
               >
                 Falar com Vendas
               </button>
