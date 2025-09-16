@@ -613,34 +613,108 @@ ${formData.mensagem}
   return (
     <Box className="landing-page" sx={{ minHeight: "100vh" }}>
       {/* Header */}
-      <AppBar position="static" color="default" elevation={0} sx={{ mb: 2 }}>
-        <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+      <AppBar
+        position="fixed"
+        color="inherit"
+        elevation={0}
+        sx={{ background: "#fff", mb: 2, boxShadow: 0, borderRadius: 2 }}
+      >
+        <Toolbar sx={{ px: { xs: 2, md: 6 }, minHeight: 80, height: 110 }}>
+          {/* Logo à esquerda */}
+          <Box sx={{ flex: 1, display: "flex", alignItems: "center" }}>
             <img
               src={logo}
               alt="CLINIC4US"
-              style={{ cursor: "pointer", height: 40 }}
+              style={{ cursor: "pointer", width: 237, height: 98 }}
               onClick={scrollToTop}
             />
           </Box>
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 3 }}>
-            <Button href="#funcionalidades">Funcionalidades</Button>
-            <Button href="#planos">Planos</Button>
-            <Button href="#comparacao">Comparação</Button>
-            <Button href="#contato" onClick={openContactModal}>
+          {/* Menu centralizado */}
+          <Box
+            sx={{
+              flex: 2,
+              display: { xs: "none", md: "flex" },
+              justifyContent: "center",
+              gap: 4,
+            }}
+          >
+            <Button
+              href="#funcionalidades"
+              sx={{
+                color: "#222",
+                fontWeight: 500,
+                fontSize: 16,
+                textTransform: "none",
+              }}
+            >
+              Funcionalidades
+            </Button>
+            <Button
+              href="#planos"
+              sx={{
+                color: "#222",
+                fontWeight: 500,
+                fontSize: 16,
+                textTransform: "none",
+              }}
+            >
+              Planos
+            </Button>
+            <Button
+              href="#comparacao"
+              sx={{
+                color: "#222",
+                fontWeight: 500,
+                fontSize: 16,
+                textTransform: "none",
+              }}
+            >
+              Comparação
+            </Button>
+            <Button
+              href="#contato"
+              onClick={openContactModal}
+              sx={{
+                color: "#222",
+                fontWeight: 500,
+                fontSize: 16,
+                textTransform: "none",
+              }}
+            >
               Contato
             </Button>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {/* CTA à direita */}
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
             <Button
               variant="contained"
               color="primary"
               onClick={openTrialModal}
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                py: 1,
+                fontWeight: 600,
+                fontSize: 16,
+                textTransform: "none",
+                boxShadow: "none",
+              }}
             >
               Teste Grátis
             </Button>
             {/* Hamburger Menu Button */}
-            <Button onClick={toggleMobileMenu} sx={{ display: { md: "none" } }}>
+            <Button
+              onClick={toggleMobileMenu}
+              sx={{ display: { md: "none" }, minWidth: 0, p: 1 }}
+            >
               <span style={{ fontSize: 24 }}>☰</span>
             </Button>
           </Box>
