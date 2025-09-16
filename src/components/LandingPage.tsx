@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  IconButton,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import "./LandingPage.css";
 import logo from "../images/logo_clinic4us.png";
+import fabio from "../images/Fabio.jpg";
 import hiltonCeo from "../images/hilton_ceo.png";
 import atalitaFono from "../images/atalita_fono.png";
 import laizaResolve from "../images/laiza_resolve.png";
@@ -9,6 +18,20 @@ import freeEvaluationImage from "../images/free_evaluation.jpg";
 import ingridResolve from "../images/ingrid_resolve.png";
 import hellenStudio from "../images/hellen_studio.png";
 import fernandaNinho from "../images/fernanda_ninho.png";
+import Grid from "@mui/material/Grid";
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  AppBar,
+  Toolbar,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@mui/material";
 
 const LandingPage: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -323,7 +346,9 @@ const LandingPage: React.FC = () => {
   };
 
   const handleTrialInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
 
@@ -586,1595 +611,1902 @@ ${formData.mensagem}
   };
 
   return (
-    <div className="landing-page">
+    <Box className="landing-page" sx={{ minHeight: "100vh" }}>
       {/* Header */}
-      <header className="header">
-        <nav className="navbar">
-          <div className="nav-brand">
+      <AppBar position="static" color="default" elevation={0} sx={{ mb: 2 }}>
+        <Toolbar sx={{ justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <img
               src={logo}
               alt="CLINIC4US"
-              className="logo"
+              style={{ cursor: "pointer", height: 40 }}
               onClick={scrollToTop}
-              style={{ cursor: "pointer" }}
             />
-          </div>
-
-          {/* Desktop Menu */}
-          <ul className="nav-menu desktop-menu">
-            <li>
-              <a href="#funcionalidades">Funcionalidades</a>
-            </li>
-            <li>
-              <a href="#planos">Planos</a>
-            </li>
-            <li>
-              <a href="#comparacao">Comparação</a>
-            </li>
-            <li>
-              <a href="#contato" onClick={openContactModal}>
-                Contato
-              </a>
-            </li>
-          </ul>
-
-          <div className="nav-actions">
-            <button className="cta-button desktop-cta" onClick={openTrialModal}>
-              Teste Grátis
-            </button>
-
-            {/* Hamburger Menu Button */}
-            <button
-              className={`hamburger ${isMobileMenuOpen ? "active" : ""}`}
-              onClick={toggleMobileMenu}
-              aria-label="Toggle menu"
+          </Box>
+          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 3 }}>
+            <Button href="#funcionalidades">Funcionalidades</Button>
+            <Button href="#planos">Planos</Button>
+            <Button href="#comparacao">Comparação</Button>
+            <Button href="#contato" onClick={openContactModal}>
+              Contato
+            </Button>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={openTrialModal}
             >
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
-          </div>
-
+              Teste Grátis
+            </Button>
+            {/* Hamburger Menu Button */}
+            <Button onClick={toggleMobileMenu} sx={{ display: { md: "none" } }}>
+              <span style={{ fontSize: 24 }}>☰</span>
+            </Button>
+          </Box>
           {/* Mobile Menu Overlay */}
           {isMobileMenuOpen && (
-            <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
-              <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
-                <div className="mobile-menu-header">
-                  <img src={logo} alt="CLINIC4US" className="mobile-logo" />
-                </div>
-                <ul className="mobile-nav-menu">
-                  <li>
-                    <a href="#funcionalidades" onClick={closeMobileMenu}>
-                      Funcionalidades
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#planos" onClick={closeMobileMenu}>
-                      Planos
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#comparacao" onClick={closeMobileMenu}>
-                      Comparação
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#contato"
-                      onClick={(e) => {
-                        openContactModal(e);
-                        closeMobileMenu();
-                      }}
-                    >
-                      Contato
-                    </a>
-                  </li>
-                </ul>
-                <button
-                  className="cta-button mobile-cta"
+            <Box
+              sx={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100vh",
+                bgcolor: "rgba(0,0,0,0.5)",
+                zIndex: 1300,
+              }}
+              onClick={closeMobileMenu}
+            >
+              <Box
+                sx={{
+                  bgcolor: "background.paper",
+                  width: 250,
+                  height: "100vh",
+                  p: 2,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Box sx={{ mb: 2, display: "flex", justifyContent: "center" }}>
+                  <img src={logo} alt="CLINIC4US" style={{ height: 40 }} />
+                </Box>
+                <Button
+                  fullWidth
+                  href="#funcionalidades"
+                  onClick={closeMobileMenu}
+                >
+                  Funcionalidades
+                </Button>
+                <Button fullWidth href="#planos" onClick={closeMobileMenu}>
+                  Planos
+                </Button>
+                <Button fullWidth href="#comparacao" onClick={closeMobileMenu}>
+                  Comparação
+                </Button>
+                <Button
+                  fullWidth
+                  href="#contato"
+                  onClick={(e) => {
+                    openContactModal(e);
+                    closeMobileMenu();
+                  }}
+                >
+                  Contato
+                </Button>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  sx={{ mt: 2 }}
                   onClick={(e) => {
                     openTrialModal(e);
                     closeMobileMenu();
                   }}
                 >
                   Teste Grátis
-                </button>
-              </div>
-            </div>
+                </Button>
+              </Box>
+            </Box>
           )}
-        </nav>
-      </header>
+        </Toolbar>
+      </AppBar>
 
       {/* Hero Section */}
-      <section className="hero">
-        <div className="hero-content">
-          <div className="hero-text">
-            <h1>
-              Transforme sua Clínica com o Sistema de Gestão Mais Completo
-            </h1>
-            <p>
-              Gerencie agendamentos, prontuários, planos de ação e finanças em
-              uma única plataforma. Ideal para clínicas multidisciplinares que
-              buscam eficiência e crescimento.
-            </p>
-            <div className="hero-buttons">
-              <button className="cta-primary" onClick={openTrialModal}>
-                Teste Grátis
-              </button>
-              <button
-                className="cta-secondary"
-                onClick={(e) => openContactModal(e, "Demonstração do produto")}
+      <Box sx={{ bgcolor: "#f5f5f5", py: 6 }}>
+        <Container>
+          <Grid container spacing={4} alignItems="center">
+            <Grid>
+              <Typography variant="h2" gutterBottom>
+                Transforme sua Clínica com o Sistema de Gestão Mais Completo
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                Gerencie agendamentos, prontuários, planos de ação e finanças em
+                uma única plataforma. Ideal para clínicas multidisciplinares que
+                buscam eficiência e crescimento.
+              </Typography>
+              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={openTrialModal}
+                >
+                  Teste Grátis
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={(e) =>
+                    openContactModal(e, "Demonstração do produto")
+                  }
+                >
+                  Agendar Demo
+                </Button>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{ bgcolor: "white", borderRadius: 2, p: 3, boxShadow: 2 }}
               >
-                Agendar Demo
-              </button>
-            </div>
-          </div>
-          <div className="hero-image">
-            <div className="dashboard-mockup">
-              <div className="mockup-header">
-                <div className="mockup-dots">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
-              <div className="mockup-content">
-                <div className="mockup-sidebar">
-                  <div className="sidebar-item active">Dashboard</div>
-                  <div className="sidebar-item">Agenda</div>
-                  <div className="sidebar-item">Pacientes</div>
-                  <div className="sidebar-item">Prontuários</div>
-                  <div className="sidebar-item">Relatórios</div>
-                </div>
-                <div className="mockup-main">
-                  <div className="card-row">
-                    <div className="info-card">
-                      <span className="card-title">Consultas Hoje</span>
-                      <span className="card-value">24</span>
-                    </div>
-                    <div className="info-card">
-                      <span className="card-title">Faturamento Mês</span>
-                      <span className="card-value">R$ 45.2k</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+                {/* ...dashboard mockup... */}
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Dashboard
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid>
+                    <Box sx={{ bgcolor: "#e3f2fd", borderRadius: 1, p: 2 }}>
+                      <Typography variant="subtitle2">
+                        Consultas Hoje
+                      </Typography>
+                      <Typography variant="h5">24</Typography>
+                    </Box>
+                  </Grid>
+                  <Grid>
+                    <Box sx={{ bgcolor: "#e3f2fd", borderRadius: 1, p: 2 }}>
+                      <Typography variant="subtitle2">
+                        Faturamento Mês
+                      </Typography>
+                      <Typography variant="h5">R$ 45.2k</Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
 
       {/* Features Section */}
-      <section id="funcionalidades" className="features">
-        <div className="container">
-          <div className="section-header">
-            <h2>Funcionalidades Completas para sua Clínica</h2>
-            <p>Todas as ferramentas que você precisa em uma única plataforma</p>
-          </div>
-
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon">📅</div>
-              <h3>Agenda Inteligente</h3>
-              <p>
-                Agendamento online, lembretes automáticos e gestão de horários
-                para múltiplos profissionais.
-              </p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">📋</div>
-              <h3>Prontuários Eletrônicos</h3>
-              <p>
-                Prontuários digitais seguros, com histórico completo e
-                assinatura eletrônica.
-              </p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">🎯</div>
-              <h3>Planos de Ação</h3>
-              <p>
-                Crie e acompanhe planos de tratamento personalizados para cada
-                paciente.
-              </p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">📊</div>
-              <h3>Evoluções e Notas</h3>
-              <p>
-                Registro detalhado de evoluções, com templates customizáveis por
-                especialidade.
-              </p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">📝</div>
-              <h3>Formulários de Avaliação</h3>
-              <p>
-                Formulários dinâmicos e customizáveis para diferentes tipos de
-                avaliação.
-              </p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">📈</div>
-              <h3>Relatórios Gerenciais</h3>
-              <p>
-                Dashboards e relatórios completos para análise de desempenho e
-                faturamento.
-              </p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">💰</div>
-              <h3>Gestão Financeira</h3>
-              <p>
-                Controle financeiro completo, faturamento, repasses e integração
-                com sistemas contábeis.
-              </p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">👥</div>
-              <h3>Controle de Usuários</h3>
-              <p>
-                Gestão de profissionais, permissões e controle de acesso por
-                função.
-              </p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon">🔒</div>
-              <h3>Base de Dados Exclusiva</h3>
-              <p>
-                Cada cliente possui sua própria base de dados isolada,
-                garantindo máxima segurança, privacidade e conformidade com a
-                LGPD.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Box id="funcionalidades" sx={{ bgcolor: "#fff", py: 6 }}>
+        <Container>
+          <Box sx={{ textAlign: "center", mb: 4 }}>
+            <Typography variant="h3" gutterBottom>
+              Funcionalidades Completas para sua Clínica
+            </Typography>
+            <Typography variant="body1">
+              Todas as ferramentas que você precisa em uma única plataforma
+            </Typography>
+          </Box>
+          <Grid container spacing={3} justifyContent="center">
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h2">📅</Typography>
+                <Typography variant="h5" gutterBottom>
+                  Agenda Inteligente
+                </Typography>
+                <Typography variant="body2">
+                  Agendamento online, lembretes automáticos e gestão de horários
+                  para múltiplos profissionais.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h2">📋</Typography>
+                <Typography variant="h5" gutterBottom>
+                  Prontuários Eletrônicos
+                </Typography>
+                <Typography variant="body2">
+                  Prontuários digitais seguros, com histórico completo e
+                  assinatura eletrônica.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h2">🎯</Typography>
+                <Typography variant="h5" gutterBottom>
+                  Planos de Ação
+                </Typography>
+                <Typography variant="body2">
+                  Crie e acompanhe planos de tratamento personalizados para cada
+                  paciente.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h2">📊</Typography>
+                <Typography variant="h5" gutterBottom>
+                  Evoluções e Notas
+                </Typography>
+                <Typography variant="body2">
+                  Registro detalhado de evoluções, com templates customizáveis
+                  por especialidade.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h2">📝</Typography>
+                <Typography variant="h5" gutterBottom>
+                  Formulários de Avaliação
+                </Typography>
+                <Typography variant="body2">
+                  Formulários dinâmicos e customizáveis para diferentes tipos de
+                  avaliação.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h2">📈</Typography>
+                <Typography variant="h5" gutterBottom>
+                  Relatórios Gerenciais
+                </Typography>
+                <Typography variant="body2">
+                  Dashboards e relatórios completos para análise de desempenho e
+                  faturamento.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h2">💰</Typography>
+                <Typography variant="h5" gutterBottom>
+                  Gestão Financeira
+                </Typography>
+                <Typography variant="body2">
+                  Controle financeiro completo, faturamento, repasses e
+                  integração com sistemas contábeis.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h2">👥</Typography>
+                <Typography variant="h5" gutterBottom>
+                  Controle de Usuários
+                </Typography>
+                <Typography variant="body2">
+                  Gestão de profissionais, permissões e controle de acesso por
+                  função.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 1,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h2">🔒</Typography>
+                <Typography variant="h5" gutterBottom>
+                  Base de Dados Exclusiva
+                </Typography>
+                <Typography variant="body2">
+                  Cada cliente possui sua própria base de dados isolada,
+                  garantindo máxima segurança, privacidade e conformidade com a
+                  LGPD.
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
 
       {/* Workflow Section */}
-      <section className="workflow-section">
-        <div className="container">
-          <div className="workflow-content">
-            <div className="workflow-text">
-              <h2>Simplifique o Fluxo de Trabalho da sua Clínica</h2>
-              <p>
+      <Box sx={{ bgcolor: "#f9fafb", py: 6 }}>
+        <Container>
+          <Grid container spacing={4} alignItems="center">
+            <Grid>
+              <Typography variant="h3" gutterBottom>
+                Simplifique o Fluxo de Trabalho da sua Clínica
+              </Typography>
+              <Typography variant="body1" gutterBottom>
                 Veja como o CLINIC4US otimiza cada etapa do atendimento, desde o
                 agendamento até o faturamento.
-              </p>
-              <div className="workflow-steps">
-                <div className="step">
-                  <div className="step-number">1</div>
-                  <div className="step-info">
-                    <h4>Agendamento Online</h4>
-                    <p>Pacientes agendam diretamente pela plataforma</p>
-                  </div>
-                </div>
-                <div className="step">
-                  <div className="step-number">2</div>
-                  <div className="step-info">
-                    <h4>Atendimento Digital</h4>
-                    <p>Prontuários e evoluções em tempo real</p>
-                  </div>
-                </div>
-                <div className="step">
-                  <div className="step-number">3</div>
-                  <div className="step-info">
-                    <h4>Gestão Automática</h4>
-                    <p>Relatórios e faturamento automatizados</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="workflow-image">
-              <div className="image-placeholder workflow-placeholder">
-                <p>
+              </Typography>
+              <Grid container spacing={2} sx={{ mt: 2 }}>
+                <Grid>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "#e3f2fd",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography variant="h4">1</Typography>
+                    <Typography variant="subtitle1">
+                      Agendamento Online
+                    </Typography>
+                    <Typography variant="body2">
+                      Pacientes agendam diretamente pela plataforma
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "#e3f2fd",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography variant="h4">2</Typography>
+                    <Typography variant="subtitle1">
+                      Atendimento Digital
+                    </Typography>
+                    <Typography variant="body2">
+                      Prontuários e evoluções em tempo real
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: "#e3f2fd",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography variant="h4">3</Typography>
+                    <Typography variant="subtitle1">
+                      Gestão Automática
+                    </Typography>
+                    <Typography variant="body2">
+                      Relatórios e faturamento automatizados
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  bgcolor: "#fff",
+                  borderRadius: 2,
+                  p: 3,
+                  textAlign: "center",
+                  boxShadow: 1,
+                }}
+              >
+                <Typography variant="h5" gutterBottom>
                   📱 Imagem: Interface do sistema mostrando o fluxo de trabalho
-                  - desde agendamento até relatórios
-                </p>
-                <small>
+                </Typography>
+                <Typography variant="body2">
                   Recomendação: Screenshot do dashboard principal com destaque
                   para as principais funcionalidades
-                </small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
 
       {/* Pricing Section */}
-      <section id="planos" className="pricing">
-        <div className="container">
-          <div className="section-header">
-            <h2>Planos que se Adaptam ao seu Negócio</h2>
-            <p>Escolha o plano ideal para o tamanho da sua clínica</p>
-          </div>
-
-          <div className="pricing-toggle">
-            <span className="toggle-label">Mensal</span>
-            <label className="toggle-switch">
+      <Box id="planos" sx={{ bgcolor: "#fff", py: 6 }}>
+        <Container>
+          <Box sx={{ textAlign: "center", mb: 4 }}>
+            <Typography variant="h3" gutterBottom>
+              Planos que se Adaptam ao seu Negócio
+            </Typography>
+            <Typography variant="body1">
+              Escolha o plano ideal para o tamanho da sua clínica
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 2,
+              mb: 4,
+            }}
+          >
+            <Typography variant="body2">Mensal</Typography>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
               <input type="checkbox" />
-              <span className="toggle-slider"></span>
-            </label>
-            <span className="toggle-label">
-              Anual <span className="discount-badge">-20%</span>
-            </span>
-          </div>
-
-          <div className="pricing-grid">
-            {/* Plano Básico */}
-            <div className="pricing-card">
-              <div className="plan-header">
-                <h3>Clínica Starter</h3>
-                <p>Para clínicas pequenas com até 2 profissionais</p>
-              </div>
-              <div className="plan-price">
-                <span className="currency">R$</span>
-                <span className="amount">197</span>
-                <span className="period">/mês</span>
-              </div>
-              <ul className="plan-features">
-                <li>✅ Até 2 profissionais</li>
-                <li>✅ Agenda básica</li>
-                <li>✅ Prontuários eletrônicos</li>
-                <li>✅ 500 pacientes</li>
-                <li>✅ Relatórios básicos</li>
-                <li>✅ Suporte por email</li>
-                <li>❌ Planos de ação</li>
-                <li>❌ Formulários customizados</li>
-                <li>❌ API integração</li>
-              </ul>
-              <button
-                className="plan-button"
-                onClick={() =>
-                  openSubscriptionModal("Clínica Starter", "197", "/mês", [
-                    "Até 2 profissionais",
-                    "Agenda básica",
-                    "Prontuários eletrônicos",
-                    "500 pacientes",
-                    "Relatórios básicos",
-                    "Suporte por email",
-                  ])
-                }
+              <Box
+                sx={{
+                  width: 32,
+                  height: 20,
+                  bgcolor: "#e0e0e0",
+                  borderRadius: 10,
+                  ml: 1,
+                }}
+              ></Box>
+            </Box>
+            <Typography variant="body2">
+              Anual{" "}
+              <Box
+                component="span"
+                sx={{
+                  bgcolor: "#03B4C6",
+                  color: "#fff",
+                  px: 1,
+                  borderRadius: 1,
+                  fontSize: 12,
+                  ml: 1,
+                }}
               >
-                Assinar
-              </button>
-            </div>
-
-            {/* Plano Profissional */}
-            <div className="pricing-card featured">
-              <div className="popular-badge">Mais Popular</div>
-              <div className="plan-header">
-                <h3>Clínica Pro</h3>
-                <p>Para clínicas médias com até 8 profissionais</p>
-              </div>
-              <div className="plan-price">
-                <span className="currency">R$</span>
-                <span className="amount">397</span>
-                <span className="period">/mês</span>
-              </div>
-              <ul className="plan-features">
-                <li>✅ Até 8 profissionais</li>
-                <li>✅ Agenda avançada com lembretes</li>
-                <li>✅ Prontuários + assinatura digital</li>
-                <li>✅ 2.000 pacientes</li>
-                <li>✅ Planos de ação</li>
-                <li>✅ Formulários customizados</li>
-                <li>✅ Relatórios avançados</li>
-                <li>✅ Gestão financeira</li>
-                <li>✅ Suporte telefônico</li>
-                <li>❌ API integração</li>
-              </ul>
-              <button
-                className="plan-button"
-                onClick={() =>
-                  openSubscriptionModal("Clínica Pro", "397", "/mês", [
-                    "Até 8 profissionais",
-                    "Agenda avançada com lembretes",
-                    "Prontuários + assinatura digital",
-                    "2.000 pacientes",
-                    "Planos de ação",
-                    "Formulários customizados",
-                    "Relatórios avançados",
-                    "Gestão financeira",
-                    "Suporte telefônico",
-                  ])
-                }
+                -20%
+              </Box>
+            </Typography>
+          </Box>
+          <Grid container spacing={4} justifyContent="center">
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 2,
+                  textAlign: "center",
+                }}
               >
-                Assinar
-              </button>
-            </div>
-
-            {/* Plano Enterprise */}
-            <div className="pricing-card">
-              <div className="plan-header">
-                <h3>Clínica Enterprise</h3>
-                <p>Para clínicas grandes e redes de clínicas</p>
-              </div>
-              <div className="plan-price">
-                <span className="currency">R$</span>
-                <span className="amount">797</span>
-                <span className="period">/mês</span>
-              </div>
-              <ul className="plan-features">
-                <li>✅ Profissionais ilimitados</li>
-                <li>✅ Todas as funcionalidades Pro</li>
-                <li>✅ Pacientes ilimitados</li>
-                <li>✅ API completa</li>
-                <li>✅ Integrações terceiros</li>
-                <li>✅ Dashboard executivo</li>
-                <li>✅ Backup automático</li>
-                <li>✅ Suporte prioritário 24/7</li>
-                <li>✅ Gerente de conta dedicado</li>
-                <li>✅ Treinamento personalizado</li>
-              </ul>
-              <button
-                className="plan-button"
-                onClick={() =>
-                  window.open(
-                    "https://wa.me/5511972918369?text=Olá! Gostaria de saber mais sobre o plano Enterprise do CLINIC4US.",
-                    "_blank"
-                  )
-                }
+                <Typography variant="h5" gutterBottom>
+                  Clínica Starter
+                </Typography>
+                <Typography variant="body2" gutterBottom>
+                  Para clínicas pequenas com até 2 profissionais
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "baseline",
+                    gap: 1,
+                    mb: 2,
+                  }}
+                >
+                  <Typography variant="h6">R$</Typography>
+                  <Typography variant="h3">197</Typography>
+                  <Typography variant="body2">/mês</Typography>
+                </Box>
+                <Box component="ul" sx={{ listStyle: "none", p: 0, mb: 2 }}>
+                  <li>✅ Até 2 profissionais</li>
+                  <li>✅ Agenda básica</li>
+                  <li>✅ Prontuários eletrônicos</li>
+                  <li>✅ 500 pacientes</li>
+                  <li>✅ Relatórios básicos</li>
+                  <li>✅ Suporte por email</li>
+                  <li>❌ Planos de ação</li>
+                  <li>❌ Formulários customizados</li>
+                  <li>❌ API integração</li>
+                </Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  onClick={() =>
+                    openSubscriptionModal("Clínica Starter", "197", "/mês", [
+                      "Até 2 profissionais",
+                      "Agenda básica",
+                      "Prontuários eletrônicos",
+                      "500 pacientes",
+                      "Relatórios básicos",
+                      "Suporte por email",
+                    ])
+                  }
+                >
+                  Assinar
+                </Button>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 2,
+                  textAlign: "center",
+                  border: "2px solid #03B4C6",
+                }}
               >
-                Falar com Vendas
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+                <Box
+                  sx={{
+                    bgcolor: "#03B4C6",
+                    color: "#fff",
+                    px: 2,
+                    py: 0.5,
+                    borderRadius: 1,
+                    mb: 1,
+                    fontWeight: "bold",
+                    display: "inline-block",
+                  }}
+                >
+                  Mais Popular
+                </Box>
+                <Typography variant="h5" gutterBottom>
+                  Clínica Pro
+                </Typography>
+                <Typography variant="body2" gutterBottom>
+                  Para clínicas médias com até 8 profissionais
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "baseline",
+                    gap: 1,
+                    mb: 2,
+                  }}
+                >
+                  <Typography variant="h6">R$</Typography>
+                  <Typography variant="h3">397</Typography>
+                  <Typography variant="body2">/mês</Typography>
+                </Box>
+                <Box component="ul" sx={{ listStyle: "none", p: 0, mb: 2 }}>
+                  <li>✅ Até 8 profissionais</li>
+                  <li>✅ Agenda avançada com lembretes</li>
+                  <li>✅ Prontuários + assinatura digital</li>
+                  <li>✅ 2.000 pacientes</li>
+                  <li>✅ Planos de ação</li>
+                  <li>✅ Formulários customizados</li>
+                  <li>✅ Relatórios avançados</li>
+                  <li>✅ Gestão financeira</li>
+                  <li>✅ Suporte telefônico</li>
+                  <li>❌ API integração</li>
+                </Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  onClick={() =>
+                    openSubscriptionModal("Clínica Pro", "397", "/mês", [
+                      "Até 8 profissionais",
+                      "Agenda avançada com lembretes",
+                      "Prontuários + assinatura digital",
+                      "2.000 pacientes",
+                      "Planos de ação",
+                      "Formulários customizados",
+                      "Relatórios avançados",
+                      "Gestão financeira",
+                      "Suporte telefônico",
+                    ])
+                  }
+                >
+                  Assinar
+                </Button>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 2,
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h5" gutterBottom>
+                  Clínica Enterprise
+                </Typography>
+                <Typography variant="body2" gutterBottom>
+                  Para clínicas grandes e redes de clínicas
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "baseline",
+                    gap: 1,
+                    mb: 2,
+                  }}
+                >
+                  <Typography variant="h6">R$</Typography>
+                  <Typography variant="h3">797</Typography>
+                  <Typography variant="body2">/mês</Typography>
+                </Box>
+                <Box component="ul" sx={{ listStyle: "none", p: 0, mb: 2 }}>
+                  <li>✅ Profissionais ilimitados</li>
+                  <li>✅ Todas as funcionalidades Pro</li>
+                  <li>✅ Pacientes ilimitados</li>
+                  <li>✅ API completa</li>
+                  <li>✅ Integrações terceiros</li>
+                  <li>✅ Dashboard executivo</li>
+                  <li>✅ Backup automático</li>
+                  <li>✅ Suporte prioritário 24/7</li>
+                  <li>✅ Gerente de conta dedicado</li>
+                  <li>✅ Treinamento personalizado</li>
+                </Box>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  fullWidth
+                  onClick={() =>
+                    window.open(
+                      "https://wa.me/5511972918369?text=Olá! Gostaria de saber mais sobre o plano Enterprise do CLINIC4US.",
+                      "_blank"
+                    )
+                  }
+                >
+                  Falar com Vendas
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
 
       {/* Comparison Table */}
-      <section id="comparacao" className="comparison">
-        <div className="container">
-          <div className="section-header">
-            <h2>Compare Todos os Planos</h2>
-            <p>Veja em detalhes o que cada plano oferece</p>
-          </div>
-
-          <div className="comparison-table-wrapper">
-            <table className="comparison-table">
-              <thead>
-                <tr>
-                  <th className="feature-column">Funcionalidades</th>
-                  <th>Starter</th>
-                  <th className="featured-column">Pro</th>
-                  <th>Enterprise</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Número de profissionais</td>
-                  <td>Até 2</td>
-                  <td>Até 8</td>
-                  <td>Ilimitado</td>
-                </tr>
-                <tr>
-                  <td>Pacientes cadastrados</td>
-                  <td>500</td>
-                  <td>2.000</td>
-                  <td>Ilimitado</td>
-                </tr>
-                <tr>
-                  <td>Agenda online</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>Prontuários eletrônicos</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>Lembretes automáticos</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>Planos de ação</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>Formulários customizados</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>Relatórios avançados</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>Gestão financeira</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>API de integração</td>
-                  <td>❌</td>
-                  <td>❌</td>
-                  <td>✅</td>
-                </tr>
-                <tr>
-                  <td>Backup automático</td>
-                  <td>❌</td>
-                  <td>Semanal</td>
-                  <td>Diário</td>
-                </tr>
-                <tr>
-                  <td>Suporte</td>
-                  <td>Email</td>
-                  <td>Email + Telefone</td>
-                  <td>24/7 Prioritário</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
+      <Box id="comparacao" sx={{ bgcolor: "#f9fafb", py: 6 }}>
+        <Container>
+          <Box sx={{ textAlign: "center", mb: 4 }}>
+            <Typography variant="h3" gutterBottom>
+              Compare Todos os Planos
+            </Typography>
+            <Typography variant="body1">
+              Veja em detalhes o que cada plano oferece
+            </Typography>
+          </Box>
+          <Box sx={{ overflowX: "auto" }}>
+            <Table sx={{ minWidth: 650 }}>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: "bold" }}>
+                    Funcionalidades
+                  </TableCell>
+                  <TableCell>Starter</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", bgcolor: "#e3f2fd" }}>
+                    Pro
+                  </TableCell>
+                  <TableCell>Enterprise</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Número de profissionais</TableCell>
+                  <TableCell>Até 2</TableCell>
+                  <TableCell>Até 8</TableCell>
+                  <TableCell>Ilimitado</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Pacientes cadastrados</TableCell>
+                  <TableCell>500</TableCell>
+                  <TableCell>2.000</TableCell>
+                  <TableCell>Ilimitado</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Agenda online</TableCell>
+                  <TableCell>✅</TableCell>
+                  <TableCell>✅</TableCell>
+                  <TableCell>✅</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Prontuários eletrônicos</TableCell>
+                  <TableCell>✅</TableCell>
+                  <TableCell>✅</TableCell>
+                  <TableCell>✅</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Lembretes automáticos</TableCell>
+                  <TableCell>❌</TableCell>
+                  <TableCell>✅</TableCell>
+                  <TableCell>✅</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Planos de ação</TableCell>
+                  <TableCell>❌</TableCell>
+                  <TableCell>✅</TableCell>
+                  <TableCell>✅</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Formulários customizados</TableCell>
+                  <TableCell>❌</TableCell>
+                  <TableCell>✅</TableCell>
+                  <TableCell>✅</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Relatórios avançados</TableCell>
+                  <TableCell>❌</TableCell>
+                  <TableCell>✅</TableCell>
+                  <TableCell>✅</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Gestão financeira</TableCell>
+                  <TableCell>❌</TableCell>
+                  <TableCell>✅</TableCell>
+                  <TableCell>✅</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>API de integração</TableCell>
+                  <TableCell>❌</TableCell>
+                  <TableCell>❌</TableCell>
+                  <TableCell>✅</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Backup automático</TableCell>
+                  <TableCell>❌</TableCell>
+                  <TableCell>Semanal</TableCell>
+                  <TableCell>Diário</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Suporte</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Email + Telefone</TableCell>
+                  <TableCell>24/7 Prioritário</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </Box>
+        </Container>
+      </Box>
 
       {/* Testimonials Section */}
-      <section className="testimonials">
-        <div className="container">
-          <div className="section-header">
-            <h2>O que Nossos Clientes Dizem</h2>
-            <p>
+      <Box sx={{ bgcolor: "#fff", py: 6 }}>
+        <Container>
+          <Box sx={{ textAlign: "center", mb: 4 }}>
+            <Typography variant="h3" gutterBottom>
+              O que Nossos Clientes Dizem
+            </Typography>
+            <Typography variant="body1">
               Depoimentos reais de profissionais que transformaram suas clínicas
-            </p>
-          </div>
-
-          <div className="testimonials-grid">
-            <div className="testimonial-card">
-              <div className="testimonial-header">
-                <div className="client-photo">
-                  <img
+            </Typography>
+          </Box>
+          <Grid container spacing={4} justifyContent="center">
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 2,
+                  textAlign: "center",
+                  height: "100%",
+                }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                  <Box
+                    component="img"
                     src={fernandaNinho}
                     alt="Fernanda Bragança"
-                    className="client-image"
+                    sx={{ width: 64, height: 64, borderRadius: "50%" }}
                   />
-                </div>
-                <div className="client-info">
-                  <h4>Fernanda Bragança</h4>
-                  <p>Consultora de Atendimento</p>
-                  <p>Instituto Ninho</p>
-                </div>
-              </div>
-              <div className="testimonial-content">
-                <div className="stars">⭐⭐⭐⭐⭐</div>
-                <p>
+                </Box>
+                <Typography variant="h6">Fernanda Bragança</Typography>
+                <Typography variant="body2">
+                  Consultora de Atendimento
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Instituto Ninho
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: "#FFD700", fontSize: 20 }}
+                >
+                  ⭐⭐⭐⭐⭐
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 2 }}>
                   "A organização da agenda de diversos profissionais é bem
                   tranquila, fornece uma visão gerencial dos compromissos
                   diminuindo erros e otimizando os atendimentos."
-                </p>
-              </div>
-            </div>
-
-            <div className="testimonial-card">
-              <div className="testimonial-header">
-                <div className="client-photo">
-                  <img
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 2,
+                  textAlign: "center",
+                  height: "100%",
+                }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                  <Box
+                    component="img"
                     src={ingridResolve}
                     alt="Ingrid Barbosa"
-                    className="client-image"
+                    sx={{ width: 64, height: 64, borderRadius: "50%" }}
                   />
-                </div>
-                <div className="client-info">
-                  <h4>Ingrid Barbosa</h4>
-                  <p>Assessoria Remota</p>
-                  <p>Resolve</p>
-                </div>
-              </div>
-              <div className="testimonial-content">
-                <div className="stars">⭐⭐⭐⭐⭐</div>
-                <p>
+                </Box>
+                <Typography variant="h6">Ingrid Barbosa</Typography>
+                <Typography variant="body2">Assessoria Remota</Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Resolve
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: "#FFD700", fontSize: 20 }}
+                >
+                  ⭐⭐⭐⭐⭐
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 2 }}>
                   "A gestão financeira nunca foi tão simples. Os relatórios me
                   ajudam a tomar decisões estratégicas juntamente com nossos
                   clientes."
-                </p>
-              </div>
-            </div>
-
-            <div className="testimonial-card">
-              <div className="testimonial-header">
-                <div className="client-photo">
-                  <img
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid>
+              <Box
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: 2,
+                  textAlign: "center",
+                  height: "100%",
+                }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                  <Box
+                    component="img"
                     src={hellenStudio}
                     alt="Hellen Kleine"
-                    className="client-image"
+                    sx={{ width: 64, height: 64, borderRadius: "50%" }}
                   />
-                </div>
-                <div className="client-info">
-                  <h4>Hellen Kleine</h4>
-                  <p>Fisioterapeuta e Psicomotricista</p>
-                  <p>Studio Kids Motriz</p>
-                </div>
-              </div>
-              <div className="testimonial-content">
-                <div className="stars">⭐⭐⭐⭐⭐</div>
-                <p>
+                </Box>
+                <Typography variant="h6">Hellen Kleine</Typography>
+                <Typography variant="body2">
+                  Fisioterapeuta e Psicomotricista
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Studio Kids Motriz
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: "#FFD700", fontSize: 20 }}
+                >
+                  ⭐⭐⭐⭐⭐
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 2 }}>
                   "Prontuários eletrônicos seguros e planos de ação
                   personalizados. O acompanhamento e a gestão estão muito
                   melhores agora."
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
 
-      {/* CTA Section */}
-      <section className="final-cta">
-        <div className="container">
-          <div className="cta-content">
-            <h2>Pronto para Revolucionar sua Clínica?</h2>
-            <p>Junte-se a centenas de clínicas que já confiam no CLINIC4US</p>
-            <div className="cta-buttons">
-              <button className="cta-primary large" onClick={openTrialModal}>
+      {/* CTA Section - Material UI */}
+      <Box sx={{ bgcolor: "#03B4C6", py: 6 }}>
+        <Container>
+          <Box
+            sx={{
+              textAlign: "center",
+              color: "#fff",
+              maxWidth: 600,
+              mx: "auto",
+            }}
+          >
+            <Typography variant="h3" gutterBottom>
+              Pronto para Revolucionar sua Clínica?
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 3 }}>
+              Junte-se a centenas de clínicas que já confiam no CLINIC4US
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                gap: 2,
+                mb: 3,
+                flexWrap: "wrap",
+              }}
+            >
+              <Button
+                variant="contained"
+                color="secondary"
+                size="large"
+                sx={{ minWidth: 200, fontWeight: "bold" }}
+                onClick={openTrialModal}
+              >
                 Teste Grátis de 7 Dias
-              </button>
-              <button
-                className="cta-secondary large"
+              </Button>
+              <Button
+                variant="outlined"
+                color="inherit"
+                size="large"
+                sx={{
+                  minWidth: 200,
+                  fontWeight: "bold",
+                  borderColor: "#fff",
+                  color: "#fff",
+                }}
                 onClick={(e) => openContactModal(e, "Demonstração do produto")}
               >
                 Agendar Demonstração
-              </button>
-            </div>
-            <p className="cta-note">
+              </Button>
+            </Box>
+            <Typography variant="body2" sx={{ mt: 2, opacity: 0.9 }}>
               ✅ Sem compromisso • ✅ Sem cartão de crédito • ✅ Suporte
               completo
-            </p>
-          </div>
-        </div>
-      </section>
+            </Typography>
+          </Box>
+        </Container>
+      </Box>
 
-      {/* About/Team Section */}
-      <section className="about-section">
-        <div className="container">
-          <div className="about-content">
-            <div className="about-text">
-              <h2>Criado por Especialistas em Saúde e Tecnologia</h2>
-              <p>
-                Nossa equipe combina anos de experiência em gestão de clínicas
-                com expertise em tecnologia avançada para criar a solução ideal
-                para profissionais de saúde.
-              </p>
-              <div className="about-features">
-                <div className="about-feature">
-                  <div className="feature-icon">🏥</div>
-                  <div>
-                    <h4>Experiência Clínica</h4>
-                    <p>
-                      Mais de 15 anos gerenciando clínicas multidisciplinares
-                    </p>
-                  </div>
-                </div>
-                <div className="about-feature">
-                  <div className="feature-icon">💻</div>
-                  <div>
-                    <h4>Tecnologia Avançada</h4>
-                    <p>
-                      Sistema desenvolvido com as melhores práticas de segurança
-                    </p>
-                  </div>
-                </div>
-                <div className="about-feature">
-                  <div className="feature-icon">🤝</div>
-                  <div>
-                    <h4>Suporte Especializado</h4>
-                    <p>Equipe dedicada que entende suas necessidades</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="team-images">
-              <div className="team-grid">
-                <div className="team-member">
-                  <img
-                    src={hiltonCeo}
-                    alt="Hilton CEO"
-                    className="team-photo"
+      {/* About/Team Section - Material UI */}
+      <Box sx={{ bgcolor: "#f5f5f5", py: 6 }}>
+        <Container>
+          <Grid container spacing={6} alignItems="center">
+            <Grid>
+              <Box>
+                <Typography variant="h3" gutterBottom>
+                  Criado por Especialistas em Saúde e Tecnologia
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 3 }}>
+                  Nossa equipe combina anos de experiência em gestão de clínicas
+                  com expertise em tecnologia avançada para criar a solução
+                  ideal para profissionais de saúde.
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Typography variant="h2">🏥</Typography>
+                      <Box>
+                        <Typography variant="h6">
+                          Experiência Clínica
+                        </Typography>
+                        <Typography variant="body2">
+                          Mais de 15 anos gerenciando clínicas
+                          multidisciplinares
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                  <Grid>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Typography variant="h2">💻</Typography>
+                      <Box>
+                        <Typography variant="h6">
+                          Tecnologia Avançada
+                        </Typography>
+                        <Typography variant="body2">
+                          Sistema desenvolvido com as melhores práticas de
+                          segurança
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                  <Grid>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Typography variant="h2">🤝</Typography>
+                      <Box>
+                        <Typography variant="h6">
+                          Suporte Especializado
+                        </Typography>
+                        <Typography variant="body2">
+                          Equipe dedicada que entende suas necessidades
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
+            </Grid>
+            <Grid>
+              <Grid container spacing={3} justifyContent="center">
+                <Grid>
+                  <Box sx={{ textAlign: "center" }}>
+                    <Box
+                      component="img"
+                      src={hiltonCeo}
+                      alt="Hilton CEO"
+                      sx={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: "50%",
+                        mb: 1,
+                        objectFit: "cover",
+                      }}
+                    />
+                    <Typography variant="h6">Hilton Cassahara</Typography>
+                    <Typography variant="body2">CEO & Fundador</Typography>
+                  </Box>
+                </Grid>
+                <Grid>
+                  <Box sx={{ textAlign: "center" }}>
+                    <Box
+                      component="img"
+                      src={fabio}
+                      alt="Fábio Martins CTO"
+                      sx={{ width: 80, height: 80, borderRadius: "50%", mb: 1 }}
+                    />
+                    <Typography variant="h6">Fábio Martins</Typography>
+                    <Typography variant="body2">CTO</Typography>
+                  </Box>
+                </Grid>
+                <Grid>
+                  <Box sx={{ textAlign: "center" }}>
+                    <Box
+                      component="img"
+                      src={atalitaFono}
+                      alt="Atalita Fonoaudióloga"
+                      sx={{ width: 80, height: 80, borderRadius: "50%", mb: 1 }}
+                    />
+                    <Typography variant="h6">Atalita Azevedo</Typography>
+                    <Typography variant="body2">
+                      Consultora Fonoaudióloga
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid>
+                  <Box sx={{ textAlign: "center" }}>
+                    <Box
+                      component="img"
+                      src={laizaResolve}
+                      alt="Laiza Especialista"
+                      sx={{ width: 80, height: 80, borderRadius: "50%", mb: 1 }}
+                    />
+                    <Typography variant="h6">Laiza Barros</Typography>
+                    <Typography variant="body2">
+                      Especialista em Atendimento
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Footer - Material UI */}
+      <Box
+        component="footer"
+        sx={{ bgcolor: "#222", color: "#fff", pt: 6, pb: 2 }}
+      >
+        <Container>
+          <Grid container spacing={4} justifyContent="center">
+            <Grid>
+              <Box sx={{ mb: 2 }}>
+                <Box
+                  component="img"
+                  src={logo}
+                  alt="CLINIC4US"
+                  sx={{ width: 120, cursor: "pointer", mb: 2 }}
+                  onClick={scrollToTop}
+                />
+                <Typography variant="body2">
+                  A plataforma completa para gestão de clínicas
+                  multidisciplinares.
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid>
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                Produto
+              </Typography>
+              <Box component="ul" sx={{ listStyle: "none", p: 0, m: 0 }}>
+                <li>
+                  <a
+                    href="#funcionalidades"
+                    style={{ color: "#fff", textDecoration: "none" }}
+                  >
+                    Funcionalidades
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#planos"
+                    style={{ color: "#fff", textDecoration: "none" }}
+                  >
+                    Planos
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#comparacao"
+                    style={{ color: "#fff", textDecoration: "none" }}
+                  >
+                    Comparação
+                  </a>
+                </li>
+              </Box>
+            </Grid>
+            <Grid>
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                Suporte
+              </Typography>
+              <Box component="ul" sx={{ listStyle: "none", p: 0, m: 0 }}>
+                <li>
+                  <a
+                    href="#help"
+                    style={{ color: "#fff", textDecoration: "none" }}
+                  >
+                    Central de Ajuda
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#contact"
+                    style={{ color: "#fff", textDecoration: "none" }}
+                  >
+                    Contato
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#docs"
+                    style={{ color: "#fff", textDecoration: "none" }}
+                  >
+                    Documentação
+                  </a>
+                </li>
+              </Box>
+            </Grid>
+            <Grid>
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                Empresa
+              </Typography>
+              <Box component="ul" sx={{ listStyle: "none", p: 0, m: 0 }}>
+                <li>
+                  <a
+                    href="#about"
+                    style={{ color: "#fff", textDecoration: "none" }}
+                  >
+                    Sobre
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#privacy"
+                    style={{ color: "#fff", textDecoration: "none" }}
+                  >
+                    Privacidade
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#terms"
+                    style={{ color: "#fff", textDecoration: "none" }}
+                  >
+                    Termos de Uso
+                  </a>
+                </li>
+              </Box>
+            </Grid>
+          </Grid>
+          <Box
+            sx={{
+              borderTop: "1px solid #444",
+              mt: 4,
+              pt: 2,
+              textAlign: "center",
+            }}
+          >
+            <Typography variant="body2" sx={{ opacity: 0.7 }}>
+              &copy; 2024 CLINIC4US. Todos os direitos reservados.
+            </Typography>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* Modal de Contato - Material UI */}
+      <Dialog
+        open={isContactModalOpen}
+        onClose={closeContactModal}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            pb: 0,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              component="img"
+              src={logo}
+              alt="CLINIC4US"
+              sx={{ height: 40 }}
+            />
+            <Typography variant="h6">Fale Conosco</Typography>
+          </Box>
+          <IconButton onClick={closeContactModal}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {!showThankYou ? (
+            <Grid container spacing={4}>
+              <Grid>
+                <Box sx={{ mb: 2 }}>
+                  <Box
+                    component="img"
+                    src={formContactImage}
+                    alt="Profissional de saúde"
+                    sx={{ width: "100%", borderRadius: 2, mb: 2 }}
                   />
-                  <h4>Hilton Cassahara</h4>
-                  <p>CEO & Fundador</p>
-                </div>
-                <div className="team-member">
-                  <div className="image-placeholder team-placeholder">
-                    <p>👨‍💻</p>
-                    <small>Foto CTO</small>
-                  </div>
-                  <h4>Fábio Martins</h4>
-                  <p>CTO</p>
-                </div>
-                <div className="team-member">
-                  <img
-                    src={atalitaFono}
-                    alt="Atalita Fonoaudióloga"
-                    className="team-photo"
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    Demonstração personalizada
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Consultoria gratuita
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid>
+                <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                  <TextField
+                    fullWidth
+                    label="Nome Completo"
+                    name="nomeCompleto"
+                    value={formData.nomeCompleto}
+                    onChange={handleInputChange}
+                    margin="normal"
+                    required
                   />
-                  <h4>Atalita Azevedo</h4>
-                  <p>Consultora Fonoaudióloga</p>
-                </div>
-                <div className="team-member">
-                  <img
-                    src={laizaResolve}
-                    alt="Laiza Especialista"
-                    className="team-photo"
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    margin="normal"
+                    required
                   />
-                  <h4>Laiza Barros</h4>
-                  <p>Especialista em Atendimento</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-section">
-              <img
-                src={logo}
-                alt="CLINIC4US"
-                className="footer-logo"
-                onClick={scrollToTop}
-                style={{ cursor: "pointer" }}
-              />
-              <p>
-                A plataforma completa para gestão de clínicas
-                multidisciplinares.
-              </p>
-            </div>
-            <div className="footer-section">
-              <h4>Produto</h4>
-              <ul>
-                <li>
-                  <a href="#funcionalidades">Funcionalidades</a>
-                </li>
-                <li>
-                  <a href="#planos">Planos</a>
-                </li>
-                <li>
-                  <a href="#comparacao">Comparação</a>
-                </li>
-              </ul>
-            </div>
-            <div className="footer-section">
-              <h4>Suporte</h4>
-              <ul>
-                <li>
-                  <a href="#help">Central de Ajuda</a>
-                </li>
-                <li>
-                  <a href="#contact">Contato</a>
-                </li>
-                <li>
-                  <a href="#docs">Documentação</a>
-                </li>
-              </ul>
-            </div>
-            <div className="footer-section">
-              <h4>Empresa</h4>
-              <ul>
-                <li>
-                  <a href="#about">Sobre</a>
-                </li>
-                <li>
-                  <a href="#privacy">Privacidade</a>
-                </li>
-                <li>
-                  <a href="#terms">Termos de Uso</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>&copy; 2024 CLINIC4US. Todos os direitos reservados.</p>
-          </div>
-        </div>
-      </footer>
-
-      {/* Modal de Contato */}
-      {isContactModalOpen && (
-        <div className="contact-modal-overlay" onClick={closeContactModal}>
-          <div className="contact-modal" onClick={(e) => e.stopPropagation()}>
-            {!showThankYou ? (
-              <>
-                <div className="contact-modal-header">
-                  <div className="modal-logo-title">
-                    <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                  </div>
-                  <button
-                    className="close-modal-button"
-                    onClick={closeContactModal}
+                  <TextField
+                    fullWidth
+                    label="WhatsApp"
+                    name="whatsapp"
+                    value={formData.whatsapp}
+                    onChange={handleInputChange}
+                    margin="normal"
+                    required
+                    placeholder={
+                      selectedCountry.code === "BR"
+                        ? "(11) 99999-9999"
+                        : selectedCountry.code === "US"
+                        ? "(123) 456-7890"
+                        : "123 456 789"
+                    }
+                  />
+                  <TextField
+                    fullWidth
+                    select
+                    label="Assunto"
+                    name="assunto"
+                    value={formData.assunto}
+                    onChange={handleInputChange}
+                    margin="normal"
+                    required
+                    SelectProps={{
+                      native: true,
+                      inputProps: { "aria-label": "Assunto" },
+                    }}
                   >
-                    &times;
-                  </button>
-                </div>
+                    <option value="">Selecione um assunto</option>
+                    <option value="Informações sobre o sistema">
+                      Informações sobre o sistema
+                    </option>
+                    <option value="Demonstração do produto">
+                      Demonstração do produto
+                    </option>
+                    <option value="Planos e preços">Planos e preços</option>
+                    <option value="Suporte técnico">Suporte técnico</option>
+                    <option value="Parceria comercial">
+                      Parceria comercial
+                    </option>
+                    <option value="Outros">Outros</option>
+                  </TextField>
+                  <TextField
+                    fullWidth
+                    label="Mensagem"
+                    name="mensagem"
+                    value={formData.mensagem}
+                    onChange={handleInputChange}
+                    margin="normal"
+                    multiline
+                    rows={4}
+                    required
+                  />
+                  <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      onClick={clearForm}
+                    >
+                      Limpar Campos
+                    </Button>
+                    <Button variant="contained" color="primary" type="submit">
+                      Enviar Mensagem
+                    </Button>
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+          ) : (
+            <Box sx={{ textAlign: "center", py: 6 }}>
+              <Box sx={{ mb: 2 }}>
+                <Box
+                  component="img"
+                  src={logo}
+                  alt="CLINIC4US"
+                  sx={{ height: 40 }}
+                />
+              </Box>
+              <Typography variant="h4" sx={{ mb: 2 }}>
+                Obrigado pelo contato!
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Nossos consultores retornarão em breve.
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={closeContactModal}
+              >
+                Fechar
+              </Button>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
 
-                <div className="modal-content-wrapper">
-                  <div className="modal-image-section">
-                    <div className="modal-contact-image">
-                      <img
-                        src={formContactImage}
-                        alt="Profissional de saúde"
-                        className="contact-image"
-                      />
-                      <div className="contact-image-overlay">
-                        <h3>Fale Conosco</h3>
-                      </div>
-                    </div>
-                    <div className="contact-benefits">
-                      <div className="benefit-item">
-                        <span className="benefit-icon">🎯</span>
-                        <span>Demonstração personalizada</span>
-                      </div>
-                      <div className="benefit-item">
-                        <span className="benefit-icon">💡</span>
-                        <span>Consultoria gratuita</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="contact-form">
-                    <div className="form-group">
-                      <label htmlFor="nomeCompleto">Nome Completo *</label>
-                      <input
-                        type="text"
-                        id="nomeCompleto"
-                        name="nomeCompleto"
-                        value={formData.nomeCompleto}
-                        onChange={handleInputChange}
-                        placeholder="Digite seu nome completo"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="email">Email *</label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="seu@email.com"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="whatsapp">WhatsApp *</label>
-                      <div className="phone-input-container">
-                        <div className="country-selector">
-                          <div
-                            className="country-select-custom"
-                            onClick={() =>
-                              setIsCountryDropdownOpen(!isCountryDropdownOpen)
-                            }
-                          >
-                            <span className="selected-country">
-                              <span className="country-prefix">
-                                {selectedCountry.prefix}
-                              </span>
-                            </span>
-                            <span className="dropdown-arrow">▼</span>
-                          </div>
-                          {isCountryDropdownOpen && (
-                            <div className="country-dropdown">
-                              {countries.map((country) => (
-                                <div
-                                  key={country.code}
-                                  className={`country-option ${
-                                    country.code === selectedCountry.code
-                                      ? "selected"
-                                      : ""
-                                  }`}
-                                  onClick={() => {
-                                    handleCountryChange(country);
-                                    setIsCountryDropdownOpen(false);
-                                  }}
-                                >
-                                  <span className="country-info">
-                                    <span className="country-prefix">
-                                      {country.prefix}
-                                    </span>
-                                    <span className="country-name">
-                                      {country.name}
-                                    </span>
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <input
-                          type="tel"
-                          id="whatsapp"
-                          name="whatsapp"
-                          value={formData.whatsapp}
-                          onChange={handleInputChange}
-                          placeholder={
-                            selectedCountry.code === "BR"
-                              ? "(11) 99999-9999"
-                              : selectedCountry.code === "US"
-                              ? "(123) 456-7890"
-                              : "123 456 789"
-                          }
-                          className="phone-input"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="assunto">Assunto *</label>
-                      <select
-                        id="assunto"
-                        name="assunto"
-                        value={formData.assunto}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Selecione um assunto</option>
-                        <option value="Informações sobre o sistema">
-                          Informações sobre o sistema
-                        </option>
-                        <option value="Demonstração do produto">
-                          Demonstração do produto
-                        </option>
-                        <option value="Planos e preços">Planos e preços</option>
-                        <option value="Suporte técnico">Suporte técnico</option>
-                        <option value="Parceria comercial">
-                          Parceria comercial
-                        </option>
-                        <option value="Outros">Outros</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="mensagem">Mensagem *</label>
-                      <textarea
-                        id="mensagem"
-                        name="mensagem"
-                        value={formData.mensagem}
-                        onChange={handleInputChange}
-                        placeholder="Digite sua mensagem aqui..."
-                        rows={4}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-actions">
-                      <button
-                        type="button"
-                        className="clear-button"
-                        onClick={clearForm}
-                      >
-                        Limpar Campos
-                      </button>
-                      <button type="submit" className="submit-button">
-                        Enviar Mensagem
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </>
-            ) : (
-              <div className="thank-you-screen">
-                <div className="thank-you-header">
-                  <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                  <button
-                    className="close-modal-button"
-                    onClick={closeContactModal}
+      {/* Modal de Teste Grátis - Material UI */}
+      <Dialog
+        open={isTrialModalOpen}
+        onClose={closeTrialModal}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            pb: 0,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              component="img"
+              src={logo}
+              alt="CLINIC4US"
+              sx={{ height: 40 }}
+            />
+            <Typography variant="h6">Teste Grátis</Typography>
+          </Box>
+          <IconButton onClick={closeTrialModal}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {!showTrialSuccess ? (
+            <Grid container spacing={4}>
+              <Grid>
+                <Box sx={{ mb: 2 }}>
+                  <Box
+                    component="img"
+                    src={freeEvaluationImage}
+                    alt="Teste Grátis CLINIC4US"
+                    sx={{ width: "100%", borderRadius: 2, mb: 2 }}
+                  />
+                  <Typography variant="h6" sx={{ mb: 1 }}>
+                    7 dias de teste completo
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    Sem compromisso
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid>
+                <Box
+                  component="form"
+                  onSubmit={handleTrialSubmit}
+                  sx={{ mt: 1 }}
+                >
+                  <TextField
+                    fullWidth
+                    label="Nome Completo"
+                    name="nomeCompleto"
+                    value={trialFormData.nomeCompleto}
+                    onChange={handleTrialInputChange}
+                    margin="normal"
+                    required
+                  />
+                  <TextField
+                    fullWidth
+                    label="Email"
+                    name="email"
+                    type="email"
+                    value={trialFormData.email}
+                    onChange={handleTrialInputChange}
+                    margin="normal"
+                    required
+                  />
+                  <TextField
+                    fullWidth
+                    label="WhatsApp"
+                    name="whatsapp"
+                    value={trialFormData.whatsapp}
+                    onChange={handleTrialInputChange}
+                    margin="normal"
+                    required
+                    placeholder={
+                      trialSelectedCountry.code === "BR"
+                        ? "(11) 99999-9999"
+                        : trialSelectedCountry.code === "US"
+                        ? "(123) 456-7890"
+                        : "123 456 789"
+                    }
+                  />
+                  <TextField
+                    fullWidth
+                    select
+                    label="Quantidade de profissionais"
+                    name="qtdProfissionais"
+                    value={trialFormData.qtdProfissionais}
+                    onChange={handleTrialInputChange}
+                    margin="normal"
+                    required
+                    SelectProps={{
+                      native: true,
+                      inputProps: {
+                        "aria-label": "Quantidade de profissionais",
+                      },
+                    }}
                   >
-                    &times;
-                  </button>
-                </div>
-                <div className="thank-you-content">
-                  <div className="thank-you-icon">✓</div>
-                  <h2>Obrigado pelo contato!</h2>
-                  <p>Nossos consultores retornarão em breve.</p>
-                  <button
-                    className="thank-you-close-button"
-                    onClick={closeContactModal}
-                  >
-                    Fechar
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Teste Grátis */}
-      {isTrialModalOpen && (
-        <div className="contact-modal-overlay" onClick={closeTrialModal}>
-          <div className="contact-modal" onClick={(e) => e.stopPropagation()}>
-            {!showTrialSuccess ? (
-              <>
-                <div className="contact-modal-header">
-                  <div className="modal-logo-title">
-                    <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                  </div>
-                  <button
-                    className="close-modal-button"
-                    onClick={closeTrialModal}
-                  >
-                    &times;
-                  </button>
-                </div>
-
-                <div className="modal-content-wrapper">
-                  <div className="modal-image-section">
-                    <div className="modal-contact-image">
-                      <img
-                        src={freeEvaluationImage}
-                        alt="Teste Grátis CLINIC4US"
-                        className="contact-image"
-                      />
-                      <div className="contact-image-overlay">
-                        <h3>Teste Grátis</h3>
-                      </div>
-                    </div>
-                    <div className="contact-benefits">
-                      <div className="benefit-item">
-                        <span className="benefit-icon">🎯</span>
-                        <span>7 dias de teste completo</span>
-                      </div>
-                      <div className="benefit-item">
-                        <span className="benefit-icon">💡</span>
-                        <span>Sem compromisso</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleTrialSubmit} className="contact-form">
-                    <div className="form-group">
-                      <label htmlFor="trialNomeCompleto">Nome Completo *</label>
-                      <input
-                        type="text"
-                        id="trialNomeCompleto"
-                        name="nomeCompleto"
-                        value={trialFormData.nomeCompleto}
-                        onChange={handleTrialInputChange}
-                        placeholder="Digite seu nome completo"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="trialEmail">Email *</label>
-                      <input
-                        type="email"
-                        id="trialEmail"
-                        name="email"
-                        value={trialFormData.email}
-                        onChange={handleTrialInputChange}
-                        placeholder="seu@email.com"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="trialWhatsapp">WhatsApp *</label>
-                      <div className="phone-input-container">
-                        <div className="country-selector">
-                          <div
-                            className="country-select-custom"
-                            onClick={() =>
-                              setIsTrialCountryDropdownOpen(
-                                !isTrialCountryDropdownOpen
-                              )
-                            }
-                          >
-                            <span className="selected-country">
-                              <span className="country-prefix">
-                                {trialSelectedCountry.prefix}
-                              </span>
-                            </span>
-                            <span className="dropdown-arrow">▼</span>
-                          </div>
-                          {isTrialCountryDropdownOpen && (
-                            <div className="country-dropdown">
-                              {countries.map((country) => (
-                                <div
-                                  key={country.code}
-                                  className={`country-option ${
-                                    country.code === trialSelectedCountry.code
-                                      ? "selected"
-                                      : ""
-                                  }`}
-                                  onClick={() => {
-                                    handleTrialCountryChange(country);
-                                    setIsTrialCountryDropdownOpen(false);
-                                  }}
-                                >
-                                  <span className="country-info">
-                                    <span className="country-prefix">
-                                      {country.prefix}
-                                    </span>
-                                    <span className="country-name">
-                                      {country.name}
-                                    </span>
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <input
-                          type="tel"
-                          id="trialWhatsapp"
-                          name="whatsapp"
-                          value={trialFormData.whatsapp}
-                          onChange={handleTrialInputChange}
-                          placeholder={
-                            trialSelectedCountry.code === "BR"
-                              ? "(11) 99999-9999"
-                              : trialSelectedCountry.code === "US"
-                              ? "(123) 456-7890"
-                              : "123 456 789"
-                          }
-                          className="phone-input"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="trialQtdProfissionais">
-                        Sua empresa tem quantos profissionais? *
-                      </label>
-                      <select
-                        id="trialQtdProfissionais"
-                        name="qtdProfissionais"
-                        value={trialFormData.qtdProfissionais}
-                        onChange={handleTrialInputChange}
-                        required
-                      >
-                        <option value="">Selecione a quantidade</option>
-                        <option value="1">1 profissional</option>
-                        <option value="2-5">2 a 5 profissionais</option>
-                        <option value="6-10">6 a 10 profissionais</option>
-                        <option value="11-20">11 a 20 profissionais</option>
-                        <option value="21-50">21 a 50 profissionais</option>
-                        <option value="50+">Mais de 50 profissionais</option>
-                      </select>
-                    </div>
-
-                    <div className="form-actions">
-                      <button type="submit" className="submit-button">
-                        Teste Grátis
-                      </button>
-                    </div>
-                  </form>
-                </div>
-
-                <div
-                  className="trial-disclaimer"
-                  style={{
-                    margin:
-                      window.innerWidth <= 768
-                        ? "1.5rem 24px 24px 24px"
-                        : "2rem 32px 32px 32px",
-                    padding: "20px",
-                    backgroundColor: "#f8fafc",
-                    borderRadius: "8px",
-                    fontSize: "0.9rem",
-                    lineHeight: "1.5",
+                    <option value="">Selecione a quantidade</option>
+                    <option value="1">1 profissional</option>
+                    <option value="2-5">2 a 5 profissionais</option>
+                    <option value="6-10">6 a 10 profissionais</option>
+                    <option value="11-20">11 a 20 profissionais</option>
+                    <option value="21-50">21 a 50 profissionais</option>
+                    <option value="50+">Mais de 50 profissionais</option>
+                  </TextField>
+                  <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                    <Button variant="contained" color="primary" type="submit">
+                      Teste Grátis
+                    </Button>
+                  </Box>
+                </Box>
+                <Box
+                  sx={{
+                    mt: 4,
+                    p: 2,
+                    bgcolor: "#f8fafc",
+                    borderRadius: 2,
                     borderLeft: "4px solid #03B4C6",
                   }}
                 >
-                  <p>
-                    <strong>Avaliação gratuita</strong>
-                    <br />
+                  <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+                    Avaliação gratuita
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
                     Ao se inscrever para a avaliação gratuita da plataforma
                     CLINIC4US, você receberá um e-mail de validação. Verifique
                     sua caixa de entrada (e também a pasta de spam ou promoções,
                     se necessário), siga as instruções e aproveite o período de
                     testes de 7 dias. Após este período a conta será inativada
                     automaticamente.
-                  </p>
-                  <p style={{ marginBottom: "0" }}>
+                  </Typography>
+                  <Typography variant="body2">
                     Em caso de dúvidas, entre em contato com nossa equipe de
                     suporte.
-                  </p>
-                </div>
-              </>
-            ) : (
-              <div className="thank-you-screen">
-                <div className="thank-you-header">
-                  <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                  <button
-                    className="close-modal-button"
-                    onClick={closeTrialModal}
-                  >
-                    &times;
-                  </button>
-                </div>
-                <div className="thank-you-content">
-                  <div className="thank-you-icon">✓</div>
-                  <h2>Cadastro Realizado!</h2>
-                  <p>Verifique seu email para ativar sua conta de teste.</p>
-                  <button
-                    className="thank-you-close-button"
-                    onClick={closeTrialModal}
-                  >
-                    Fechar
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
+          ) : (
+            <Box sx={{ textAlign: "center", py: 6 }}>
+              <Box sx={{ mb: 2 }}>
+                <Box
+                  component="img"
+                  src={logo}
+                  alt="CLINIC4US"
+                  sx={{ height: 40 }}
+                />
+              </Box>
+              <Typography variant="h4" sx={{ mb: 2 }}>
+                Cadastro Realizado!
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Verifique seu email para ativar sua conta de teste.
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={closeTrialModal}
+              >
+                Fechar
+              </Button>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
 
-      {/* Modal de Assinatura */}
-      {isSubscriptionModalOpen && selectedPlan && (
-        <div className="contact-modal-overlay" onClick={closeSubscriptionModal}>
-          <div
-            className="contact-modal subscription-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {!showSubscriptionSuccess ? (
-              <>
-                <div className="contact-modal-header">
-                  <div className="modal-logo-title">
-                    <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                  </div>
-                  <button
-                    className="close-modal-button"
-                    onClick={closeSubscriptionModal}
-                  >
-                    &times;
-                  </button>
-                </div>
-
-                <div className="subscription-content">
-                  <div className="subscription-plan-summary">
-                    <h3>Assinatura - {selectedPlan.name}</h3>
-                    <div className="plan-price-display">
-                      <span className="currency">R$</span>
-                      <span className="amount">{selectedPlan.price}</span>
-                      <span className="period">{selectedPlan.period}</span>
-                    </div>
-                  </div>
-
-                  <form
-                    onSubmit={handleSubscriptionSubmit}
-                    className="subscription-form"
-                  >
-                    <div className="form-section">
-                      <h4>Dados Pessoais</h4>
-
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="subNomeCompleto">
-                            Nome Completo *
-                          </label>
-                          <input
-                            type="text"
-                            id="subNomeCompleto"
-                            name="nomeCompleto"
-                            value={subscriptionFormData.nomeCompleto}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="Digite seu nome completo"
-                            required
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label htmlFor="subEmail">Email *</label>
-                          <input
-                            type="email"
-                            id="subEmail"
-                            name="email"
-                            value={subscriptionFormData.email}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="seu@email.com"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="subCpfCnpj">CPF/CNPJ *</label>
-                          <input
-                            type="text"
-                            id="subCpfCnpj"
-                            name="cpfCnpj"
-                            value={subscriptionFormData.cpfCnpj}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="000.000.000-00 ou 00.000.000/0000-00"
-                            required
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label htmlFor="subTelefone">Telefone *</label>
-                          <input
-                            type="tel"
-                            id="subTelefone"
-                            name="telefone"
-                            value={subscriptionFormData.telefone}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="(11) 99999-9999"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      {/* Campo Razão Social - aparece apenas se for CNPJ */}
-                      {isCNPJ(subscriptionFormData.cpfCnpj) && (
-                        <div className="form-row">
-                          <div className="form-group">
-                            <label htmlFor="subRazaoSocial">
-                              Razão Social *
-                            </label>
-                            <input
-                              type="text"
-                              id="subRazaoSocial"
-                              name="razaoSocial"
-                              value={subscriptionFormData.razaoSocial}
-                              onChange={handleSubscriptionInputChange}
-                              placeholder="Nome da empresa conforme CNPJ"
-                              required
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="subCep">CEP *</label>
-                          <input
-                            type="text"
-                            id="subCep"
-                            name="cep"
-                            value={subscriptionFormData.cep}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="00000-000"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="subEndereco">Endereço *</label>
-                          <input
-                            type="text"
-                            id="subEndereco"
-                            name="endereco"
-                            value={subscriptionFormData.endereco}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="Nome da rua/avenida"
-                            required
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label htmlFor="subNumero">Número *</label>
-                          <input
-                            type="text"
-                            id="subNumero"
-                            name="numero"
-                            value={subscriptionFormData.numero}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="123"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="subComplemento">Complemento</label>
-                          <input
-                            type="text"
-                            id="subComplemento"
-                            name="complemento"
-                            value={subscriptionFormData.complemento}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="Apto, sala, bloco (opcional)"
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label htmlFor="subBairro">Bairro *</label>
-                          <input
-                            type="text"
-                            id="subBairro"
-                            name="bairro"
-                            value={subscriptionFormData.bairro}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="Nome do bairro"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="subCidade">Cidade *</label>
-                          <input
-                            type="text"
-                            id="subCidade"
-                            name="cidade"
-                            value={subscriptionFormData.cidade}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="Nome da cidade"
-                            required
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label htmlFor="subUf">UF *</label>
-                          <input
-                            type="text"
-                            id="subUf"
-                            name="uf"
-                            value={subscriptionFormData.uf}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="SP"
-                            maxLength={2}
-                            style={{ textTransform: "uppercase" }}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="form-section">
-                      <h4>Dados do Cartão de Crédito</h4>
-
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="subCardNumber">
-                            Número do Cartão *
-                          </label>
-                          <input
-                            type="text"
-                            id="subCardNumber"
-                            name="cardNumber"
-                            value={subscriptionFormData.cardNumber}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="0000 0000 0000 0000"
-                            maxLength={19}
-                            required
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label htmlFor="subCardName">Nome no Cartão *</label>
-                          <input
-                            type="text"
-                            id="subCardName"
-                            name="cardName"
-                            value={subscriptionFormData.cardName}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="Nome como impresso no cartão"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="subCardExpiry">Validade *</label>
-                          <input
-                            type="text"
-                            id="subCardExpiry"
-                            name="cardExpiry"
-                            value={subscriptionFormData.cardExpiry}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="MM/YY"
-                            maxLength={5}
-                            required
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label htmlFor="subCardCvv">CVV *</label>
-                          <input
-                            type="text"
-                            id="subCardCvv"
-                            name="cardCvv"
-                            value={subscriptionFormData.cardCvv}
-                            onChange={handleSubscriptionInputChange}
-                            placeholder="000"
-                            maxLength={4}
-                            required
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="subscription-summary">
-                      <div className="summary-row">
-                        <span>Plano {selectedPlan.name}:</span>
-                        <span>
-                          R$ {selectedPlan.price}
-                          {selectedPlan.period}
-                        </span>
-                      </div>
-                      <div className="summary-row total">
-                        <strong>Total:</strong>
-                        <strong>
-                          R$ {selectedPlan.price}
-                          {selectedPlan.period}
-                        </strong>
-                      </div>
-                    </div>
-
-                    <div className="form-actions">
-                      <button
-                        type="submit"
-                        className="submit-button subscription-button"
-                      >
-                        Confirmar Assinatura
-                      </button>
-                    </div>
-
-                    <div className="subscription-security">
-                      <p>
-                        🔒 Pagamento 100% seguro. Seus dados estão protegidos.
-                      </p>
-                      <p>
-                        💳 Aceitamos todos os cartões de crédito principais.
-                      </p>
-                    </div>
-                  </form>
-                </div>
-              </>
-            ) : (
-              <div className="thank-you-screen">
-                <div className="thank-you-header">
-                  <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                  <button
-                    className="close-modal-button"
-                    onClick={closeSubscriptionModal}
-                  >
-                    &times;
-                  </button>
-                </div>
-                <div className="thank-you-content">
-                  <div className="thank-you-icon">✓</div>
-                  <h2>Assinatura Confirmada!</h2>
-                  <p>Bem-vindo ao {selectedPlan?.name}!</p>
-                  <p>
-                    Você receberá as instruções de acesso por email em breve.
-                  </p>
-                  <button
-                    className="thank-you-close-button"
-                    onClick={closeSubscriptionModal}
-                  >
-                    Começar a Usar
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Modal de Assinatura - Material UI */}
+      <Dialog
+        open={isSubscriptionModalOpen && !!selectedPlan}
+        onClose={closeSubscriptionModal}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            pb: 0,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box
+              component="img"
+              src={logo}
+              alt="CLINIC4US"
+              sx={{ height: 40 }}
+            />
+            <Typography variant="h6">
+              Assinatura - {selectedPlan?.name}
+            </Typography>
+          </Box>
+          <IconButton onClick={closeSubscriptionModal}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {!showSubscriptionSuccess ? (
+            <Box sx={{ mb: 3 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
+              >
+                <Typography variant="h4" color="primary">
+                  R$ {selectedPlan?.price}
+                </Typography>
+                <Typography variant="h6">{selectedPlan?.period}</Typography>
+              </Box>
+              <Box
+                component="form"
+                onSubmit={handleSubscriptionSubmit}
+                sx={{ mt: 1 }}
+              >
+                <Typography variant="subtitle1" sx={{ mb: 2 }}>
+                  Dados Pessoais
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="Nome Completo"
+                      name="nomeCompleto"
+                      value={subscriptionFormData.nomeCompleto}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="Email"
+                      name="email"
+                      type="email"
+                      value={subscriptionFormData.email}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="CPF/CNPJ"
+                      name="cpfCnpj"
+                      value={subscriptionFormData.cpfCnpj}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="Telefone"
+                      name="telefone"
+                      value={subscriptionFormData.telefone}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      placeholder="(11) 99999-9999"
+                    />
+                  </Grid>
+                  {isCNPJ(subscriptionFormData.cpfCnpj) && (
+                    <Grid>
+                      <TextField
+                        fullWidth
+                        label="Razão Social"
+                        name="razaoSocial"
+                        value={subscriptionFormData.razaoSocial}
+                        onChange={handleSubscriptionInputChange}
+                        margin="normal"
+                        required
+                        placeholder="Nome da empresa conforme CNPJ"
+                      />
+                    </Grid>
+                  )}
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="CEP"
+                      name="cep"
+                      value={subscriptionFormData.cep}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      placeholder="00000-000"
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="Endereço"
+                      name="endereco"
+                      value={subscriptionFormData.endereco}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      placeholder="Nome da rua/avenida"
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="Número"
+                      name="numero"
+                      value={subscriptionFormData.numero}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      placeholder="123"
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="Complemento"
+                      name="complemento"
+                      value={subscriptionFormData.complemento}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      placeholder="Apto, sala, bloco (opcional)"
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="Bairro"
+                      name="bairro"
+                      value={subscriptionFormData.bairro}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      placeholder="Nome do bairro"
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="Cidade"
+                      name="cidade"
+                      value={subscriptionFormData.cidade}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      placeholder="Nome da cidade"
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="UF"
+                      name="uf"
+                      value={subscriptionFormData.uf}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      inputProps={{
+                        maxLength: 2,
+                        style: { textTransform: "uppercase" },
+                      }}
+                      placeholder="SP"
+                    />
+                  </Grid>
+                </Grid>
+                <Typography variant="subtitle1" sx={{ mt: 4, mb: 2 }}>
+                  Dados do Cartão de Crédito
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="Número do Cartão"
+                      name="cardNumber"
+                      value={subscriptionFormData.cardNumber}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      placeholder="0000 0000 0000 0000"
+                      inputProps={{ maxLength: 19 }}
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="Nome no Cartão"
+                      name="cardName"
+                      value={subscriptionFormData.cardName}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      placeholder="Nome como impresso no cartão"
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="Validade"
+                      name="cardExpiry"
+                      value={subscriptionFormData.cardExpiry}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      placeholder="MM/YY"
+                      inputProps={{ maxLength: 5 }}
+                    />
+                  </Grid>
+                  <Grid>
+                    <TextField
+                      fullWidth
+                      label="CVV"
+                      name="cardCvv"
+                      value={subscriptionFormData.cardCvv}
+                      onChange={handleSubscriptionInputChange}
+                      margin="normal"
+                      required
+                      placeholder="000"
+                      inputProps={{ maxLength: 4 }}
+                    />
+                  </Grid>
+                </Grid>
+                <Box
+                  sx={{
+                    mt: 4,
+                    mb: 2,
+                    p: 2,
+                    bgcolor: "#f8fafc",
+                    borderRadius: 2,
+                    borderLeft: "4px solid #03B4C6",
+                  }}
+                >
+                  <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+                    Resumo
+                  </Typography>
+                  <Typography variant="body2">
+                    Plano {selectedPlan?.name}: R$ {selectedPlan?.price}
+                    {selectedPlan?.period}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                    Total: R$ {selectedPlan?.price}
+                    {selectedPlan?.period}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                  <Button variant="contained" color="primary" type="submit">
+                    Confirmar Assinatura
+                  </Button>
+                </Box>
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2">
+                    🔒 Pagamento 100% seguro. Seus dados estão protegidos.
+                  </Typography>
+                  <Typography variant="body2">
+                    💳 Aceitamos todos os cartões de crédito principais.
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ textAlign: "center", py: 6 }}>
+              <Box sx={{ mb: 2 }}>
+                <Box
+                  component="img"
+                  src={logo}
+                  alt="CLINIC4US"
+                  sx={{ height: 40 }}
+                />
+              </Box>
+              <Typography variant="h4" sx={{ mb: 2 }}>
+                Assinatura Confirmada!
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Bem-vindo ao {selectedPlan?.name}!
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Você receberá as instruções de acesso por email em breve.
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={closeSubscriptionModal}
+              >
+                Começar a Usar
+              </Button>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Botão flutuante do WhatsApp */}
       <a
@@ -2188,7 +2520,7 @@ ${formData.mensagem}
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.51 3.488" />
         </svg>
       </a>
-    </div>
+    </Box>
   );
 };
 

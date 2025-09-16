@@ -798,7 +798,7 @@ ${formData.mensagem}
                 </div>
                 <div className="team-member">
                   <div className="image-placeholder team-placeholder">
-                    <p>👨‍💻</p>
+                    <p>{fabio}</p>
                     <small>Foto CTO</small>
                   </div>
                   <h4>Fábio Martins</h4>

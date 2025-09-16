@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import './LandingPage.css';
-import logo from '../images/logo_clinic4us.png';
-import hiltonCeo from '../images/hilton_ceo.png';
-import atalitaFono from '../images/atalita_fono.png';
-import laizaResolve from '../images/laiza_resolve.png';
-import formContactImage from '../images/form_contact_image.jpg';
-import freeEvaluationImage from '../images/free_evaluation.jpg';
-import ingridResolve from '../images/ingrid_resolve.png';
-import hellenStudio from '../images/hellen_studio.png';
-import fernandaNinho from '../images/fernanda_ninho.png';
+import React, { useState, useEffect } from "react";
+import "./LandingPage.css";
+import logo from "../images/logo_clinic4us.png";
+import hiltonCeo from "../images/hilton_ceo.png";
+import fabio from "../images/Fabio.jpeg";
+import atalitaFono from "../images/atalita_fono.png";
+import laizaResolve from "../images/laiza_resolve.png";
+import formContactImage from "../images/form_contact_image.jpg";
+import freeEvaluationImage from "../images/free_evaluation.jpg";
+import ingridResolve from "../images/ingrid_resolve.png";
+import hellenStudio from "../images/hellen_studio.png";
+import fernandaNinho from "../images/fernanda_ninho.png";
 
 const LandingPage: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -25,85 +26,86 @@ const LandingPage: React.FC = () => {
     features: string[];
   } | null>(null);
   const [trialFormData, setTrialFormData] = useState({
-    nomeCompleto: '',
-    email: '',
-    whatsapp: '',
-    qtdProfissionais: ''
+    nomeCompleto: "",
+    email: "",
+    whatsapp: "",
+    qtdProfissionais: "",
   });
   const [trialSelectedCountry, setTrialSelectedCountry] = useState({
-    code: 'BR',
-    name: 'Brasil',
-    prefix: '+55',
-    flag: 'BR'
+    code: "BR",
+    name: "Brasil",
+    prefix: "+55",
+    flag: "BR",
   });
-  const [isTrialCountryDropdownOpen, setIsTrialCountryDropdownOpen] = useState(false);
+  const [isTrialCountryDropdownOpen, setIsTrialCountryDropdownOpen] =
+    useState(false);
   const [subscriptionFormData, setSubscriptionFormData] = useState({
-    nomeCompleto: '',
-    email: '',
-    cpfCnpj: '',
-    razaoSocial: '',
-    telefone: '',
-    endereco: '',
-    numero: '',
-    complemento: '',
-    bairro: '',
-    cidade: '',
-    uf: '',
-    cep: '',
-    cardNumber: '',
-    cardName: '',
-    cardExpiry: '',
-    cardCvv: ''
+    nomeCompleto: "",
+    email: "",
+    cpfCnpj: "",
+    razaoSocial: "",
+    telefone: "",
+    endereco: "",
+    numero: "",
+    complemento: "",
+    bairro: "",
+    cidade: "",
+    uf: "",
+    cep: "",
+    cardNumber: "",
+    cardName: "",
+    cardExpiry: "",
+    cardCvv: "",
   });
   const [formData, setFormData] = useState({
-    nomeCompleto: '',
-    email: '',
-    whatsapp: '',
-    assunto: '',
-    mensagem: ''
+    nomeCompleto: "",
+    email: "",
+    whatsapp: "",
+    assunto: "",
+    mensagem: "",
   });
   const [selectedCountry, setSelectedCountry] = useState({
-    code: 'BR',
-    name: 'Brasil',
-    prefix: '+55',
-    flag: 'BR'
+    code: "BR",
+    name: "Brasil",
+    prefix: "+55",
+    flag: "BR",
   });
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
 
   const countries = [
-    { code: 'BR', name: 'Brasil', prefix: '+55', flag: 'BR' },
-    { code: 'US', name: 'Estados Unidos', prefix: '+1', flag: 'US' },
-    { code: 'CA', name: 'Canadá', prefix: '+1', flag: 'CA' },
-    { code: 'AR', name: 'Argentina', prefix: '+54', flag: 'AR' },
-    { code: 'CL', name: 'Chile', prefix: '+56', flag: 'CL' },
-    { code: 'CO', name: 'Colômbia', prefix: '+57', flag: 'CO' },
-    { code: 'MX', name: 'México', prefix: '+52', flag: 'MX' },
-    { code: 'PE', name: 'Peru', prefix: '+51', flag: 'PE' },
-    { code: 'UY', name: 'Uruguai', prefix: '+598', flag: 'UY' },
-    { code: 'PY', name: 'Paraguai', prefix: '+595', flag: 'PY' },
-    { code: 'BO', name: 'Bolívia', prefix: '+591', flag: 'BO' },
-    { code: 'VE', name: 'Venezuela', prefix: '+58', flag: 'VE' },
-    { code: 'EC', name: 'Equador', prefix: '+593', flag: 'EC' },
-    { code: 'CR', name: 'Costa Rica', prefix: '+506', flag: 'CR' },
-    { code: 'PA', name: 'Panamá', prefix: '+507', flag: 'PA' },
-    { code: 'GT', name: 'Guatemala', prefix: '+502', flag: 'GT' },
-    { code: 'PT', name: 'Portugal', prefix: '+351', flag: 'PT' },
-    { code: 'ES', name: 'Espanha', prefix: '+34', flag: 'ES' },
-    { code: 'FR', name: 'França', prefix: '+33', flag: 'FR' },
-    { code: 'IT', name: 'Itália', prefix: '+39', flag: 'IT' },
-    { code: 'DE', name: 'Alemanha', prefix: '+49', flag: 'DE' },
-    { code: 'UK', name: 'Reino Unido', prefix: '+44', flag: 'UK' },
-    { code: 'AU', name: 'Austrália', prefix: '+61', flag: 'AU' },
-    { code: 'JP', name: 'Japão', prefix: '+81', flag: 'JP' },
-    { code: 'CN', name: 'China', prefix: '+86', flag: 'CN' },
-    { code: 'IN', name: 'Índia', prefix: '+91', flag: 'IN' },
-    { code: 'ZA', name: 'África do Sul', prefix: '+27', flag: 'ZA' },
+    { code: "BR", name: "Brasil", prefix: "+55", flag: "BR" },
+    { code: "US", name: "Estados Unidos", prefix: "+1", flag: "US" },
+    { code: "CA", name: "Canadá", prefix: "+1", flag: "CA" },
+    { code: "AR", name: "Argentina", prefix: "+54", flag: "AR" },
+    { code: "CL", name: "Chile", prefix: "+56", flag: "CL" },
+    { code: "CO", name: "Colômbia", prefix: "+57", flag: "CO" },
+    { code: "MX", name: "México", prefix: "+52", flag: "MX" },
+    { code: "PE", name: "Peru", prefix: "+51", flag: "PE" },
+    { code: "UY", name: "Uruguai", prefix: "+598", flag: "UY" },
+    { code: "PY", name: "Paraguai", prefix: "+595", flag: "PY" },
+    { code: "BO", name: "Bolívia", prefix: "+591", flag: "BO" },
+    { code: "VE", name: "Venezuela", prefix: "+58", flag: "VE" },
+    { code: "EC", name: "Equador", prefix: "+593", flag: "EC" },
+    { code: "CR", name: "Costa Rica", prefix: "+506", flag: "CR" },
+    { code: "PA", name: "Panamá", prefix: "+507", flag: "PA" },
+    { code: "GT", name: "Guatemala", prefix: "+502", flag: "GT" },
+    { code: "PT", name: "Portugal", prefix: "+351", flag: "PT" },
+    { code: "ES", name: "Espanha", prefix: "+34", flag: "ES" },
+    { code: "FR", name: "França", prefix: "+33", flag: "FR" },
+    { code: "IT", name: "Itália", prefix: "+39", flag: "IT" },
+    { code: "DE", name: "Alemanha", prefix: "+49", flag: "DE" },
+    { code: "UK", name: "Reino Unido", prefix: "+44", flag: "UK" },
+    { code: "AU", name: "Austrália", prefix: "+61", flag: "AU" },
+    { code: "JP", name: "Japão", prefix: "+81", flag: "JP" },
+    { code: "CN", name: "China", prefix: "+86", flag: "CN" },
+    { code: "IN", name: "Índia", prefix: "+91", flag: "IN" },
+    { code: "ZA", name: "África do Sul", prefix: "+27", flag: "ZA" },
   ];
 
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 
@@ -112,14 +114,14 @@ const LandingPage: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isCountryDropdownOpen) {
         const target = event.target as Element;
-        if (!target.closest('.country-selector')) {
+        if (!target.closest(".country-selector")) {
           setIsCountryDropdownOpen(false);
         }
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isCountryDropdownOpen]);
 
   const toggleMobileMenu = () => {
@@ -130,12 +132,15 @@ const LandingPage: React.FC = () => {
     setIsMobileMenuOpen(false);
   };
 
-  const openContactModal = (e: React.MouseEvent, preSelectedSubject?: string) => {
+  const openContactModal = (
+    e: React.MouseEvent,
+    preSelectedSubject?: string
+  ) => {
     e.preventDefault();
     if (preSelectedSubject) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        assunto: preSelectedSubject
+        assunto: preSelectedSubject,
       }));
     }
     setIsContactModalOpen(true);
@@ -155,21 +160,31 @@ const LandingPage: React.FC = () => {
     setIsTrialModalOpen(false);
     setShowTrialSuccess(false);
     setTrialFormData({
-      nomeCompleto: '',
-      email: '',
-      whatsapp: '',
-      qtdProfissionais: ''
+      nomeCompleto: "",
+      email: "",
+      whatsapp: "",
+      qtdProfissionais: "",
     });
     setTrialSelectedCountry({
-      code: 'BR',
-      name: 'Brasil',
-      prefix: '+55',
-      flag: 'BR'
+      code: "BR",
+      name: "Brasil",
+      prefix: "+55",
+      flag: "BR",
     });
   };
 
-  const openSubscriptionModal = (planName: string, planPrice: string, planPeriod: string, planFeatures: string[]) => {
-    setSelectedPlan({ name: planName, price: planPrice, period: planPeriod, features: planFeatures });
+  const openSubscriptionModal = (
+    planName: string,
+    planPrice: string,
+    planPeriod: string,
+    planFeatures: string[]
+  ) => {
+    setSelectedPlan({
+      name: planName,
+      price: planPrice,
+      period: planPeriod,
+      features: planFeatures,
+    });
     setIsSubscriptionModalOpen(true);
   };
 
@@ -178,22 +193,22 @@ const LandingPage: React.FC = () => {
     setShowSubscriptionSuccess(false);
     setSelectedPlan(null);
     setSubscriptionFormData({
-      nomeCompleto: '',
-      email: '',
-      cpfCnpj: '',
-      razaoSocial: '',
-      telefone: '',
-      endereco: '',
-      numero: '',
-      complemento: '',
-      bairro: '',
-      cidade: '',
-      uf: '',
-      cep: '',
-      cardNumber: '',
-      cardName: '',
-      cardExpiry: '',
-      cardCvv: ''
+      nomeCompleto: "",
+      email: "",
+      cpfCnpj: "",
+      razaoSocial: "",
+      telefone: "",
+      endereco: "",
+      numero: "",
+      complemento: "",
+      bairro: "",
+      cidade: "",
+      uf: "",
+      cep: "",
+      cardNumber: "",
+      cardName: "",
+      cardExpiry: "",
+      cardCvv: "",
     });
   };
 
@@ -204,73 +219,97 @@ const LandingPage: React.FC = () => {
 
   const handleTrialSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!trialFormData.nomeCompleto) {
-      alert('Por favor, informe seu nome completo!');
+      alert("Por favor, informe seu nome completo!");
       return;
     }
 
     if (!trialFormData.email) {
-      alert('Por favor, informe seu email!');
+      alert("Por favor, informe seu email!");
       return;
     }
 
     if (!isValidEmail(trialFormData.email)) {
-      alert('Por favor, informe um email válido!');
+      alert("Por favor, informe um email válido!");
       return;
     }
 
     if (!trialFormData.whatsapp) {
-      alert('Por favor, informe seu WhatsApp!');
+      alert("Por favor, informe seu WhatsApp!");
       return;
     }
 
     if (!trialFormData.qtdProfissionais) {
-      alert('Por favor, selecione a quantidade de profissionais!');
+      alert("Por favor, selecione a quantidade de profissionais!");
       return;
     }
 
     // Simulação de envio - aqui você integraria com sua API
-    console.log('Dados para teste grátis:', trialFormData, 'País:', trialSelectedCountry);
+    console.log(
+      "Dados para teste grátis:",
+      trialFormData,
+      "País:",
+      trialSelectedCountry
+    );
     setShowTrialSuccess(true);
   };
 
-  const formatWhatsApp = (value: string, country: string = 'BR') => {
+  const formatWhatsApp = (value: string, country: string = "BR") => {
     // Remove todos os caracteres não numéricos
-    const numbers = value.replace(/\D/g, '');
-    
-    if (country === 'BR') {
+    const numbers = value.replace(/\D/g, "");
+
+    if (country === "BR") {
       // Formato brasileiro: (11) 99999-9999
       if (numbers.length <= 2) return `(${numbers}`;
-      if (numbers.length <= 7) return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
-      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`;
-    } else if (country === 'US') {
+      if (numbers.length <= 7)
+        return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`;
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(
+        7,
+        11
+      )}`;
+    } else if (country === "US") {
       // Formato americano: (123) 456-7890
       if (numbers.length <= 3) return `(${numbers}`;
-      if (numbers.length <= 6) return `(${numbers.slice(0, 3)}) ${numbers.slice(3)}`;
-      return `(${numbers.slice(0, 3)}) ${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
+      if (numbers.length <= 6)
+        return `(${numbers.slice(0, 3)}) ${numbers.slice(3)}`;
+      return `(${numbers.slice(0, 3)}) ${numbers.slice(3, 6)}-${numbers.slice(
+        6,
+        10
+      )}`;
     } else {
       // Formato genérico para outros países
       if (numbers.length <= 3) return numbers;
-      if (numbers.length <= 6) return `${numbers.slice(0, 3)} ${numbers.slice(3)}`;
-      if (numbers.length <= 9) return `${numbers.slice(0, 3)} ${numbers.slice(3, 6)} ${numbers.slice(6)}`;
-      return `${numbers.slice(0, 3)} ${numbers.slice(3, 6)} ${numbers.slice(6, 9)} ${numbers.slice(9, 12)}`;
+      if (numbers.length <= 6)
+        return `${numbers.slice(0, 3)} ${numbers.slice(3)}`;
+      if (numbers.length <= 9)
+        return `${numbers.slice(0, 3)} ${numbers.slice(3, 6)} ${numbers.slice(
+          6
+        )}`;
+      return `${numbers.slice(0, 3)} ${numbers.slice(3, 6)} ${numbers.slice(
+        6,
+        9
+      )} ${numbers.slice(9, 12)}`;
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    
-    if (name === 'whatsapp') {
+
+    if (name === "whatsapp") {
       const formatted = formatWhatsApp(value, selectedCountry.code);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: formatted
+        [name]: formatted,
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
@@ -278,25 +317,27 @@ const LandingPage: React.FC = () => {
   const handleCountryChange = (country: typeof selectedCountry) => {
     setSelectedCountry(country);
     // Limpar o campo WhatsApp quando mudar o país
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      whatsapp: ''
+      whatsapp: "",
     }));
   };
 
-  const handleTrialInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleTrialInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    
-    if (name === 'whatsapp') {
+
+    if (name === "whatsapp") {
       const formatted = formatWhatsApp(value, trialSelectedCountry.code);
-      setTrialFormData(prev => ({
+      setTrialFormData((prev) => ({
         ...prev,
-        [name]: formatted
+        [name]: formatted,
       }));
     } else {
-      setTrialFormData(prev => ({
+      setTrialFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
@@ -304,161 +345,180 @@ const LandingPage: React.FC = () => {
   const handleTrialCountryChange = (country: typeof trialSelectedCountry) => {
     setTrialSelectedCountry(country);
     // Limpar o campo WhatsApp quando mudar o país
-    setTrialFormData(prev => ({
+    setTrialFormData((prev) => ({
       ...prev,
-      whatsapp: ''
+      whatsapp: "",
     }));
   };
 
   const formatCardNumber = (value: string) => {
     // Remove todos os caracteres não numéricos
-    const numbers = value.replace(/\D/g, '');
+    const numbers = value.replace(/\D/g, "");
     // Adiciona espaços a cada 4 dígitos
-    return numbers.replace(/(\d{4})(?=\d)/g, '$1 ').substr(0, 19);
+    return numbers.replace(/(\d{4})(?=\d)/g, "$1 ").substr(0, 19);
   };
 
   const formatCardExpiry = (value: string) => {
     // Remove todos os caracteres não numéricos
-    const numbers = value.replace(/\D/g, '');
+    const numbers = value.replace(/\D/g, "");
     // Formato MM/YY
     if (numbers.length >= 2) {
-      return numbers.slice(0, 2) + '/' + numbers.slice(2, 4);
+      return numbers.slice(0, 2) + "/" + numbers.slice(2, 4);
     }
     return numbers;
   };
 
   const formatCPFCNPJ = (value: string) => {
     // Remove todos os caracteres não numéricos
-    const numbers = value.replace(/\D/g, '');
-    
+    const numbers = value.replace(/\D/g, "");
+
     if (numbers.length <= 11) {
       // Formato CPF: 000.000.000-00
       return numbers
-        .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
     } else {
       // Formato CNPJ: 00.000.000/0000-00
       return numbers
-        .replace(/(\d{2})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d)/, '$1.$2')
-        .replace(/(\d{3})(\d)/, '$1/$2')
-        .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+        .replace(/(\d{2})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1.$2")
+        .replace(/(\d{3})(\d)/, "$1/$2")
+        .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
     }
   };
 
   const formatCEP = (value: string) => {
     // Remove todos os caracteres não numéricos
-    const numbers = value.replace(/\D/g, '');
+    const numbers = value.replace(/\D/g, "");
     // Formato 00000-000
-    return numbers.replace(/(\d{5})(\d)/, '$1-$2').substr(0, 9);
+    return numbers.replace(/(\d{5})(\d)/, "$1-$2").substr(0, 9);
   };
 
   const isCNPJ = (cpfCnpj: string) => {
     // Remove caracteres não numéricos
-    const numbers = cpfCnpj.replace(/\D/g, '');
+    const numbers = cpfCnpj.replace(/\D/g, "");
     // CNPJ tem 14 dígitos, CPF tem 11
     return numbers.length > 11;
   };
 
   const buscarCEP = async (cep: string) => {
     // Remove caracteres não numéricos
-    const cleanCEP = cep.replace(/\D/g, '');
-    
+    const cleanCEP = cep.replace(/\D/g, "");
+
     // Verifica se o CEP tem 8 dígitos
     if (cleanCEP.length !== 8) {
       return;
     }
 
     try {
-      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
+      const response = await fetch(
+        `https://viacep.com.br/ws/${cleanCEP}/json/`
+      );
       const data = await response.json();
-      
+
       if (!data.erro) {
         // Preenche automaticamente os campos de endereço
-        setSubscriptionFormData(prev => ({
+        setSubscriptionFormData((prev) => ({
           ...prev,
-          endereco: data.logradouro || '',
-          bairro: data.bairro || '',
-          cidade: data.localidade || '',
-          uf: data.uf || ''
+          endereco: data.logradouro || "",
+          bairro: data.bairro || "",
+          cidade: data.localidade || "",
+          uf: data.uf || "",
         }));
       } else {
         // CEP não encontrado
-        console.log('CEP não encontrado');
+        console.log("CEP não encontrado");
       }
     } catch (error) {
-      console.error('Erro ao buscar CEP:', error);
+      console.error("Erro ao buscar CEP:", error);
     }
   };
 
-  const handleSubscriptionInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSubscriptionInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const { name, value } = e.target;
-    
+
     let formattedValue = value;
-    
-    if (name === 'cardNumber') {
+
+    if (name === "cardNumber") {
       formattedValue = formatCardNumber(value);
-    } else if (name === 'cardExpiry') {
+    } else if (name === "cardExpiry") {
       formattedValue = formatCardExpiry(value);
-    } else if (name === 'cpfCnpj') {
+    } else if (name === "cpfCnpj") {
       formattedValue = formatCPFCNPJ(value);
       // Se mudou de CNPJ para CPF, limpar razão social
       if (!isCNPJ(formattedValue)) {
-        setSubscriptionFormData(prev => ({
+        setSubscriptionFormData((prev) => ({
           ...prev,
           [name]: formattedValue,
-          razaoSocial: ''
+          razaoSocial: "",
         }));
         return;
       }
-    } else if (name === 'cep') {
+    } else if (name === "cep") {
       formattedValue = formatCEP(value);
       // Buscar endereço automaticamente quando CEP estiver completo
-      const cleanCEP = formattedValue.replace(/\D/g, '');
+      const cleanCEP = formattedValue.replace(/\D/g, "");
       if (cleanCEP.length === 8) {
         buscarCEP(formattedValue);
       }
-    } else if (name === 'cardCvv') {
-      formattedValue = value.replace(/\D/g, '').substr(0, 4);
+    } else if (name === "cardCvv") {
+      formattedValue = value.replace(/\D/g, "").substr(0, 4);
     }
-    
-    setSubscriptionFormData(prev => ({
+
+    setSubscriptionFormData((prev) => ({
       ...prev,
-      [name]: formattedValue
+      [name]: formattedValue,
     }));
   };
 
   const handleSubscriptionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validação básica (complemento é opcional)
-    let requiredFields = ['nomeCompleto', 'email', 'cpfCnpj', 'telefone', 'endereco', 'numero', 'bairro', 'cidade', 'uf', 'cep', 'cardNumber', 'cardName', 'cardExpiry', 'cardCvv'];
-    
+    let requiredFields = [
+      "nomeCompleto",
+      "email",
+      "cpfCnpj",
+      "telefone",
+      "endereco",
+      "numero",
+      "bairro",
+      "cidade",
+      "uf",
+      "cep",
+      "cardNumber",
+      "cardName",
+      "cardExpiry",
+      "cardCvv",
+    ];
+
     // Se for CNPJ, incluir razão social como campo obrigatório
     if (isCNPJ(subscriptionFormData.cpfCnpj)) {
-      requiredFields.push('razaoSocial');
+      requiredFields.push("razaoSocial");
     }
-    
+
     for (const field of requiredFields) {
       if (!subscriptionFormData[field as keyof typeof subscriptionFormData]) {
         const fieldNames: { [key: string]: string } = {
-          'nomeCompleto': 'Nome Completo',
-          'email': 'Email',
-          'cpfCnpj': 'CPF/CNPJ',
-          'razaoSocial': 'Razão Social',
-          'telefone': 'Telefone',
-          'endereco': 'Endereço',
-          'numero': 'Número',
-          'complemento': 'Complemento',
-          'bairro': 'Bairro',
-          'cidade': 'Cidade',
-          'uf': 'UF',
-          'cep': 'CEP',
-          'cardNumber': 'Número do Cartão',
-          'cardName': 'Nome no Cartão',
-          'cardExpiry': 'Validade do Cartão',
-          'cardCvv': 'CVV'
+          nomeCompleto: "Nome Completo",
+          email: "Email",
+          cpfCnpj: "CPF/CNPJ",
+          razaoSocial: "Razão Social",
+          telefone: "Telefone",
+          endereco: "Endereço",
+          numero: "Número",
+          complemento: "Complemento",
+          bairro: "Bairro",
+          cidade: "Cidade",
+          uf: "UF",
+          cep: "CEP",
+          cardNumber: "Número do Cartão",
+          cardName: "Nome no Cartão",
+          cardExpiry: "Validade do Cartão",
+          cardCvv: "CVV",
         };
         alert(`Por favor, preencha o campo ${fieldNames[field] || field}!`);
         return;
@@ -466,31 +526,42 @@ const LandingPage: React.FC = () => {
     }
 
     if (!isValidEmail(subscriptionFormData.email)) {
-      alert('Por favor, informe um email válido!');
+      alert("Por favor, informe um email válido!");
       return;
     }
 
     // Simulação de processamento - aqui você integraria com o Mercado Pago
-    console.log('Dados da assinatura:', subscriptionFormData, 'Plano selecionado:', selectedPlan);
+    console.log(
+      "Dados da assinatura:",
+      subscriptionFormData,
+      "Plano selecionado:",
+      selectedPlan
+    );
     setShowSubscriptionSuccess(true);
   };
 
   const clearForm = () => {
     setFormData({
-      nomeCompleto: '',
-      email: '',
-      whatsapp: '',
-      assunto: '',
-      mensagem: ''
+      nomeCompleto: "",
+      email: "",
+      whatsapp: "",
+      assunto: "",
+      mensagem: "",
     });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validação básica
-    if (!formData.nomeCompleto || !formData.email || !formData.whatsapp || !formData.assunto || !formData.mensagem) {
-      alert('Todos os campos são obrigatórios!');
+    if (
+      !formData.nomeCompleto ||
+      !formData.email ||
+      !formData.whatsapp ||
+      !formData.assunto ||
+      !formData.mensagem
+    ) {
+      alert("Todos os campos são obrigatórios!");
       return;
     }
 
@@ -506,10 +577,10 @@ Assunto: ${formData.assunto}
 Mensagem:
 ${formData.mensagem}
     `);
-    
+
     const mailtoLink = `mailto:adm.clinic4us@gmail.com?subject=${subject}&body=${body}`;
-    window.open(mailtoLink, '_blank');
-    
+    window.open(mailtoLink, "_blank");
+
     // Limpar formulário e mostrar tela de agradecimento
     clearForm();
     setShowThankYou(true);
@@ -521,34 +592,41 @@ ${formData.mensagem}
       <header className="header">
         <nav className="navbar">
           <div className="nav-brand">
-            <img 
-              src={logo} 
-              alt="CLINIC4US" 
-              className="logo" 
+            <img
+              src={logo}
+              alt="CLINIC4US"
+              className="logo"
               onClick={scrollToTop}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
             />
           </div>
-          
+
           {/* Desktop Menu */}
           <ul className="nav-menu desktop-menu">
-            <li><a href="#funcionalidades">Funcionalidades</a></li>
-            <li><a href="#planos">Planos</a></li>
-            <li><a href="#comparacao">Comparação</a></li>
-            <li><a href="#contato" onClick={openContactModal}>Contato</a></li>
+            <li>
+              <a href="#funcionalidades">Funcionalidades</a>
+            </li>
+            <li>
+              <a href="#planos">Planos</a>
+            </li>
+            <li>
+              <a href="#comparacao">Comparação</a>
+            </li>
+            <li>
+              <a href="#contato" onClick={openContactModal}>
+                Contato
+              </a>
+            </li>
           </ul>
-          
+
           <div className="nav-actions">
-            <button 
-              className="cta-button desktop-cta"
-              onClick={openTrialModal}
-            >
+            <button className="cta-button desktop-cta" onClick={openTrialModal}>
               Teste Grátis
             </button>
-            
+
             {/* Hamburger Menu Button */}
-            <button 
-              className={`hamburger ${isMobileMenuOpen ? 'active' : ''}`}
+            <button
+              className={`hamburger ${isMobileMenuOpen ? "active" : ""}`}
               onClick={toggleMobileMenu}
               aria-label="Toggle menu"
             >
@@ -566,14 +644,39 @@ ${formData.mensagem}
                   <img src={logo} alt="CLINIC4US" className="mobile-logo" />
                 </div>
                 <ul className="mobile-nav-menu">
-                  <li><a href="#funcionalidades" onClick={closeMobileMenu}>Funcionalidades</a></li>
-                  <li><a href="#planos" onClick={closeMobileMenu}>Planos</a></li>
-                  <li><a href="#comparacao" onClick={closeMobileMenu}>Comparação</a></li>
-                  <li><a href="#contato" onClick={(e) => { openContactModal(e); closeMobileMenu(); }}>Contato</a></li>
+                  <li>
+                    <a href="#funcionalidades" onClick={closeMobileMenu}>
+                      Funcionalidades
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#planos" onClick={closeMobileMenu}>
+                      Planos
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#comparacao" onClick={closeMobileMenu}>
+                      Comparação
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#contato"
+                      onClick={(e) => {
+                        openContactModal(e);
+                        closeMobileMenu();
+                      }}
+                    >
+                      Contato
+                    </a>
+                  </li>
                 </ul>
-                <button 
-                  className="cta-button mobile-cta" 
-                  onClick={(e) => { openTrialModal(e); closeMobileMenu(); }}
+                <button
+                  className="cta-button mobile-cta"
+                  onClick={(e) => {
+                    openTrialModal(e);
+                    closeMobileMenu();
+                  }}
                 >
                   Teste Grátis
                 </button>
@@ -587,16 +690,19 @@ ${formData.mensagem}
       <section className="hero">
         <div className="hero-content">
           <div className="hero-text">
-            <h1>Transforme sua Clínica com o Sistema de Gestão Mais Completo</h1>
-            <p>Gerencie agendamentos, prontuários, planos de ação e finanças em uma única plataforma. Ideal para clínicas multidisciplinares que buscam eficiência e crescimento.</p>
+            <h1>
+              Transforme sua Clínica com o Sistema de Gestão Mais Completo
+            </h1>
+            <p>
+              Gerencie agendamentos, prontuários, planos de ação e finanças em
+              uma única plataforma. Ideal para clínicas multidisciplinares que
+              buscam eficiência e crescimento.
+            </p>
             <div className="hero-buttons">
-              <button 
-                className="cta-primary"
-                onClick={openTrialModal}
-              >
+              <button className="cta-primary" onClick={openTrialModal}>
                 Teste Grátis
               </button>
-              <button 
+              <button
                 className="cta-secondary"
                 onClick={(e) => openContactModal(e, "Demonstração do produto")}
               >
@@ -608,7 +714,9 @@ ${formData.mensagem}
             <div className="dashboard-mockup">
               <div className="mockup-header">
                 <div className="mockup-dots">
-                  <span></span><span></span><span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
                 </div>
               </div>
               <div className="mockup-content">
@@ -644,60 +752,88 @@ ${formData.mensagem}
             <h2>Funcionalidades Completas para sua Clínica</h2>
             <p>Todas as ferramentas que você precisa em uma única plataforma</p>
           </div>
-          
+
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">📅</div>
               <h3>Agenda Inteligente</h3>
-              <p>Agendamento online, lembretes automáticos e gestão de horários para múltiplos profissionais.</p>
+              <p>
+                Agendamento online, lembretes automáticos e gestão de horários
+                para múltiplos profissionais.
+              </p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">📋</div>
               <h3>Prontuários Eletrônicos</h3>
-              <p>Prontuários digitais seguros, com histórico completo e assinatura eletrônica.</p>
+              <p>
+                Prontuários digitais seguros, com histórico completo e
+                assinatura eletrônica.
+              </p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">🎯</div>
               <h3>Planos de Ação</h3>
-              <p>Crie e acompanhe planos de tratamento personalizados para cada paciente.</p>
+              <p>
+                Crie e acompanhe planos de tratamento personalizados para cada
+                paciente.
+              </p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">📊</div>
               <h3>Evoluções e Notas</h3>
-              <p>Registro detalhado de evoluções, com templates customizáveis por especialidade.</p>
+              <p>
+                Registro detalhado de evoluções, com templates customizáveis por
+                especialidade.
+              </p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">📝</div>
               <h3>Formulários de Avaliação</h3>
-              <p>Formulários dinâmicos e customizáveis para diferentes tipos de avaliação.</p>
+              <p>
+                Formulários dinâmicos e customizáveis para diferentes tipos de
+                avaliação.
+              </p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">📈</div>
               <h3>Relatórios Gerenciais</h3>
-              <p>Dashboards e relatórios completos para análise de desempenho e faturamento.</p>
+              <p>
+                Dashboards e relatórios completos para análise de desempenho e
+                faturamento.
+              </p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">💰</div>
               <h3>Gestão Financeira</h3>
-              <p>Controle financeiro completo, faturamento, repasses e integração com sistemas contábeis.</p>
+              <p>
+                Controle financeiro completo, faturamento, repasses e integração
+                com sistemas contábeis.
+              </p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">👥</div>
               <h3>Controle de Usuários</h3>
-              <p>Gestão de profissionais, permissões e controle de acesso por função.</p>
+              <p>
+                Gestão de profissionais, permissões e controle de acesso por
+                função.
+              </p>
             </div>
-            
+
             <div className="feature-card">
               <div className="feature-icon">🔒</div>
               <h3>Base de Dados Exclusiva</h3>
-              <p>Cada cliente possui sua própria base de dados isolada, garantindo máxima segurança, privacidade e conformidade com a LGPD.</p>
+              <p>
+                Cada cliente possui sua própria base de dados isolada,
+                garantindo máxima segurança, privacidade e conformidade com a
+                LGPD.
+              </p>
             </div>
           </div>
         </div>
@@ -709,7 +845,10 @@ ${formData.mensagem}
           <div className="workflow-content">
             <div className="workflow-text">
               <h2>Simplifique o Fluxo de Trabalho da sua Clínica</h2>
-              <p>Veja como o CLINIC4US otimiza cada etapa do atendimento, desde o agendamento até o faturamento.</p>
+              <p>
+                Veja como o CLINIC4US otimiza cada etapa do atendimento, desde o
+                agendamento até o faturamento.
+              </p>
               <div className="workflow-steps">
                 <div className="step">
                   <div className="step-number">1</div>
@@ -736,8 +875,14 @@ ${formData.mensagem}
             </div>
             <div className="workflow-image">
               <div className="image-placeholder workflow-placeholder">
-                <p>📱 Imagem: Interface do sistema mostrando o fluxo de trabalho - desde agendamento até relatórios</p>
-                <small>Recomendação: Screenshot do dashboard principal com destaque para as principais funcionalidades</small>
+                <p>
+                  📱 Imagem: Interface do sistema mostrando o fluxo de trabalho
+                  - desde agendamento até relatórios
+                </p>
+                <small>
+                  Recomendação: Screenshot do dashboard principal com destaque
+                  para as principais funcionalidades
+                </small>
               </div>
             </div>
           </div>
@@ -751,14 +896,16 @@ ${formData.mensagem}
             <h2>Planos que se Adaptam ao seu Negócio</h2>
             <p>Escolha o plano ideal para o tamanho da sua clínica</p>
           </div>
-          
+
           <div className="pricing-toggle">
             <span className="toggle-label">Mensal</span>
             <label className="toggle-switch">
               <input type="checkbox" />
               <span className="toggle-slider"></span>
             </label>
-            <span className="toggle-label">Anual <span className="discount-badge">-20%</span></span>
+            <span className="toggle-label">
+              Anual <span className="discount-badge">-20%</span>
+            </span>
           </div>
 
           <div className="pricing-grid">
@@ -784,14 +931,18 @@ ${formData.mensagem}
                 <li>❌ Formulários customizados</li>
                 <li>❌ API integração</li>
               </ul>
-              <button 
+              <button
                 className="plan-button"
-                onClick={() => openSubscriptionModal(
-                  'Clínica Starter', 
-                  '197', 
-                  '/mês', 
-                  ['Até 2 profissionais', 'Agenda básica', 'Prontuários eletrônicos', '500 pacientes', 'Relatórios básicos', 'Suporte por email']
-                )}
+                onClick={() =>
+                  openSubscriptionModal("Clínica Starter", "197", "/mês", [
+                    "Até 2 profissionais",
+                    "Agenda básica",
+                    "Prontuários eletrônicos",
+                    "500 pacientes",
+                    "Relatórios básicos",
+                    "Suporte por email",
+                  ])
+                }
               >
                 Assinar
               </button>
@@ -821,14 +972,21 @@ ${formData.mensagem}
                 <li>✅ Suporte telefônico</li>
                 <li>❌ API integração</li>
               </ul>
-              <button 
+              <button
                 className="plan-button"
-                onClick={() => openSubscriptionModal(
-                  'Clínica Pro', 
-                  '397', 
-                  '/mês', 
-                  ['Até 8 profissionais', 'Agenda avançada com lembretes', 'Prontuários + assinatura digital', '2.000 pacientes', 'Planos de ação', 'Formulários customizados', 'Relatórios avançados', 'Gestão financeira', 'Suporte telefônico']
-                )}
+                onClick={() =>
+                  openSubscriptionModal("Clínica Pro", "397", "/mês", [
+                    "Até 8 profissionais",
+                    "Agenda avançada com lembretes",
+                    "Prontuários + assinatura digital",
+                    "2.000 pacientes",
+                    "Planos de ação",
+                    "Formulários customizados",
+                    "Relatórios avançados",
+                    "Gestão financeira",
+                    "Suporte telefônico",
+                  ])
+                }
               >
                 Assinar
               </button>
@@ -857,9 +1015,14 @@ ${formData.mensagem}
                 <li>✅ Gerente de conta dedicado</li>
                 <li>✅ Treinamento personalizado</li>
               </ul>
-              <button 
+              <button
                 className="plan-button"
-                onClick={() => window.open('https://wa.me/5511972918369?text=Olá! Gostaria de saber mais sobre o plano Enterprise do CLINIC4US.', '_blank')}
+                onClick={() =>
+                  window.open(
+                    "https://wa.me/5511972918369?text=Olá! Gostaria de saber mais sobre o plano Enterprise do CLINIC4US.",
+                    "_blank"
+                  )
+                }
               >
                 Falar com Vendas
               </button>
@@ -875,7 +1038,7 @@ ${formData.mensagem}
             <h2>Compare Todos os Planos</h2>
             <p>Veja em detalhes o que cada plano oferece</p>
           </div>
-          
+
           <div className="comparison-table-wrapper">
             <table className="comparison-table">
               <thead>
@@ -970,14 +1133,20 @@ ${formData.mensagem}
         <div className="container">
           <div className="section-header">
             <h2>O que Nossos Clientes Dizem</h2>
-            <p>Depoimentos reais de profissionais que transformaram suas clínicas</p>
+            <p>
+              Depoimentos reais de profissionais que transformaram suas clínicas
+            </p>
           </div>
-          
+
           <div className="testimonials-grid">
             <div className="testimonial-card">
               <div className="testimonial-header">
                 <div className="client-photo">
-                  <img src={fernandaNinho} alt="Fernanda Bragança" className="client-image" />
+                  <img
+                    src={fernandaNinho}
+                    alt="Fernanda Bragança"
+                    className="client-image"
+                  />
                 </div>
                 <div className="client-info">
                   <h4>Fernanda Bragança</h4>
@@ -987,14 +1156,22 @@ ${formData.mensagem}
               </div>
               <div className="testimonial-content">
                 <div className="stars">⭐⭐⭐⭐⭐</div>
-                <p>"A organização da agenda de diversos profissionais é bem tranquila, fornece uma visão gerencial dos compromissos diminuindo erros e otimizando os atendimentos."</p>
+                <p>
+                  "A organização da agenda de diversos profissionais é bem
+                  tranquila, fornece uma visão gerencial dos compromissos
+                  diminuindo erros e otimizando os atendimentos."
+                </p>
               </div>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
                 <div className="client-photo">
-                  <img src={ingridResolve} alt="Ingrid Barbosa" className="client-image" />
+                  <img
+                    src={ingridResolve}
+                    alt="Ingrid Barbosa"
+                    className="client-image"
+                  />
                 </div>
                 <div className="client-info">
                   <h4>Ingrid Barbosa</h4>
@@ -1004,14 +1181,22 @@ ${formData.mensagem}
               </div>
               <div className="testimonial-content">
                 <div className="stars">⭐⭐⭐⭐⭐</div>
-                <p>"A gestão financeira nunca foi tão simples. Os relatórios me ajudam a tomar decisões estratégicas juntamente com nossos clientes."</p>
+                <p>
+                  "A gestão financeira nunca foi tão simples. Os relatórios me
+                  ajudam a tomar decisões estratégicas juntamente com nossos
+                  clientes."
+                </p>
               </div>
             </div>
 
             <div className="testimonial-card">
               <div className="testimonial-header">
                 <div className="client-photo">
-                  <img src={hellenStudio} alt="Hellen Kleine" className="client-image" />
+                  <img
+                    src={hellenStudio}
+                    alt="Hellen Kleine"
+                    className="client-image"
+                  />
                 </div>
                 <div className="client-info">
                   <h4>Hellen Kleine</h4>
@@ -1021,7 +1206,11 @@ ${formData.mensagem}
               </div>
               <div className="testimonial-content">
                 <div className="stars">⭐⭐⭐⭐⭐</div>
-                <p>"Prontuários eletrônicos seguros e planos de ação personalizados. O acompanhamento e a gestão estão muito melhores agora."</p>
+                <p>
+                  "Prontuários eletrônicos seguros e planos de ação
+                  personalizados. O acompanhamento e a gestão estão muito
+                  melhores agora."
+                </p>
               </div>
             </div>
           </div>
@@ -1035,20 +1224,20 @@ ${formData.mensagem}
             <h2>Pronto para Revolucionar sua Clínica?</h2>
             <p>Junte-se a centenas de clínicas que já confiam no CLINIC4US</p>
             <div className="cta-buttons">
-              <button 
-                className="cta-primary large"
-                onClick={openTrialModal}
-              >
-Teste Grátis de 7 Dias
+              <button className="cta-primary large" onClick={openTrialModal}>
+                Teste Grátis de 7 Dias
               </button>
-              <button 
+              <button
                 className="cta-secondary large"
                 onClick={(e) => openContactModal(e, "Demonstração do produto")}
               >
                 Agendar Demonstração
               </button>
             </div>
-            <p className="cta-note">✅ Sem compromisso • ✅ Sem cartão de crédito • ✅ Suporte completo</p>
+            <p className="cta-note">
+              ✅ Sem compromisso • ✅ Sem cartão de crédito • ✅ Suporte
+              completo
+            </p>
           </div>
         </div>
       </section>
@@ -1059,20 +1248,28 @@ Teste Grátis de 7 Dias
           <div className="about-content">
             <div className="about-text">
               <h2>Criado por Especialistas em Saúde e Tecnologia</h2>
-              <p>Nossa equipe combina anos de experiência em gestão de clínicas com expertise em tecnologia avançada para criar a solução ideal para profissionais de saúde.</p>
+              <p>
+                Nossa equipe combina anos de experiência em gestão de clínicas
+                com expertise em tecnologia avançada para criar a solução ideal
+                para profissionais de saúde.
+              </p>
               <div className="about-features">
                 <div className="about-feature">
                   <div className="feature-icon">🏥</div>
                   <div>
                     <h4>Experiência Clínica</h4>
-                    <p>Mais de 15 anos gerenciando clínicas multidisciplinares</p>
+                    <p>
+                      Mais de 15 anos gerenciando clínicas multidisciplinares
+                    </p>
                   </div>
                 </div>
                 <div className="about-feature">
                   <div className="feature-icon">💻</div>
                   <div>
                     <h4>Tecnologia Avançada</h4>
-                    <p>Sistema desenvolvido com as melhores práticas de segurança</p>
+                    <p>
+                      Sistema desenvolvido com as melhores práticas de segurança
+                    </p>
                   </div>
                 </div>
                 <div className="about-feature">
@@ -1087,25 +1284,37 @@ Teste Grátis de 7 Dias
             <div className="team-images">
               <div className="team-grid">
                 <div className="team-member">
-                  <img src={hiltonCeo} alt="Hilton CEO" className="team-photo" />
+                  <img
+                    src={hiltonCeo}
+                    alt="Hilton CEO"
+                    className="team-photo"
+                  />
                   <h4>Hilton Cassahara</h4>
                   <p>CEO & Fundador</p>
                 </div>
                 <div className="team-member">
                   <div className="image-placeholder team-placeholder">
-                    <p>👨‍💻</p>
+                    <p>{fabio}</p>
                     <small>Foto CTO</small>
                   </div>
                   <h4>Fábio Martins</h4>
                   <p>CTO</p>
                 </div>
                 <div className="team-member">
-                  <img src={atalitaFono} alt="Atalita Fonoaudióloga" className="team-photo" />
+                  <img
+                    src={atalitaFono}
+                    alt="Atalita Fonoaudióloga"
+                    className="team-photo"
+                  />
                   <h4>Atalita Azevedo</h4>
                   <p>Consultora Fonoaudióloga</p>
                 </div>
                 <div className="team-member">
-                  <img src={laizaResolve} alt="Laiza Especialista" className="team-photo" />
+                  <img
+                    src={laizaResolve}
+                    alt="Laiza Especialista"
+                    className="team-photo"
+                  />
                   <h4>Laiza Barros</h4>
                   <p>Especialista em Atendimento</p>
                 </div>
@@ -1120,37 +1329,58 @@ Teste Grátis de 7 Dias
         <div className="container">
           <div className="footer-content">
             <div className="footer-section">
-              <img 
-                src={logo} 
-                alt="CLINIC4US" 
-                className="footer-logo" 
+              <img
+                src={logo}
+                alt="CLINIC4US"
+                className="footer-logo"
                 onClick={scrollToTop}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: "pointer" }}
               />
-              <p>A plataforma completa para gestão de clínicas multidisciplinares.</p>
+              <p>
+                A plataforma completa para gestão de clínicas
+                multidisciplinares.
+              </p>
             </div>
             <div className="footer-section">
               <h4>Produto</h4>
               <ul>
-                <li><a href="#funcionalidades">Funcionalidades</a></li>
-                <li><a href="#planos">Planos</a></li>
-                <li><a href="#comparacao">Comparação</a></li>
+                <li>
+                  <a href="#funcionalidades">Funcionalidades</a>
+                </li>
+                <li>
+                  <a href="#planos">Planos</a>
+                </li>
+                <li>
+                  <a href="#comparacao">Comparação</a>
+                </li>
               </ul>
             </div>
             <div className="footer-section">
               <h4>Suporte</h4>
               <ul>
-                <li><a href="#help">Central de Ajuda</a></li>
-                <li><a href="#contact">Contato</a></li>
-                <li><a href="#docs">Documentação</a></li>
+                <li>
+                  <a href="#help">Central de Ajuda</a>
+                </li>
+                <li>
+                  <a href="#contact">Contato</a>
+                </li>
+                <li>
+                  <a href="#docs">Documentação</a>
+                </li>
               </ul>
             </div>
             <div className="footer-section">
               <h4>Empresa</h4>
               <ul>
-                <li><a href="#about">Sobre</a></li>
-                <li><a href="#privacy">Privacidade</a></li>
-                <li><a href="#terms">Termos de Uso</a></li>
+                <li>
+                  <a href="#about">Sobre</a>
+                </li>
+                <li>
+                  <a href="#privacy">Privacidade</a>
+                </li>
+                <li>
+                  <a href="#terms">Termos de Uso</a>
+                </li>
               </ul>
             </div>
           </div>
@@ -1170,15 +1400,22 @@ Teste Grátis de 7 Dias
                   <div className="modal-logo-title">
                     <img src={logo} alt="CLINIC4US" className="modal-logo" />
                   </div>
-                  <button className="close-modal-button" onClick={closeContactModal}>
+                  <button
+                    className="close-modal-button"
+                    onClick={closeContactModal}
+                  >
                     &times;
                   </button>
                 </div>
-                
+
                 <div className="modal-content-wrapper">
                   <div className="modal-image-section">
                     <div className="modal-contact-image">
-                      <img src={formContactImage} alt="Profissional de saúde" className="contact-image" />
+                      <img
+                        src={formContactImage}
+                        alt="Profissional de saúde"
+                        className="contact-image"
+                      />
                       <div className="contact-image-overlay">
                         <h3>Fale Conosco</h3>
                       </div>
@@ -1194,7 +1431,7 @@ Teste Grátis de 7 Dias
                       </div>
                     </div>
                   </div>
-                  
+
                   <form onSubmit={handleSubmit} className="contact-form">
                     <div className="form-group">
                       <label htmlFor="nomeCompleto">Nome Completo *</label>
@@ -1226,12 +1463,16 @@ Teste Grátis de 7 Dias
                       <label htmlFor="whatsapp">WhatsApp *</label>
                       <div className="phone-input-container">
                         <div className="country-selector">
-                          <div 
+                          <div
                             className="country-select-custom"
-                            onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+                            onClick={() =>
+                              setIsCountryDropdownOpen(!isCountryDropdownOpen)
+                            }
                           >
                             <span className="selected-country">
-                              <span className="country-prefix">{selectedCountry.prefix}</span>
+                              <span className="country-prefix">
+                                {selectedCountry.prefix}
+                              </span>
                             </span>
                             <span className="dropdown-arrow">▼</span>
                           </div>
@@ -1240,15 +1481,23 @@ Teste Grátis de 7 Dias
                               {countries.map((country) => (
                                 <div
                                   key={country.code}
-                                  className={`country-option ${country.code === selectedCountry.code ? 'selected' : ''}`}
+                                  className={`country-option ${
+                                    country.code === selectedCountry.code
+                                      ? "selected"
+                                      : ""
+                                  }`}
                                   onClick={() => {
                                     handleCountryChange(country);
                                     setIsCountryDropdownOpen(false);
                                   }}
                                 >
                                   <span className="country-info">
-                                    <span className="country-prefix">{country.prefix}</span>
-                                    <span className="country-name">{country.name}</span>
+                                    <span className="country-prefix">
+                                      {country.prefix}
+                                    </span>
+                                    <span className="country-name">
+                                      {country.name}
+                                    </span>
                                   </span>
                                 </div>
                               ))}
@@ -1261,9 +1510,13 @@ Teste Grátis de 7 Dias
                           name="whatsapp"
                           value={formData.whatsapp}
                           onChange={handleInputChange}
-                          placeholder={selectedCountry.code === 'BR' ? '(11) 99999-9999' : 
-                                      selectedCountry.code === 'US' ? '(123) 456-7890' : 
-                                      '123 456 789'}
+                          placeholder={
+                            selectedCountry.code === "BR"
+                              ? "(11) 99999-9999"
+                              : selectedCountry.code === "US"
+                              ? "(123) 456-7890"
+                              : "123 456 789"
+                          }
                           className="phone-input"
                           required
                         />
@@ -1278,13 +1531,20 @@ Teste Grátis de 7 Dias
                         value={formData.assunto}
                         onChange={handleInputChange}
                         required
+                        title="Assunto"
                       >
                         <option value="">Selecione um assunto</option>
-                        <option value="Informações sobre o sistema">Informações sobre o sistema</option>
-                        <option value="Demonstração do produto">Demonstração do produto</option>
+                        <option value="Informações sobre o sistema">
+                          Informações sobre o sistema
+                        </option>
+                        <option value="Demonstração do produto">
+                          Demonstração do produto
+                        </option>
                         <option value="Planos e preços">Planos e preços</option>
                         <option value="Suporte técnico">Suporte técnico</option>
-                        <option value="Parceria comercial">Parceria comercial</option>
+                        <option value="Parceria comercial">
+                          Parceria comercial
+                        </option>
                         <option value="Outros">Outros</option>
                       </select>
                     </div>
@@ -1303,7 +1563,11 @@ Teste Grátis de 7 Dias
                     </div>
 
                     <div className="form-actions">
-                      <button type="button" className="clear-button" onClick={clearForm}>
+                      <button
+                        type="button"
+                        className="clear-button"
+                        onClick={clearForm}
+                      >
                         Limpar Campos
                       </button>
                       <button type="submit" className="submit-button">
@@ -1317,7 +1581,10 @@ Teste Grátis de 7 Dias
               <div className="thank-you-screen">
                 <div className="thank-you-header">
                   <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                  <button className="close-modal-button" onClick={closeContactModal}>
+                  <button
+                    className="close-modal-button"
+                    onClick={closeContactModal}
+                  >
                     &times;
                   </button>
                 </div>
@@ -1325,7 +1592,10 @@ Teste Grátis de 7 Dias
                   <div className="thank-you-icon">✓</div>
                   <h2>Obrigado pelo contato!</h2>
                   <p>Nossos consultores retornarão em breve.</p>
-                  <button className="thank-you-close-button" onClick={closeContactModal}>
+                  <button
+                    className="thank-you-close-button"
+                    onClick={closeContactModal}
+                  >
                     Fechar
                   </button>
                 </div>
@@ -1345,15 +1615,22 @@ Teste Grátis de 7 Dias
                   <div className="modal-logo-title">
                     <img src={logo} alt="CLINIC4US" className="modal-logo" />
                   </div>
-                  <button className="close-modal-button" onClick={closeTrialModal}>
+                  <button
+                    className="close-modal-button"
+                    onClick={closeTrialModal}
+                  >
                     &times;
                   </button>
                 </div>
-                
+
                 <div className="modal-content-wrapper">
                   <div className="modal-image-section">
                     <div className="modal-contact-image">
-                      <img src={freeEvaluationImage} alt="Teste Grátis CLINIC4US" className="contact-image" />
+                      <img
+                        src={freeEvaluationImage}
+                        alt="Teste Grátis CLINIC4US"
+                        className="contact-image"
+                      />
                       <div className="contact-image-overlay">
                         <h3>Teste Grátis</h3>
                       </div>
@@ -1369,7 +1646,7 @@ Teste Grátis de 7 Dias
                       </div>
                     </div>
                   </div>
-                  
+
                   <form onSubmit={handleTrialSubmit} className="contact-form">
                     <div className="form-group">
                       <label htmlFor="trialNomeCompleto">Nome Completo *</label>
@@ -1401,12 +1678,18 @@ Teste Grátis de 7 Dias
                       <label htmlFor="trialWhatsapp">WhatsApp *</label>
                       <div className="phone-input-container">
                         <div className="country-selector">
-                          <div 
+                          <div
                             className="country-select-custom"
-                            onClick={() => setIsTrialCountryDropdownOpen(!isTrialCountryDropdownOpen)}
+                            onClick={() =>
+                              setIsTrialCountryDropdownOpen(
+                                !isTrialCountryDropdownOpen
+                              )
+                            }
                           >
                             <span className="selected-country">
-                              <span className="country-prefix">{trialSelectedCountry.prefix}</span>
+                              <span className="country-prefix">
+                                {trialSelectedCountry.prefix}
+                              </span>
                             </span>
                             <span className="dropdown-arrow">▼</span>
                           </div>
@@ -1415,15 +1698,23 @@ Teste Grátis de 7 Dias
                               {countries.map((country) => (
                                 <div
                                   key={country.code}
-                                  className={`country-option ${country.code === trialSelectedCountry.code ? 'selected' : ''}`}
+                                  className={`country-option ${
+                                    country.code === trialSelectedCountry.code
+                                      ? "selected"
+                                      : ""
+                                  }`}
                                   onClick={() => {
                                     handleTrialCountryChange(country);
                                     setIsTrialCountryDropdownOpen(false);
                                   }}
                                 >
                                   <span className="country-info">
-                                    <span className="country-prefix">{country.prefix}</span>
-                                    <span className="country-name">{country.name}</span>
+                                    <span className="country-prefix">
+                                      {country.prefix}
+                                    </span>
+                                    <span className="country-name">
+                                      {country.name}
+                                    </span>
                                   </span>
                                 </div>
                               ))}
@@ -1436,9 +1727,13 @@ Teste Grátis de 7 Dias
                           name="whatsapp"
                           value={trialFormData.whatsapp}
                           onChange={handleTrialInputChange}
-                          placeholder={trialSelectedCountry.code === 'BR' ? '(11) 99999-9999' : 
-                                      trialSelectedCountry.code === 'US' ? '(123) 456-7890' : 
-                                      '123 456 789'}
+                          placeholder={
+                            trialSelectedCountry.code === "BR"
+                              ? "(11) 99999-9999"
+                              : trialSelectedCountry.code === "US"
+                              ? "(123) 456-7890"
+                              : "123 456 789"
+                          }
                           className="phone-input"
                           required
                         />
@@ -1446,13 +1741,16 @@ Teste Grátis de 7 Dias
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="trialQtdProfissionais">Sua empresa tem quantos profissionais? *</label>
+                      <label htmlFor="trialQtdProfissionais">
+                        Sua empresa tem quantos profissionais? *
+                      </label>
                       <select
                         id="trialQtdProfissionais"
                         name="qtdProfissionais"
                         value={trialFormData.qtdProfissionais}
                         onChange={handleTrialInputChange}
                         required
+                        title="Quantidade de Profissionais"
                       >
                         <option value="">Selecione a quantidade</option>
                         <option value="1">1 profissional</option>
@@ -1466,29 +1764,40 @@ Teste Grátis de 7 Dias
 
                     <div className="form-actions">
                       <button type="submit" className="submit-button">
-Teste Grátis
+                        Teste Grátis
                       </button>
                     </div>
                   </form>
                 </div>
-                
-                <div className="trial-disclaimer" style={{
-                  margin: window.innerWidth <= 768 ? '1.5rem 24px 24px 24px' : '2rem 32px 32px 32px', 
-                  padding: '20px', 
-                  backgroundColor: '#f8fafc', 
-                  borderRadius: '8px', 
-                  fontSize: '0.9rem', 
-                  lineHeight: '1.5',
-                  borderLeft: '4px solid #03B4C6'
-                }}>
+
+                <div
+                  className="trial-disclaimer"
+                  style={{
+                    margin:
+                      window.innerWidth <= 768
+                        ? "1.5rem 24px 24px 24px"
+                        : "2rem 32px 32px 32px",
+                    padding: "20px",
+                    backgroundColor: "#f8fafc",
+                    borderRadius: "8px",
+                    fontSize: "0.9rem",
+                    lineHeight: "1.5",
+                    borderLeft: "4px solid #03B4C6",
+                  }}
+                >
                   <p>
-                    <strong>Avaliação gratuita</strong><br/>
-                    Ao se inscrever para a avaliação gratuita da plataforma CLINIC4US, você receberá um e-mail de validação. 
-                    Verifique sua caixa de entrada (e também a pasta de spam ou promoções, se necessário), siga as instruções 
-                    e aproveite o período de testes de 7 dias. Após este período a conta será inativada automaticamente.
+                    <strong>Avaliação gratuita</strong>
+                    <br />
+                    Ao se inscrever para a avaliação gratuita da plataforma
+                    CLINIC4US, você receberá um e-mail de validação. Verifique
+                    sua caixa de entrada (e também a pasta de spam ou promoções,
+                    se necessário), siga as instruções e aproveite o período de
+                    testes de 7 dias. Após este período a conta será inativada
+                    automaticamente.
                   </p>
-                  <p style={{marginBottom: '0'}}>
-                    Em caso de dúvidas, entre em contato com nossa equipe de suporte.
+                  <p style={{ marginBottom: "0" }}>
+                    Em caso de dúvidas, entre em contato com nossa equipe de
+                    suporte.
                   </p>
                 </div>
               </>
@@ -1496,7 +1805,10 @@ Teste Grátis
               <div className="thank-you-screen">
                 <div className="thank-you-header">
                   <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                  <button className="close-modal-button" onClick={closeTrialModal}>
+                  <button
+                    className="close-modal-button"
+                    onClick={closeTrialModal}
+                  >
                     &times;
                   </button>
                 </div>
@@ -1504,7 +1816,10 @@ Teste Grátis
                   <div className="thank-you-icon">✓</div>
                   <h2>Cadastro Realizado!</h2>
                   <p>Verifique seu email para ativar sua conta de teste.</p>
-                  <button className="thank-you-close-button" onClick={closeTrialModal}>
+                  <button
+                    className="thank-you-close-button"
+                    onClick={closeTrialModal}
+                  >
                     Fechar
                   </button>
                 </div>
@@ -1517,18 +1832,24 @@ Teste Grátis
       {/* Modal de Assinatura */}
       {isSubscriptionModalOpen && selectedPlan && (
         <div className="contact-modal-overlay" onClick={closeSubscriptionModal}>
-          <div className="contact-modal subscription-modal" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="contact-modal subscription-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             {!showSubscriptionSuccess ? (
               <>
                 <div className="contact-modal-header">
                   <div className="modal-logo-title">
                     <img src={logo} alt="CLINIC4US" className="modal-logo" />
                   </div>
-                  <button className="close-modal-button" onClick={closeSubscriptionModal}>
+                  <button
+                    className="close-modal-button"
+                    onClick={closeSubscriptionModal}
+                  >
                     &times;
                   </button>
                 </div>
-                
+
                 <div className="subscription-content">
                   <div className="subscription-plan-summary">
                     <h3>Assinatura - {selectedPlan.name}</h3>
@@ -1539,13 +1860,18 @@ Teste Grátis
                     </div>
                   </div>
 
-                  <form onSubmit={handleSubscriptionSubmit} className="subscription-form">
+                  <form
+                    onSubmit={handleSubscriptionSubmit}
+                    className="subscription-form"
+                  >
                     <div className="form-section">
                       <h4>Dados Pessoais</h4>
-                      
+
                       <div className="form-row">
                         <div className="form-group">
-                          <label htmlFor="subNomeCompleto">Nome Completo *</label>
+                          <label htmlFor="subNomeCompleto">
+                            Nome Completo *
+                          </label>
                           <input
                             type="text"
                             id="subNomeCompleto"
@@ -1556,7 +1882,7 @@ Teste Grátis
                             required
                           />
                         </div>
-                        
+
                         <div className="form-group">
                           <label htmlFor="subEmail">Email *</label>
                           <input
@@ -1584,7 +1910,7 @@ Teste Grátis
                             required
                           />
                         </div>
-                        
+
                         <div className="form-group">
                           <label htmlFor="subTelefone">Telefone *</label>
                           <input
@@ -1603,7 +1929,9 @@ Teste Grátis
                       {isCNPJ(subscriptionFormData.cpfCnpj) && (
                         <div className="form-row">
                           <div className="form-group">
-                            <label htmlFor="subRazaoSocial">Razão Social *</label>
+                            <label htmlFor="subRazaoSocial">
+                              Razão Social *
+                            </label>
                             <input
                               type="text"
                               id="subRazaoSocial"
@@ -1645,7 +1973,7 @@ Teste Grátis
                             required
                           />
                         </div>
-                        
+
                         <div className="form-group">
                           <label htmlFor="subNumero">Número *</label>
                           <input
@@ -1672,7 +2000,7 @@ Teste Grátis
                             placeholder="Apto, sala, bloco (opcional)"
                           />
                         </div>
-                        
+
                         <div className="form-group">
                           <label htmlFor="subBairro">Bairro *</label>
                           <input
@@ -1700,7 +2028,7 @@ Teste Grátis
                             required
                           />
                         </div>
-                        
+
                         <div className="form-group">
                           <label htmlFor="subUf">UF *</label>
                           <input
@@ -1711,7 +2039,7 @@ Teste Grátis
                             onChange={handleSubscriptionInputChange}
                             placeholder="SP"
                             maxLength={2}
-                            style={{ textTransform: 'uppercase' }}
+                            style={{ textTransform: "uppercase" }}
                             required
                           />
                         </div>
@@ -1720,10 +2048,12 @@ Teste Grátis
 
                     <div className="form-section">
                       <h4>Dados do Cartão de Crédito</h4>
-                      
+
                       <div className="form-row">
                         <div className="form-group">
-                          <label htmlFor="subCardNumber">Número do Cartão *</label>
+                          <label htmlFor="subCardNumber">
+                            Número do Cartão *
+                          </label>
                           <input
                             type="text"
                             id="subCardNumber"
@@ -1735,7 +2065,7 @@ Teste Grátis
                             required
                           />
                         </div>
-                        
+
                         <div className="form-group">
                           <label htmlFor="subCardName">Nome no Cartão *</label>
                           <input
@@ -1764,7 +2094,7 @@ Teste Grátis
                             required
                           />
                         </div>
-                        
+
                         <div className="form-group">
                           <label htmlFor="subCardCvv">CVV *</label>
                           <input
@@ -1784,23 +2114,36 @@ Teste Grátis
                     <div className="subscription-summary">
                       <div className="summary-row">
                         <span>Plano {selectedPlan.name}:</span>
-                        <span>R$ {selectedPlan.price}{selectedPlan.period}</span>
+                        <span>
+                          R$ {selectedPlan.price}
+                          {selectedPlan.period}
+                        </span>
                       </div>
                       <div className="summary-row total">
                         <strong>Total:</strong>
-                        <strong>R$ {selectedPlan.price}{selectedPlan.period}</strong>
+                        <strong>
+                          R$ {selectedPlan.price}
+                          {selectedPlan.period}
+                        </strong>
                       </div>
                     </div>
 
                     <div className="form-actions">
-                      <button type="submit" className="submit-button subscription-button">
+                      <button
+                        type="submit"
+                        className="submit-button subscription-button"
+                      >
                         Confirmar Assinatura
                       </button>
                     </div>
 
                     <div className="subscription-security">
-                      <p>🔒 Pagamento 100% seguro. Seus dados estão protegidos.</p>
-                      <p>💳 Aceitamos todos os cartões de crédito principais.</p>
+                      <p>
+                        🔒 Pagamento 100% seguro. Seus dados estão protegidos.
+                      </p>
+                      <p>
+                        💳 Aceitamos todos os cartões de crédito principais.
+                      </p>
                     </div>
                   </form>
                 </div>
@@ -1809,7 +2152,10 @@ Teste Grátis
               <div className="thank-you-screen">
                 <div className="thank-you-header">
                   <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                  <button className="close-modal-button" onClick={closeSubscriptionModal}>
+                  <button
+                    className="close-modal-button"
+                    onClick={closeSubscriptionModal}
+                  >
                     &times;
                   </button>
                 </div>
@@ -1817,8 +2163,13 @@ Teste Grátis
                   <div className="thank-you-icon">✓</div>
                   <h2>Assinatura Confirmada!</h2>
                   <p>Bem-vindo ao {selectedPlan?.name}!</p>
-                  <p>Você receberá as instruções de acesso por email em breve.</p>
-                  <button className="thank-you-close-button" onClick={closeSubscriptionModal}>
+                  <p>
+                    Você receberá as instruções de acesso por email em breve.
+                  </p>
+                  <button
+                    className="thank-you-close-button"
+                    onClick={closeSubscriptionModal}
+                  >
                     Começar a Usar
                   </button>
                 </div>
@@ -1829,20 +2180,15 @@ Teste Grátis
       )}
 
       {/* Botão flutuante do WhatsApp */}
-      <a 
-        href="https://wa.me/5511972918369" 
-        target="_blank" 
-        rel="noopener noreferrer" 
+      <a
+        href="https://wa.me/5511972918369"
+        target="_blank"
+        rel="noopener noreferrer"
         className="whatsapp-float"
         aria-label="Falar no WhatsApp"
       >
-        <svg 
-          width="24" 
-          height="24" 
-          viewBox="0 0 24 24" 
-          fill="currentColor"
-        >
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.51 3.488"/>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.51 3.488" />
         </svg>
       </a>
     </div>
