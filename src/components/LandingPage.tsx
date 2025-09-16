@@ -4,20 +4,55 @@ import logo from "../images/logo_clinic4us.png";
 import hiltonCeo from "../images/hilton_ceo.png";
 import atalitaFono from "../images/atalita_fono.png";
 import laizaResolve from "../images/laiza_resolve.png";
-import formContactImage from "../images/form_contact_image.jpg";
 import freeEvaluationImage from "../images/free_evaluation.jpg";
 import ingridResolve from "../images/ingrid_resolve.png";
 import hellenStudio from "../images/hellen_studio.png";
 import fernandaNinho from "../images/fernanda_ninho.png";
-
+import Footer from "./Footer";
+import ContactForm from "./ContactForm";
 const LandingPage: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [showThankYou, setShowThankYou] = useState(false);
+  const [contactPreSelectedSubject, setContactPreSelectedSubject] = useState<string>();
   const [isTrialModalOpen, setIsTrialModalOpen] = useState(false);
   const [showTrialSuccess, setShowTrialSuccess] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [showSubscriptionSuccess, setShowSubscriptionSuccess] = useState(false);
+
+  useEffect(() => {
+    document.title = "Clinic4Us - Sistema de Gestão para Clínicas";
+  }, []);
+
+  // Countries array for trial and subscription modals
+  const countries = [
+    { code: "BR", name: "Brasil", prefix: "+55", flag: "BR" },
+    { code: "US", name: "Estados Unidos", prefix: "+1", flag: "US" },
+    { code: "CA", name: "Canadá", prefix: "+1", flag: "CA" },
+    { code: "AR", name: "Argentina", prefix: "+54", flag: "AR" },
+    { code: "CL", name: "Chile", prefix: "+56", flag: "CL" },
+    { code: "CO", name: "Colômbia", prefix: "+57", flag: "CO" },
+    { code: "MX", name: "México", prefix: "+52", flag: "MX" },
+    { code: "PE", name: "Peru", prefix: "+51", flag: "PE" },
+    { code: "UY", name: "Uruguai", prefix: "+598", flag: "UY" },
+    { code: "PY", name: "Paraguai", prefix: "+595", flag: "PY" },
+    { code: "BO", name: "Bolívia", prefix: "+591", flag: "BO" },
+    { code: "VE", name: "Venezuela", prefix: "+58", flag: "VE" },
+    { code: "EC", name: "Equador", prefix: "+593", flag: "EC" },
+    { code: "CR", name: "Costa Rica", prefix: "+506", flag: "CR" },
+    { code: "PA", name: "Panamá", prefix: "+507", flag: "PA" },
+    { code: "GT", name: "Guatemala", prefix: "+502", flag: "GT" },
+    { code: "PT", name: "Portugal", prefix: "+351", flag: "PT" },
+    { code: "ES", name: "Espanha", prefix: "+34", flag: "ES" },
+    { code: "FR", name: "França", prefix: "+33", flag: "FR" },
+    { code: "IT", name: "Itália", prefix: "+39", flag: "IT" },
+    { code: "DE", name: "Alemanha", prefix: "+49", flag: "DE" },
+    { code: "UK", name: "Reino Unido", prefix: "+44", flag: "UK" },
+    { code: "AU", name: "Austrália", prefix: "+61", flag: "AU" },
+    { code: "JP", name: "Japão", prefix: "+81", flag: "JP" },
+    { code: "CN", name: "China", prefix: "+86", flag: "CN" },
+    { code: "IN", name: "Índia", prefix: "+91", flag: "IN" },
+    { code: "ZA", name: "África do Sul", prefix: "+27", flag: "ZA" },
+  ];
   const [selectedPlan, setSelectedPlan] = useState<{
     name: string;
     price: string;
@@ -56,50 +91,6 @@ const LandingPage: React.FC = () => {
     cardExpiry: "",
     cardCvv: "",
   });
-  const [formData, setFormData] = useState({
-    nomeCompleto: "",
-    email: "",
-    whatsapp: "",
-    assunto: "",
-    mensagem: "",
-  });
-  const [selectedCountry, setSelectedCountry] = useState({
-    code: "BR",
-    name: "Brasil",
-    prefix: "+55",
-    flag: "BR",
-  });
-  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
-
-  const countries = [
-    { code: "BR", name: "Brasil", prefix: "+55", flag: "BR" },
-    { code: "US", name: "Estados Unidos", prefix: "+1", flag: "US" },
-    { code: "CA", name: "Canadá", prefix: "+1", flag: "CA" },
-    { code: "AR", name: "Argentina", prefix: "+54", flag: "AR" },
-    { code: "CL", name: "Chile", prefix: "+56", flag: "CL" },
-    { code: "CO", name: "Colômbia", prefix: "+57", flag: "CO" },
-    { code: "MX", name: "México", prefix: "+52", flag: "MX" },
-    { code: "PE", name: "Peru", prefix: "+51", flag: "PE" },
-    { code: "UY", name: "Uruguai", prefix: "+598", flag: "UY" },
-    { code: "PY", name: "Paraguai", prefix: "+595", flag: "PY" },
-    { code: "BO", name: "Bolívia", prefix: "+591", flag: "BO" },
-    { code: "VE", name: "Venezuela", prefix: "+58", flag: "VE" },
-    { code: "EC", name: "Equador", prefix: "+593", flag: "EC" },
-    { code: "CR", name: "Costa Rica", prefix: "+506", flag: "CR" },
-    { code: "PA", name: "Panamá", prefix: "+507", flag: "PA" },
-    { code: "GT", name: "Guatemala", prefix: "+502", flag: "GT" },
-    { code: "PT", name: "Portugal", prefix: "+351", flag: "PT" },
-    { code: "ES", name: "Espanha", prefix: "+34", flag: "ES" },
-    { code: "FR", name: "França", prefix: "+33", flag: "FR" },
-    { code: "IT", name: "Itália", prefix: "+39", flag: "IT" },
-    { code: "DE", name: "Alemanha", prefix: "+49", flag: "DE" },
-    { code: "UK", name: "Reino Unido", prefix: "+44", flag: "UK" },
-    { code: "AU", name: "Austrália", prefix: "+61", flag: "AU" },
-    { code: "JP", name: "Japão", prefix: "+81", flag: "JP" },
-    { code: "CN", name: "China", prefix: "+86", flag: "CN" },
-    { code: "IN", name: "Índia", prefix: "+91", flag: "IN" },
-    { code: "ZA", name: "África do Sul", prefix: "+27", flag: "ZA" },
-  ];
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -108,20 +99,12 @@ const LandingPage: React.FC = () => {
     });
   };
 
-  // Fechar dropdown ao clicar fora
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isCountryDropdownOpen) {
-        const target = event.target as Element;
-        if (!target.closest(".country-selector")) {
-          setIsCountryDropdownOpen(false);
-        }
-      }
-    };
+  const handleNavigateToLogin = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Usaremos uma solução simples com query parameter
+    window.location.href = window.location.origin + '?page=login';
+  };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isCountryDropdownOpen]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -136,18 +119,13 @@ const LandingPage: React.FC = () => {
     preSelectedSubject?: string
   ) => {
     e.preventDefault();
-    if (preSelectedSubject) {
-      setFormData((prev) => ({
-        ...prev,
-        assunto: preSelectedSubject,
-      }));
-    }
+    setContactPreSelectedSubject(preSelectedSubject);
     setIsContactModalOpen(true);
   };
 
   const closeContactModal = () => {
     setIsContactModalOpen(false);
-    setShowThankYou(false);
+    setContactPreSelectedSubject(undefined);
   };
 
   const openTrialModal = (e: React.MouseEvent) => {
@@ -292,35 +270,6 @@ const LandingPage: React.FC = () => {
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-
-    if (name === "whatsapp") {
-      const formatted = formatWhatsApp(value, selectedCountry.code);
-      setFormData((prev) => ({
-        ...prev,
-        [name]: formatted,
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-  };
-
-  const handleCountryChange = (country: typeof selectedCountry) => {
-    setSelectedCountry(country);
-    // Limpar o campo WhatsApp quando mudar o país
-    setFormData((prev) => ({
-      ...prev,
-      whatsapp: "",
-    }));
-  };
 
   const handleTrialInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -539,51 +488,6 @@ const LandingPage: React.FC = () => {
     setShowSubscriptionSuccess(true);
   };
 
-  const clearForm = () => {
-    setFormData({
-      nomeCompleto: "",
-      email: "",
-      whatsapp: "",
-      assunto: "",
-      mensagem: "",
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validação básica
-    if (
-      !formData.nomeCompleto ||
-      !formData.email ||
-      !formData.whatsapp ||
-      !formData.assunto ||
-      !formData.mensagem
-    ) {
-      alert("Todos os campos são obrigatórios!");
-      return;
-    }
-
-    // Criar link mailto
-    const subject = encodeURIComponent(formData.assunto);
-    const body = encodeURIComponent(`
-Nome: ${formData.nomeCompleto}
-Email: ${formData.email}
-WhatsApp: ${selectedCountry.prefix} ${formData.whatsapp}
-País: ${selectedCountry.name}
-Assunto: ${formData.assunto}
-
-Mensagem:
-${formData.mensagem}
-    `);
-
-    const mailtoLink = `mailto:adm.clinic4us@gmail.com?subject=${subject}&body=${body}`;
-    window.open(mailtoLink, "_blank");
-
-    // Limpar formulário e mostrar tela de agradecimento
-    clearForm();
-    setShowThankYou(true);
-  };
 
   return (
     <div className="landing-page">
@@ -614,6 +518,11 @@ ${formData.mensagem}
             <li>
               <a href="#contato" onClick={openContactModal}>
                 Contato
+              </a>
+            </li>
+            <li>
+              <a href="#login" onClick={handleNavigateToLogin} className="client-area-link">
+                Área do Cliente
               </a>
             </li>
           </ul>
@@ -667,6 +576,18 @@ ${formData.mensagem}
                       }}
                     >
                       Contato
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#login"
+                      className="client-area-link"
+                      onClick={(e) => {
+                        handleNavigateToLogin(e);
+                        closeMobileMenu();
+                      }}
+                    >
+                      Área do Cliente
                     </a>
                   </li>
                 </ul>
@@ -1324,284 +1245,14 @@ ${formData.mensagem}
       </section>
 
       {/* Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-section">
-              <img
-                src={logo}
-                alt="CLINIC4US"
-                className="footer-logo"
-                onClick={scrollToTop}
-                style={{ cursor: "pointer" }}
-              />
-              <p>
-                A plataforma completa para gestão de clínicas
-                multidisciplinares.
-              </p>
-            </div>
-            <div className="footer-section">
-              <h4>Produto</h4>
-              <ul>
-                <li>
-                  <a href="#funcionalidades">Funcionalidades</a>
-                </li>
-                <li>
-                  <a href="#planos">Planos</a>
-                </li>
-                <li>
-                  <a href="#comparacao">Comparação</a>
-                </li>
-              </ul>
-            </div>
-            <div className="footer-section">
-              <h4>Suporte</h4>
-              <ul>
-                <li>
-                  <a href="#help">Central de Ajuda</a>
-                </li>
-                <li>
-                  <a href="#contact">Contato</a>
-                </li>
-                <li>
-                  <a href="#docs">Documentação</a>
-                </li>
-              </ul>
-            </div>
-            <div className="footer-section">
-              <h4>Empresa</h4>
-              <ul>
-                <li>
-                  <a href="#about">Sobre</a>
-                </li>
-                <li>
-                  <a href="#privacy">Privacidade</a>
-                </li>
-                <li>
-                  <a href="#terms">Termos de Uso</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>&copy; 2024 CLINIC4US. Todos os direitos reservados.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer onScrollToTop={scrollToTop} />
 
       {/* Modal de Contato */}
-      {isContactModalOpen && (
-        <div className="contact-modal-overlay" onClick={closeContactModal}>
-          <div className="contact-modal" onClick={(e) => e.stopPropagation()}>
-            {!showThankYou ? (
-              <>
-                <div className="contact-modal-header">
-                  <div className="modal-logo-title">
-                    <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                  </div>
-                  <button
-                    className="close-modal-button"
-                    onClick={closeContactModal}
-                  >
-                    &times;
-                  </button>
-                </div>
-
-                <div className="modal-content-wrapper">
-                  <div className="modal-image-section">
-                    <div className="modal-contact-image">
-                      <img
-                        src={formContactImage}
-                        alt="Profissional de saúde"
-                        className="contact-image"
-                      />
-                      <div className="contact-image-overlay">
-                        <h3>Fale Conosco</h3>
-                      </div>
-                    </div>
-                    <div className="contact-benefits">
-                      <div className="benefit-item">
-                        <span className="benefit-icon">🎯</span>
-                        <span>Demonstração personalizada</span>
-                      </div>
-                      <div className="benefit-item">
-                        <span className="benefit-icon">💡</span>
-                        <span>Consultoria gratuita</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="contact-form">
-                    <div className="form-group">
-                      <label htmlFor="nomeCompleto">Nome Completo *</label>
-                      <input
-                        type="text"
-                        id="nomeCompleto"
-                        name="nomeCompleto"
-                        value={formData.nomeCompleto}
-                        onChange={handleInputChange}
-                        placeholder="Digite seu nome completo"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="email">Email *</label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="seu@email.com"
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="whatsapp">WhatsApp *</label>
-                      <div className="phone-input-container">
-                        <div className="country-selector">
-                          <div
-                            className="country-select-custom"
-                            onClick={() =>
-                              setIsCountryDropdownOpen(!isCountryDropdownOpen)
-                            }
-                          >
-                            <span className="selected-country">
-                              <span className="country-prefix">
-                                {selectedCountry.prefix}
-                              </span>
-                            </span>
-                            <span className="dropdown-arrow">▼</span>
-                          </div>
-                          {isCountryDropdownOpen && (
-                            <div className="country-dropdown">
-                              {countries.map((country) => (
-                                <div
-                                  key={country.code}
-                                  className={`country-option ${
-                                    country.code === selectedCountry.code
-                                      ? "selected"
-                                      : ""
-                                  }`}
-                                  onClick={() => {
-                                    handleCountryChange(country);
-                                    setIsCountryDropdownOpen(false);
-                                  }}
-                                >
-                                  <span className="country-info">
-                                    <span className="country-prefix">
-                                      {country.prefix}
-                                    </span>
-                                    <span className="country-name">
-                                      {country.name}
-                                    </span>
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <input
-                          type="tel"
-                          id="whatsapp"
-                          name="whatsapp"
-                          value={formData.whatsapp}
-                          onChange={handleInputChange}
-                          placeholder={
-                            selectedCountry.code === "BR"
-                              ? "(11) 99999-9999"
-                              : selectedCountry.code === "US"
-                              ? "(123) 456-7890"
-                              : "123 456 789"
-                          }
-                          className="phone-input"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="assunto">Assunto *</label>
-                      <select
-                        id="assunto"
-                        name="assunto"
-                        value={formData.assunto}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Selecione um assunto</option>
-                        <option value="Informações sobre o sistema">
-                          Informações sobre o sistema
-                        </option>
-                        <option value="Demonstração do produto">
-                          Demonstração do produto
-                        </option>
-                        <option value="Planos e preços">Planos e preços</option>
-                        <option value="Suporte técnico">Suporte técnico</option>
-                        <option value="Parceria comercial">
-                          Parceria comercial
-                        </option>
-                        <option value="Outros">Outros</option>
-                      </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="mensagem">Mensagem *</label>
-                      <textarea
-                        id="mensagem"
-                        name="mensagem"
-                        value={formData.mensagem}
-                        onChange={handleInputChange}
-                        placeholder="Digite sua mensagem aqui..."
-                        rows={4}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-actions">
-                      <button
-                        type="button"
-                        className="clear-button"
-                        onClick={clearForm}
-                      >
-                        Limpar Campos
-                      </button>
-                      <button type="submit" className="submit-button">
-                        Enviar Mensagem
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </>
-            ) : (
-              <div className="thank-you-screen">
-                <div className="thank-you-header">
-                  <img src={logo} alt="CLINIC4US" className="modal-logo" />
-                  <button
-                    className="close-modal-button"
-                    onClick={closeContactModal}
-                  >
-                    &times;
-                  </button>
-                </div>
-                <div className="thank-you-content">
-                  <div className="thank-you-icon">✓</div>
-                  <h2>Obrigado pelo contato!</h2>
-                  <p>Nossos consultores retornarão em breve.</p>
-                  <button
-                    className="thank-you-close-button"
-                    onClick={closeContactModal}
-                  >
-                    Fechar
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <ContactForm
+        isOpen={isContactModalOpen}
+        onClose={closeContactModal}
+        preSelectedSubject={contactPreSelectedSubject}
+      />
 
       {/* Modal de Teste Grátis */}
       {isTrialModalOpen && (

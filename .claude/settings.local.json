@@ -19,7 +19,10 @@
       "Bash(sed:*)",
       "Bash(cd:*)",
       "Read(//c/Users/Cassa/OneDrive/Área de Trabalho/PROJETOS/**)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []

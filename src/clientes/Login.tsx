@@ -1,0 +1,434 @@
+import React, { useState } from "react";
+import "./Login.css";
+import HeaderInternal from "../components/Header/HeaderInternal";
+import { FooterInternal } from "../components/Footer";
+import ContactForm from "../components/ContactForm";
+
+interface LoginFormData {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+}
+
+const Login: React.FC = () => {
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: "",
+    password: "",
+    rememberMe: false,
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+    general?: string;
+  }>({});
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [contactPreSelectedSubject, setContactPreSelectedSubject] = useState<string>();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
+
+  React.useEffect(() => {
+    document.title = "Clinic4Us - Login";
+
+    // Carregar dados salvos se existirem
+    const savedData = localStorage.getItem('clinic4us-remember-me');
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setFormData(prev => ({
+          ...prev,
+          email: parsedData.email || "",
+          password: parsedData.password || "",
+          rememberMe: true
+        }));
+      } catch (error) {
+        console.error('Erro ao carregar dados salvos:', error);
+        localStorage.removeItem('clinic4us-remember-me');
+      }
+    }
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+
+    // Se desmarcar "Lembrar de mim", remover dados salvos
+    if (name === "rememberMe" && !checked) {
+      localStorage.removeItem('clinic4us-remember-me');
+    }
+
+    // Clear errors when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: undefined,
+      }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: typeof errors = {};
+
+    if (!formData.email) {
+      newErrors.email = "Email é obrigatório";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Email inválido";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Senha é obrigatória";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Senha deve ter pelo menos 6 caracteres";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      // For demo purposes, check if it's a valid email/password combination
+      if (formData.email === "admin@clinic4us.com" && formData.password === "123456") {
+        // Salvar dados se "Lembrar de mim" estiver marcado
+        if (formData.rememberMe) {
+          try {
+            const dataToSave = {
+              email: formData.email,
+              password: formData.password
+            };
+            localStorage.setItem('clinic4us-remember-me', JSON.stringify(dataToSave));
+          } catch (error) {
+            console.error('Erro ao salvar dados para lembrar:', error);
+          }
+        }
+
+        alert("Login realizado com sucesso!");
+        // Here you would typically redirect to dashboard
+        console.log("Login successful:", formData);
+      } else {
+        setErrors({
+          general: "Credenciais inválidas. Tente novamente.",
+        });
+      }
+    } catch (error) {
+      setErrors({
+        general: "Erro no servidor. Tente novamente mais tarde.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = () => {
+    setShowForgotPassword(true);
+    setErrors({});
+  };
+
+  const handleBackToLogin = () => {
+    setShowForgotPassword(false);
+    setForgotPasswordEmail("");
+    setForgotPasswordSent(false);
+    setErrors({});
+  };
+
+  const handleForgotPasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!forgotPasswordEmail) {
+      setErrors({ email: "Email é obrigatório" });
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotPasswordEmail)) {
+      setErrors({ email: "Email inválido" });
+      return;
+    }
+
+    // Simular envio do email
+    setErrors({});
+    setForgotPasswordSent(true);
+  };
+
+  const handleForgotPasswordEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForgotPasswordEmail(e.target.value);
+    if (errors.email) {
+      setErrors(prev => ({ ...prev, email: undefined }));
+    }
+  };
+
+  const handleGoToPlans = () => {
+    // Redirect to landing page plans section
+    window.location.href = window.location.origin + '#planos';
+  };
+
+  const handleGoHome = () => {
+    // Redirect to landing page
+    window.location.href = window.location.origin;
+  };
+
+  // Contact modal functions
+  const openContactModal = (e: React.MouseEvent, preSelectedSubject?: string) => {
+    e.preventDefault();
+    setContactPreSelectedSubject(preSelectedSubject);
+    setIsContactModalOpen(true);
+  };
+
+  const closeContactModal = () => {
+    setIsContactModalOpen(false);
+    setContactPreSelectedSubject(undefined);
+  };
+
+  // Header menu items for login page
+  const loginMenuItems = [
+    { label: "Início", onClick: handleGoHome },
+    { label: "Contato", onClick: openContactModal },
+  ];
+
+  return (
+    <div className="login-page">
+      <HeaderInternal
+        menuItems={loginMenuItems}
+        showCTAButton={true}
+        ctaButtonText="Assinar"
+        onCTAClick={handleGoToPlans}
+        className="login-header"
+      />
+
+      <main className="login-main">
+        <div className="login-container">
+          <div className="login-content">
+            <div className="login-card">
+              <div className="login-card-inner">
+                <div className="login-image-section">
+                  <div className="login-illustration-inner">
+                    <div className="illustration-placeholder-inner">
+                      <div className="placeholder-icon">🏥</div>
+                      <h3>Gerencie sua clínica com eficiência</h3>
+                      <p>Sistema completo para profissionais de saúde</p>
+                      <div className="feature-list">
+                        <div className="feature-item">
+                          <span className="feature-icon">📅</span>
+                          <span>Agenda inteligente</span>
+                        </div>
+                        <div className="feature-item">
+                          <span className="feature-icon">📋</span>
+                          <span>Prontuários digitais</span>
+                        </div>
+                        <div className="feature-item">
+                          <span className="feature-icon">📊</span>
+                          <span>Relatórios completos</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="login-form-section">
+                  <div className="login-header-content">
+                    <p>{showForgotPassword ? "Recuperar senha" : "Acesse sua conta para gerenciar sua clínica"}</p>
+                  </div>
+
+                  {!showForgotPassword ? (
+                    <>
+                      <form onSubmit={handleSubmit} className="login-form">
+                        {errors.general && (
+                          <div className="error-message general-error">
+                            {errors.general}
+                          </div>
+                        )}
+
+                        <div className="form-group">
+                          <label htmlFor="email">Email</label>
+                          <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            placeholder="seu@email.com"
+                            className={errors.email ? "error" : ""}
+                            disabled={isLoading}
+                          />
+                          {errors.email && (
+                            <span className="error-text">{errors.email}</span>
+                          )}
+                        </div>
+
+                        <div className="form-group">
+                          <label htmlFor="password">Senha</label>
+                          <div className="password-input-container">
+                            <input
+                              type={showPassword ? "text" : "password"}
+                              id="password"
+                              name="password"
+                              value={formData.password}
+                              onChange={handleInputChange}
+                              placeholder="Digite sua senha"
+                              className={errors.password ? "error" : ""}
+                              disabled={isLoading}
+                            />
+                            <button
+                              type="button"
+                              className="password-toggle"
+                              onClick={() => setShowPassword(!showPassword)}
+                              disabled={isLoading}
+                            >
+                              {showPassword ? "👁️" : "👁️‍🗨️"}
+                            </button>
+                          </div>
+                          {errors.password && (
+                            <span className="error-text">{errors.password}</span>
+                          )}
+                        </div>
+
+                        <div className="form-options">
+                          <label className="checkbox-container">
+                            <input
+                              type="checkbox"
+                              name="rememberMe"
+                              checked={formData.rememberMe}
+                              onChange={handleInputChange}
+                              disabled={isLoading}
+                            />
+                            <span className="checkmark"></span>
+                            Lembrar de mim
+                          </label>
+
+                          <button
+                            type="button"
+                            className="forgot-password-link"
+                            onClick={handleForgotPassword}
+                            disabled={isLoading}
+                          >
+                            Esqueceu a senha?
+                          </button>
+                        </div>
+
+                        <button
+                          type="submit"
+                          className={`login-button ${isLoading ? "loading" : ""}`}
+                          disabled={isLoading}
+                        >
+                          {isLoading ? (
+                            <>
+                              <span className="spinner"></span>
+                              Entrando...
+                            </>
+                          ) : (
+                            "Entrar"
+                          )}
+                        </button>
+                      </form>
+
+                      <div className="login-footer">
+                        <p>
+                          Não tem uma conta?{" "}
+                          <button
+                            className="register-link"
+                            onClick={handleGoToPlans}
+                            disabled={isLoading}
+                          >
+                            Assinar
+                          </button>
+                        </p>
+                      </div>
+
+                      <div className="demo-credentials">
+                        <p><strong>Demo:</strong></p>
+                        <p>Email: admin@clinic4us.com</p>
+                        <p>Senha: 123456</p>
+                      </div>
+                    </>
+                  ) : (
+                    // Formulário de Esqueci a Senha
+                    <div className="forgot-password-form">
+                {!forgotPasswordSent ? (
+                  <form onSubmit={handleForgotPasswordSubmit} className="login-form">
+                    <div className="form-group">
+                      <label htmlFor="forgotEmail">Email</label>
+                      <input
+                        type="email"
+                        id="forgotEmail"
+                        name="forgotEmail"
+                        value={forgotPasswordEmail}
+                        onChange={handleForgotPasswordEmailChange}
+                        placeholder="Digite seu email"
+                        className={errors.email ? "error" : ""}
+                        required
+                      />
+                      {errors.email && (
+                        <span className="error-text">{errors.email}</span>
+                      )}
+                    </div>
+
+                    <div className="form-actions">
+                      <button type="submit" className="login-button">
+                        Enviar Link de Recuperação
+                      </button>
+                      <button
+                        type="button"
+                        className="back-button"
+                        onClick={handleBackToLogin}
+                      >
+                        ← Voltar ao Login
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="success-message">
+                    <div className="success-icon">✓</div>
+                    <h3>Email enviado!</h3>
+                    <p>
+                      Enviamos um link de recuperação para <strong>{forgotPasswordEmail}</strong>.
+                      Verifique sua caixa de entrada e spam.
+                    </p>
+                    <button
+                      className="back-button"
+                      onClick={handleBackToLogin}
+                    >
+                      ← Voltar ao Login
+                    </button>
+                  </div>
+                )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Modal de Contato */}
+      <ContactForm
+        isOpen={isContactModalOpen}
+        onClose={closeContactModal}
+        preSelectedSubject={contactPreSelectedSubject}
+      />
+
+      <FooterInternal
+        simplified={true}
+        className="login-footer-component"
+      />
+    </div>
+  );
+};
+
+export default Login;
