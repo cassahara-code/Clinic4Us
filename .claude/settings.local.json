@@ -3,7 +3,27 @@
     "allow": [
       "Bash(npx create-react-app:*)",
       "Bash(npm install)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "WebFetch(domain:dtox-landing-page.bubbleapps.io)",
+      "Bash(npm start)",
+      "Bash(npx react-scripts:*)",
+      "Bash(timeout:*)",
+      "Bash(curl:*)",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(rm:*)",
+      "Bash(node:*)",
+      "Bash(cp:*)",
+      "Bash(git commit:*)",
+      "Bash(sed:*)",
+      "Bash(cd:*)",
+      "Read(//c/Users/Cassa/OneDrive/Área de Trabalho/PROJETOS/**)",
+      "Bash(git push:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
