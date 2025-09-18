@@ -98,9 +98,11 @@ const AliasRegister: React.FC = () => {
     if (!formData.alias) {
       newErrors.alias = "Alias é obrigatório";
     } else if (!/^[a-zA-Z0-9_-]+$/.test(formData.alias)) {
-      newErrors.alias = "Alias deve conter apenas letras, números, hífens e underscores";
+      newErrors.alias = "Não é permitido o uso de espaços ou caracteres especiais";
     } else if (formData.alias.length < 3) {
       newErrors.alias = "Alias deve ter pelo menos 3 caracteres";
+    } else if (formData.alias.toLowerCase() !== 'ninho') {
+      newErrors.alias = "Este identificador já existe e não pode ser usado novamente";
     }
 
     if (!formData.password) {
@@ -138,6 +140,9 @@ const AliasRegister: React.FC = () => {
 
       alert("Cadastro realizado com sucesso!");
       console.log("AliasRegister successful:", formData);
+
+      // Redirect to login page with clinic parameter
+      window.location.href = window.location.origin + '/?page=login&clinic=ninho';
     } catch (error) {
       setErrors({
         general: "Erro no servidor. Tente novamente mais tarde.",
@@ -259,10 +264,13 @@ const AliasRegister: React.FC = () => {
                         name="alias"
                         value={formData.alias}
                         onChange={handleInputChange}
-                        placeholder="ClinicaSucesso"
+                        placeholder="Identificador"
                         className={errors.alias ? "error" : ""}
                         disabled={isLoading}
                       />
+                      {errors.alias && (
+                        <span className="error-text">{errors.alias}</span>
+                      )}
                       <div style={{
                         marginTop: '0.5rem',
                         padding: '0.75rem',
@@ -279,9 +287,6 @@ const AliasRegister: React.FC = () => {
                         <br/>
                         <em>Este identificador não poderá ser alterado após o cadastro.</em>
                       </div>
-                      {errors.alias && (
-                        <span className="error-text">{errors.alias}</span>
-                      )}
                     </div>
 
                     <div className="form-group">
