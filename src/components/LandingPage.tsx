@@ -549,7 +549,6 @@ const LandingPage: React.FC = () => {
             <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
               <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
                 <div className="mobile-menu-header">
-                  <img src={logo} alt="CLINIC4US" className="mobile-logo" />
                 </div>
                 <ul className="mobile-nav-menu">
                   <li>

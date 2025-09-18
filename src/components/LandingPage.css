@@ -33,7 +33,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 1.625rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -45,7 +45,7 @@ body {
 }
 
 .logo {
-  height: 24px;
+  height: 31px;
   width: auto;
   transition: opacity 0.3s ease, transform 0.2s ease;
 }
@@ -641,7 +641,7 @@ input:checked + .toggle-slider:before {
 }
 
 .footer-logo {
-  height: 22px;
+  height: 29px;
   width: auto;
   margin-bottom: 1rem;
   transition: opacity 0.3s ease, transform 0.2s ease;
@@ -771,7 +771,7 @@ input:checked + .toggle-slider:before {
 }
 
 .mobile-logo {
-  height: 16px;
+  height: 21px;
   width: auto;
 }
 
@@ -818,7 +818,7 @@ input:checked + .toggle-slider:before {
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
-    padding: 1rem;
+    padding: 1.625rem 1rem;
   }
 
   .desktop-menu,
@@ -1040,7 +1040,7 @@ input:checked + .toggle-slider:before {
   }
 
   .mobile-logo {
-    height: 14px;
+    height: 18px;
   }
   
   .comparison-table {
@@ -1058,11 +1058,11 @@ input:checked + .toggle-slider:before {
   }
 
   .logo {
-    height: 21px;
+    height: 27px;
   }
 
   .footer-logo {
-    height: 19px;
+    height: 25px;
   }
 }
 
@@ -1120,7 +1120,7 @@ input:checked + .toggle-slider:before {
 }
 
 .modal-logo {
-  height: 21px;
+  height: 31px;
   width: auto;
 }
 

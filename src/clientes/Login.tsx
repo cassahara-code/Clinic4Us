@@ -28,11 +28,35 @@ const Login: React.FC = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
+  const [clinicError, setClinicError] = useState<string>("");
+  const [isValidClinic, setIsValidClinic] = useState<boolean>(false);
 
   React.useEffect(() => {
     document.title = "Clinic4Us - Login";
 
-    // Carregar dados salvos se existirem
+    // Verificar parâmetro clinic na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const clinicParam = urlParams.get('clinic');
+
+    if (!clinicParam || clinicParam.trim() === '') {
+      setClinicError("Acesse a plataforma com o link específico de sua clínica. Em caso de dúvida, entre em contato com o administrador do sistema.");
+      setIsValidClinic(false);
+      return;
+    }
+
+    // Mock de validação do cliente (frontend only)
+    const validClinics = ['ninho', 'clinic1', 'clinic2']; // Lista de clínicas válidas (mock)
+
+    if (validClinics.includes(clinicParam.toLowerCase())) {
+      setIsValidClinic(true);
+      setClinicError("");
+    } else {
+      setClinicError("Cliente não encontrado. Por favor, entre em contato com o administrador do sistema de sua clínica.");
+      setIsValidClinic(false);
+      return;
+    }
+
+    // Carregar dados salvos se existirem (apenas se clinic for válida)
     const savedData = localStorage.getItem('clinic4us-remember-me');
     if (savedData) {
       try {
@@ -214,7 +238,7 @@ const Login: React.FC = () => {
       <main className="login-main">
         <div className="login-container">
           <div className="login-content">
-            <div className="login-card">
+            <div className="login-card" style={{ opacity: clinicError ? 0.3 : 1, pointerEvents: clinicError ? 'none' : 'auto' }}>
               <div className="login-card-inner">
                 <div className="login-image-section">
                   <div className="login-illustration-inner">
@@ -422,6 +446,21 @@ const Login: React.FC = () => {
         onClose={closeContactModal}
         preSelectedSubject={contactPreSelectedSubject}
       />
+
+      {/* Modal de Erro da Clínica */}
+      {clinicError && (
+        <div className="clinic-error-modal-overlay">
+          <div className="clinic-error-modal">
+            <div className="clinic-error-header">
+              <div className="clinic-error-icon">ℹ️</div>
+              <h3>Informação de Acesso</h3>
+            </div>
+            <div className="clinic-error-content">
+              <p>{clinicError}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <FooterInternal
         simplified={true}

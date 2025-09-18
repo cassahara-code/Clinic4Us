@@ -19,7 +19,7 @@
 }
 
 .footer-logo {
-  height: 22px;
+  height: 29px;
   width: auto;
   margin-bottom: 1rem;
   transition: opacity 0.3s ease, transform 0.2s ease;
@@ -77,6 +77,6 @@
 
 @media (max-width: 480px) {
   .footer-logo {
-    height: 19px;
+    height: 25px;
   }
 }

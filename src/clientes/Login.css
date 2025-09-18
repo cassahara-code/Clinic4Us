@@ -666,3 +666,95 @@
   }
 }
 
+/* Modal de Erro da Clínica */
+.clinic-error-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.clinic-error-modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  animation: clinicErrorFadeIn 0.3s ease-out;
+  border: 3px solid #03B4C6;
+}
+
+@keyframes clinicErrorFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.clinic-error-header {
+  padding: 2rem 2rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid #e0f7fa;
+  background: linear-gradient(135deg, #f0fdff 0%, #e0f7fa 100%);
+  border-radius: 16px 16px 0 0;
+}
+
+.clinic-error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.clinic-error-header h3 {
+  color: #03B4C6;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.clinic-error-content {
+  padding: 2rem;
+  text-align: center;
+}
+
+.clinic-error-content p {
+  color: #374151;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .clinic-error-modal {
+    margin: 1rem;
+    max-width: calc(100% - 2rem);
+  }
+
+  .clinic-error-header,
+  .clinic-error-content {
+    padding: 1.5rem;
+  }
+
+  .clinic-error-icon {
+    font-size: 2.5rem;
+  }
+
+  .clinic-error-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .clinic-error-content p {
+    font-size: 1rem;
+  }
+}
+

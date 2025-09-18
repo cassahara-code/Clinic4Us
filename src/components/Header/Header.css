@@ -20,7 +20,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 1.625rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -32,7 +32,7 @@
 }
 
 .logo {
-  height: 24px;
+  height: 31px;
   width: auto;
   transition: opacity 0.3s ease, transform 0.2s ease;
 }
@@ -169,7 +169,7 @@
 }
 
 .mobile-logo {
-  height: 16px;
+  height: 21px;
   width: auto;
 }
 
@@ -205,7 +205,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
-    padding: 1rem;
+    padding: 1.625rem 1rem;
   }
 
   .desktop-menu,
@@ -227,11 +227,11 @@
   }
 
   .mobile-logo {
-    height: 14px;
+    height: 18px;
   }
 
   .logo {
-    height: 21px;
+    height: 27px;
   }
 }
 
