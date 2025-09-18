@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Login } from './clientes';
+import { Login, AliasRegister } from './clients';
 import LandingPage from './components/LandingPage';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'landing' | 'login'>('landing');
+  const [currentPage, setCurrentPage] = useState<'landing' | 'login' | 'alias-register'>('landing');
 
   useEffect(() => {
     // Check URL parameter to determine which page to show
@@ -12,6 +12,8 @@ function App() {
 
     if (page === 'login') {
       setCurrentPage('login');
+    } else if (page === 'alias-register') {
+      setCurrentPage('alias-register');
     } else {
       setCurrentPage('landing');
     }
@@ -19,6 +21,10 @@ function App() {
 
   if (currentPage === 'login') {
     return <Login />;
+  }
+
+  if (currentPage === 'alias-register') {
+    return <AliasRegister />;
   }
 
   return <LandingPage />;

@@ -3,7 +3,8 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 import LandingPage from "./components/LandingPage";
-import Login from "./clientes/Login";
+import Login from "./clients/Login";
+import AliasRegister from "./clients/AliasRegister";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -16,6 +17,9 @@ const page = urlParams.get('page');
 const AppComponent = () => {
   if (page === 'login') {
     return <Login />;
+  }
+  if (page === 'alias-register') {
+    return <AliasRegister />;
   }
   return <LandingPage />;
 };
