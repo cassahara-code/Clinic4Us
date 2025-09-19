@@ -189,12 +189,15 @@ const Login: React.FC = () => {
         const userSession = {
           email: formData.email,
           alias: clinicAlias,
+          clinic: clinicAlias,
           clinicName: clinicAlias === 'ninho' ? 'Instituto Ninho' : `Clínica ${clinicAlias}`,
           role: userProfile.profile,
           permissions: userProfile.permissions,
           menuItems: userProfile.menuItems,
-          loginTime: new Date().toLocaleString('pt-BR'),
+          loginTime: new Date().toISOString(), // ISO string para melhor precisão
+          loginTimestamp: Date.now(), // Timestamp para cálculos
           sessionId: Date.now().toString(),
+          sessionDuration: 300, // 5 minutos em segundos para homologação
         };
 
         try {
