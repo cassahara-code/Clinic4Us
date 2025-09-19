@@ -21,8 +21,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.625rem 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+}
+
+.header .nav-brand {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
 }
 
 .nav-brand h2 {
@@ -86,48 +91,54 @@
   display: block;
 }
 
-/* Hamburger Menu */
-.hamburger {
+/* Hamburger Menu - only for landing header */
+.header .hamburger {
   display: none;
   flex-direction: column;
-  justify-content: space-around;
-  width: 30px;
-  height: 30px;
+  justify-content: space-between;
+  align-items: center;
+  width: 36px;
+  height: 27px;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 4px 0;
   z-index: 1001;
 }
 
-.hamburger span {
+.header .hamburger-left {
+  margin-right: 0;
+  flex-shrink: 0;
+}
+
+.header .hamburger span {
   display: block;
-  height: 3px;
-  width: 100%;
-  background: #4A5568;
-  border-radius: 3px;
+  height: 4px;
+  width: 27px;
+  background: #03B4C6;
+  border-radius: 2px;
   opacity: 1;
   transform: rotate(0deg);
   transition: 0.25s ease-in-out;
 }
 
-.hamburger.active span:nth-child(1) {
+.header .hamburger.active span:nth-child(1) {
   top: 9px;
   transform: rotate(45deg);
 }
 
-.hamburger.active span:nth-child(2) {
+.header .hamburger.active span:nth-child(2) {
   opacity: 0;
   left: -60px;
 }
 
-.hamburger.active span:nth-child(3) {
+.header .hamburger.active span:nth-child(3) {
   top: 9px;
   transform: rotate(-45deg);
 }
 
-/* Mobile Menu Overlay */
-.mobile-menu-overlay {
+/* Mobile Menu Overlay - only for landing header */
+.header .mobile-menu-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -136,18 +147,27 @@
   background: rgba(0, 0, 0, 0.5);
   z-index: 1000;
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
-.mobile-menu {
+.header .mobile-menu {
   background: white;
   width: 280px;
   height: 100vh;
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-  animation: slideInRight 0.3s ease-out;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes slideInRight {
@@ -159,30 +179,47 @@
   }
 }
 
-.mobile-menu-header {
+.header .mobile-menu-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
 }
 
-.mobile-logo {
+.header .close-menu-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #718096;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.header .close-menu-button:hover {
+  color: #4a5568;
+  background: #f7fafc;
+}
+
+.header .mobile-logo {
   height: 21px;
   width: auto;
 }
 
-.mobile-nav-menu {
+.header .mobile-nav-menu {
   list-style: none;
   flex: 1;
 }
 
-.mobile-nav-menu li {
+.header .mobile-nav-menu li {
   margin-bottom: 1.5rem;
 }
 
-.mobile-nav-menu a {
+.header .mobile-nav-menu a {
   display: block;
   text-decoration: none;
   color: #4A5568;
@@ -193,40 +230,43 @@
   transition: color 0.3s ease;
 }
 
-.mobile-nav-menu a:hover {
+.header .mobile-nav-menu a:hover {
   color: #03B4C6;
 }
 
-.mobile-cta {
+.header .mobile-cta {
   width: 100%;
   margin-top: 1rem;
 }
 
-/* Responsive Design */
+/* Responsive Design - Show hamburger when menu doesn't fit */
 @media (max-width: 768px) {
-  .navbar {
-    padding: 1.625rem 1rem;
-  }
-
   .desktop-menu,
   .desktop-cta {
     display: none;
   }
 
-  .hamburger {
+  .header .hamburger {
     display: flex;
   }
+}
 
-  .mobile-menu {
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1.625rem 1rem;
+    width: 100%;
+  }
+
+  .header .mobile-menu {
     width: 100%;
     padding: 1.5rem;
   }
 
-  .mobile-menu-header {
+  .header .mobile-menu-header {
     margin-bottom: 1.5rem;
   }
 
-  .mobile-logo {
+  .header .mobile-logo {
     height: 18px;
   }
 
@@ -236,7 +276,11 @@
 }
 
 @media (max-width: 480px) {
-  .mobile-menu {
+  .navbar {
+    padding: 1.625rem 0.5rem;
+  }
+
+  .header .mobile-menu {
     width: 98%;
     margin: 1rem;
   }

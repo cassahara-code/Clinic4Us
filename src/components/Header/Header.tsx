@@ -82,7 +82,7 @@ const Header: React.FC<HeaderProps> = ({
                 Teste Grátis
               </button>
 
-              {/* Hamburger Menu Button */}
+              {/* Hamburger Menu Button - only for mobile */}
               <button
                 className={`hamburger ${isMobileMenuOpen ? "active" : ""}`}
                 onClick={toggleMobileMenu}
@@ -99,6 +99,13 @@ const Header: React.FC<HeaderProps> = ({
               <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
                 <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
                   <div className="mobile-menu-header">
+                    <button
+                      className="close-menu-button"
+                      onClick={closeMobileMenu}
+                      aria-label="Fechar menu"
+                    >
+                      ✕
+                    </button>
                   </div>
                   <ul className="mobile-nav-menu">
                     <li>

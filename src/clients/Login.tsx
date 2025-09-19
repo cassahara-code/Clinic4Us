@@ -30,6 +30,7 @@ const Login: React.FC = () => {
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
   const [clinicError, setClinicError] = useState<string>("");
   const [isValidClinic, setIsValidClinic] = useState<boolean>(false);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
 
   React.useEffect(() => {
     document.title = "Clinic4Us - Login";
@@ -143,9 +144,71 @@ const Login: React.FC = () => {
           }
         }
 
-        alert("Login realizado com sucesso!");
-        // Here you would typically redirect to dashboard
+        // Pegar parâmetro clinic da URL para o alias
+        const urlParams = new URLSearchParams(window.location.search);
+        const clinicAlias = urlParams.get('clinic') || 'ninho';
+
+        // Criar sessão do usuário com perfis mais detalhados
+        const userProfiles = {
+          'admin@clinic4us.com': {
+            profile: 'Administrador',
+            permissions: ['dashboard', 'agenda', 'pacientes', 'relatorios', 'financeiro', 'configuracoes', 'usuarios'],
+            menuItems: [
+              { label: 'Dashboard', href: '#dashboard' },
+              { label: 'Agenda', href: '#agenda' },
+              { label: 'Pacientes', href: '#pacientes' },
+              { label: 'Relatórios', href: '#relatorios' },
+              { label: 'Financeiro', href: '#financeiro' },
+              { label: 'Usuários', href: '#usuarios' },
+              { label: 'Configurações', href: '#configuracoes' }
+            ]
+          },
+          'medico@clinic4us.com': {
+            profile: 'Médico',
+            permissions: ['dashboard', 'agenda', 'pacientes', 'relatorios'],
+            menuItems: [
+              { label: 'Dashboard', href: '#dashboard' },
+              { label: 'Agenda', href: '#agenda' },
+              { label: 'Pacientes', href: '#pacientes' },
+              { label: 'Relatórios', href: '#relatorios' }
+            ]
+          },
+          'recepcao@clinic4us.com': {
+            profile: 'Recepção',
+            permissions: ['dashboard', 'agenda', 'pacientes'],
+            menuItems: [
+              { label: 'Dashboard', href: '#dashboard' },
+              { label: 'Agenda', href: '#agenda' },
+              { label: 'Pacientes', href: '#pacientes' }
+            ]
+          }
+        };
+
+        const userProfile = userProfiles[formData.email as keyof typeof userProfiles] || userProfiles['admin@clinic4us.com'];
+
+        const userSession = {
+          email: formData.email,
+          alias: clinicAlias,
+          clinicName: clinicAlias === 'ninho' ? 'Instituto Ninho' : `Clínica ${clinicAlias}`,
+          role: userProfile.profile,
+          permissions: userProfile.permissions,
+          menuItems: userProfile.menuItems,
+          loginTime: new Date().toLocaleString('pt-BR'),
+          sessionId: Date.now().toString(),
+        };
+
+        try {
+          localStorage.setItem('clinic4us-user-session', JSON.stringify(userSession));
+        } catch (error) {
+          console.error('Erro ao criar sessão:', error);
+        }
+
+        alert("Login realizado com sucesso! Redirecionando...");
         console.log("Login successful:", formData);
+        console.log("Session created:", userSession);
+
+        // Redirecionar para dashboard
+        window.location.href = window.location.origin + '/?page=dashboard';
       } else {
         setErrors({
           general: "Credenciais inválidas. Tente novamente.",
@@ -219,6 +282,26 @@ const Login: React.FC = () => {
     setContactPreSelectedSubject(undefined);
   };
 
+  // Header logged in callbacks
+  const handleRevalidateLogin = () => {
+    setIsUserLoggedIn(false);
+    setFormData({
+      email: "",
+      password: "",
+      rememberMe: false,
+    });
+    setErrors({});
+    alert("Sessão encerrada. Faça login novamente.");
+  };
+
+  const handleNotificationClick = () => {
+    alert("Você tem 27 notificações!");
+  };
+
+  const handleUserClick = () => {
+    alert("Menu do usuário - perfil, configurações, logout");
+  };
+
   // Header menu items for login page
   const loginMenuItems = [
     { label: "Início", onClick: handleGoHome },
@@ -229,10 +312,16 @@ const Login: React.FC = () => {
     <div className="login-page">
       <HeaderInternal
         menuItems={loginMenuItems}
-        showCTAButton={true}
+        showCTAButton={!isUserLoggedIn}
         ctaButtonText="Assinar"
         onCTAClick={handleGoToPlans}
         className="login-header"
+        isLoggedIn={isUserLoggedIn}
+        userEmail={formData.email}
+        notificationCount={27}
+        onRevalidateLogin={handleRevalidateLogin}
+        onNotificationClick={handleNotificationClick}
+        onUserClick={handleUserClick}
       />
 
       <main className="login-main">
