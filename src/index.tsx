@@ -5,6 +5,7 @@ import reportWebVitals from "./reportWebVitals";
 import LandingPage from "./components/LandingPage";
 import Login from "./clients/Login";
 import AliasRegister from "./clients/AliasRegister";
+import Dashboard from "./clients/Dashboard";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -20,6 +21,9 @@ const AppComponent = () => {
   }
   if (page === 'alias-register') {
     return <AliasRegister />;
+  }
+  if (page === 'dashboard') {
+    return <Dashboard />;
   }
   return <LandingPage />;
 };

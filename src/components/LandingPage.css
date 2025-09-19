@@ -12,8 +12,8 @@ body {
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   padding: 0 2rem;
 }
 
@@ -35,8 +35,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1.625rem 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .nav-brand h2 {
@@ -107,8 +106,8 @@ body {
 }
 
 .hero-content {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   padding: 0 2rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -642,7 +641,7 @@ input:checked + .toggle-slider:before {
 }
 
 .footer-logo {
-  height: 29px;
+  height: 31px;
   width: auto;
   margin-bottom: 1rem;
   transition: opacity 0.3s ease, transform 0.2s ease;
@@ -1063,7 +1062,7 @@ input:checked + .toggle-slider:before {
   }
 
   .footer-logo {
-    height: 25px;
+    height: 27px;
   }
 }
 

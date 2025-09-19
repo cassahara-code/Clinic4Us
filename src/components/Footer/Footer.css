@@ -19,7 +19,7 @@
 }
 
 .footer-logo {
-  height: 29px;
+  height: 31px;
   width: auto;
   margin-bottom: 1rem;
   transition: opacity 0.3s ease, transform 0.2s ease;
@@ -57,9 +57,10 @@
 
 /* Container class for Footer */
 .footer .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   padding: 0 2rem;
+  max-width: none;
 }
 
 /* Mobile responsiveness */
@@ -77,6 +78,6 @@
 
 @media (max-width: 480px) {
   .footer-logo {
-    height: 25px;
+    height: 27px;
   }
 }

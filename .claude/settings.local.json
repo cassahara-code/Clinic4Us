@@ -23,7 +23,11 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(taskkill:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(tasklist:*)",
+      "Bash(dir node_modulesreact-scripts)",
+      "Bash(./node_modules/.bin/react-scripts:*)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []
