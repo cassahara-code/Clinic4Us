@@ -47,7 +47,7 @@ const Dashboard: React.FC = () => {
     localStorage.removeItem('clinic4us-user-session');
     localStorage.removeItem('clinic4us-remember-me');
 
-    alert("Sessão encerrada. Redirecionando para login...");
+    alert("Sessão encerrada. Redirecionando para login..");
     window.location.href = window.location.origin + '/?page=login&clinic=ninho';
   };
 
