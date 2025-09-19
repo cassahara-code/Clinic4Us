@@ -102,83 +102,328 @@ const Dashboard: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main className="login-main">
-        <div className="login-container">
-          <div className="login-content">
-            <div style={{
-              background: 'white',
-              borderRadius: '16px',
-              padding: '3rem',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-              border: '1px solid rgba(226, 232, 240, 0.8)',
-              textAlign: 'center',
-              minHeight: '400px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}>
-              <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{
-                  color: '#03B4C6',
-                  fontSize: '2.5rem',
-                  marginBottom: '1rem',
-                  fontWeight: '700'
-                }}>
-                  🏥 Bem-vindo ao Dashboard
-                </h1>
-                <p style={{
-                  color: '#4A5568',
-                  fontSize: '1.2rem',
-                  marginBottom: '2rem'
-                }}>
-                  Sistema de gestão para sua clínica
-                </p>
-              </div>
+      <main style={{
+        padding: '1rem',
+        paddingTop: '2rem',
+        minHeight: 'calc(100vh - 120px)',
+        background: '#f8f9fa',
+        marginTop: '80px'
+      }}>
+        <div style={{
+          width: '100%',
+          maxWidth: '100%',
+          margin: '0',
+          padding: '0'
+        }}>
+          <div style={{
+            width: '100%',
+            maxWidth: '100%'
+          }}>
 
+              {/* Cards de Estatísticas */}
               <div style={{
-                background: '#F7FAFC',
-                padding: '2rem',
-                borderRadius: '12px',
-                border: '1px solid #E2E8F0',
-                width: '100%',
-                maxWidth: '500px'
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '1.5rem',
+                marginBottom: '2rem',
+                width: '100%'
               }}>
-                <h3 style={{
-                  color: '#2D3748',
-                  marginBottom: '1rem',
-                  fontSize: '1.3rem'
+                {/* Card Compromissos */}
+                <div style={{
+                  background: 'white',
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+                  border: '1px solid #e9ecef',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%'
                 }}>
-                  Informações da Sessão
-                </h3>
-                <div style={{ textAlign: 'left', color: '#4A5568' }}>
-                  <p><strong>Email:</strong> {userSession.email}</p>
-                  <p><strong>Clínica:</strong> {userSession.clinicName}</p>
-                  <p><strong>Alias:</strong> {userSession.alias}</p>
-                  <p><strong>Perfil:</strong> {userSession.role}</p>
-                  <p><strong>Permissões:</strong> {userSession.permissions?.join(', ')}</p>
-                  <p><strong>Login em:</strong> {userSession.loginTime}</p>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '1rem'
+                  }}>
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '50%',
+                      background: '#4263eb',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: '1rem'
+                    }}>
+                      <span style={{ color: 'white', fontSize: '20px' }}>📅</span>
+                    </div>
+                    <h3 style={{
+                      margin: '0',
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      color: '#212529'
+                    }}>Compromissos 19/09/2025</h3>
+                  </div>
+                  <div style={{ marginBottom: '1.5rem', flex: 1 }}>
+                    <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Agendamentos de hoje: <strong>16</strong></p>
+                    <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Confirmados: <strong>6</strong></p>
+                    <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Cancelados: <strong>4</strong></p>
+                    <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Provisório: <strong>0</strong></p>
+                    <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Pendente Confirmação: <strong>0</strong></p>
+                  </div>
+                  <button style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: '#03B4C6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s'
+                  }} onMouseOver={(e) => e.currentTarget.style.background = '#029AAB'} onMouseOut={(e) => e.currentTarget.style.background = '#03B4C6'}>
+                    VER AGENDA
+                  </button>
+                </div>
+
+                {/* Card Atendimentos */}
+                <div style={{
+                  background: 'white',
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+                  border: '1px solid #e9ecef',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '1rem'
+                  }}>
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '50%',
+                      background: '#28a745',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: '1rem'
+                    }}>
+                      <span style={{ color: 'white', fontSize: '20px' }}>✓</span>
+                    </div>
+                    <h3 style={{
+                      margin: '0',
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      color: '#212529'
+                    }}>Atendimentos (30 dias)</h3>
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: '1.5rem',
+                    position: 'relative',
+                    flex: 1
+                  }}>
+                    <svg width="120" height="120" viewBox="0 0 42 42" style={{ transform: 'rotate(-90deg)' }}>
+                      <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e9ecef" strokeWidth="3"/>
+                      <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#03B4C6" strokeWidth="3"
+                        strokeDasharray="60 40" strokeLinecap="round"/>
+                      <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#dc3545" strokeWidth="3"
+                        strokeDasharray="25 75" strokeDashoffset="-60" strokeLinecap="round"/>
+                      <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#ffc107" strokeWidth="3"
+                        strokeDasharray="15 85" strokeDashoffset="-85" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                  <button style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: '#03B4C6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s'
+                  }} onMouseOver={(e) => e.currentTarget.style.background = '#029AAB'} onMouseOut={(e) => e.currentTarget.style.background = '#03B4C6'}>
+                    VER DADOS
+                  </button>
+                </div>
+
+                {/* Card Registros de Pacientes */}
+                <div style={{
+                  background: 'white',
+                  borderRadius: '12px',
+                  padding: '1.5rem',
+                  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+                  border: '1px solid #e9ecef',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  height: '100%'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '1rem'
+                  }}>
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '50%',
+                      background: '#fd7e14',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: '1rem'
+                    }}>
+                      <span style={{ color: 'white', fontSize: '20px' }}>📝</span>
+                    </div>
+                    <h3 style={{
+                      margin: '0',
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      color: '#212529'
+                    }}>Registros de pacientes</h3>
+                  </div>
+                  <div style={{ marginBottom: '1.5rem', flex: 1 }}>
+                    <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Com CID: <strong>12 de 371</strong></p>
+                    <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Com plano de ação: <strong>14 de 371</strong></p>
+                    <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Com registro de atendimentos: <strong>155 de 371</strong></p>
+                    <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Com cadastro completo: <strong>77 de 371</strong></p>
+                    <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Com agendamentos: <strong>82 de 371</strong></p>
+                  </div>
+                  <button style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    background: '#03B4C6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s'
+                  }} onMouseOver={(e) => e.currentTarget.style.background = '#029AAB'} onMouseOut={(e) => e.currentTarget.style.background = '#03B4C6'}>
+                    VER PACIENTES
+                  </button>
                 </div>
               </div>
 
+              {/* Seção de Aniversários */}
               <div style={{
-                marginTop: '2rem',
-                padding: '1.5rem',
-                background: 'linear-gradient(135deg, #03B4C6 0%, #029AAB 100%)',
-                color: 'white',
+                background: 'white',
                 borderRadius: '12px',
-                width: '100%',
-                maxWidth: '500px'
+                padding: '1.5rem',
+                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+                border: '1px solid #e9ecef',
+                marginBottom: '2rem',
+                width: '100%'
               }}>
-                <h4 style={{ margin: '0 0 1rem 0', fontSize: '1.1rem' }}>
-                  📋 Conteúdo do Dashboard em desenvolvimento
-                </h4>
-                <p style={{ margin: 0, opacity: 0.9 }}>
-                  Esta área será preenchida com widgets, gráficos e funcionalidades específicas do sistema de gestão da clínica.
-                </p>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: '1.5rem'
+                }}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    background: '#e91e63',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: '1rem'
+                  }}>
+                    <span style={{ color: 'white', fontSize: '20px' }}>🎂</span>
+                  </div>
+                  <div>
+                    <h3 style={{
+                      margin: '0',
+                      fontSize: '1.1rem',
+                      fontWeight: '600',
+                      color: '#212529'
+                    }}>Data: 19/09/2025 | Aniversário deste mês: 18 | Aniversários desta semana: 5 | Aniversários de hoje: 0</h3>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <select style={{
+                    padding: '0.5rem',
+                    border: '1px solid #ced4da',
+                    borderRadius: '4px',
+                    fontSize: '0.9rem',
+                    color: '#495057',
+                    width: '150px'
+                  }}>
+                    <option>Mês</option>
+                    <option>Janeiro</option>
+                    <option>Fevereiro</option>
+                    <option>Março</option>
+                    <option>Abril</option>
+                    <option>Maio</option>
+                    <option>Junho</option>
+                    <option>Julho</option>
+                    <option>Agosto</option>
+                    <option selected>Setembro</option>
+                    <option>Outubro</option>
+                    <option>Novembro</option>
+                    <option>Dezembro</option>
+                  </select>
+                </div>
+
+                <div style={{
+                  background: '#f8f9fa',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  overflowX: 'auto'
+                }}>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    background: '#e9ecef',
+                    padding: '0.75rem',
+                    fontSize: '0.9rem',
+                    fontWeight: '600',
+                    color: '#495057',
+                    minWidth: '400px'
+                  }}>
+                    <div>Nascimento</div>
+                    <div>Idade</div>
+                    <div>Nome</div>
+                  </div>
+                  <div style={{
+                    padding: '0.75rem',
+                    borderBottom: '1px solid #dee2e6',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    fontSize: '0.9rem',
+                    color: '#495057',
+                    minWidth: '400px'
+                  }}>
+                    <div>01/09/2023</div>
+                    <div>2</div>
+                    <div>Eloah Silveira Siqueira Prado Nascimento</div>
+                  </div>
+                  <div style={{
+                    padding: '0.75rem',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    fontSize: '0.9rem',
+                    color: '#495057',
+                    minWidth: '400px'
+                  }}>
+                    <div>01/09/2024</div>
+                    <div>1</div>
+                    <div>Antonella Di Franco Kitallah</div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
         </div>
       </main>
 

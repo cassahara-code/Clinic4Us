@@ -47,6 +47,18 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className={`header header--${variant}`}>
       <nav className="navbar">
+        {showNavigation && (
+          <button
+            className={`hamburger ${isMobileMenuOpen ? "active" : ""}`}
+            onClick={toggleMobileMenu}
+            aria-label="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        )}
+
         <div className="nav-brand">
           <img
             src={logo}
@@ -80,17 +92,6 @@ const Header: React.FC<HeaderProps> = ({
             <div className="nav-actions">
               <button className="cta-button desktop-cta" onClick={handleTrialClick}>
                 Teste Grátis
-              </button>
-
-              {/* Hamburger Menu Button - only for mobile */}
-              <button
-                className={`hamburger ${isMobileMenuOpen ? "active" : ""}`}
-                onClick={toggleMobileMenu}
-                aria-label="Toggle menu"
-              >
-                <span></span>
-                <span></span>
-                <span></span>
               </button>
             </div>
 
