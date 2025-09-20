@@ -6,6 +6,7 @@ import LandingPage from "./components/LandingPage";
 import Login from "./clients/Login";
 import AliasRegister from "./clients/AliasRegister";
 import Dashboard from "./clients/Dashboard";
+import ProfessionalSchedule from "./clients/ProfessionalSchedule";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -24,6 +25,9 @@ const AppComponent = () => {
   }
   if (page === 'dashboard') {
     return <Dashboard />;
+  }
+  if (page === 'schedule') {
+    return <ProfessionalSchedule />;
   }
   return <LandingPage />;
 };

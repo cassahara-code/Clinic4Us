@@ -200,6 +200,7 @@ const Login: React.FC = () => {
           sessionDuration: 300, // 5 minutos em segundos para homologação
         };
 
+        // Salvar sessão diretamente no localStorage (o contexto carregará automaticamente)
         try {
           localStorage.setItem('clinic4us-user-session', JSON.stringify(userSession));
         } catch (error) {
@@ -207,8 +208,6 @@ const Login: React.FC = () => {
         }
 
         alert("Login realizado com sucesso! Redirecionando...");
-        console.log("Login successful:", formData);
-        console.log("Session created:", userSession);
 
         // Redirecionar para dashboard
         window.location.href = window.location.origin + '/?page=dashboard';

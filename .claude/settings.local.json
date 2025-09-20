@@ -27,7 +27,9 @@
       "Bash(tasklist:*)",
       "Bash(dir node_modulesreact-scripts)",
       "Bash(./node_modules/.bin/react-scripts:*)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx kill-port:*)"
     ],
     "deny": [],
     "ask": []

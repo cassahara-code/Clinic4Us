@@ -307,13 +307,17 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
           {isLoggedIn ? (
             <div className="logged-actions">
               <div className="timer-section">
-                <span className="timer-icon">🕐</span>
                 <span
                   className="timer-text"
                   style={{
-                    color: timeRemaining < 600 ? '#dc3545' : 'inherit'
+                    color: timeRemaining < 600 ? '#dc3545' : 'inherit',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    paddingTop: '6px'
                   }}
                 >
+                  <span className="timer-icon" title="Tempo restante da sessão">🕐</span>
                   {formatTime(timeRemaining)}
                 </span>
               </div>
@@ -321,8 +325,9 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
               <button
                 className="notification-button"
                 onClick={onNotificationClick}
+                aria-label="Ver notificações"
               >
-                <span className="notification-icon">🔔</span>
+                <span className="notification-icon" title="Notificações">🔔</span>
                 {notificationCount > 0 && (
                   <span className="notification-badge">{notificationCount}</span>
                 )}
@@ -331,8 +336,9 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
               <button
                 className="user-avatar"
                 onClick={onUserClick}
+                aria-label="Opções do usuário"
               >
-                <span className="avatar-icon">👤</span>
+                <span className="avatar-icon" title="Perfil do usuário">👤</span>
               </button>
             </div>
           ) : (
@@ -366,7 +372,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                     <div className="mobile-user-email">{truncateEmail(userEmail || '')}</div>
                     <div className="mobile-user-details-row">
                       <div className="mobile-user-avatar">
-                        <span className="avatar-icon">👤</span>
+                        <span className="avatar-icon" title="Avatar do usuário">👤</span>
                       </div>
                       <div className="mobile-user-details">
                         <div className="mobile-user-role">{userProfile}</div>
@@ -381,8 +387,9 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                     <button
                       className="mobile-action-button change-profile-button"
                       onClick={() => alert('Funcionalidade temporariamente indisponível')}
+                      aria-label="Mudar perfil do usuário"
                     >
-                      🔄 Mudar perfil
+                      <span title="Alterar perfil">🔄</span> Mudar perfil
                     </button>
                     <button
                       className="mobile-action-button logout-button"
@@ -391,8 +398,9 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                         localStorage.removeItem('clinic4us-remember-me');
                         window.location.href = `${window.location.origin}/?page=login&clinic=ninho`;
                       }}
+                      aria-label="Sair do sistema"
                     >
-                      🚪 Sair
+                      <span title="Sair do sistema">🚪</span> Sair
                     </button>
                   </div>
                 )}
@@ -418,8 +426,9 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                       if (onNotificationClick) onNotificationClick();
                       closeMobileMenu();
                     }}
+                    aria-label="Ver notificações"
                   >
-                    🔔 Notificações {notificationCount > 0 && `(${notificationCount})`}
+                    <span title="Ver notificações">🔔</span> Notificações {notificationCount > 0 && `(${notificationCount})`}
                   </button>
                   <button
                     className="mobile-action-button"
@@ -427,8 +436,9 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                       if (onUserClick) onUserClick();
                       closeMobileMenu();
                     }}
+                    aria-label="Acessar configurações"
                   >
-                    ⚙️ Configurações
+                    <span title="Acessar configurações">⚙️</span> Configurações
                   </button>
                 </div>
               )}
@@ -482,7 +492,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                 fontSize: '3rem',
                 color: '#dc3545',
                 marginBottom: '0.5rem'
-              }}>⏰</div>
+              }} title="Sessão expirada">⏰</div>
               <h3 style={{
                 margin: '0 0 0.5rem 0',
                 color: '#dc3545',
@@ -577,6 +587,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
             }}>
               <button
                 onClick={handleSessionExpiredLogout}
+                aria-label="Sair do sistema"
                 style={{
                   padding: '0.75rem 1.5rem',
                   border: '1px solid #dc3545',
@@ -597,10 +608,11 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                   e.currentTarget.style.color = '#dc3545';
                 }}
               >
-                🚪 Sair
+                <span title="Sair do sistema">🚪</span> Sair
               </button>
               <button
                 onClick={handleSessionExpiredRevalidate}
+                aria-label="Revalidar login do usuário"
                 style={{
                   padding: '0.75rem 1.5rem',
                   border: 'none',
@@ -615,7 +627,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#029AAB'}
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#03B4C6'}
               >
-                🔄 Revalidar Login
+                <span title="Renovar sessão">🔄</span> Revalidar Login
               </button>
             </div>
           </div>
