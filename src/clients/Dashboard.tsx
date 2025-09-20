@@ -64,8 +64,49 @@ const Dashboard: React.FC = () => {
     window.location.reload();
   };
 
-  // Menu items dinâmicos baseados no perfil do usuário
-  const loggedMenuItems = userSession?.menuItems || [];
+  const handleViewSchedule = () => {
+    // Redirecionar para página Schedule
+    console.log('🚀 Redirecting to schedule page...');
+    const scheduleUrl = `${window.location.origin}/?page=schedule`;
+    console.log('🔗 Schedule URL:', scheduleUrl);
+    window.location.href = scheduleUrl;
+  };
+
+
+  // Menu items dinâmicos baseados no perfil do usuário com navegação funcional
+  const loggedMenuItems = userSession?.menuItems?.map(item => ({
+    ...item,
+    onClick: (e: React.MouseEvent) => {
+      e.preventDefault();
+      const clinic = new URLSearchParams(window.location.search).get('clinic') || 'ninho';
+
+      switch (item.label) {
+        case 'Dashboard':
+          window.location.href = `${window.location.origin}/?page=dashboard&clinic=${clinic}`;
+          break;
+        case 'Agenda':
+          window.location.href = `${window.location.origin}/?page=schedule&clinic=${clinic}`;
+          break;
+        case 'Pacientes':
+          alert('Página de Pacientes em desenvolvimento');
+          break;
+        case 'Relatórios':
+          alert('Página de Relatórios em desenvolvimento');
+          break;
+        case 'Financeiro':
+          alert('Página Financeiro em desenvolvimento');
+          break;
+        case 'Usuários':
+          alert('Página de Usuários em desenvolvimento');
+          break;
+        case 'Configurações':
+          alert('Página de Configurações em desenvolvimento');
+          break;
+        default:
+          console.log('Menu item clicked:', item.label);
+      }
+    }
+  })) || [];
 
   if (!userSession) {
     return (
@@ -170,18 +211,23 @@ const Dashboard: React.FC = () => {
                     <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Provisório: <strong>0</strong></p>
                     <p style={{ margin: '0.5rem 0', color: '#6c757d' }}>Pendente Confirmação: <strong>0</strong></p>
                   </div>
-                  <button style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    background: '#03B4C6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '0.9rem',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'background 0.2s'
-                  }} onMouseOver={(e) => e.currentTarget.style.background = '#029AAB'} onMouseOut={(e) => e.currentTarget.style.background = '#03B4C6'}>
+                  <button
+                    onClick={handleViewSchedule}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      background: '#03B4C6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '0.9rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'background 0.2s'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.background = '#029AAB'}
+                    onMouseOut={(e) => e.currentTarget.style.background = '#03B4C6'}
+                  >
                     VER AGENDA
                   </button>
                 </div>
