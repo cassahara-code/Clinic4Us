@@ -53,6 +53,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
   const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false);
   const [revalidatePassword, setRevalidatePassword] = useState('');
   const [revalidateError, setRevalidateError] = useState('');
+  const [timerKey, setTimerKey] = useState(0); // Key para forçar reinicialização do timer
   const [timeRemaining, setTimeRemaining] = useState(() => {
     if (!isLoggedIn) return 300;
 
@@ -128,7 +129,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
         clearInterval(timerId as NodeJS.Timeout);
       }
     };
-  }, [isLoggedIn, onRevalidateLogin]);
+  }, [isLoggedIn, onRevalidateLogin, timerKey]);
 
   const formatTime = (seconds: number): string => {
     // Garantir que seconds seja um número válido
@@ -185,6 +186,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
 
       localStorage.setItem('clinic4us-user-session', JSON.stringify(session));
       setTimeRemaining(300);
+      setTimerKey(prev => prev + 1); // Força reinicialização do timer
 
       // Fechar modal e limpar campos
       setIsSessionExpiredModalOpen(false);

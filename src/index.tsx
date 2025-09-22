@@ -2,39 +2,54 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
+import { RouterProvider, useRouter } from "./contexts/RouterContext";
 import LandingPage from "./components/LandingPage";
 import Login from "./clients/Login";
 import AliasRegister from "./clients/AliasRegister";
 import Dashboard from "./clients/Dashboard";
 import ProfessionalSchedule from "./clients/ProfessionalSchedule";
+import PatientsList from "./clients/PatientsList";
+import PatientRegister from "./clients/PatientRegister";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
-// Simple routing based on URL parameters
-const urlParams = new URLSearchParams(window.location.search);
-const page = urlParams.get('page');
+// Main app component with routing
+const AppContent = () => {
+  const { currentPage } = useRouter();
 
-const AppComponent = () => {
-  if (page === 'login') {
-    return <Login />;
+  switch (currentPage) {
+    case 'login':
+      return <Login />;
+    case 'alias-register':
+      return <AliasRegister />;
+    case 'dashboard':
+      return <Dashboard />;
+    case 'schedule':
+      return <ProfessionalSchedule />;
+    case 'patients':
+      return <PatientsList />;
+    case 'patient-register':
+      return <PatientRegister />;
+    case 'landing':
+    default:
+      return <LandingPage />;
   }
-  if (page === 'alias-register') {
-    return <AliasRegister />;
-  }
-  if (page === 'dashboard') {
-    return <Dashboard />;
-  }
-  if (page === 'schedule') {
-    return <ProfessionalSchedule />;
-  }
-  return <LandingPage />;
+};
+
+// Root component with router provider
+const App = () => {
+  return (
+    <RouterProvider>
+      <AppContent />
+    </RouterProvider>
+  );
 };
 
 root.render(
   <React.StrictMode>
-    <AppComponent />
+    <App />
   </React.StrictMode>
 );
 
