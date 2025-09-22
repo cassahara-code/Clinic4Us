@@ -1,42 +1,56 @@
-import React, { useState, useEffect } from 'react';
-import { Login, AliasRegister, Dashboard, ProfessionalSchedule } from './clients';
-import LandingPage from './components/LandingPage';
+import React, { useState, useEffect } from "react";
+import {
+  Login,
+  AliasRegister,
+  Dashboard,
+  ProfessionalSchedule,
+} from "./clients";
+import LandingPage from "./components/LandingPage";
+import { AdminDashboard } from "./components/admin";
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule'>('landing');
+  const [currentPage, setCurrentPage] = useState<
+    "landing" | "login" | "alias-register" | "dashboard" | "schedule" | "admin"
+  >("landing");
 
   useEffect(() => {
     // Check URL parameter to determine which page to show
     const urlParams = new URLSearchParams(window.location.search);
-    const page = urlParams.get('page');
+    const page = urlParams.get("page");
 
-    if (page === 'login') {
-      setCurrentPage('login');
-    } else if (page === 'alias-register') {
-      setCurrentPage('alias-register');
-    } else if (page === 'dashboard') {
-      setCurrentPage('dashboard');
-    } else if (page === 'schedule') {
-      setCurrentPage('schedule');
+    if (page === "login") {
+      setCurrentPage("login");
+    } else if (page === "alias-register") {
+      setCurrentPage("alias-register");
+    } else if (page === "dashboard") {
+      setCurrentPage("dashboard");
+    } else if (page === "schedule") {
+      setCurrentPage("schedule");
+    } else if (page === "admin") {
+      setCurrentPage("admin");
     } else {
-      setCurrentPage('landing');
+      setCurrentPage("landing");
     }
   }, []);
 
-  if (currentPage === 'login') {
+  if (currentPage === "login") {
     return <Login />;
   }
 
-  if (currentPage === 'alias-register') {
+  if (currentPage === "alias-register") {
     return <AliasRegister />;
   }
 
-  if (currentPage === 'dashboard') {
+  if (currentPage === "dashboard") {
     return <Dashboard />;
   }
 
-  if (currentPage === 'schedule') {
+  if (currentPage === "schedule") {
     return <ProfessionalSchedule />;
+  }
+
+  if (currentPage === "admin") {
+    return <AdminDashboard />;
   }
 
   return <LandingPage />;

@@ -2,39 +2,31 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
-import LandingPage from "./components/LandingPage";
-import Login from "./clients/Login";
-import AliasRegister from "./clients/AliasRegister";
-import Dashboard from "./clients/Dashboard";
-import ProfessionalSchedule from "./clients/ProfessionalSchedule";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import App from "./App";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutos
+      gcTime: 10 * 60 * 1000, // 10 minutos
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      retry: 1, // Apenas 1 tentativa em caso de erro
+    },
+  },
+});
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
-// Simple routing based on URL parameters
-const urlParams = new URLSearchParams(window.location.search);
-const page = urlParams.get('page');
-
-const AppComponent = () => {
-  if (page === 'login') {
-    return <Login />;
-  }
-  if (page === 'alias-register') {
-    return <AliasRegister />;
-  }
-  if (page === 'dashboard') {
-    return <Dashboard />;
-  }
-  if (page === 'schedule') {
-    return <ProfessionalSchedule />;
-  }
-  return <LandingPage />;
-};
-
 root.render(
   <React.StrictMode>
-    <AppComponent />
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
   </React.StrictMode>
 );
 
