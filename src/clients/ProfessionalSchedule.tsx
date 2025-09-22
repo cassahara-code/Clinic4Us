@@ -4,6 +4,7 @@ import "./ProfessionalSchedule.css";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
+import { useNavigation } from "../contexts/RouterContext";
 
 interface MenuItemProps {
   label: string;
@@ -42,6 +43,7 @@ interface LayoutEvent extends ScheduleEvent {
 const ProfessionalSchedule: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { goToPatientRegister, goToPatients } = useNavigation();
 
   const professionalsList = [
     'Dr. João Silva - Cardiologista',
@@ -88,6 +90,10 @@ const ProfessionalSchedule: React.FC = () => {
   const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [appointmentModalMode, setAppointmentModalMode] = useState<'create' | 'edit'>('create');
   const [appointmentModalData, setAppointmentModalData] = useState<Partial<AppointmentData>>({});
+
+  // Estados do modal de agenda do paciente
+  const [isPatientScheduleModalOpen, setIsPatientScheduleModalOpen] = useState(false);
+  const [patientScheduleEvents, setPatientScheduleEvents] = useState<ScheduleEvent[]>([]);
 
 
   // Estados dos filtros da agenda
@@ -234,6 +240,12 @@ const ProfessionalSchedule: React.FC = () => {
     // Redirecionar para dashboard
     const clinic = new URLSearchParams(window.location.search).get('clinic') || 'ninho';
     window.location.href = `${window.location.origin}/?page=dashboard&clinic=${clinic}`;
+  };
+
+  const handleNewPatientClick = () => {
+    // Abrir página de cadastro de novo paciente em nova aba
+    const registerUrl = `${window.location.origin}${window.location.pathname}?page=patient-register`;
+    window.open(registerUrl, '_blank');
   };
 
   const handleProfessionalToggle = (professional: string) => {
@@ -466,6 +478,26 @@ const ProfessionalSchedule: React.FC = () => {
     closeAppointmentModal();
   };
 
+  // Funções do modal de agenda do paciente
+  const openPatientScheduleModal = () => {
+    if (selectedPatients.length === 0) return;
+
+    const selectedPatientName = selectedPatients[0].split(' - ')[0];
+
+    // Filtrar eventos que contêm o nome do paciente selecionado
+    const patientEvents = events.filter((event: ScheduleEvent) =>
+      event.patient && event.patient.toLowerCase().includes(selectedPatientName.toLowerCase())
+    );
+
+    setPatientScheduleEvents(patientEvents);
+    setIsPatientScheduleModalOpen(true);
+  };
+
+  const closePatientScheduleModal = () => {
+    setIsPatientScheduleModalOpen(false);
+    setPatientScheduleEvents([]);
+  };
+
   const calculateEndTime = (startTime: string) => {
     const [hours, minutes] = startTime.split(':').map(Number);
     const endHours = hours + 1; // Assumindo 1 hora de duração
@@ -563,6 +595,18 @@ const ProfessionalSchedule: React.FC = () => {
     fetchAgendaData(filters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Executar apenas na montagem do componente
+
+  // useEffect para pré-preencher paciente da URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const patientParam = urlParams.get('patient');
+
+    if (patientParam) {
+      // Decodificar o nome do paciente e pré-preencher o campo de busca
+      const decodedPatientName = decodeURIComponent(patientParam);
+      setPatientSearchTerm(decodedPatientName);
+    }
+  }, []);
 
 
   // Função para limpar todos os filtros
@@ -1281,7 +1325,8 @@ const ProfessionalSchedule: React.FC = () => {
               <div className="schedule-filters-actions" style={{
                 display: 'flex',
                 gap: '0.5rem',
-                flexWrap: 'wrap'
+                flexWrap: 'wrap',
+                justifyContent: 'flex-end'
               }}>
                 <button
                   onClick={handleClearFilters}
@@ -1298,38 +1343,70 @@ const ProfessionalSchedule: React.FC = () => {
                 >
                   {isLoading ? 'Carregando...' : 'Limpar filtros'}
                 </button>
-                <button style={{
-                  padding: '0.5rem 1rem',
-                  background: '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer'
-                }}>
+                <button
+                  onClick={openPatientScheduleModal}
+                  disabled={selectedPatients.length === 0}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: selectedPatients.length === 0 ? '#adb5bd' : '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '0.85rem',
+                    cursor: selectedPatients.length === 0 ? 'not-allowed' : 'pointer',
+                    opacity: selectedPatients.length === 0 ? 0.6 : 1
+                  }}
+                >
                   Agenda Paciente
                 </button>
-                <button style={{
-                  padding: '0.5rem 1rem',
-                  background: '#17a2b8',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer'
-                }}>
+                <button
+                  onClick={() => {
+                    if (selectedPatients.length > 0) {
+                      const patientId = selectedPatients[0].split(' - ')[0];
+                      goToPatientRegister(patientId);
+                    }
+                  }}
+                  disabled={selectedPatients.length === 0}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: selectedPatients.length === 0 ? '#adb5bd' : '#17a2b8',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '0.85rem',
+                    cursor: selectedPatients.length === 0 ? 'not-allowed' : 'pointer',
+                    opacity: selectedPatients.length === 0 ? 0.6 : 1
+                  }}
+                >
                   Cadastro do Paciente
                 </button>
-                <button style={{
-                  padding: '0.5rem 1rem',
-                  background: '#ffc107',
-                  color: '#212529',
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontSize: '0.85rem',
-                  cursor: 'pointer'
-                }}>
+                <button
+                  onClick={handleNewPatientClick}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: '#ffc107',
+                    color: '#212529',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer'
+                  }}
+                >
                   Novo Paciente
+                </button>
+                <button
+                  onClick={goToPatients}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: '#6f42c1',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Lista de pacientes
                 </button>
               </div>
             </div>
@@ -2211,6 +2288,163 @@ const ProfessionalSchedule: React.FC = () => {
         title={appointmentModalMode === 'create' ? 'Agendamento' : 'Editar Agendamento'}
         patientsList={patientsList}
       />
+
+      {/* Modal de agenda do paciente */}
+      {isPatientScheduleModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000
+          }}
+          onClick={closePatientScheduleModal}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '2rem',
+              maxWidth: '700px',
+              width: '90%',
+              maxHeight: '80vh',
+              overflow: 'auto',
+              position: 'relative',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Cabeçalho do modal */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem',
+              borderBottom: '1px solid #e9ecef',
+              paddingBottom: '1rem'
+            }}>
+              <h3 style={{
+                margin: 0,
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                color: '#495057'
+              }}>
+                Agenda do Paciente: {selectedPatients.length > 0 ? selectedPatients[0].split(' - ')[0] : ''}
+              </h3>
+              <button
+                onClick={closePatientScheduleModal}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  color: '#6c757d',
+                  padding: '0.25rem',
+                  borderRadius: '4px',
+                  lineHeight: 1
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Lista de agendamentos do paciente */}
+            <div style={{ maxHeight: '60vh', overflow: 'auto' }}>
+              {patientScheduleEvents.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '2rem',
+                  color: '#6c757d',
+                  fontSize: '1.1rem'
+                }}>
+                  Nenhum agendamento encontrado para este paciente.
+                </div>
+              ) : (
+                patientScheduleEvents
+                  .sort((a, b) => {
+                    const dateA = new Date(a.date);
+                    const dateB = new Date(b.date);
+                    if (dateA.getTime() === dateB.getTime()) {
+                      return a.time.localeCompare(b.time);
+                    }
+                    return dateA.getTime() - dateB.getTime();
+                  })
+                  .map((event, index) => (
+                    <div
+                      key={index}
+                      onClick={() => openEditModal(event)}
+                      style={{
+                        background: 'white',
+                        border: '1px solid #e9ecef',
+                        borderRadius: '8px',
+                        padding: '1rem',
+                        marginBottom: '0.75rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#28a745';
+                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#e9ecef';
+                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                      }}
+                    >
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <div style={{
+                          fontSize: '1.1rem',
+                          fontWeight: '600',
+                          color: '#495057'
+                        }}>
+                          {event.time} - {calculateEndTime(event.time)}
+                        </div>
+                        <div style={{
+                          fontSize: '0.9rem',
+                          color: '#6c757d',
+                          fontWeight: '500'
+                        }}>
+                          {new Date(event.date).toLocaleDateString('pt-BR', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </div>
+                      </div>
+
+                      <div style={{
+                        fontSize: '0.95rem',
+                        color: '#6c757d',
+                        marginBottom: '0.25rem'
+                      }}>
+                        <strong>Serviço:</strong> {event.service}
+                      </div>
+
+                      <div style={{
+                        fontSize: '0.95rem',
+                        color: '#6c757d'
+                      }}>
+                        <strong>Profissional:</strong> {event.doctor}
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <FooterInternal
         simplified={true}
