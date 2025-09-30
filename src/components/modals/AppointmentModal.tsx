@@ -242,14 +242,8 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
         <form style={{ padding: '2rem' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
             {/* Paciente */}
-            <div style={{ position: 'relative' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '0.95rem',
-                color: '#6c757d',
-                marginBottom: '0.5rem',
-                fontWeight: '500'
-              }}>Paciente (Digite pelo menos 3 letras)</label>
+            <div className="form-group" style={{ position: 'relative' }}>
+              <label>Paciente (Digite pelo menos 3 letras)</label>
 
               <input
                 type="text"
@@ -258,12 +252,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 onChange={handlePatientSearchChange}
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: isPatientDropdownOpen ? '1px solid #03B4C6' : '1px solid #ced4da',
-                  borderRadius: '6px',
-                  fontSize: '1rem',
-                  boxSizing: 'border-box',
+                  border: isPatientDropdownOpen ? '1px solid #03B4C6' : undefined,
                   fontWeight: selectedPatient ? '500' : 'normal'
                 }}
               />
@@ -321,48 +310,20 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
             {/* Data/Hora Inicial */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem',
-                  fontWeight: '500'
-                }}>Data Inicial</label>
+              <div className="form-group">
+                <label>Data Inicial</label>
                 <input
                   type="date"
                   value={formData.startDate}
                   onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '6px',
-                    fontSize: '1rem',
-                    boxSizing: 'border-box'
-                  }}
                 />
               </div>
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem',
-                  fontWeight: '500'
-                }}>Horário</label>
+              <div className="form-group">
+                <label>Horário</label>
                 <input
                   type="time"
                   value={formData.startTime}
                   onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '6px',
-                    fontSize: '1rem',
-                    boxSizing: 'border-box'
-                  }}
                 />
               </div>
             </div>
@@ -371,52 +332,24 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
           {/* Segunda linha */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
             {/* 1º Responsável */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.95rem',
-                color: '#6c757d',
-                marginBottom: '0.5rem',
-                fontWeight: '500'
-              }}>1º Responsável</label>
+            <div className="form-group">
+              <label>1º Responsável</label>
               <input
                 type="text"
                 value={formData.firstResponsible}
                 onChange={(e) => setFormData({ ...formData, firstResponsible: e.target.value })}
                 placeholder="Não informado"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
-                  fontSize: '1rem',
-                  boxSizing: 'border-box'
-                }}
               />
             </div>
 
             {/* 2º Responsável */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.95rem',
-                color: '#6c757d',
-                marginBottom: '0.5rem',
-                fontWeight: '500'
-              }}>2º Responsável</label>
+            <div className="form-group">
+              <label>2º Responsável</label>
               <input
                 type="text"
                 value={formData.secondResponsible}
                 onChange={(e) => setFormData({ ...formData, secondResponsible: e.target.value })}
                 placeholder="Não informado"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
-                  fontSize: '1rem',
-                  boxSizing: 'border-box'
-                }}
               />
             </div>
           </div>
@@ -425,72 +358,30 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
             {/* Data/Hora Final */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem',
-                  fontWeight: '500'
-                }}>Data Final</label>
+              <div className="form-group">
+                <label>Data Final</label>
                 <input
                   type="date"
                   value={formData.endDate}
                   onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '6px',
-                    fontSize: '1rem',
-                    boxSizing: 'border-box'
-                  }}
                 />
               </div>
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem',
-                  fontWeight: '500'
-                }}>Horário Final</label>
+              <div className="form-group">
+                <label>Horário Final</label>
                 <input
                   type="time"
                   value={formData.endTime}
                   onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '6px',
-                    fontSize: '1rem',
-                    boxSizing: 'border-box'
-                  }}
                 />
               </div>
             </div>
 
             {/* Profissional */}
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.95rem',
-                color: '#6c757d',
-                marginBottom: '0.5rem',
-                fontWeight: '500'
-              }}>Profissional</label>
+            <div className="form-group">
+              <label>Profissional</label>
               <select
                 value={formData.professional}
                 onChange={(e) => setFormData({ ...formData, professional: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
-                  fontSize: '1rem',
-                  boxSizing: 'border-box'
-                }}
               >
                 <option value="">Selecione um profissional</option>
                 <option value="Dr. João Silva">Dr. João Silva</option>
@@ -554,25 +445,11 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
           </div>
 
           {/* Tipo de serviço */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.95rem',
-              color: '#6c757d',
-              marginBottom: '0.5rem',
-              fontWeight: '500'
-            }}>Tipo de serviço</label>
+          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+            <label>Tipo de serviço</label>
             <select
               value={formData.serviceType}
               onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ced4da',
-                borderRadius: '6px',
-                fontSize: '1rem',
-                boxSizing: 'border-box'
-              }}
             >
               <option value="">Tipo de serviço</option>
               <option value="Consulta">Consulta</option>
@@ -584,26 +461,14 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
           </div>
 
           {/* Observações */}
-          <div style={{ marginBottom: '2rem' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.95rem',
-              color: '#6c757d',
-              marginBottom: '0.5rem',
-              fontWeight: '500'
-            }}>Observações</label>
+          <div className="form-group" style={{ marginBottom: '2rem' }}>
+            <label>Observações</label>
             <textarea
               value={formData.observations}
               onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
               placeholder="Observações"
               rows={3}
               style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '1px solid #ced4da',
-                borderRadius: '6px',
-                fontSize: '1rem',
-                boxSizing: 'border-box',
                 resize: 'vertical'
               }}
             />

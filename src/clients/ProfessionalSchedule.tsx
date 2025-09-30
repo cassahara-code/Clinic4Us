@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import "./Login.css";
-import "./ProfessionalSchedule.css";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
 import { useNavigation } from "../contexts/RouterContext";
+import { CalendarToday, Delete } from '@mui/icons-material';
 
 interface MenuItemProps {
   label: string;
@@ -908,38 +907,16 @@ const ProfessionalSchedule: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main style={{
-        padding: '1rem',
-        paddingTop: '2rem',
-        minHeight: 'calc(100vh - 120px)',
-        background: '#f8f9fa',
-        marginTop: '80px'
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '100%',
-          margin: '0',
-          padding: '0'
-        }}>
-          <div style={{
-            width: '100%',
-            maxWidth: '100%'
-          }}>
+      <main className="dashboard-main">
+        <div className="dashboard-container">
+          <div className="dashboard-content">
             {/* Título da Agenda */}
-            <div style={{
+            <div className="page-header" style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '1.5rem'
+              justifyContent: 'space-between'
             }}>
-              <h1 style={{
-                margin: '0',
-                fontSize: '1.3rem',
-                fontWeight: '600',
-                color: '#6c757d'
-              }}>
-                Agenda Profissional
-              </h1>
+              <h1 className="page-title">Agenda Profissional</h1>
               <div style={{
                 width: '32px',
                 height: '32px',
@@ -982,6 +959,14 @@ const ProfessionalSchedule: React.FC = () => {
                   <select
                     value={filters.team}
                     onChange={(e) => handleFilterChange('team', e.target.value)}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#03B4C6';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#ced4da';
+                      e.target.style.boxShadow = 'none';
+                    }}
                     style={{
                       width: '100%',
                       padding: '0.375rem 0.5rem',
@@ -990,7 +975,8 @@ const ProfessionalSchedule: React.FC = () => {
                       fontSize: '1rem',
                       color: '#495057',
                       height: '40px',
-                      boxSizing: 'border-box'
+                      boxSizing: 'border-box',
+                      transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                     }}
                   >
                     <option value="">Todas as equipes</option>
@@ -1012,6 +998,14 @@ const ProfessionalSchedule: React.FC = () => {
                     type="date"
                     value={filters.startDate}
                     onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#03B4C6';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#ced4da';
+                      e.target.style.boxShadow = 'none';
+                    }}
                     style={{
                       width: '100%',
                       padding: '0.375rem 0.5rem',
@@ -1021,7 +1015,8 @@ const ProfessionalSchedule: React.FC = () => {
                       color: '#495057',
                       minHeight: '40px',
                       height: '40px',
-                      boxSizing: 'border-box'
+                      boxSizing: 'border-box',
+                      transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                     }}
                   />
                 </div>
@@ -1038,6 +1033,14 @@ const ProfessionalSchedule: React.FC = () => {
                     type="date"
                     value={filters.endDate}
                     onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#03B4C6';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#ced4da';
+                      e.target.style.boxShadow = 'none';
+                    }}
                     style={{
                       width: '100%',
                       padding: '0.375rem 0.5rem',
@@ -1047,7 +1050,8 @@ const ProfessionalSchedule: React.FC = () => {
                       color: '#495057',
                       minHeight: '40px',
                       height: '40px',
-                      boxSizing: 'border-box'
+                      boxSizing: 'border-box',
+                      transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                     }}
                   />
                 </div>
@@ -1219,16 +1223,26 @@ const ProfessionalSchedule: React.FC = () => {
                         value={selectedPatients.length > 0 ? selectedPatients[0].split(' - ')[0] : patientSearchTerm}
                         onChange={handlePatientSearchChange}
                         onClick={(e) => e.stopPropagation()}
+                        onFocus={(e) => {
+                          e.target.style.setProperty('border-color', '#03B4C6', 'important');
+                          e.target.style.setProperty('box-shadow', '0 0 0 3px rgba(3, 180, 198, 0.1)', 'important');
+                          e.target.style.setProperty('outline', 'none', 'important');
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.setProperty('border-color', '#ced4da', 'important');
+                          e.target.style.setProperty('box-shadow', 'none', 'important');
+                        }}
                         style={{
                           width: '100%',
                           padding: '0.375rem 0.5rem',
-                          border: isPatientDropdownOpen ? '1px solid #03B4C6' : '1px solid #ced4da',
+                          border: '1px solid #ced4da',
                           borderRadius: '4px',
                           fontSize: '1rem',
                           color: selectedPatients.length > 0 ? '#495057' : '#495057',
                           height: '40px',
                           boxSizing: 'border-box',
-                          fontWeight: selectedPatients.length > 0 ? '500' : 'normal'
+                          fontWeight: selectedPatients.length > 0 ? '500' : 'normal',
+                          transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
                         }}
                       />
 
@@ -1290,33 +1304,65 @@ const ProfessionalSchedule: React.FC = () => {
 
                     </div>
 
-                    <button
-                      onClick={() => openNewAppointmentModal(new Date())}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#03B4C6';
-                        e.currentTarget.style.transform = 'scale(1.05)';
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => openNewAppointmentModal(new Date())}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#218838';
+                          e.currentTarget.style.transform = 'scale(1.05)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#28a745';
+                          e.currentTarget.style.transform = 'scale(1)';
+                        }}
+                        style={{
+                        background: '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        width: '40px',
+                        height: '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease'
                       }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#6c757d';
-                        e.currentTarget.style.transform = 'scale(1)';
-                      }}
-                      style={{
-                      padding: '0.5rem 1rem',
-                      background: '#6c757d',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      minHeight: '40px',
-                      height: '40px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.2s ease'
-                    }}
-                      title="Agendar novo compromisso">
-                      📅
-                    </button>
+                        title="Agendar novo compromisso">
+                        <CalendarToday />
+                      </button>
+
+                      <button
+                        onClick={handleClearFilters}
+                        disabled={isLoading}
+                        style={{
+                          background: isLoading ? '#adb5bd' : '#6c757d',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: isLoading ? 'not-allowed' : 'pointer',
+                          width: '40px',
+                          height: '40px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isLoading) {
+                            e.currentTarget.style.background = '#5a6268';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isLoading) {
+                            e.currentTarget.style.background = '#6c757d';
+                          }
+                        }}
+                        title="Limpar filtros"
+                      >
+                        <Delete fontSize="small" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1328,21 +1374,6 @@ const ProfessionalSchedule: React.FC = () => {
                 flexWrap: 'wrap',
                 justifyContent: 'flex-end'
               }}>
-                <button
-                  onClick={handleClearFilters}
-                  disabled={isLoading}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    background: isLoading ? '#adb5bd' : '#6c757d',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    fontSize: '0.85rem',
-                    cursor: isLoading ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  {isLoading ? 'Carregando...' : 'Limpar filtros'}
-                </button>
                 <button
                   onClick={openPatientScheduleModal}
                   disabled={selectedPatients.length === 0}

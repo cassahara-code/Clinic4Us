@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Person, WhatsApp, CalendarToday, Edit, Warning, Add, Email, Check, Close, Folder, FirstPage, LastPage, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { Delete, Edit, ContentCopy, ToggleOff, ToggleOn, Add, FirstPage, LastPage, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import PlanModal, { PlanData } from "../components/modals/PlanModal";
+import ConfirmModal from "../components/modals/ConfirmModal";
+import { Toast } from "../components/Toast";
+import { useToast } from "../hooks/useToast";
 
 interface MenuItemProps {
   label: string;
@@ -20,28 +24,27 @@ interface UserSession {
   loginTime: string;
 }
 
-interface Patient {
+interface Plan {
   id: string;
   name: string;
-  document: string;
-  responsible: string;
-  phone: string;
+  description: string;
+  price: number;
+  duration: number; // em meses
+  maxUsers: number;
+  features: string[];
   status: 'Ativo' | 'Inativo';
-  isComplete: boolean;
-  gender: 'Masculino' | 'Feminino' | 'Outro';
-  professional: string;
-  birthDate: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-const PatientsList: React.FC = () => {
+const AdminPlans: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
-  const { goToDashboard, goToSchedule, goToPatients, goToPatientRegister } = useNavigation();
+  const { goToDashboard, goToSchedule, goToPatients } = useNavigation();
+  const { toast, showToast, hideToast } = useToast();
 
   // Estados dos filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'Todos' | 'Ativo' | 'Inativo'>('Ativo');
-  const [genderFilter, setGenderFilter] = useState<'Todos' | 'Masculino' | 'Feminino' | 'Outro'>('Todos');
-  const [professionalFilter, setProfessionalFilter] = useState('Selecione');
 
   // Estados da paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,159 +53,111 @@ const PatientsList: React.FC = () => {
   // Estado da ordenação
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
-  // Estados do modal de exclusão
+  // Estados dos modais
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
+  const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
+  const [planToEdit, setPlanToEdit] = useState<Plan | null>(null);
 
-  // Lista de profissionais para filtro
-  const professionalsList = [
-    'Dr. João Silva - Cardiologista',
-    'Dra. Maria Santos - Pediatra',
-    'Dr. Pedro Oliveira - Ortopedista',
-    'Dra. Ana Costa - Dermatologista',
-    'Dr. Carlos Ferreira - Neurologista',
-    'Dra. Lucia Rodrigues - Ginecologista',
-    'Dr. Rafael Almeida - Clínico Geral',
-    'Dra. Fernanda Lima - Psiquiatra',
-    'Dr. Roberto Souza - Oftalmologista',
-    'Dra. Patricia Mendes - Endocrinologista',
-    'Dr. André Castro - Urologista',
-    'Dra. Beatriz Rocha - Reumatologista'
-  ];
+  // Estados do modal de plano
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [planModalMode, setPlanModalMode] = useState<'create' | 'edit'>('create');
 
-  // Dados de exemplo dos pacientes - expandido para testar paginação
-  const [patients] = useState<Patient[]>(() => {
-    const basePatients = [
+  // Dados de exemplo dos planos - geração de dados para testar paginação
+  const [plans] = useState<Plan[]>(() => {
+    const basePlans = [
       {
         id: '1',
-        name: 'Abdul Aziz Walid Saada',
-        document: '53095900805',
-        responsible: 'Milena Hamed Abdouni',
-        phone: '11 969315000',
+        name: 'Plano Básico',
+        description: 'Plano ideal para clínicas pequenas',
+        price: 199.90,
+        duration: 12,
+        maxUsers: 5,
+        features: ['Agenda básica', 'Cadastro de pacientes', 'Relatórios simples'],
         status: 'Ativo' as const,
-        isComplete: true,
-        gender: 'Masculino' as const,
-        professional: 'Dr. João Silva - Cardiologista',
-        birthDate: '2015-03-15'
+        createdAt: '2024-01-15T10:00:00Z',
+        updatedAt: '2024-02-20T14:30:00Z'
       },
       {
         id: '2',
-        name: 'Adam Feitosa Rebouças',
-        document: '06760953800',
-        responsible: 'Maria Helena Ap. Feitosa Silva',
-        phone: '11 962983112',
+        name: 'Plano Professional',
+        description: 'Para clínicas em crescimento',
+        price: 399.90,
+        duration: 12,
+        maxUsers: 15,
+        features: ['Agenda avançada', 'Múltiplos profissionais', 'Relatórios completos', 'Integração WhatsApp'],
         status: 'Ativo' as const,
-        isComplete: false,
-        gender: 'Masculino' as const,
-        professional: 'Dra. Maria Santos - Pediatra',
-        birthDate: '2018-07-22'
+        createdAt: '2024-01-20T09:15:00Z',
+        updatedAt: '2024-03-10T16:45:00Z'
       },
       {
         id: '3',
-        name: 'Alana De Souza Medeiros',
-        document: '05042045805',
-        responsible: 'Thales Alexandre Melo De Souza',
-        phone: '11 990067750',
+        name: 'Plano Enterprise',
+        description: 'Para grandes clínicas e hospitais',
+        price: 799.90,
+        duration: 12,
+        maxUsers: 50,
+        features: ['Recursos ilimitados', 'API personalizada', 'Suporte 24/7', 'Customizações'],
         status: 'Ativo' as const,
-        isComplete: false,
-        gender: 'Feminino' as const,
-        professional: 'Dr. Pedro Oliveira - Ortopedista',
-        birthDate: '2020-11-08'
+        createdAt: '2024-02-01T11:30:00Z',
+        updatedAt: '2024-03-15T13:20:00Z'
       },
       {
         id: '4',
-        name: 'Alice Barbosa Lobo Montoani',
-        document: '01020405808',
-        responsible: 'Maria Laura Barbosa Lobo',
-        phone: '11 998887777',
+        name: 'Plano Teste',
+        description: 'Plano para demonstrações',
+        price: 0,
+        duration: 1,
+        maxUsers: 2,
+        features: ['Funcionalidades limitadas', 'Apenas para testes'],
         status: 'Inativo' as const,
-        isComplete: false,
-        gender: 'Feminino' as const,
-        professional: 'Dra. Ana Costa - Dermatologista',
-        birthDate: '2019-05-30'
-      },
-      {
-        id: '5',
-        name: 'Alice De Matos Poço',
-        document: '56565657780',
-        responsible: 'Luana Rosa De Matos Silva Poço',
-        phone: '11 995489919',
-        status: 'Ativo' as const,
-        isComplete: true,
-        gender: 'Feminino' as const,
-        professional: 'Dr. Carlos Ferreira - Neurologista',
-        birthDate: '2016-12-03'
-      },
-      {
-        id: '6',
-        name: 'Alice Hikari Kimoto Yasuoka',
-        document: '47327423869',
-        responsible: 'Elaine Yucari Kimoto Yasuoka',
-        phone: '11 997158686',
-        status: 'Ativo' as const,
-        isComplete: true,
-        gender: 'Feminino' as const,
-        professional: 'Dra. Lucia Rodrigues - Ginecologista',
-        birthDate: '2017-09-14'
+        createdAt: '2024-01-10T08:00:00Z',
+        updatedAt: '2024-01-10T08:00:00Z'
       }
     ];
 
-    // Gerar pacientes adicionais para testar paginação
-    const additionalPatients = [];
-    const firstNames = ['João', 'Maria', 'Pedro', 'Ana', 'Carlos', 'Lucia', 'Rafael', 'Fernanda', 'Roberto', 'Patricia', 'André', 'Beatriz', 'Lucas', 'Camila', 'Gabriel', 'Juliana', 'Fernando', 'Amanda', 'Ricardo', 'Larissa'];
-    const lastNames = ['Silva', 'Santos', 'Oliveira', 'Costa', 'Ferreira', 'Rodrigues', 'Almeida', 'Lima', 'Souza', 'Mendes', 'Castro', 'Rocha', 'Pereira', 'Carvalho', 'Barbosa', 'Ribeiro', 'Martins', 'Gomes', 'Fernandes', 'Araújo'];
+    // Gerar dados adicionais para testar paginação
+    const additionalPlans = [];
+    const planTypes = ['Básico', 'Standard', 'Premium', 'Enterprise', 'Corporate', 'Starter'];
+    const descriptions = [
+      'Ideal para pequenos consultórios',
+      'Perfeito para clínicas médias',
+      'Desenvolvido para hospitais',
+      'Customizado para grandes redes',
+      'Solução corporativa completa',
+      'Plano inicial econômico'
+    ];
 
-    for (let i = 7; i <= 120; i++) {
-      const firstName = firstNames[i % firstNames.length];
-      const lastName = lastNames[(i + 5) % lastNames.length];
-      const lastName2 = lastNames[(i + 10) % lastNames.length];
-      const isActive = Math.random() > 0.2; // 80% ativos
-      const isComplete = Math.random() > 0.4; // 60% completos
-      const gender = ['Masculino', 'Feminino', 'Outro'][Math.floor(Math.random() * 3)] as 'Masculino' | 'Feminino' | 'Outro';
-      const professional = professionalsList[Math.floor(Math.random() * professionalsList.length)];
+    for (let i = 5; i <= 120; i++) {
+      const planType = planTypes[i % planTypes.length];
+      const description = descriptions[i % descriptions.length];
+      const isActive = Math.random() > 0.3; // 70% ativos
 
-      // Gerar CPF fictício
-      const cpf = String(Math.floor(Math.random() * 99999999999)).padStart(11, '0');
-
-      // Gerar telefone fictício
-      const phone = `11 9${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 9)}`;
-
-      // Gerar data de nascimento aleatória
-      const year = 2010 + Math.floor(Math.random() * 14); // 2010-2023
-      const month = Math.floor(Math.random() * 12) + 1;
-      const day = Math.floor(Math.random() * 28) + 1;
-      const birthDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-      additionalPatients.push({
+      additionalPlans.push({
         id: i.toString(),
-        name: `${firstName} ${lastName} ${lastName2}`,
-        document: cpf,
-        responsible: `${firstNames[(i + 3) % firstNames.length]} ${lastNames[(i + 7) % lastNames.length]}`,
-        phone: phone,
+        name: `${planType} ${i}`,
+        description: `${description} - Versão ${i}`,
+        price: Math.round((Math.random() * 800 + 100) * 100) / 100,
+        duration: [6, 12, 24][Math.floor(Math.random() * 3)],
+        maxUsers: [5, 10, 25, 50, 100][Math.floor(Math.random() * 5)],
+        features: [`Recurso ${i}A`, `Funcionalidade ${i}B`, `Feature ${i}C`],
         status: isActive ? 'Ativo' as const : 'Inativo' as const,
-        isComplete: isComplete,
-        gender: gender,
-        professional: professional,
-        birthDate: birthDate
+        createdAt: new Date(2024, Math.floor(Math.random() * 3), Math.floor(Math.random() * 28) + 1).toISOString(),
+        updatedAt: new Date(2024, Math.floor(Math.random() * 3) + 1, Math.floor(Math.random() * 28) + 1).toISOString()
       });
     }
 
-    return [...basePatients, ...additionalPatients];
+    return [...basePlans, ...additionalPlans];
   });
 
-  // Filtrar e ordenar pacientes
-  const filteredAndSortedPatients = patients
-    .filter(patient => {
-      const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           patient.document.includes(searchTerm) ||
-                           patient.responsible.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           patient.phone.includes(searchTerm);
+  // Filtrar e ordenar planos
+  const filteredAndSortedPlans = plans
+    .filter(plan => {
+      const matchesSearch = plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           plan.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus = statusFilter === 'Todos' || patient.status === statusFilter;
-      const matchesGender = genderFilter === 'Todos' || patient.gender === genderFilter;
-      const matchesProfessional = professionalFilter === 'Selecione' || patient.professional === professionalFilter;
+      const matchesStatus = statusFilter === 'Todos' || plan.status === statusFilter;
 
-      return matchesSearch && matchesStatus && matchesGender && matchesProfessional;
+      return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
       const nameA = a.name.toLowerCase();
@@ -216,14 +171,14 @@ const PatientsList: React.FC = () => {
     });
 
   // Calcular paginação
-  const totalPages = Math.ceil(filteredAndSortedPatients.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredAndSortedPlans.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedPatients = filteredAndSortedPatients.slice(startIndex, endIndex);
+  const paginatedPlans = filteredAndSortedPlans.slice(startIndex, endIndex);
 
   // Função para rolar para o início da lista
   const scrollToTop = () => {
-    const listContainer = document.querySelector('.patients-list-container');
+    const listContainer = document.querySelector('.admin-plans-list-container');
     if (listContainer) {
       const containerRect = listContainer.getBoundingClientRect();
       const offset = 100; // Margem superior para não ficar escondido pelo header
@@ -278,19 +233,18 @@ const PatientsList: React.FC = () => {
     itemsPerPageOptions.push(i);
   }
 
-  // Simulação de carregamento da sessão do usuário
   useEffect(() => {
     const simulatedUserSession: UserSession = {
-      email: "user@clinic4us.com",
-      alias: "User Demo",
-      clinicName: "Clínica Demo",
-      role: "Professional",
-      permissions: ["view_schedule", "manage_appointments"],
+      email: "admin@clinic4us.com",
+      alias: "Admin Demo",
+      clinicName: "Admin Dashboard",
+      role: "Administrator",
+      permissions: ["admin_access", "manage_plans", "view_all"],
       menuItems: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Agenda", href: "/schedule" },
-        { label: "Pacientes", href: "/patients" },
-        { label: "Relatórios", href: "/reports" }
+        { label: "Planos", href: "/admin-plans" },
+        { label: "Usuários", href: "/admin-users" },
+        { label: "Relatórios", href: "/admin-reports" }
       ],
       loginTime: new Date().toISOString()
     };
@@ -301,109 +255,131 @@ const PatientsList: React.FC = () => {
   // Reset página quando filtros ou ordenação mudarem
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, genderFilter, professionalFilter, sortOrder]);
+  }, [searchTerm, statusFilter, sortOrder]);
 
-  // Função para calcular idade
-  const calculateAge = (birthDate: string): number => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-
-    return age;
+  // Função para formatar data
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
   };
 
-  // Função para formatar data de nascimento
-  const formatBirthDate = (birthDate: string): string => {
-    const date = new Date(birthDate);
-    return date.toLocaleDateString('pt-BR');
+  // Função para formatar preço
+  const formatPrice = (price: number): string => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(price);
   };
 
   const clearFilters = () => {
     setSearchTerm('');
     setStatusFilter('Ativo');
-    setGenderFilter('Todos');
-    setProfessionalFilter('Selecione');
     setSortOrder('asc');
     setCurrentPage(1);
   };
 
-  const handleAddPatient = () => {
-    goToPatientRegister();
+  const handleAddPlan = () => {
+    setPlanModalMode('create');
+    setPlanToEdit(null);
+    setIsPlanModalOpen(true);
   };
 
-  const handlePatientRowClick = (patientId: string) => {
-    goToPatientRegister(patientId);
+  const handleSavePlan = (data: PlanData) => {
+    // Converter features de array de objetos para array de strings incluídas
+    const includedFeatures = data.features
+      .filter(f => f.included)
+      .map(f => f.name);
+
+    if (planModalMode === 'create') {
+      const newPlan: Plan = {
+        id: `plan-${Date.now()}`,
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        duration: data.duration,
+        maxUsers: data.maxUsers,
+        features: includedFeatures,
+        status: data.status,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      console.log('Novo plano criado:', newPlan);
+      // Aqui você adicionaria o plano à lista de planos
+      showToast('Plano criado com sucesso!', 'success');
+    } else {
+      console.log('Plano editado:', {
+        ...planToEdit,
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        duration: data.duration,
+        maxUsers: data.maxUsers,
+        features: includedFeatures,
+        status: data.status,
+        updatedAt: new Date().toISOString()
+      });
+      // Aqui você atualizaria o plano na lista
+      showToast('Plano editado com sucesso!', 'success');
+    }
+    setIsPlanModalOpen(false);
+  };
+
+  const handlePlanRowClick = (planId: string) => {
+    const plan = plans.find(p => p.id === planId);
+    if (plan) {
+      setPlanModalMode('edit');
+      setPlanToEdit(plan);
+      setIsPlanModalOpen(true);
+    }
   };
 
   const handleDeleteConfirm = async () => {
-    if (!patientToDelete) return;
+    if (!planToDelete) return;
 
     try {
-      // Aqui seria feita a chamada da API para exclusão lógica
-      console.log(`Excluindo paciente: ${patientToDelete.name} (ID: ${patientToDelete.id})`);
+      console.log(`Excluindo plano: ${planToDelete.name} (ID: ${planToDelete.id})`);
 
       // TODO: Implementar chamada da API
-      // await deletePatientAPI(patientToDelete.id);
+      // await deletePlanAPI(planToDelete.id);
 
       // Fechar modal
       setIsDeleteModalOpen(false);
-      setPatientToDelete(null);
+      setPlanToDelete(null);
 
-      // TODO: Atualizar lista de pacientes após exclusão
-      // refetchPatients();
+      // Exibir toast de sucesso
+      showToast('Plano excluído com sucesso!', 'success');
+
+      // TODO: Atualizar lista de planos após exclusão
+      // refetchPlans();
 
     } catch (error) {
-      console.error('Erro ao excluir paciente:', error);
-      // TODO: Mostrar mensagem de erro
+      console.error('Erro ao excluir plano:', error);
+      showToast('Erro ao excluir plano', 'error');
     }
   };
 
   const handleDeleteCancel = () => {
     setIsDeleteModalOpen(false);
-    setPatientToDelete(null);
+    setPlanToDelete(null);
   };
 
-  const handlePatientAction = (action: string, patientId: string) => {
-    const patient = patients.find(p => p.id === patientId);
 
-    if (action === 'email' && patient) {
-      // Usar mailto para abrir aplicação de email
-      const subject = encodeURIComponent(`Contato - ${patient.name}`);
-      const body = encodeURIComponent(`Olá ${patient.name},\n\nEsperamos que esteja bem.\n\nAtenciosamente,\nEquipe Clinic4Us`);
+  const handlePlanAction = (action: string, planId: string) => {
+    const plan = plans.find(p => p.id === planId);
 
-      // Criar link mailto
-      const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
-
-      // Abrir aplicação de email
-      window.location.href = mailtoLink;
-    } else if (action === 'whatsapp' && patient) {
-      // Limpar e formatar número do telefone para WhatsApp
-      const phoneNumber = patient.phone.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
-      const message = encodeURIComponent(`Olá ${patient.name}, esperamos que esteja bem. Equipe Clinic4Us`);
-
-      // Criar link do WhatsApp
-      const whatsappLink = `https://wa.me/55${phoneNumber}?text=${message}`;
-
-      // Abrir WhatsApp em nova aba
-      window.open(whatsappLink, '_blank');
-    } else if (action === 'calendar' && patient) {
-      // Abrir página de agendamento em nova aba com paciente pré-selecionado
-      const scheduleUrl = `${window.location.origin}${window.location.pathname}?page=schedule&patient=${encodeURIComponent(patient.name)}`;
-      window.open(scheduleUrl, '_blank');
-    } else if (action === 'cadastro' && patient) {
-      // Abrir página de cadastro do paciente em nova janela
-      window.open(`/cadastro-paciente?id=${patient.id}`, '_blank');
-    } else if (action === 'delete' && patient) {
-      // Abrir modal de confirmação de exclusão
-      setPatientToDelete(patient);
+    if (action === 'edit' && plan) {
+      setPlanModalMode('edit');
+      setPlanToEdit(plan);
+      setIsPlanModalOpen(true);
+    } else if (action === 'delete' && plan) {
+      setPlanToDelete(plan);
       setIsDeleteModalOpen(true);
-    } else {
-      console.log(`Ação ${action} para paciente ${patientId}`);
+    } else if (action === 'duplicate' && plan) {
+      console.log(`Duplicando plano: ${plan.name}`);
+      alert("Funcionalidade de duplicar plano em desenvolvimento");
+    } else if (action === 'toggle-status' && plan) {
+      console.log(`Alterando status do plano: ${plan.name}`);
+      alert("Funcionalidade de alterar status em desenvolvimento");
     }
   };
 
@@ -415,7 +391,7 @@ const PatientsList: React.FC = () => {
     { label: "Dashboard", href: "#", onClick: () => goToDashboard() },
     { label: "Agenda", href: "#", onClick: () => goToSchedule() },
     { label: "Pacientes", href: "#", onClick: () => goToPatients() },
-    { label: "Relatórios", href: "#", onClick: () => alert("Funcionalidade em desenvolvimento") }
+    { label: "Admin", href: "#", onClick: () => alert("Menu Admin em desenvolvimento") }
   ];
 
   const handleRevalidateLogin = () => {
@@ -426,11 +402,11 @@ const PatientsList: React.FC = () => {
   };
 
   const handleNotificationClick = () => {
-    alert("Sistema de notificações - 27 notificações pendentes");
+    alert("Sistema de notificações - 5 notificações administrativas");
   };
 
   const handleUserClick = () => {
-    alert("Configurações do usuário - funcionalidade em desenvolvimento");
+    alert("Configurações do administrador - funcionalidade em desenvolvimento");
   };
 
   const handleLogoClick = () => {
@@ -438,7 +414,7 @@ const PatientsList: React.FC = () => {
   };
 
   return (
-    <div className="patients-list">
+    <div className="professional-schedule">
       <HeaderInternal
         menuItems={[]}
         loggedMenuItems={loggedMenuItems}
@@ -448,29 +424,47 @@ const PatientsList: React.FC = () => {
         userEmail={userSession.email}
         userProfile={userSession.role}
         clinicName={userSession.clinicName}
-        notificationCount={27}
+        notificationCount={5}
         onRevalidateLogin={handleRevalidateLogin}
         onNotificationClick={handleNotificationClick}
         onUserClick={handleUserClick}
         onLogoClick={handleLogoClick}
       />
 
-      <main className="dashboard-main">
-        <div className="dashboard-container">
-          <div className="dashboard-content">
-            {/* Título da Lista de Pacientes */}
-            <div className="page-header" style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
+      <main style={{
+        padding: '1rem',
+        paddingTop: '0.25rem',
+        minHeight: 'calc(100vh - 120px)',
+        background: '#f8f9fa',
+        marginTop: '20px'
+      }}>
+        <div style={{
+          width: '100%',
+          maxWidth: '100%',
+          margin: '0',
+          padding: '0'
+        }}>
+          {/* Título da Lista de Planos */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '1.5rem'
+          }}>
+            <h1 style={{
+              margin: '0',
+              fontSize: '1.3rem',
+              fontWeight: '600',
+              color: '#6c757d'
             }}>
-              <h1 className="page-title">Lista de Pacientes</h1>
+              Gestão de Planos
+            </h1>
             <button
-              onClick={handleAddPatient}
-              title="Adicionar novo paciente"
+              onClick={handleAddPlan}
+              title="Adicionar novo plano"
               style={{
                 background: '#48bb78',
-                color: '#212529',
+                color: 'white',
                 border: 'none',
                 borderRadius: '6px',
                 width: '40px',
@@ -490,7 +484,7 @@ const PatientsList: React.FC = () => {
             </button>
           </div>
 
-          {/* Filtros da lista de pacientes */}
+          {/* Filtros da lista de planos */}
           <div className="schedule-filters" style={{
             background: 'white',
             borderRadius: '12px',
@@ -501,7 +495,7 @@ const PatientsList: React.FC = () => {
           }}>
             <div className="schedule-filters-grid" style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: '0.75rem',
               marginBottom: '1rem'
             }}>
@@ -512,10 +506,10 @@ const PatientsList: React.FC = () => {
                   fontSize: '0.95rem',
                   color: '#6c757d',
                   marginBottom: '0.5rem'
-                }}>Nome do Paciente</label>
+                }}>Nome do Plano</label>
                 <input
                   type="text"
-                  placeholder="Buscar"
+                  placeholder="Buscar plano"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   style={{
@@ -579,86 +573,6 @@ const PatientsList: React.FC = () => {
                 </select>
               </div>
 
-              {/* Gênero */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Gênero</label>
-                <select
-                  value={genderFilter}
-                  onChange={(e) => setGenderFilter(e.target.value as any)}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="Todos">Todos</option>
-                  <option value="Masculino">Masculino</option>
-                  <option value="Feminino">Feminino</option>
-                  <option value="Outro">Outro</option>
-                </select>
-              </div>
-
-              {/* Filtro por profissional */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Filtro por profissional</label>
-                <select
-                  value={professionalFilter}
-                  onChange={(e) => setProfessionalFilter(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="Selecione">Selecione</option>
-                  {professionalsList.map((professional, index) => (
-                    <option key={index} value={professional}>
-                      {professional}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {/* Ordenação */}
               <div>
                 <label style={{
@@ -704,23 +618,26 @@ const PatientsList: React.FC = () => {
               }}>
                 <button
                   onClick={clearFilters}
-                  title="Limpar todos os filtros"
+                  title="Limpar filtros"
                   style={{
-                    padding: '0.4rem',
+                    width: '40px',
+                    height: '40px',
                     background: '#6c757d',
                     color: 'white',
                     border: 'none',
                     borderRadius: '4px',
                     cursor: 'pointer',
-                    transition: 'background 0.2s',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '40px',
-                    height: '40px'
+                    transition: 'all 0.2s ease'
                   }}
-                  onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = '#5a6268'}
-                  onMouseLeave={(e) => (e.target as HTMLButtonElement).style.background = '#6c757d'}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#5a6268';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#6c757d';
+                  }}
                 >
                   <Delete fontSize="small" />
                 </button>
@@ -739,10 +656,10 @@ const PatientsList: React.FC = () => {
                 color: '#4a5568',
                 fontSize: '0.9rem'
               }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPatients.length)} de <strong style={{
+                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPlans.length)} de <strong style={{
                   color: '#2d3748',
                   fontWeight: '600'
-                }}>{filteredAndSortedPatients.length}</strong> pacientes
+                }}>{filteredAndSortedPlans.length}</strong> planos
               </div>
 
               <div style={{
@@ -869,94 +786,64 @@ const PatientsList: React.FC = () => {
             </div>
           </div>
 
-          {/* Lista de pacientes */}
-          <div className="patients-list-container">
-            <div className="patients-table">
-              <div className="patients-table-header">
-                <div className="patients-header-cell">Foto</div>
-                <div className="patients-header-cell">Nome do Paciente</div>
-                <div className="patients-header-cell">Documento</div>
-                <div className="patients-header-cell">Nascimento</div>
-                <div className="patients-header-cell">Idade</div>
-                <div className="patients-header-cell">Responsável</div>
-                <div className="patients-header-cell">Celular</div>
-                <div className="patients-header-cell">Completo</div>
-                <div className="patients-header-cell">Ações</div>
+          {/* Lista de planos */}
+          <div className="admin-plans-list-container">
+            <div className="admin-plans-table">
+              <div className="admin-plans-table-header">
+                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Nome</div>
+                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Descrição</div>
+                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Preço</div>
+                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Duração</div>
+                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Max Usuários</div>
+                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Status</div>
+                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Criado em</div>
+                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Ações</div>
               </div>
 
-              <div className="patients-table-body">
-                {paginatedPatients.map((patient) => (
+              <div className="admin-plans-table-body">
+                {paginatedPlans.map((plan) => (
                   <div
-                    key={patient.id}
-                    className="patients-table-row"
-                    onClick={() => handlePatientRowClick(patient.id)}
+                    key={plan.id}
+                    className="admin-plans-table-row"
+                    onClick={() => handlePlanRowClick(plan.id)}
                     style={{ cursor: 'pointer' }}
                   >
-                    <div className="patients-cell patients-photo">
-                      <div className="patient-avatar">
-                        <Person />
-                      </div>
+                    <div className="admin-plans-cell admin-plans-name" data-label="Nome" style={{ textAlign: 'left' }}>
+                      {plan.name}
                     </div>
-                    <div className="patients-cell patients-name" data-label="Nome">
-                      {patient.name}
+                    <div className="admin-plans-cell admin-plans-description" data-label="Descrição" style={{ textAlign: 'left' }}>
+                      {plan.description}
                     </div>
-                    <div className="patients-cell patients-document" data-label="Documento">
-                      {patient.document}
+                    <div className="admin-plans-cell admin-plans-price" data-label="Preço" style={{ textAlign: 'left' }}>
+                      {formatPrice(plan.price)}
                     </div>
-                    <div className="patients-cell patients-birth" data-label="Nascimento">
-                      {formatBirthDate(patient.birthDate)}
+                    <div className="admin-plans-cell admin-plans-duration" data-label="Duração" style={{ textAlign: 'left' }}>
+                      {plan.duration} {plan.duration === 1 ? 'mês' : 'meses'}
                     </div>
-                    <div className="patients-cell patients-age" data-label="Idade">
-                      {calculateAge(patient.birthDate)}
+                    <div className="admin-plans-cell admin-plans-users" data-label="Max Usuários" style={{ textAlign: 'left' }}>
+                      {plan.maxUsers} usuários
                     </div>
-                    <div className="patients-cell patients-responsible" data-label="Responsável">
-                      {patient.responsible}
-                    </div>
-                    <div className="patients-cell patients-phone" data-label="Telefone">
-                      {patient.phone}
-                    </div>
-                    <div className="patients-cell patients-complete" data-label="Status">
-                      <span className={`status-indicator ${patient.isComplete ? 'complete' : 'incomplete'}`}>
-                        {patient.isComplete ? <Check fontSize="small" /> : <Close fontSize="small" />}
+                    <div className="admin-plans-cell admin-plans-status" data-label="Status" style={{ textAlign: 'left' }}>
+                      <span className={`plan-status-indicator ${plan.status === 'Ativo' ? 'active' : 'inactive'}`}>
+                        {plan.status}
                       </span>
                     </div>
-                    <div className="patients-cell patients-actions" data-label="Ações">
+                    <div className="admin-plans-cell admin-plans-created" data-label="Criado em" style={{ textAlign: 'left' }}>
+                      {formatDate(plan.createdAt)}
+                    </div>
+                    <div className="admin-plans-cell admin-plans-actions" data-label="Ações" style={{ textAlign: 'left' }}>
                       <button
                         className="action-btn"
-                        onClick={(e) => { e.stopPropagation(); handlePatientAction('email', patient.id); }}
-                        title="Enviar email"
+                        onClick={(e) => { e.stopPropagation(); handlePlanAction('edit', plan.id); }}
+                        title="Editar plano"
                         style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
-                        <Email fontSize="small" />
+                        <Edit fontSize="small" />
                       </button>
                       <button
                         className="action-btn"
-                        onClick={(e) => { e.stopPropagation(); handlePatientAction('whatsapp', patient.id); }}
-                        title="WhatsApp"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
-                      >
-                        <WhatsApp fontSize="small" />
-                      </button>
-                      <button
-                        className="action-btn"
-                        onClick={(e) => { e.stopPropagation(); handlePatientAction('calendar', patient.id); }}
-                        title="Agendar consulta"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
-                      >
-                        <CalendarToday fontSize="small" />
-                      </button>
-                      <button
-                        className="action-btn"
-                        onClick={(e) => { e.stopPropagation(); handlePatientAction('cadastro', patient.id); }}
-                        title="Gerenciar cadastro"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
-                      >
-                        <Folder fontSize="small" />
-                      </button>
-                      <button
-                        className="action-btn"
-                        onClick={(e) => { e.stopPropagation(); handlePatientAction('delete', patient.id); }}
-                        title="Excluir paciente"
+                        onClick={(e) => { e.stopPropagation(); handlePlanAction('delete', plan.id); }}
+                        title="Excluir plano"
                         style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Delete fontSize="small" />
@@ -988,10 +875,10 @@ const PatientsList: React.FC = () => {
                 color: '#4a5568',
                 fontSize: '0.9rem'
               }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPatients.length)} de <strong style={{
+                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPlans.length)} de <strong style={{
                   color: '#2d3748',
                   fontWeight: '600'
-                }}>{filteredAndSortedPatients.length}</strong> pacientes
+                }}>{filteredAndSortedPlans.length}</strong> planos
               </div>
 
               <div style={{
@@ -1118,7 +1005,6 @@ const PatientsList: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
       </main>
 
       <FooterInternal
@@ -1127,40 +1013,45 @@ const PatientsList: React.FC = () => {
       />
 
       {/* Modal de confirmação de exclusão */}
-      {isDeleteModalOpen && patientToDelete && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Confirmar Exclusão</h3>
-            </div>
-            <div className="modal-body">
-              <p>
-                Tem certeza que deseja excluir o paciente <strong>{patientToDelete.name}</strong>?
-              </p>
-              <p className="warning-text">
-                <Warning fontSize="small" style={{ marginRight: '0.5rem' }} />
-                Esta ação não poderá ser desfeita e não será possível recuperar o cadastro.
-              </p>
-            </div>
-            <div className="modal-actions">
-              <button
-                className="btn-cancel"
-                onClick={handleDeleteCancel}
-              >
-                Cancelar
-              </button>
-              <button
-                className="btn-delete"
-                onClick={handleDeleteConfirm}
-              >
-                Excluir Paciente
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir o plano ${planToDelete?.name}?`}
+        warningMessage="Esta ação não poderá ser desfeita e afetará todos os usuários que utilizam este plano."
+        confirmButtonText="Excluir Plano"
+        cancelButtonText="Cancelar"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        type="danger"
+      />
+
+      {/* Modal de adicionar/editar plano */}
+      <PlanModal
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
+        onSave={handleSavePlan}
+        mode={planModalMode}
+        initialData={planToEdit ? {
+          name: planToEdit.name,
+          description: planToEdit.description,
+          price: planToEdit.price,
+          annualPrice: planToEdit.price * 12 * 0.9, // Valor anual com 10% de desconto por padrão
+          duration: planToEdit.duration,
+          maxUsers: planToEdit.maxUsers,
+          features: planToEdit.features.map(f => ({ name: f, included: true })),
+          status: planToEdit.status
+        } : undefined}
+      />
+
+      {/* Toast de notificação */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
   );
 };
 
-export default PatientsList;
+export default AdminPlans;

@@ -79,6 +79,9 @@ const Footer: React.FC<FooterProps> = ({ onScrollToTop }) => {
         </div>
         <div className="footer-bottom">
           <p>&copy; 2024 CLINIC4US. Todos os direitos reservados.</p>
+          <p style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.5rem' }}>
+            Imagens by <a href="http://www.freepik.com" target="_blank" rel="noopener noreferrer" style={{ color: '#03B4C6', textDecoration: 'none' }}>Freepik</a>
+          </p>
         </div>
       </div>
     </footer>

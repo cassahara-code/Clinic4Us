@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
+import "./global.css";
 import reportWebVitals from "./reportWebVitals";
 import { RouterProvider, useRouter } from "./contexts/RouterContext";
 import LandingPage from "./components/LandingPage";
@@ -10,6 +11,8 @@ import Dashboard from "./clients/Dashboard";
 import ProfessionalSchedule from "./clients/ProfessionalSchedule";
 import PatientsList from "./clients/PatientsList";
 import PatientRegister from "./clients/PatientRegister";
+import PageModel from "./clients/PageModel";
+import AdminPlans from "./admin/AdminPlans";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -32,6 +35,10 @@ const AppContent = () => {
       return <PatientsList />;
     case 'patient-register':
       return <PatientRegister />;
+    case 'page-model':
+      return <PageModel />;
+    case 'admin-plans':
+      return <AdminPlans />;
     case 'landing':
     default:
       return <LandingPage />;

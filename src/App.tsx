@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Login, AliasRegister, Dashboard, ProfessionalSchedule, PatientsList } from './clients';
+import { Login, AliasRegister, Dashboard, ProfessionalSchedule, PatientsList, PageModel } from './clients';
 import LandingPage from './components/LandingPage';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients'>('landing');
+  const [currentPage, setCurrentPage] = useState<'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients' | 'page-model'>('landing');
 
   useEffect(() => {
     // Check URL parameter to determine which page to show
@@ -20,6 +20,8 @@ function App() {
       setCurrentPage('schedule');
     } else if (page === 'patients') {
       setCurrentPage('patients');
+    } else if (page === 'page-model') {
+      setCurrentPage('page-model');
     } else {
       setCurrentPage('landing');
     }
@@ -43,6 +45,10 @@ function App() {
 
   if (currentPage === 'patients') {
     return <PatientsList />;
+  }
+
+  if (currentPage === 'page-model') {
+    return <PageModel />;
   }
 
   return <LandingPage />;
