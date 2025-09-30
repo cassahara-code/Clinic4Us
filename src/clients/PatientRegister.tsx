@@ -3,6 +3,7 @@ import "./PatientRegister.css";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
+import { Rotate90DegreesCw, Search, BarChart, CalendarToday, TrendingUp, InsertDriveFile } from '@mui/icons-material';
 
 interface MenuItemProps {
   label: string;
@@ -692,7 +693,7 @@ const PatientRegister: React.FC = () => {
                                   photoRotation: (prev.photoRotation || 0) - 90
                                 }))}
                               >
-                                🔄
+                                <Rotate90DegreesCw fontSize="small" />
                               </button>
                               <button
                                 type="button"
@@ -714,7 +715,7 @@ const PatientRegister: React.FC = () => {
                                   photoZoom: Math.max(0.5, (prev.photoZoom || 1) - 0.1)
                                 }))}
                               >
-                                🔍
+                                <Search fontSize="small" />
                               </button>
                               <button
                                 type="button"
@@ -770,15 +771,15 @@ const PatientRegister: React.FC = () => {
 
                         {/* Mini Dashboard de Presenças */}
                         <div className="mini-dashboard">
-                          <h4 className="dashboard-title">📊 Resumo de Presenças</h4>
+                          <h4 className="dashboard-title"><BarChart fontSize="small" style={{marginRight: '0.5rem', verticalAlign: 'middle'}} />Resumo de Presenças</h4>
 
                           <div className="dashboard-item">
-                            <span className="dashboard-label">📅 Última presença:</span>
+                            <span className="dashboard-label"><CalendarToday fontSize="small" style={{marginRight: '0.25rem', verticalAlign: 'middle'}} />Última presença:</span>
                             <span className="dashboard-value">15/03/2024</span>
                           </div>
 
                           <div className="dashboard-section">
-                            <h5 className="dashboard-subtitle">📈 Total Geral</h5>
+                            <h5 className="dashboard-subtitle"><TrendingUp fontSize="small" style={{marginRight: '0.5rem', verticalAlign: 'middle'}} />Total Geral</h5>
                             <div className="dashboard-stats">
                               <div className="stat-item stat-present">
                                 <span className="stat-number">42</span>
@@ -796,7 +797,7 @@ const PatientRegister: React.FC = () => {
                           </div>
 
                           <div className="dashboard-section">
-                            <h5 className="dashboard-subtitle">📅 Últimos 30 dias</h5>
+                            <h5 className="dashboard-subtitle"><CalendarToday fontSize="small" style={{marginRight: '0.5rem', verticalAlign: 'middle'}} />Últimos 30 dias</h5>
                             <div className="dashboard-stats">
                               <div className="stat-item stat-present">
                                 <span className="stat-number">12</span>
@@ -1207,7 +1208,7 @@ const PatientRegister: React.FC = () => {
                               placeholder="00000-000"
                               maxLength={9}
                             />
-                            {cepLoading && <span className="cep-loading">🔍</span>}
+                            {cepLoading && <span className="cep-loading"><Search fontSize="small" /></span>}
                           </div>
                         </div>
                         <div className="form-group">
@@ -1760,7 +1761,7 @@ const PatientRegister: React.FC = () => {
                   </div>
                   <div className="files-grid">
                     <div className="file-item">
-                      <div className="file-icon">📄</div>
+                      <div className="file-icon"><InsertDriveFile fontSize="large" /></div>
                       <div className="file-info">
                         <h4>ECG_15032024.pdf</h4>
                         <p>Eletrocardiograma</p>

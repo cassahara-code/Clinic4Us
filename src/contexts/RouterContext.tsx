@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type PageType = 'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients' | 'patient-register';
+type PageType = 'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients' | 'patient-register' | 'page-model' | 'admin-plans';
 
 interface RouterContextType {
   currentPage: PageType;
@@ -23,7 +23,7 @@ export const RouterProvider: React.FC<RouterProviderProps> = ({ children }) => {
     const urlParams = new URLSearchParams(window.location.search);
     const page = urlParams.get('page') as PageType;
 
-    const validPages: PageType[] = ['landing', 'login', 'alias-register', 'dashboard', 'schedule', 'patients', 'patient-register'];
+    const validPages: PageType[] = ['landing', 'login', 'alias-register', 'dashboard', 'schedule', 'patients', 'patient-register', 'page-model', 'admin-plans'];
 
     if (page && validPages.includes(page)) {
       return page;
@@ -128,6 +128,8 @@ export const useNavigation = () => {
     goToDashboard: () => navigateTo('dashboard'),
     goToSchedule: (patientName?: string) => navigateTo('schedule', patientName ? { patient: patientName } : undefined),
     goToPatients: () => navigateTo('patients'),
-    goToPatientRegister: (patientId?: string) => navigateTo('patient-register', patientId ? { id: patientId } : undefined)
+    goToPatientRegister: (patientId?: string) => navigateTo('patient-register', patientId ? { id: patientId } : undefined),
+    goToPageModel: () => navigateTo('page-model'),
+    goToAdminPlans: () => navigateTo('admin-plans')
   };
 };

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import "./Login.css";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import ContactForm from "../components/ContactForm";
+import { LocalHospital, CalendarToday, BarChart, Visibility, VisibilityOff, CheckCircle, Info, Assignment } from '@mui/icons-material';
 
 interface LoginFormData {
   email: string;
@@ -65,7 +65,7 @@ const Login: React.FC = () => {
         setFormData(prev => ({
           ...prev,
           email: parsedData.email || "",
-          password: parsedData.password || "",
+          password: "", // Por segurança, senha nunca é pré-preenchida
           rememberMe: true
         }));
       } catch (error) {
@@ -135,8 +135,8 @@ const Login: React.FC = () => {
         if (formData.rememberMe) {
           try {
             const dataToSave = {
-              email: formData.email,
-              password: formData.password
+              email: formData.email
+              // Por segurança, senha nunca é salva
             };
             localStorage.setItem('clinic4us-remember-me', JSON.stringify(dataToSave));
           } catch (error) {
@@ -311,7 +311,7 @@ const Login: React.FC = () => {
   ];
 
   return (
-    <div className="login-page">
+    <div className="login-page login-page-specific">
       <HeaderInternal
         menuItems={loginMenuItems}
         showCTAButton={!isUserLoggedIn}
@@ -332,27 +332,6 @@ const Login: React.FC = () => {
             <div className="login-card" style={{ opacity: clinicError ? 0.3 : 1, pointerEvents: clinicError ? 'none' : 'auto' }}>
               <div className="login-card-inner">
                 <div className="login-image-section">
-                  <div className="login-illustration-inner">
-                    <div className="illustration-placeholder-inner">
-                      <div className="placeholder-icon">🏥</div>
-                      <h3>Gerencie sua clínica com eficiência</h3>
-                      <p>Sistema completo para profissionais de saúde</p>
-                      <div className="feature-list">
-                        <div className="feature-item">
-                          <span className="feature-icon">📅</span>
-                          <span>Agenda inteligente</span>
-                        </div>
-                        <div className="feature-item">
-                          <span className="feature-icon">📋</span>
-                          <span>Prontuários digitais</span>
-                        </div>
-                        <div className="feature-item">
-                          <span className="feature-icon">📊</span>
-                          <span>Relatórios completos</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="login-form-section">
@@ -405,7 +384,7 @@ const Login: React.FC = () => {
                               onClick={() => setShowPassword(!showPassword)}
                               disabled={isLoading}
                             >
-                              {showPassword ? "👁️" : "👁️‍🗨️"}
+                              {showPassword ? <VisibilityOff /> : <Visibility />}
                             </button>
                           </div>
                           {errors.password && (
@@ -508,7 +487,7 @@ const Login: React.FC = () => {
                   </form>
                 ) : (
                   <div className="success-message">
-                    <div className="success-icon">✓</div>
+                    <div className="success-icon"><CheckCircle /></div>
                     <h3>Email enviado!</h3>
                     <p>
                       Enviamos um link de recuperação para <strong>{forgotPasswordEmail}</strong>.
@@ -543,7 +522,7 @@ const Login: React.FC = () => {
         <div className="clinic-error-modal-overlay">
           <div className="clinic-error-modal">
             <div className="clinic-error-header">
-              <div className="clinic-error-icon">ℹ️</div>
+              <div className="clinic-error-icon"><Info /></div>
               <h3>Informação de Acesso</h3>
             </div>
             <div className="clinic-error-content">

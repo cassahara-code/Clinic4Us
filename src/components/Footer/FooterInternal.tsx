@@ -1,5 +1,4 @@
 import React from "react";
-import "./FooterInternal.css";
 import logo from "../../images/logo_clinic4us.png";
 
 interface FooterLinkProps {
@@ -90,6 +89,9 @@ const FooterInternal: React.FC<FooterInternalProps> = ({
         <div className="container">
           <div className="footer-bottom">
             <p>{copyrightText}</p>
+            <p style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.5rem' }}>
+              Imagens by <a href="http://www.freepik.com" target="_blank" rel="noopener noreferrer" style={{ color: '#03B4C6', textDecoration: 'none' }}>Freepik</a>
+            </p>
           </div>
         </div>
       </footer>

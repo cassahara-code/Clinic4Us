@@ -29,7 +29,15 @@
       "Bash(./node_modules/.bin/react-scripts:*)",
       "Bash(powershell:*)",
       "Bash(npx tsc:*)",
-      "Bash(npx kill-port:*)"
+      "Bash(npx kill-port:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(dir:*)",
+      "Bash(rg:*)",
+      "Bash(del \"C:\\Users\\Cassa\\OneDrive\\Área de Trabalho\\PROJETOS\\Clinic4Us\\src\\clients\\ProfessionalSchedule.css\")",
+      "Bash(npm run start:*)",
+      "Bash(npx babel:*)"
     ],
     "deny": [],
     "ask": []

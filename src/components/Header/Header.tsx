@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import "./Header.css";
+import React, { useState, useEffect } from "react";
 import logo from "../../images/logo_clinic4us.png";
 
 interface HeaderProps {
@@ -17,12 +16,28 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Cleanup mobile menu state when component unmounts
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove('mobile-menu-open');
+    };
+  }, []);
+
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+    const newState = !isMobileMenuOpen;
+    setIsMobileMenuOpen(newState);
+
+    // Add/remove class to body to hide hamburger when menu is open
+    if (newState) {
+      document.body.classList.add('mobile-menu-open');
+    } else {
+      document.body.classList.remove('mobile-menu-open');
+    }
   };
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+    document.body.classList.remove('mobile-menu-open');
   };
 
   const scrollToTop = () => {
@@ -99,15 +114,6 @@ const Header: React.FC<HeaderProps> = ({
             {isMobileMenuOpen && (
               <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
                 <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
-                  <div className="mobile-menu-header">
-                    <button
-                      className="close-menu-button"
-                      onClick={closeMobileMenu}
-                      aria-label="Fechar menu"
-                    >
-                      ✕
-                    </button>
-                  </div>
                   <ul className="mobile-nav-menu">
                     <li>
                       <a href="#funcionalidades" onClick={closeMobileMenu}>

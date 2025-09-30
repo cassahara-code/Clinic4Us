@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import "./HeaderInternal.css";
 import logo from "../../images/logo_clinic4us.png";
+import { NotificationsOutlined, Person, AccessTime, Refresh, Logout, Settings, Schedule, Visibility, VisibilityOff } from '@mui/icons-material';
 
 interface MenuItemProps {
   label: string;
@@ -53,16 +53,17 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
   const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false);
   const [revalidatePassword, setRevalidatePassword] = useState('');
   const [revalidateError, setRevalidateError] = useState('');
+  const [showRevalidatePassword, setShowRevalidatePassword] = useState(false);
   const [timerKey, setTimerKey] = useState(0); // Key para forçar reinicialização do timer
   const [timeRemaining, setTimeRemaining] = useState(() => {
-    if (!isLoggedIn) return 300;
+    if (!isLoggedIn) return 3600;
 
     try {
       const sessionData = localStorage.getItem('clinic4us-user-session');
       if (sessionData) {
         const session = JSON.parse(sessionData);
         const loginTimestamp = session.loginTimestamp || new Date(session.loginTime).getTime();
-        const sessionDuration = session.sessionDuration || 300; // 5 minutos padrão para homologação
+        const sessionDuration = session.sessionDuration || 3600; // 1 hora padrão
         const currentTime = Date.now();
         const elapsedSeconds = Math.floor((currentTime - loginTimestamp) / 1000);
         const remaining = Math.max(0, sessionDuration - elapsedSeconds);
@@ -79,7 +80,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
       console.error('Erro ao calcular tempo da sessão:', error);
     }
 
-    return 300; // Fallback para 5 minutos
+    return 3600; // Fallback para 1 hora
   });
 
   useEffect(() => {
@@ -104,6 +105,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
             setIsSessionExpiredModalOpen(true);
             setRevalidatePassword('');
             setRevalidateError('');
+            setShowRevalidatePassword(false);
           }, 100);
 
           return 0;
@@ -130,6 +132,13 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
       }
     };
   }, [isLoggedIn, onRevalidateLogin, timerKey]);
+
+  // Cleanup mobile menu state when component unmounts
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove('mobile-menu-open');
+    };
+  }, []);
 
   const formatTime = (seconds: number): string => {
     // Garantir que seconds seja um número válido
@@ -182,20 +191,21 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
       const newTimestamp = Date.now();
       session.loginTime = new Date().toISOString();
       session.loginTimestamp = newTimestamp;
-      session.sessionDuration = 300; // 5 minutos para homologação
+      session.sessionDuration = 3600; // 1 hora
 
       localStorage.setItem('clinic4us-user-session', JSON.stringify(session));
-      setTimeRemaining(300);
+      setTimeRemaining(3600);
       setTimerKey(prev => prev + 1); // Força reinicialização do timer
 
       // Fechar modal e limpar campos
       setIsSessionExpiredModalOpen(false);
       setRevalidatePassword('');
       setRevalidateError('');
+      setShowRevalidatePassword(false);
 
       console.log('Session renewed after expiration:', {
         newTimestamp: new Date(newTimestamp).toLocaleString(),
-        duration: '5 minutes'
+        duration: '1 hour'
       });
 
     } catch (error) {
@@ -231,11 +241,22 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
   };
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+    const newState = !isMobileMenuOpen;
+    setIsMobileMenuOpen(newState);
+
+    // Add/remove class to body to hide hamburger when menu is open
+    if (newState) {
+      document.body.classList.add('mobile-menu-open');
+      console.log('Mobile menu opened - added class mobile-menu-open');
+    } else {
+      document.body.classList.remove('mobile-menu-open');
+      console.log('Mobile menu closed - removed class mobile-menu-open');
+    }
   };
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+    document.body.classList.remove('mobile-menu-open');
   };
 
   const handleLogoClick = () => {
@@ -319,7 +340,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                     paddingTop: '6px'
                   }}
                 >
-                  <span className="timer-icon" title="Tempo restante da sessão">🕐</span>
+                  <AccessTime className="timer-icon" />
                   {formatTime(timeRemaining)}
                 </span>
               </div>
@@ -329,7 +350,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                 onClick={onNotificationClick}
                 aria-label="Ver notificações"
               >
-                <span className="notification-icon" title="Notificações">🔔</span>
+                <NotificationsOutlined className="notification-icon" />
                 {notificationCount > 0 && (
                   <span className="notification-badge">{notificationCount}</span>
                 )}
@@ -340,7 +361,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                 onClick={onUserClick}
                 aria-label="Opções do usuário"
               >
-                <span className="avatar-icon" title="Perfil do usuário">👤</span>
+                <Person className="avatar-icon" />
               </button>
             </div>
           ) : (
@@ -367,14 +388,13 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
         {isMobileMenuOpen && (
           <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
             <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
-              <div className="mobile-menu-header">
-
-                {isLoggedIn && (
+              {isLoggedIn && (
+                <div className="mobile-menu-header">
                   <div className="mobile-user-info">
                     <div className="mobile-user-email">{truncateEmail(userEmail || '')}</div>
                     <div className="mobile-user-details-row">
                       <div className="mobile-user-avatar">
-                        <span className="avatar-icon" title="Avatar do usuário">👤</span>
+                        <Person className="avatar-icon" />
                       </div>
                       <div className="mobile-user-details">
                         <div className="mobile-user-role">{userProfile}</div>
@@ -382,16 +402,14 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                       </div>
                     </div>
                   </div>
-                )}
 
-                {isLoggedIn && (
                   <div className="profile-actions-row">
                     <button
                       className="mobile-action-button change-profile-button"
                       onClick={() => alert('Funcionalidade temporariamente indisponível')}
                       aria-label="Mudar perfil do usuário"
                     >
-                      <span title="Alterar perfil">🔄</span> Mudar perfil
+                      <Refresh /> Mudar perfil
                     </button>
                     <button
                       className="mobile-action-button logout-button"
@@ -402,11 +420,11 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                       }}
                       aria-label="Sair do sistema"
                     >
-                      <span title="Sair do sistema">🚪</span> Sair
+                      <Logout /> Sair
                     </button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
               <ul className="mobile-nav-menu">
                 {(isLoggedIn ? loggedMenuItems : menuItems).map((item, index) => (
                   <li key={index}>
@@ -430,7 +448,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                     }}
                     aria-label="Ver notificações"
                   >
-                    <span title="Ver notificações">🔔</span> Notificações {notificationCount > 0 && `(${notificationCount})`}
+                    <NotificationsOutlined /> Notificações {notificationCount > 0 && `(${notificationCount})`}
                   </button>
                   <button
                     className="mobile-action-button"
@@ -440,7 +458,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                     }}
                     aria-label="Acessar configurações"
                   >
-                    <span title="Acessar configurações">⚙️</span> Configurações
+                    <Settings /> Configurações
                   </button>
                 </div>
               )}
@@ -493,8 +511,12 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
               <div style={{
                 fontSize: '3rem',
                 color: '#dc3545',
-                marginBottom: '0.5rem'
-              }} title="Sessão expirada">⏰</div>
+                marginBottom: '0.5rem',
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                <Schedule style={{ fontSize: '3rem' }} />
+              </div>
               <h3 style={{
                 margin: '0 0 0.5rem 0',
                 color: '#dc3545',
@@ -508,7 +530,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                 color: '#6c757d',
                 fontSize: '0.9rem'
               }}>
-                Sua sessão de 5 minutos expirou. Revalide seu login para continuar ou saia do sistema.
+                Sua sessão de 1 hora expirou. Revalide seu login para continuar ou saia do sistema.
               </p>
             </div>
 
@@ -549,28 +571,52 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
               }}>
                 Senha:
               </label>
-              <input
-                type="password"
-                value={revalidatePassword}
-                onChange={(e) => setRevalidatePassword(e.target.value)}
-                placeholder="Digite sua senha para continuar"
-                autoFocus
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSessionExpiredRevalidate();
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  borderColor: revalidateError ? '#dc3545' : '#ced4da'
-                }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showRevalidatePassword ? "text" : "password"}
+                  value={revalidatePassword}
+                  onChange={(e) => setRevalidatePassword(e.target.value)}
+                  placeholder="Digite sua senha para continuar"
+                  autoFocus
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSessionExpiredRevalidate();
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    paddingRight: '3rem',
+                    border: '1px solid #ced4da',
+                    borderRadius: '6px',
+                    fontSize: '0.9rem',
+                    outline: 'none',
+                    transition: 'border-color 0.2s',
+                    borderColor: revalidateError ? '#dc3545' : '#ced4da'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRevalidatePassword(!showRevalidatePassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '0.75rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#6c757d',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0',
+                    fontSize: '1.1rem'
+                  }}
+                  aria-label={showRevalidatePassword ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  {showRevalidatePassword ? <VisibilityOff /> : <Visibility />}
+                </button>
+              </div>
               {revalidateError && (
                 <div style={{
                   color: '#dc3545',
@@ -599,7 +645,11 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                   fontSize: '0.9rem',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
                 }}
                 onMouseOver={(e) => {
                   e.currentTarget.style.backgroundColor = '#dc3545';
@@ -610,7 +660,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                   e.currentTarget.style.color = '#dc3545';
                 }}
               >
-                <span title="Sair do sistema">🚪</span> Sair
+                <Logout /> Sair
               </button>
               <button
                 onClick={handleSessionExpiredRevalidate}
@@ -624,12 +674,16 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                   fontSize: '0.9rem',
                   fontWeight: '500',
                   cursor: 'pointer',
-                  transition: 'background-color 0.2s'
+                  transition: 'background-color 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
                 }}
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#029AAB'}
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#03B4C6'}
               >
-                <span title="Renovar sessão">🔄</span> Revalidar Login
+                <Refresh /> Revalidar Login
               </button>
             </div>
           </div>

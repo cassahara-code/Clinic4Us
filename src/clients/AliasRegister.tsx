@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import "./Login.css";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import ContactForm from "../components/ContactForm";
+import { LocalHospital, CalendarToday, BarChart, Visibility, VisibilityOff, Assignment, Warning } from '@mui/icons-material';
 
 interface RegistroFormData {
   email: string;
@@ -204,32 +204,11 @@ const AliasRegister: React.FC = () => {
             <div className="login-card">
               <div className="login-card-inner">
                 <div className="login-image-section">
-                  <div className="login-illustration-inner">
-                    <div className="illustration-placeholder-inner">
-                      <div className="placeholder-icon">🏥</div>
-                      <h3>Crie sua conta na Clinic4Us</h3>
-                      <p>Sistema completo para profissionais de saúde</p>
-                      <div className="feature-list">
-                        <div className="feature-item">
-                          <span className="feature-icon">📅</span>
-                          <span>Agenda inteligente</span>
-                        </div>
-                        <div className="feature-item">
-                          <span className="feature-icon">📋</span>
-                          <span>Prontuários digitais</span>
-                        </div>
-                        <div className="feature-item">
-                          <span className="feature-icon">📊</span>
-                          <span>Relatórios completos</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="login-form-section">
                   <div className="login-header-content">
-                    <p>Preencha os dados para criar sua conta</p>
+                    <p style={{ textAlign: 'left', fontWeight: 'bold' }}>Preencha os dados para criar sua conta</p>
                   </div>
 
                   <form onSubmit={handleSubmit} className="login-form">
@@ -281,9 +260,9 @@ const AliasRegister: React.FC = () => {
                         color: '#B91C1C',
                         lineHeight: '1.4'
                       }}>
-                        <strong>⚠️ Importante:</strong> Informe o identificador de sua clínica, para que seja criado um link personalizado.
+                        <strong><Warning sx={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '0.25rem', color: '#FFA726' }} />Importante:</strong> Informe o identificador de sua clínica, para que seja criado um link personalizado.
                         <br/>
-                        <strong>Exemplo:</strong> ClinicaSucesso → www.clinic4us.com/?page=login&clinic=ClinicaSucesso
+                        <strong>Exemplo:</strong> ClinicaSucesso → www.clinic4us.com/ClinicaSucesso
                         <br/>
                         <em>Este identificador não poderá ser alterado após o cadastro.</em>
                       </div>
@@ -308,7 +287,7 @@ const AliasRegister: React.FC = () => {
                           onClick={() => setShowPassword(!showPassword)}
                           disabled={isLoading}
                         >
-                          {showPassword ? "👁️" : "👁️‍🗨️"}
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
                         </button>
                       </div>
                       {formData.password && (
@@ -360,7 +339,7 @@ const AliasRegister: React.FC = () => {
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           disabled={isLoading}
                         >
-                          {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                         </button>
                       </div>
                       {errors.confirmPassword && (
