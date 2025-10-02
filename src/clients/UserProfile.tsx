@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Rotate90DegreesCw, Search } from '@mui/icons-material';
+import { Rotate90DegreesCw, RotateRight, ZoomOut, ZoomIn, Restore, CenterFocusStrong } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 
 interface MenuItemProps {
@@ -379,7 +379,7 @@ const UserProfile: React.FC = () => {
                         photoRotation: (prev.photoRotation || 0) + 90
                       }))}
                     >
-                      🔃
+                      <RotateRight fontSize="small" />
                     </button>
                     <button
                       type="button"
@@ -390,7 +390,7 @@ const UserProfile: React.FC = () => {
                         photoZoom: Math.max(0.5, (prev.photoZoom || 1) - 0.1)
                       }))}
                     >
-                      <Search fontSize="small" />
+                      <ZoomOut fontSize="small" />
                     </button>
                     <button
                       type="button"
@@ -401,7 +401,7 @@ const UserProfile: React.FC = () => {
                         photoZoom: Math.min(3, (prev.photoZoom || 1) + 0.1)
                       }))}
                     >
-                      🔎
+                      <ZoomIn fontSize="small" />
                     </button>
                     <button
                       type="button"
@@ -416,7 +416,7 @@ const UserProfile: React.FC = () => {
                         photoPositionY: 0
                       }))}
                     >
-                      ⚡
+                      <Restore fontSize="small" />
                     </button>
                     <button
                       type="button"
@@ -428,7 +428,7 @@ const UserProfile: React.FC = () => {
                         photoPositionY: 0
                       }))}
                     >
-                      🎯
+                      <CenterFocusStrong fontSize="small" />
                     </button>
                   </div>
                 )}
