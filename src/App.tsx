@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Login, AliasRegister, Dashboard, ProfessionalSchedule, PatientsList, PageModel } from './clients';
+import Faq from './clients/Faq';
 import LandingPage from './components/LandingPage';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients' | 'page-model'>('landing');
+  const [currentPage, setCurrentPage] = useState<'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients' | 'page-model' | 'faq'>('landing');
 
   useEffect(() => {
     // Check URL parameter to determine which page to show
@@ -22,6 +23,8 @@ function App() {
       setCurrentPage('patients');
     } else if (page === 'page-model') {
       setCurrentPage('page-model');
+    } else if (page === 'faq') {
+      setCurrentPage('faq');
     } else {
       setCurrentPage('landing');
     }
@@ -49,6 +52,10 @@ function App() {
 
   if (currentPage === 'page-model') {
     return <PageModel />;
+  }
+
+  if (currentPage === 'faq') {
+    return <Faq />;
   }
 
   return <LandingPage />;

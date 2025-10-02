@@ -24,15 +24,20 @@ interface HeaderInternalProps {
   onRevalidateLogin?: () => void;
   onNotificationClick?: () => void;
   onUserClick?: () => void;
-  loggedMenuItems?: MenuItemProps[];
 }
 
 const HeaderInternal: React.FC<HeaderInternalProps> = ({
   menuItems = [
-    { label: "Dashboard", href: "#dashboard" },
-    { label: "Agenda", href: "#agenda" },
-    { label: "Pacientes", href: "#pacientes" },
-    { label: "Relatórios", href: "#relatorios" },
+    { label: "Agenda", href: "?page=schedule" },
+    { label: "Cadastro Paciente", href: "?page=patient-register" },
+    { label: "Dashboard", href: "?page=dashboard" },
+    { label: "Entidades", href: "?page=admin-entities" },
+    { label: "FAQ", href: "?page=faq" },
+    { label: "Funcionalidades", href: "?page=admin-functionalities" },
+    { label: "Gestão FAQ", href: "?page=admin-faq" },
+    { label: "Pacientes", href: "?page=patients" },
+    { label: "Perfis", href: "?page=admin-profiles" },
+    { label: "Planos", href: "?page=admin-plans" },
   ],
   showCTAButton = false,
   ctaButtonText = "Ação",
@@ -47,7 +52,6 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
   onRevalidateLogin,
   onNotificationClick,
   onUserClick,
-  loggedMenuItems = [],
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false);
@@ -311,21 +315,6 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
           />
         </div>
 
-        {!isLoggedIn && (
-          <ul className="nav-menu desktop-menu">
-            {menuItems.map((item, index) => (
-              <li key={index}>
-                <a
-                  href={item.href || "#"}
-                  onClick={(e) => handleMenuItemClick(item, e)}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
-
         <div className="nav-actions">
           {isLoggedIn ? (
             <div className="logged-actions">
@@ -426,7 +415,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                 </div>
               )}
               <ul className="mobile-nav-menu">
-                {(isLoggedIn ? loggedMenuItems : menuItems).map((item, index) => (
+                {menuItems.map((item, index) => (
                   <li key={index}>
                     <a
                       href={item.href || "#"}

@@ -4,6 +4,7 @@ import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
 import { Rotate90DegreesCw, Search, BarChart, CalendarToday, TrendingUp, InsertDriveFile } from '@mui/icons-material';
+import { FaqButton } from "../components/FaqButton";
 
 interface MenuItemProps {
   label: string;
@@ -413,12 +414,6 @@ const PatientRegister: React.FC = () => {
     return <div>Carregando...</div>;
   }
 
-  const loggedMenuItems = [
-    { label: "Dashboard", href: "#", onClick: () => goToDashboard() },
-    { label: "Agenda", href: "#", onClick: () => goToSchedule() },
-    { label: "Pacientes", href: "#", onClick: () => goToPatients() },
-    { label: "Relatórios", href: "#", onClick: () => alert("Funcionalidade em desenvolvimento") }
-  ];
 
   const handleRevalidateLogin = () => {
     localStorage.removeItem('clinic4us-user-session');
@@ -529,8 +524,6 @@ const PatientRegister: React.FC = () => {
   return (
     <div className="patient-register-page">
       <HeaderInternal
-        menuItems={userSession.menuItems}
-        loggedMenuItems={loggedMenuItems}
         showCTAButton={false}
         className=""
         isLoggedIn={true}
@@ -545,6 +538,12 @@ const PatientRegister: React.FC = () => {
       />
 
       <main className="patient-register-main">
+        {/* Título da Página */}
+        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', padding: '0 1rem' }}>
+          <h1 className="page-title">Cadastro de Paciente</h1>
+          <FaqButton />
+        </div>
+
         {/* Tabs de navegação */}
         <div className="patient-tabs-container">
           <div className="patient-tabs">

@@ -3,6 +3,7 @@ import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
 import { Delete, Person, WhatsApp, CalendarToday, Edit, Warning, Add, Email, Check, Close, Folder, FirstPage, LastPage, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { FaqButton } from "../components/FaqButton";
 
 interface MenuItemProps {
   label: string;
@@ -411,13 +412,6 @@ const PatientsList: React.FC = () => {
     return <div>Carregando...</div>;
   }
 
-  const loggedMenuItems = [
-    { label: "Dashboard", href: "#", onClick: () => goToDashboard() },
-    { label: "Agenda", href: "#", onClick: () => goToSchedule() },
-    { label: "Pacientes", href: "#", onClick: () => goToPatients() },
-    { label: "Relatórios", href: "#", onClick: () => alert("Funcionalidade em desenvolvimento") }
-  ];
-
   const handleRevalidateLogin = () => {
     localStorage.removeItem('clinic4us-user-session');
     localStorage.removeItem('clinic4us-remember-me');
@@ -440,8 +434,6 @@ const PatientsList: React.FC = () => {
   return (
     <div className="patients-list">
       <HeaderInternal
-        menuItems={[]}
-        loggedMenuItems={loggedMenuItems}
         showCTAButton={false}
         className="login-header"
         isLoggedIn={true}
@@ -465,29 +457,32 @@ const PatientsList: React.FC = () => {
               justifyContent: 'space-between'
             }}>
               <h1 className="page-title">Lista de Pacientes</h1>
-            <button
-              onClick={handleAddPatient}
-              title="Adicionar novo paciente"
-              style={{
-                background: '#48bb78',
-                color: '#212529',
-                border: 'none',
-                borderRadius: '6px',
-                width: '40px',
-                height: '40px',
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.background = '#38a169'}
-              onMouseOut={(e) => e.currentTarget.style.background = '#48bb78'}
-            >
-              <Add />
-            </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <FaqButton />
+                <button
+                  onClick={handleAddPatient}
+                  title="Adicionar novo paciente"
+                  style={{
+                    background: '#48bb78',
+                    color: '#212529',
+                    border: 'none',
+                    borderRadius: '6px',
+                    width: '40px',
+                    height: '40px',
+                    fontSize: '1.5rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = '#38a169'}
+                  onMouseOut={(e) => e.currentTarget.style.background = '#48bb78'}
+                >
+                  <Add />
+                </button>
+              </div>
           </div>
 
           {/* Filtros da lista de pacientes */}

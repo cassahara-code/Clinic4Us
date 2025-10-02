@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
+import { FaqButton } from "../components/FaqButton";
 
 interface MenuItemProps {
   label: string;
@@ -46,12 +47,6 @@ const PageModel: React.FC = () => {
     return <div>Carregando...</div>;
   }
 
-  const loggedMenuItems = [
-    { label: "Dashboard", href: "#", onClick: () => goToDashboard() },
-    { label: "Agenda", href: "#", onClick: () => goToSchedule() },
-    { label: "Pacientes", href: "#", onClick: () => goToPatients() },
-    { label: "Relatórios", href: "#", onClick: () => alert("Funcionalidade em desenvolvimento") }
-  ];
 
   const handleRevalidateLogin = () => {
     localStorage.removeItem('clinic4us-user-session');
@@ -75,8 +70,6 @@ const PageModel: React.FC = () => {
   return (
     <div className="professional-schedule">
       <HeaderInternal
-        menuItems={[]}
-        loggedMenuItems={loggedMenuItems}
         showCTAButton={false}
         className="login-header"
         isLoggedIn={true}
@@ -97,6 +90,12 @@ const PageModel: React.FC = () => {
         background: '#f8f9fa',
         marginTop: '80px'
       }}>
+        {/* Título da Página */}
+        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <h1 className="page-title">Título da Página</h1>
+          <FaqButton />
+        </div>
+
         {/* Conteúdo da página vai aqui */}
         <div style={{
           display: 'flex',
