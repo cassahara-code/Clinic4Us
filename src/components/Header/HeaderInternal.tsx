@@ -38,6 +38,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
     { label: "Pacientes", href: "?page=patients" },
     { label: "Perfis", href: "?page=admin-profiles" },
     { label: "Planos", href: "?page=admin-plans" },
+    { label: "Meu Perfil", href: "?page=user-profile" },
     { label: "Tipos de Profissionais", href: "?page=admin-professional-types" },
   ],
   showCTAButton = false,
@@ -56,6 +57,9 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false);
+  const [isChangeProfileModalOpen, setIsChangeProfileModalOpen] = useState(false);
+  const [selectedEntity, setSelectedEntity] = useState('');
+  const [selectedProfile, setSelectedProfile] = useState('');
   const [revalidatePassword, setRevalidatePassword] = useState('');
   const [revalidateError, setRevalidateError] = useState('');
   const [showRevalidatePassword, setShowRevalidatePassword] = useState(false);
@@ -291,6 +295,77 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
     return email.substring(0, maxLength) + '...';
   };
 
+  const handleOpenChangeProfileModal = () => {
+    setIsChangeProfileModalOpen(true);
+    setSelectedEntity('');
+    setSelectedProfile('');
+    closeMobileMenu();
+  };
+
+  const handleCloseChangeProfileModal = () => {
+    setIsChangeProfileModalOpen(false);
+    setSelectedEntity('');
+    setSelectedProfile('');
+  };
+
+  const handleConfirmChangeProfile = () => {
+    if (!selectedEntity || !selectedProfile) {
+      alert('Por favor, selecione uma entidade e um perfil.');
+      return;
+    }
+
+    try {
+      // Obter sessão atual
+      const sessionData = localStorage.getItem('clinic4us-user-session');
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+
+        // Atualizar dados da sessão com novo perfil e entidade
+        const newTimestamp = Date.now();
+        session.role = selectedProfile;
+        session.clinicName = selectedEntity;
+        session.alias = selectedEntity;
+        session.loginTime = new Date().toISOString();
+        session.loginTimestamp = newTimestamp;
+        session.sessionDuration = 3600; // Renovar para 1 hora
+
+        // Salvar sessão atualizada
+        localStorage.setItem('clinic4us-user-session', JSON.stringify(session));
+
+        // Renovar timer
+        setTimeRemaining(3600);
+        setTimerKey(prev => prev + 1);
+
+        console.log('Profile changed:', {
+          newProfile: selectedProfile,
+          newEntity: selectedEntity,
+          timestamp: new Date(newTimestamp).toLocaleString()
+        });
+      }
+
+      // Fechar modal e recarregar página para aplicar mudanças
+      handleCloseChangeProfileModal();
+      window.location.reload();
+    } catch (error) {
+      console.error('Erro ao mudar perfil:', error);
+      alert('Erro ao alterar perfil. Tente novamente.');
+    }
+  };
+
+  // Dados simulados para entidades e perfis
+  const availableEntities = [
+    'Clínica Demo',
+    'Hospital Central',
+    'Consultório Médico'
+  ];
+
+  const availableProfiles = [
+    'Cliente admin',
+    'Profissional',
+    'Secretário',
+    'Recepcionista'
+  ];
+
   return (
     <header className={`header-internal ${className} ${isLoggedIn ? 'logged-in' : ''}`}>
       <nav className="navbar">
@@ -348,8 +423,9 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
 
               <button
                 className="user-avatar"
-                onClick={onUserClick}
-                aria-label="Opções do usuário"
+                onClick={() => window.location.href = '?page=user-profile'}
+                aria-label="Meu perfil"
+                title="Meu perfil"
               >
                 <Person className="avatar-icon" />
               </button>
@@ -383,9 +459,17 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                   <div className="mobile-user-info">
                     <div className="mobile-user-email">{truncateEmail(userEmail || '')}</div>
                     <div className="mobile-user-details-row">
-                      <div className="mobile-user-avatar">
+                      <button
+                        className="mobile-user-avatar"
+                        onClick={() => {
+                          window.location.href = '?page=user-profile';
+                          closeMobileMenu();
+                        }}
+                        aria-label="Meu perfil"
+                        title="Meu perfil"
+                      >
                         <Person className="avatar-icon" />
-                      </div>
+                      </button>
                       <div className="mobile-user-details">
                         <div className="mobile-user-role">{userProfile}</div>
                         <div className="mobile-clinic-name">{truncateEmail(clinicName || '', 20)}</div>
@@ -396,7 +480,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                   <div className="profile-actions-row">
                     <button
                       className="mobile-action-button change-profile-button"
-                      onClick={() => alert('Funcionalidade temporariamente indisponível')}
+                      onClick={handleOpenChangeProfileModal}
                       aria-label="Mudar perfil do usuário"
                     >
                       <Refresh /> Mudar perfil
@@ -674,6 +758,177 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#03B4C6'}
               >
                 <Refresh /> Revalidar Login
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Modal de Mudança de Perfil */}
+      {isChangeProfileModalOpen && createPortal(
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 99999
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '2rem',
+            minWidth: '450px',
+            maxWidth: '90vw',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
+          }}>
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '1.5rem'
+            }}>
+              <div style={{
+                fontSize: '3rem',
+                color: '#03B4C6',
+                marginBottom: '0.5rem',
+                display: 'flex',
+                justifyContent: 'center'
+              }}>
+                <Refresh style={{ fontSize: '3rem' }} />
+              </div>
+              <h3 style={{
+                margin: '0 0 0.5rem 0',
+                color: '#2D3748',
+                fontSize: '1.25rem',
+                fontWeight: '600'
+              }}>
+                Mudar Perfil
+              </h3>
+              <p style={{
+                margin: '0',
+                color: '#6c757d',
+                fontSize: '0.9rem'
+              }}>
+                Selecione a entidade e o perfil para o qual deseja alterar.
+              </p>
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                color: '#495057',
+                fontSize: '0.9rem',
+                fontWeight: '500'
+              }}>
+                Entidade:
+              </label>
+              <select
+                value={selectedEntity}
+                onChange={(e) => setSelectedEntity(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #ced4da',
+                  borderRadius: '6px',
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="">Selecione uma entidade</option>
+                {availableEntities.map((entity, index) => (
+                  <option key={index} value={entity}>{entity}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                color: '#495057',
+                fontSize: '0.9rem',
+                fontWeight: '500'
+              }}>
+                Perfil:
+              </label>
+              <select
+                value={selectedProfile}
+                onChange={(e) => setSelectedProfile(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #ced4da',
+                  borderRadius: '6px',
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="">Selecione um perfil</option>
+                {availableProfiles.map((profile, index) => (
+                  <option key={index} value={profile}>{profile}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              gap: '1rem',
+              justifyContent: 'flex-end'
+            }}>
+              <button
+                onClick={handleCloseChangeProfileModal}
+                aria-label="Cancelar mudança de perfil"
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: '1px solid #ced4da',
+                  borderRadius: '6px',
+                  backgroundColor: 'transparent',
+                  color: '#6c757d',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  fontWeight: '500'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#e9ecef';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmChangeProfile}
+                aria-label="Confirmar mudança de perfil"
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: '#03B4C6',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#029AAB'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#03B4C6'}
+              >
+                Confirmar
               </button>
             </div>
           </div>
