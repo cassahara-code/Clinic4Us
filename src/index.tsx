@@ -18,6 +18,7 @@ import AdminFunctionalities from "./admin/AdminFunctionalities";
 import AdminEntities from "./admin/AdminEntities";
 import AdminFaq from "./admin/AdminFaq";
 import AdminProfessionalTypes from "./admin/AdminProfessionalTypes";
+import UserProfile from "./clients/UserProfile";
 import Faq from "./clients/Faq";
 
 const root = ReactDOM.createRoot(
@@ -57,6 +58,8 @@ const AppContent = () => {
       return <AdminProfessionalTypes />;
     case 'faq':
       return <Faq />;
+    case 'user-profile':
+      return <UserProfile />;
     case 'landing':
     default:
       return <LandingPage />;
