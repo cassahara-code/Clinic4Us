@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import "./UserProfile.css";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
