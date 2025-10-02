@@ -2,6 +2,12 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
+import { Delete, Edit, Add, FirstPage, LastPage, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import ConfirmModal from "../components/modals/ConfirmModal";
+import ProfileModal, { ProfileData } from "../components/modals/ProfileModal";
+import { Toast } from "../components/Toast";
+import { useToast } from "../hooks/useToast";
+import { FaqButton } from "../components/FaqButton";
 
 interface MenuItemProps {
   label: string;
@@ -19,26 +25,24 @@ interface UserSession {
   loginTime: string;
 }
 
-interface Plan {
+interface Profile {
   id: string;
   name: string;
-  description: string;
-  price: number;
-  duration: number; // em meses
-  maxUsers: number;
-  features: string[];
-  status: 'Ativo' | 'Inativo';
+  description?: string;
+  type: 'Nativo Cliente' | 'Paciente' | 'Sistema' | 'Nativo Sistema';
+  functionalities: string[];
   createdAt: string;
   updatedAt: string;
 }
 
-const AdminPlans: React.FC = () => {
+const AdminProfiles: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
   const { goToDashboard, goToSchedule, goToPatients } = useNavigation();
+  const { toast, showToast, hideToast } = useToast();
 
   // Estados dos filtros
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'Todos' | 'Ativo' | 'Inativo'>('Ativo');
+  const [typeFilter, setTypeFilter] = useState<'Todos' | 'Nativo Cliente' | 'Paciente' | 'Sistema' | 'Nativo Sistema'>('Todos');
 
   // Estados da paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,106 +53,108 @@ const AdminPlans: React.FC = () => {
 
   // Estados dos modais
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
-  const [planToEdit, setPlanToEdit] = useState<Plan | null>(null);
+  const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
+  const [profileToEdit, setProfileToEdit] = useState<Profile | null>(null);
 
-  // Dados de exemplo dos planos - geração de dados para testar paginação
-  const [plans] = useState<Plan[]>(() => {
-    const basePlans = [
+  // Estados do modal de perfil
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [profileModalMode, setProfileModalMode] = useState<'create' | 'edit'>('create');
+
+  // Dados de exemplo dos perfis
+  const [profiles] = useState<Profile[]>(() => {
+    const baseProfiles = [
       {
         id: '1',
-        name: 'Plano Básico',
-        description: 'Plano ideal para clínicas pequenas',
-        price: 199.90,
-        duration: 12,
-        maxUsers: 5,
-        features: ['Agenda básica', 'Cadastro de pacientes', 'Relatórios simples'],
-        status: 'Ativo' as const,
+        name: 'Secretário',
+        type: 'Nativo Cliente' as const,
+        functionalities: [
+          'Meu perfil',
+          'Inicial',
+          'Fale conosco',
+          'Quem Somos',
+          'Home',
+          'Sair',
+          'FAQ',
+          'Agenda Profissional',
+          'Lista de Pacientes'
+        ],
         createdAt: '2024-01-15T10:00:00Z',
         updatedAt: '2024-02-20T14:30:00Z'
       },
       {
         id: '2',
-        name: 'Plano Professional',
-        description: 'Para clínicas em crescimento',
-        price: 399.90,
-        duration: 12,
-        maxUsers: 15,
-        features: ['Agenda avançada', 'Múltiplos profissionais', 'Relatórios completos', 'Integração WhatsApp'],
-        status: 'Ativo' as const,
+        name: 'Profissional',
+        type: 'Nativo Cliente' as const,
+        functionalities: [
+          'Meu perfil',
+          'Inicial',
+          'Fale conosco',
+          'Home',
+          'Sair',
+          'FAQ',
+          'Agenda Profissional',
+          'Lista de Pacientes',
+          'Paciente'
+        ],
         createdAt: '2024-01-20T09:15:00Z',
         updatedAt: '2024-03-10T16:45:00Z'
       },
       {
         id: '3',
-        name: 'Plano Enterprise',
-        description: 'Para grandes clínicas e hospitais',
-        price: 799.90,
-        duration: 12,
-        maxUsers: 50,
-        features: ['Recursos ilimitados', 'API personalizada', 'Suporte 24/7', 'Customizações'],
-        status: 'Ativo' as const,
+        name: 'Paciente',
+        type: 'Paciente' as const,
+        functionalities: [
+          'FAQ',
+          'Disponib. Profissionais'
+        ],
         createdAt: '2024-02-01T11:30:00Z',
         updatedAt: '2024-03-15T13:20:00Z'
       },
       {
         id: '4',
-        name: 'Plano Teste',
-        description: 'Plano para demonstrações',
-        price: 0,
-        duration: 1,
-        maxUsers: 2,
-        features: ['Funcionalidades limitadas', 'Apenas para testes'],
-        status: 'Inativo' as const,
+        name: 'Manut. Formulários',
+        type: 'Sistema' as const,
+        functionalities: [
+          'Relatórios',
+          'Sair',
+          'FAQ'
+        ],
         createdAt: '2024-01-10T08:00:00Z',
         updatedAt: '2024-01-10T08:00:00Z'
+      },
+      {
+        id: '5',
+        name: 'Adm. Owner',
+        type: 'Nativo Sistema' as const,
+        functionalities: [
+          'Clientes',
+          'Funcionalidades',
+          'Perfis',
+          'Usuários',
+          'Meu perfil',
+          'Relatórios',
+          'Inicial',
+          'Entidades',
+          'Sair',
+          'Usuários da'
+        ],
+        createdAt: '2024-02-05T14:20:00Z',
+        updatedAt: '2024-03-20T10:15:00Z'
       }
     ];
 
-    // Gerar dados adicionais para testar paginação
-    const additionalPlans = [];
-    const planTypes = ['Básico', 'Standard', 'Premium', 'Enterprise', 'Corporate', 'Starter'];
-    const descriptions = [
-      'Ideal para pequenos consultórios',
-      'Perfeito para clínicas médias',
-      'Desenvolvido para hospitais',
-      'Customizado para grandes redes',
-      'Solução corporativa completa',
-      'Plano inicial econômico'
-    ];
-
-    for (let i = 5; i <= 120; i++) {
-      const planType = planTypes[i % planTypes.length];
-      const description = descriptions[i % descriptions.length];
-      const isActive = Math.random() > 0.3; // 70% ativos
-
-      additionalPlans.push({
-        id: i.toString(),
-        name: `${planType} ${i}`,
-        description: `${description} - Versão ${i}`,
-        price: Math.round((Math.random() * 800 + 100) * 100) / 100,
-        duration: [6, 12, 24][Math.floor(Math.random() * 3)],
-        maxUsers: [5, 10, 25, 50, 100][Math.floor(Math.random() * 5)],
-        features: [`Recurso ${i}A`, `Funcionalidade ${i}B`, `Feature ${i}C`],
-        status: isActive ? 'Ativo' as const : 'Inativo' as const,
-        createdAt: new Date(2024, Math.floor(Math.random() * 3), Math.floor(Math.random() * 28) + 1).toISOString(),
-        updatedAt: new Date(2024, Math.floor(Math.random() * 3) + 1, Math.floor(Math.random() * 28) + 1).toISOString()
-      });
-    }
-
-    return [...basePlans, ...additionalPlans];
+    return baseProfiles;
   });
 
-  // Filtrar e ordenar planos
-  const filteredAndSortedPlans = plans
-    .filter(plan => {
-      const matchesSearch = plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           plan.description.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filtrar e ordenar perfis
+  const filteredAndSortedProfiles = profiles
+    .filter(profile => {
+      const matchesSearch = profile.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           profile.type.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus = statusFilter === 'Todos' || plan.status === statusFilter;
+      const matchesType = typeFilter === 'Todos' || profile.type === typeFilter;
 
-      return matchesSearch && matchesStatus;
+      return matchesSearch && matchesType;
     })
     .sort((a, b) => {
       const nameA = a.name.toLowerCase();
@@ -162,17 +168,17 @@ const AdminPlans: React.FC = () => {
     });
 
   // Calcular paginação
-  const totalPages = Math.ceil(filteredAndSortedPlans.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredAndSortedProfiles.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedPlans = filteredAndSortedPlans.slice(startIndex, endIndex);
+  const paginatedProfiles = filteredAndSortedProfiles.slice(startIndex, endIndex);
 
   // Função para rolar para o início da lista
   const scrollToTop = () => {
     const listContainer = document.querySelector('.admin-plans-list-container');
     if (listContainer) {
       const containerRect = listContainer.getBoundingClientRect();
-      const offset = 100; // Margem superior para não ficar escondido pelo header
+      const offset = 100;
       const targetPosition = window.pageYOffset + containerRect.top - offset;
 
       window.scrollTo({
@@ -180,7 +186,6 @@ const AdminPlans: React.FC = () => {
         behavior: 'smooth'
       });
     } else {
-      // Fallback: rolar para o topo da página
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -208,13 +213,13 @@ const AdminPlans: React.FC = () => {
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // Reset para primeira página
+    setCurrentPage(1);
     setTimeout(scrollToTop, 100);
   };
 
   const handleSortOrderChange = (newSortOrder: 'asc' | 'desc') => {
     setSortOrder(newSortOrder);
-    setCurrentPage(1); // Reset para primeira página
+    setCurrentPage(1);
     setTimeout(scrollToTop, 100);
   };
 
@@ -230,10 +235,10 @@ const AdminPlans: React.FC = () => {
       alias: "Admin Demo",
       clinicName: "Admin Dashboard",
       role: "Administrator",
-      permissions: ["admin_access", "manage_plans", "view_all"],
+      permissions: ["admin_access", "manage_profiles", "view_all"],
       menuItems: [
         { label: "Dashboard", href: "/dashboard" },
-        { label: "Planos", href: "/admin-plans" },
+        { label: "Perfis", href: "/admin-profiles" },
         { label: "Usuários", href: "/admin-users" },
         { label: "Relatórios", href: "/admin-reports" }
       ],
@@ -246,108 +251,82 @@ const AdminPlans: React.FC = () => {
   // Reset página quando filtros ou ordenação mudarem
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, sortOrder]);
-
-  // Função para formatar data
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
-  };
-
-  // Função para formatar preço
-  const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(price);
-  };
+  }, [searchTerm, typeFilter, sortOrder]);
 
   const clearFilters = () => {
     setSearchTerm('');
-    setStatusFilter('Ativo');
+    setTypeFilter('Todos');
     setSortOrder('asc');
     setCurrentPage(1);
   };
 
-  const handleAddPlan = () => {
-    alert("Funcionalidade de adicionar plano em desenvolvimento");
+  const handleAddProfile = () => {
+    setProfileModalMode('create');
+    setProfileToEdit(null);
+    setIsProfileModalOpen(true);
   };
 
-  const handlePlanRowClick = (planId: string) => {
-    const plan = plans.find(p => p.id === planId);
-    if (plan) {
-      setPlanToEdit(plan);
-      setIsEditModalOpen(true);
+  const handleSaveProfile = (data: ProfileData) => {
+    // Converter functionalities de array de objetos para array de strings incluídas
+    const includedFunctionalities = data.functionalities
+      .filter(f => f.included)
+      .map(f => f.name);
+
+    if (profileModalMode === 'create') {
+      const newProfile: Profile = {
+        id: `profile-${Date.now()}`,
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        functionalities: includedFunctionalities,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      console.log('Novo perfil criado:', newProfile);
+      showToast('Perfil criado com sucesso!', 'success');
+    } else {
+      console.log('Perfil editado:', {
+        ...profileToEdit,
+        name: data.name,
+        description: data.description,
+        type: data.type,
+        functionalities: includedFunctionalities,
+        updatedAt: new Date().toISOString()
+      });
+      showToast('Perfil editado com sucesso!', 'success');
     }
+    setIsProfileModalOpen(false);
   };
 
   const handleDeleteConfirm = async () => {
-    if (!planToDelete) return;
+    if (!profileToDelete) return;
 
     try {
-      console.log(`Excluindo plano: ${planToDelete.name} (ID: ${planToDelete.id})`);
-
-      // TODO: Implementar chamada da API
-      // await deletePlanAPI(planToDelete.id);
-
-      // Fechar modal
+      console.log(`Excluindo perfil: ${profileToDelete.name} (ID: ${profileToDelete.id})`);
       setIsDeleteModalOpen(false);
-      setPlanToDelete(null);
-
-      // TODO: Atualizar lista de planos após exclusão
-      // refetchPlans();
-
+      setProfileToDelete(null);
+      showToast('Perfil excluído com sucesso!', 'success');
     } catch (error) {
-      console.error('Erro ao excluir plano:', error);
+      console.error('Erro ao excluir perfil:', error);
+      showToast('Erro ao excluir perfil', 'error');
     }
   };
 
   const handleDeleteCancel = () => {
     setIsDeleteModalOpen(false);
-    setPlanToDelete(null);
+    setProfileToDelete(null);
   };
 
-  const handleEditCancel = () => {
-    setIsEditModalOpen(false);
-    setPlanToEdit(null);
-  };
+  const handleProfileAction = (action: string, profileId: string) => {
+    const profile = profiles.find(p => p.id === profileId);
 
-  const handleEditSave = () => {
-    if (!planToEdit) return;
-
-    try {
-      console.log(`Salvando alterações do plano: ${planToEdit.name} (ID: ${planToEdit.id})`);
-
-      // TODO: Implementar chamada da API
-      // await updatePlanAPI(planToEdit);
-
-      // Fechar modal
-      setIsEditModalOpen(false);
-      setPlanToEdit(null);
-
-      // TODO: Atualizar lista de planos após edição
-      // refetchPlans();
-
-    } catch (error) {
-      console.error('Erro ao atualizar plano:', error);
-    }
-  };
-
-  const handlePlanAction = (action: string, planId: string) => {
-    const plan = plans.find(p => p.id === planId);
-
-    if (action === 'edit' && plan) {
-      setPlanToEdit(plan);
-      setIsEditModalOpen(true);
-    } else if (action === 'delete' && plan) {
-      setPlanToDelete(plan);
+    if (action === 'edit' && profile) {
+      setProfileModalMode('edit');
+      setProfileToEdit(profile);
+      setIsProfileModalOpen(true);
+    } else if (action === 'delete' && profile) {
+      setProfileToDelete(profile);
       setIsDeleteModalOpen(true);
-    } else if (action === 'duplicate' && plan) {
-      console.log(`Duplicando plano: ${plan.name}`);
-      alert("Funcionalidade de duplicar plano em desenvolvimento");
-    } else if (action === 'toggle-status' && plan) {
-      console.log(`Alterando status do plano: ${plan.name}`);
-      alert("Funcionalidade de alterar status em desenvolvimento");
     }
   };
 
@@ -355,12 +334,6 @@ const AdminPlans: React.FC = () => {
     return <div>Carregando...</div>;
   }
 
-  const loggedMenuItems = [
-    { label: "Dashboard", href: "#", onClick: () => goToDashboard() },
-    { label: "Agenda", href: "#", onClick: () => goToSchedule() },
-    { label: "Pacientes", href: "#", onClick: () => goToPatients() },
-    { label: "Admin", href: "#", onClick: () => alert("Menu Admin em desenvolvimento") }
-  ];
 
   const handleRevalidateLogin = () => {
     localStorage.removeItem('clinic4us-user-session');
@@ -384,8 +357,6 @@ const AdminPlans: React.FC = () => {
   return (
     <div className="professional-schedule">
       <HeaderInternal
-        menuItems={[]}
-        loggedMenuItems={loggedMenuItems}
         showCTAButton={false}
         className="login-header"
         isLoggedIn={true}
@@ -412,7 +383,7 @@ const AdminPlans: React.FC = () => {
           margin: '0',
           padding: '0'
         }}>
-          {/* Título da Lista de Planos */}
+          {/* Título da Lista de Perfis */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -425,34 +396,37 @@ const AdminPlans: React.FC = () => {
               fontWeight: '600',
               color: '#6c757d'
             }}>
-              Gestão de Planos
+              Gestão de Perfis
             </h1>
-            <button
-              onClick={handleAddPlan}
-              title="Adicionar novo plano"
-              style={{
-                background: '#48bb78',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                width: '40px',
-                height: '40px',
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.background = '#38a169'}
-              onMouseOut={(e) => e.currentTarget.style.background = '#48bb78'}
-            >
-              +
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <FaqButton />
+              <button
+                onClick={handleAddProfile}
+                title="Adicionar novo perfil"
+                style={{
+                  background: '#48bb78',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  width: '40px',
+                  height: '40px',
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = '#38a169'}
+                onMouseOut={(e) => e.currentTarget.style.background = '#48bb78'}
+              >
+                <Add />
+              </button>
+            </div>
           </div>
 
-          {/* Filtros da lista de planos */}
+          {/* Filtros da lista de perfis */}
           <div className="schedule-filters" style={{
             background: 'white',
             borderRadius: '12px',
@@ -474,10 +448,10 @@ const AdminPlans: React.FC = () => {
                   fontSize: '0.95rem',
                   color: '#6c757d',
                   marginBottom: '0.5rem'
-                }}>Nome do Plano</label>
+                }}>Nome do Perfil</label>
                 <input
                   type="text"
-                  placeholder="Buscar plano"
+                  placeholder="Buscar perfil"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   style={{
@@ -488,22 +462,32 @@ const AdminPlans: React.FC = () => {
                     fontSize: '1rem',
                     color: '#495057',
                     height: '40px',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    outline: 'none',
+                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#03B4C6';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#ced4da';
+                    e.target.style.boxShadow = 'none';
                   }}
                 />
               </div>
 
-              {/* Status */}
+              {/* Tipo de Perfil */}
               <div>
                 <label style={{
                   display: 'block',
                   fontSize: '0.95rem',
                   color: '#6c757d',
                   marginBottom: '0.5rem'
-                }}>Status</label>
+                }}>Tipo de Perfil</label>
                 <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value as any)}
                   style={{
                     width: '100%',
                     padding: '0.375rem 0.5rem',
@@ -512,12 +496,24 @@ const AdminPlans: React.FC = () => {
                     fontSize: '1rem',
                     color: '#495057',
                     height: '40px',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    outline: 'none',
+                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#03B4C6';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#ced4da';
+                    e.target.style.boxShadow = 'none';
                   }}
                 >
-                  <option value="Ativo">Ativo</option>
                   <option value="Todos">Todos</option>
-                  <option value="Inativo">Inativo</option>
+                  <option value="Nativo Cliente">Nativo Cliente</option>
+                  <option value="Paciente">Paciente</option>
+                  <option value="Sistema">Sistema</option>
+                  <option value="Nativo Sistema">Nativo Sistema</option>
                 </select>
               </div>
 
@@ -540,7 +536,17 @@ const AdminPlans: React.FC = () => {
                     fontSize: '1rem',
                     color: '#495057',
                     height: '40px',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    outline: 'none',
+                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#03B4C6';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#ced4da';
+                    e.target.style.boxShadow = 'none';
                   }}
                 >
                   <option value="asc">A → Z</option>
@@ -556,35 +562,28 @@ const AdminPlans: React.FC = () => {
               }}>
                 <button
                   onClick={clearFilters}
-                  title="Limpar todos os filtros"
+                  title="Limpar filtros"
                   style={{
                     width: '40px',
                     height: '40px',
-                    background: 'transparent',
-                    color: '#6c757d',
-                    border: '1px solid #e9ecef',
-                    borderRadius: '6px',
-                    fontSize: '1.2rem',
+                    background: '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s ease'
                   }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.background = '#f8f9fa';
-                    e.currentTarget.style.color = '#495057';
-                    e.currentTarget.style.borderColor = '#ced4da';
-                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#5a6268';
                   }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = '#6c757d';
-                    e.currentTarget.style.borderColor = '#e9ecef';
-                    e.currentTarget.style.transform = 'translateY(0)';
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#6c757d';
                   }}
                 >
-                  🗑️
+                  <Delete fontSize="small" />
                 </button>
               </div>
             </div>
@@ -601,10 +600,10 @@ const AdminPlans: React.FC = () => {
                 color: '#4a5568',
                 fontSize: '0.9rem'
               }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPlans.length)} de <strong style={{
+                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedProfiles.length)} de <strong style={{
                   color: '#2d3748',
                   fontWeight: '600'
-                }}>{filteredAndSortedPlans.length}</strong> planos
+                }}>{filteredAndSortedProfiles.length}</strong> perfis
               </div>
 
               <div style={{
@@ -661,7 +660,7 @@ const AdminPlans: React.FC = () => {
                       transition: 'background-color 0.2s'
                     }}
                   >
-                    ⏪
+                    <FirstPage />
                   </button>
 
                   <button
@@ -679,7 +678,7 @@ const AdminPlans: React.FC = () => {
                       transition: 'background-color 0.2s'
                     }}
                   >
-                    ◀
+                    <ChevronLeft />
                   </button>
 
                   <span style={{
@@ -706,7 +705,7 @@ const AdminPlans: React.FC = () => {
                       transition: 'background-color 0.2s'
                     }}
                   >
-                    ▶
+                    <ChevronRight />
                   </button>
 
                   <button
@@ -724,90 +723,70 @@ const AdminPlans: React.FC = () => {
                       transition: 'background-color 0.2s'
                     }}
                   >
-                    ⏩
+                    <LastPage />
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Lista de planos */}
+          {/* Lista de perfis */}
           <div className="admin-plans-list-container">
-            <div className="admin-plans-table">
-              <div className="admin-plans-table-header">
-                <div className="admin-plans-header-cell">Nome</div>
-                <div className="admin-plans-header-cell">Descrição</div>
-                <div className="admin-plans-header-cell">Preço</div>
-                <div className="admin-plans-header-cell">Duração</div>
-                <div className="admin-plans-header-cell">Max Usuários</div>
-                <div className="admin-plans-header-cell">Status</div>
-                <div className="admin-plans-header-cell">Criado em</div>
-                <div className="admin-plans-header-cell">Ações</div>
+            <div className="admin-plans-table" style={{ display: 'block' }}>
+              <div className="admin-plans-table-header" style={{
+                display: 'flex',
+                gridTemplateColumns: 'unset'
+              }}>
+                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '0 0 200px' }}>Perfil</div>
+                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '0 0 200px' }}>Tipo</div>
+                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '1 1 auto' }}>Funcionalidades</div>
+                <div className="admin-plans-header-cell" style={{ textAlign: 'right', flex: '0 0 140px' }}>Ações</div>
               </div>
 
               <div className="admin-plans-table-body">
-                {paginatedPlans.map((plan) => (
+                {paginatedProfiles.map((profile) => (
                   <div
-                    key={plan.id}
+                    key={profile.id}
                     className="admin-plans-table-row"
-                    onClick={() => handlePlanRowClick(plan.id)}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: 'default', display: 'flex', gridTemplateColumns: 'unset' }}
                   >
-                    <div className="admin-plans-cell admin-plans-name" data-label="Nome">
-                      {plan.name}
+                    <div className="admin-plans-cell admin-plans-name" data-label="Perfil" style={{ textAlign: 'left', flex: '0 0 200px' }}>
+                      {profile.name}
                     </div>
-                    <div className="admin-plans-cell admin-plans-description" data-label="Descrição">
-                      {plan.description}
+                    <div className="admin-plans-cell admin-plans-description" data-label="Tipo" style={{ textAlign: 'left', flex: '0 0 200px' }}>
+                      {profile.type}
                     </div>
-                    <div className="admin-plans-cell admin-plans-price" data-label="Preço">
-                      {formatPrice(plan.price)}
+                    <div className="admin-plans-cell admin-plans-description" data-label="Funcionalidades" style={{
+                      textAlign: 'left',
+                      flex: '1 1 auto',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'normal',
+                      wordBreak: 'break-word'
+                    }}>
+                      {profile.functionalities.join(', ')}
                     </div>
-                    <div className="admin-plans-cell admin-plans-duration" data-label="Duração">
-                      {plan.duration} {plan.duration === 1 ? 'mês' : 'meses'}
-                    </div>
-                    <div className="admin-plans-cell admin-plans-users" data-label="Max Usuários">
-                      {plan.maxUsers} usuários
-                    </div>
-                    <div className="admin-plans-cell admin-plans-status" data-label="Status">
-                      <span className={`plan-status-indicator ${plan.status === 'Ativo' ? 'active' : 'inactive'}`}>
-                        {plan.status}
-                      </span>
-                    </div>
-                    <div className="admin-plans-cell admin-plans-created" data-label="Criado em">
-                      {formatDate(plan.createdAt)}
-                    </div>
-                    <div className="admin-plans-cell admin-plans-actions" data-label="Ações">
+                    <div className="admin-plans-cell admin-plans-actions" data-label="Ações" style={{
+                      textAlign: 'right',
+                      flex: '0 0 140px',
+                      justifyContent: 'flex-end',
+                      display: 'flex'
+                    }}>
                       <button
-                        className="admin-action-btn"
-                        onClick={(e) => { e.stopPropagation(); handlePlanAction('edit', plan.id); }}
-                        title="Editar plano"
-                        style={{ backgroundColor: '#ffc107', color: '#212529' }}
+                        className="action-btn"
+                        onClick={(e) => { e.stopPropagation(); handleProfileAction('edit', profile.id); }}
+                        title="Editar perfil"
+                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
-                        ✏️
+                        <Edit fontSize="small" />
                       </button>
                       <button
-                        className="admin-action-btn"
-                        onClick={(e) => { e.stopPropagation(); handlePlanAction('duplicate', plan.id); }}
-                        title="Duplicar plano"
-                        style={{ backgroundColor: '#17a2b8', color: 'white' }}
+                        className="action-btn"
+                        onClick={(e) => { e.stopPropagation(); handleProfileAction('delete', profile.id); }}
+                        title="Excluir perfil"
+                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
-                        📋
-                      </button>
-                      <button
-                        className="admin-action-btn"
-                        onClick={(e) => { e.stopPropagation(); handlePlanAction('toggle-status', plan.id); }}
-                        title="Alterar status"
-                        style={{ backgroundColor: plan.status === 'Ativo' ? '#dc3545' : '#28a745', color: 'white' }}
-                      >
-                        {plan.status === 'Ativo' ? '🚫' : '✅'}
-                      </button>
-                      <button
-                        className="admin-action-btn"
-                        onClick={(e) => { e.stopPropagation(); handlePlanAction('delete', plan.id); }}
-                        title="Excluir plano"
-                        style={{ backgroundColor: '#dc3545', color: 'white' }}
-                      >
-                        🗑️
+                        <Delete fontSize="small" />
                       </button>
                     </div>
                   </div>
@@ -836,10 +815,10 @@ const AdminPlans: React.FC = () => {
                 color: '#4a5568',
                 fontSize: '0.9rem'
               }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPlans.length)} de <strong style={{
+                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedProfiles.length)} de <strong style={{
                   color: '#2d3748',
                   fontWeight: '600'
-                }}>{filteredAndSortedPlans.length}</strong> planos
+                }}>{filteredAndSortedProfiles.length}</strong> perfis
               </div>
 
               <div style={{
@@ -896,7 +875,7 @@ const AdminPlans: React.FC = () => {
                       transition: 'background-color 0.2s'
                     }}
                   >
-                    ⏪
+                    <FirstPage />
                   </button>
 
                   <button
@@ -914,7 +893,7 @@ const AdminPlans: React.FC = () => {
                       transition: 'background-color 0.2s'
                     }}
                   >
-                    ◀
+                    <ChevronLeft />
                   </button>
 
                   <span style={{
@@ -941,7 +920,7 @@ const AdminPlans: React.FC = () => {
                       transition: 'background-color 0.2s'
                     }}
                   >
-                    ▶
+                    <ChevronRight />
                   </button>
 
                   <button
@@ -959,7 +938,7 @@ const AdminPlans: React.FC = () => {
                       transition: 'background-color 0.2s'
                     }}
                   >
-                    ⏩
+                    <LastPage />
                   </button>
                 </div>
               </div>
@@ -973,115 +952,45 @@ const AdminPlans: React.FC = () => {
         className="login-footer-component"
       />
 
+      {/* Modal de criar/editar perfil */}
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        onSave={handleSaveProfile}
+        mode={profileModalMode}
+        initialData={profileToEdit ? {
+          name: profileToEdit.name,
+          description: profileToEdit.description || '',
+          type: profileToEdit.type,
+          functionalities: profileToEdit.functionalities.map(name => ({
+            name,
+            included: true
+          }))
+        } : undefined}
+      />
+
       {/* Modal de confirmação de exclusão */}
-      {isDeleteModalOpen && planToDelete && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Confirmar Exclusão</h3>
-            </div>
-            <div className="modal-body">
-              <p>
-                Tem certeza que deseja excluir o plano <strong>{planToDelete.name}</strong>?
-              </p>
-              <p className="warning-text">
-                ⚠️ Esta ação não poderá ser desfeita e afetará todos os usuários que utilizam este plano.
-              </p>
-            </div>
-            <div className="modal-actions">
-              <button
-                className="btn-cancel"
-                onClick={handleDeleteCancel}
-              >
-                Cancelar
-              </button>
-              <button
-                className="btn-delete"
-                onClick={handleDeleteConfirm}
-              >
-                Excluir Plano
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir o perfil ${profileToDelete?.name}?`}
+        warningMessage="Esta ação não poderá ser desfeita e afetará todos os usuários que utilizam este perfil."
+        confirmButtonText="Excluir Perfil"
+        cancelButtonText="Cancelar"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        type="danger"
+      />
 
-      {/* Modal de edição */}
-      {isEditModalOpen && planToEdit && (
-        <div className="modal-overlay">
-          <div className="modal-content admin-plans-modal-content">
-            <div className="modal-header">
-              <h3>Editar Plano</h3>
-            </div>
-            <div className="modal-body">
-              <div className="admin-plans-form-field">
-                <label>Nome do Plano</label>
-                <input
-                  type="text"
-                  value={planToEdit.name}
-                  onChange={(e) => setPlanToEdit({ ...planToEdit, name: e.target.value })}
-                />
-              </div>
-
-              <div className="admin-plans-form-field">
-                <label>Descrição</label>
-                <textarea
-                  value={planToEdit.description}
-                  onChange={(e) => setPlanToEdit({ ...planToEdit, description: e.target.value })}
-                  rows={3}
-                />
-              </div>
-
-              <div className="admin-plans-form-grid">
-                <div className="admin-plans-form-field">
-                  <label>Preço (R$)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={planToEdit.price}
-                    onChange={(e) => setPlanToEdit({ ...planToEdit, price: parseFloat(e.target.value) || 0 })}
-                  />
-                </div>
-
-                <div className="admin-plans-form-field">
-                  <label>Max Usuários</label>
-                  <input
-                    type="number"
-                    value={planToEdit.maxUsers}
-                    onChange={(e) => setPlanToEdit({ ...planToEdit, maxUsers: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
-              </div>
-
-              <div className="admin-plans-form-field">
-                <label>Funcionalidades (uma por linha)</label>
-                <textarea
-                  value={planToEdit.features.join('\n')}
-                  onChange={(e) => setPlanToEdit({ ...planToEdit, features: e.target.value.split('\n').filter(f => f.trim()) })}
-                  rows={4}
-                />
-              </div>
-            </div>
-            <div className="modal-actions">
-              <button
-                className="btn-cancel"
-                onClick={handleEditCancel}
-              >
-                Cancelar
-              </button>
-              <button
-                className="btn-delete"
-                onClick={handleEditSave}
-                style={{ background: '#28a745' }}
-              >
-                Salvar Alterações
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Toast de notificação */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
   );
 };
 
-export default AdminPlans;
+export default AdminProfiles;

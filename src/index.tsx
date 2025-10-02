@@ -13,6 +13,11 @@ import PatientsList from "./clients/PatientsList";
 import PatientRegister from "./clients/PatientRegister";
 import PageModel from "./clients/PageModel";
 import AdminPlans from "./admin/AdminPlans";
+import AdminProfiles from "./admin/AdminProfiles";
+import AdminFunctionalities from "./admin/AdminFunctionalities";
+import AdminEntities from "./admin/AdminEntities";
+import AdminFaq from "./admin/AdminFaq";
+import Faq from "./clients/Faq";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -39,6 +44,16 @@ const AppContent = () => {
       return <PageModel />;
     case 'admin-plans':
       return <AdminPlans />;
+    case 'admin-profiles':
+      return <AdminProfiles />;
+    case 'admin-functionalities':
+      return <AdminFunctionalities />;
+    case 'admin-entities':
+      return <AdminEntities />;
+    case 'admin-faq':
+      return <AdminFaq />;
+    case 'faq':
+      return <Faq />;
     case 'landing':
     default:
       return <LandingPage />;

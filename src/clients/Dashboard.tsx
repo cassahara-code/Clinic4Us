@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
+import { FaqButton } from "../components/FaqButton";
 import { CalendarToday, CheckCircle, Assignment, Cake, FirstPage, LastPage, ChevronLeft, ChevronRight, Delete, WhatsApp, Email, Folder } from '@mui/icons-material';
 
 interface MenuItemProps {
@@ -227,8 +228,6 @@ const Dashboard: React.FC = () => {
   return (
     <div className="login-page">
       <HeaderInternal
-        menuItems={[]}
-        loggedMenuItems={loggedMenuItems}
         showCTAButton={false}
         className="login-header"
         isLoggedIn={true}
@@ -247,8 +246,9 @@ const Dashboard: React.FC = () => {
           <div className="dashboard-content">
 
             {/* Título da Página */}
-            <div className="dashboard-page-header">
+            <div className="dashboard-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h1 className="dashboard-page-title">Dashboard</h1>
+              <FaqButton />
             </div>
 
               {/* Cards de Estatísticas */}

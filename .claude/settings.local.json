@@ -37,7 +37,15 @@
       "Bash(rg:*)",
       "Bash(del \"C:\\Users\\Cassa\\OneDrive\\Área de Trabalho\\PROJETOS\\Clinic4Us\\src\\clients\\ProfessionalSchedule.css\")",
       "Bash(npm run start:*)",
-      "Bash(npx babel:*)"
+      "Bash(npx babel:*)",
+      "Bash(for file in admin/AdminProfiles.tsx admin/AdminFunctionalities.tsx clients/Dashboard.tsx clients/ProfessionalSchedule.tsx clients/PatientRegister.tsx clients/PageModel.tsx)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(done)",
+      "Bash(for file in admin/AdminFunctionalities.tsx admin/AdminProfiles.tsx clients/Dashboard.tsx clients/PageModel.tsx clients/PatientRegister.tsx clients/ProfessionalSchedule.tsx)",
+      "Bash(do echo \"=== Removing from $file ===\")",
+      "Bash(for file in admin/AdminFunctionalities.tsx admin/AdminProfiles.tsx admin/AdminPlans.tsx clients/ProfessionalSchedule.tsx clients/PageModel.tsx clients/PatientsList.tsx)",
+      "Bash(do sed -i '/menuItems={\\[\\]}/d' \"$file\")",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

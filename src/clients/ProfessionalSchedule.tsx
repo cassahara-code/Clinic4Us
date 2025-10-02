@@ -4,6 +4,7 @@ import { FooterInternal } from "../components/Footer";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
 import { useNavigation } from "../contexts/RouterContext";
 import { CalendarToday, Delete } from '@mui/icons-material';
+import { FaqButton } from "../components/FaqButton";
 
 interface MenuItemProps {
   label: string;
@@ -892,8 +893,6 @@ const ProfessionalSchedule: React.FC = () => {
         `}
       </style>
       <HeaderInternal
-        menuItems={[]}
-        loggedMenuItems={loggedMenuItems}
         showCTAButton={false}
         className="login-header"
         isLoggedIn={true}
@@ -917,20 +916,7 @@ const ProfessionalSchedule: React.FC = () => {
               justifyContent: 'space-between'
             }}>
               <h1 className="page-title">Agenda Profissional</h1>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                background: '#03B4C6',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontSize: '18px',
-                cursor: 'pointer'
-              }}>
-                ?
-              </div>
+              <FaqButton />
             </div>
 
             {/* Filtros da Agenda */}
