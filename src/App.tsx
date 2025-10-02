@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Login, AliasRegister, Dashboard, ProfessionalSchedule, PatientsList, PageModel } from './clients';
 import Faq from './clients/Faq';
 import LandingPage from './components/LandingPage';
+import { AdminProfessionalTypes } from './admin';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients' | 'page-model' | 'faq'>('landing');
+  const [currentPage, setCurrentPage] = useState<'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients' | 'page-model' | 'faq' | 'admin-professional-types'>('landing');
 
   useEffect(() => {
     // Check URL parameter to determine which page to show
@@ -25,6 +26,8 @@ function App() {
       setCurrentPage('page-model');
     } else if (page === 'faq') {
       setCurrentPage('faq');
+    } else if (page === 'admin-professional-types') {
+      setCurrentPage('admin-professional-types');
     } else {
       setCurrentPage('landing');
     }
@@ -56,6 +59,10 @@ function App() {
 
   if (currentPage === 'faq') {
     return <Faq />;
+  }
+
+  if (currentPage === 'admin-professional-types') {
+    return <AdminProfessionalTypes />;
   }
 
   return <LandingPage />;
