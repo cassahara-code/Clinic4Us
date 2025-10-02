@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type PageType = 'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients' | 'patient-register' | 'page-model' | 'admin-plans' | 'admin-profiles' | 'admin-functionalities' | 'admin-entities' | 'admin-faq' | 'faq';
+type PageType = 'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients' | 'patient-register' | 'page-model' | 'admin-plans' | 'admin-profiles' | 'admin-functionalities' | 'admin-entities' | 'admin-faq' | 'admin-professional-types' | 'faq';
 
 interface RouterContextType {
   currentPage: PageType;
@@ -23,7 +23,7 @@ export const RouterProvider: React.FC<RouterProviderProps> = ({ children }) => {
     const urlParams = new URLSearchParams(window.location.search);
     const page = urlParams.get('page') as PageType;
 
-    const validPages: PageType[] = ['landing', 'login', 'alias-register', 'dashboard', 'schedule', 'patients', 'patient-register', 'page-model', 'admin-plans', 'admin-profiles', 'admin-functionalities', 'admin-entities', 'admin-faq', 'faq'];
+    const validPages: PageType[] = ['landing', 'login', 'alias-register', 'dashboard', 'schedule', 'patients', 'patient-register', 'page-model', 'admin-plans', 'admin-profiles', 'admin-functionalities', 'admin-entities', 'admin-faq', 'admin-professional-types', 'faq'];
 
     if (page && validPages.includes(page)) {
       return page;
@@ -134,6 +134,7 @@ export const useNavigation = () => {
     goToAdminProfiles: () => navigateTo('admin-profiles'),
     goToAdminFunctionalities: () => navigateTo('admin-functionalities'),
     goToAdminEntities: () => navigateTo('admin-entities'),
-    goToAdminFaq: () => navigateTo('admin-faq')
+    goToAdminFaq: () => navigateTo('admin-faq'),
+    goToAdminProfessionalTypes: () => navigateTo('admin-professional-types'),
   };
 };

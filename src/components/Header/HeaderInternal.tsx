@@ -38,6 +38,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
     { label: "Pacientes", href: "?page=patients" },
     { label: "Perfis", href: "?page=admin-profiles" },
     { label: "Planos", href: "?page=admin-plans" },
+    { label: "Tipos de Profissionais", href: "?page=admin-professional-types" },
   ],
   showCTAButton = false,
   ctaButtonText = "Ação",
