@@ -349,6 +349,11 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               <select
                 value={formData.professional}
                 onChange={(e) => setFormData({ ...formData, professional: e.target.value })}
+                style={{
+                  minWidth: '120px',
+                  width: '100%',
+                  paddingRight: '2rem'
+                }}
               >
                 <option value="">Selecione um profissional</option>
                 <option value="Dr. João Silva">Dr. João Silva</option>
@@ -405,6 +410,11 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 <select
                   value={formData.team}
                   onChange={(e) => setFormData({ ...formData, team: e.target.value })}
+                  style={{
+                    minWidth: '120px',
+                    width: '100%',
+                    paddingRight: '2rem'
+                  }}
                 >
                   <option value="">Selecione uma equipe</option>
                   <option value="Equipe A">Equipe A</option>
@@ -419,6 +429,11 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 <select
                   value={formData.serviceType}
                   onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
+                  style={{
+                    minWidth: '120px',
+                    width: '100%',
+                    paddingRight: '2rem'
+                  }}
                 >
                   <option value="">Tipo de serviço</option>
                   <option value="Consulta">Consulta</option>

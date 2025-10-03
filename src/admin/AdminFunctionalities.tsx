@@ -459,7 +459,9 @@ const AdminFunctionalities: React.FC = () => {
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
                   style={{
+                    minWidth: '120px',
                     width: '100%',
+                    paddingRight: '2rem',
                     padding: '0.375rem 0.5rem',
                     border: '1px solid #ced4da',
                     borderRadius: '4px',

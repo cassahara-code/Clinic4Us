@@ -396,6 +396,11 @@ const EntityModal: React.FC<EntityModalProps> = ({
               <select
                 value={formData.startTime}
                 onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                style={{
+                  minWidth: '120px',
+                  width: '100%',
+                  paddingRight: '2rem'
+                }}
               >
                 {Array.from({ length: 24 }, (_, i) => {
                   const hour = i.toString().padStart(2, '0');
@@ -413,6 +418,11 @@ const EntityModal: React.FC<EntityModalProps> = ({
               <select
                 value={formData.endTime}
                 onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                style={{
+                  minWidth: '120px',
+                  width: '100%',
+                  paddingRight: '2rem'
+                }}
               >
                 {Array.from({ length: 24 }, (_, i) => {
                   const hour = i.toString().padStart(2, '0');

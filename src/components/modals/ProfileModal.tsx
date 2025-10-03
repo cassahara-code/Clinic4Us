@@ -198,6 +198,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                style={{
+                  minWidth: '120px',
+                  width: '100%',
+                  paddingRight: '2rem'
+                }}
               >
                 <option value="Nativo Cliente">Nativo Cliente</option>
                 <option value="Paciente">Paciente</option>

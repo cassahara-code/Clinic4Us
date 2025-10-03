@@ -159,6 +159,11 @@ const FunctionalityModal: React.FC<FunctionalityModalProps> = ({
             <select
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              style={{
+                minWidth: '120px',
+                width: '100%',
+                paddingRight: '2rem'
+              }}
             >
               <option value="">Categoria</option>
               {AVAILABLE_CATEGORIES.map((cat, index) => (
@@ -306,6 +311,9 @@ const FunctionalityModal: React.FC<FunctionalityModalProps> = ({
                 setFormData({ ...formData, relatedFAQs: selectedOptions });
               }}
               style={{
+                minWidth: '120px',
+                width: '100%',
+                paddingRight: '2rem',
                 minHeight: '120px',
                 padding: '0.5rem'
               }}
