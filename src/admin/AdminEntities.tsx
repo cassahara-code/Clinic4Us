@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Person, Add, ViewModule, FilterAltOff } from '@mui/icons-material';
+import { Delete, Edit, Person, Add, ViewModule, FilterAltOff, FirstPage, ChevronLeft, ChevronRight, LastPage } from '@mui/icons-material';
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import EntityModal, { EntityData } from "../components/modals/EntityModal";
@@ -279,20 +279,11 @@ const AdminEntities: React.FC = () => {
           padding: '0'
         }}>
           {/* Título */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '1.5rem'
-          }}>
-            <h1 style={{
-              margin: '0',
-              fontSize: '1.3rem',
-              fontWeight: '600',
-              color: '#6c757d'
-            }}>
-              Entidades
-            </h1>
+          <div className="page-header-container">
+            <div className="page-header-content">
+              <h1 className="page-header-title">Entidades</h1>
+              <p className="page-header-description">Gestão de clínicas e unidades cadastradas no sistema.</p>
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaqButton />
               <button

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add, FilterAltOff } from '@mui/icons-material';
+import { Delete, Edit, Add, FilterAltOff, FirstPage, ChevronLeft, ChevronRight, LastPage } from '@mui/icons-material';
 import ConfirmModal from "../components/modals/ConfirmModal";
 import ProfileModal, { ProfileData } from "../components/modals/ProfileModal";
 import { Toast } from "../components/Toast";
@@ -371,20 +371,11 @@ const AdminProfiles: React.FC = () => {
           padding: '0'
         }}>
           {/* Título da Lista de Perfis */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '1.5rem'
-          }}>
-            <h1 style={{
-              margin: '0',
-              fontSize: '1.3rem',
-              fontWeight: '600',
-              color: '#6c757d'
-            }}>
-              Gestão de Perfis
-            </h1>
+          <div className="page-header-container">
+            <div className="page-header-content">
+              <h1 className="page-header-title">Gestão de Perfis</h1>
+              <p className="page-header-description">Gestão de perfis de acesso e permissões do sistema.</p>
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaqButton />
               <button

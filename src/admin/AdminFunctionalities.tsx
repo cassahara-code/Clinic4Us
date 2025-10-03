@@ -356,28 +356,10 @@ const AdminFunctionalities: React.FC = () => {
           padding: '0'
         }}>
           {/* Título da página */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            marginBottom: '1.5rem'
-          }}>
-            <div>
-              <h1 style={{
-                margin: '0 0 0.5rem 0',
-                fontSize: '1.3rem',
-                fontWeight: '600',
-                color: '#6c757d'
-              }}>
-                Funcionalidades
-              </h1>
-              <p style={{
-                margin: 0,
-                fontSize: '0.95rem',
-                color: '#868e96'
-              }}>
-                Gestão de páginas de funcionalidades de todo o sistema.
-              </p>
+          <div className="page-header-container">
+            <div className="page-header-content">
+              <h1 className="page-header-title">Funcionalidades</h1>
+              <p className="page-header-description">Gestão de páginas de funcionalidades de todo o sistema.</p>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
               <FaqButton />

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import "./PatientRegister.css";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
-import { useNavigation } from "../contexts/RouterContext";
-import { Rotate90DegreesCw, Search, BarChart, CalendarToday, TrendingUp, InsertDriveFile } from '@mui/icons-material';
+import { useNavigation, useRouter } from "../contexts/RouterContext";
+import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Search } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
+import PhotoUpload from "../components/PhotoUpload";
 
 interface MenuItemProps {
   label: string;
@@ -70,6 +70,7 @@ interface PatientFormData {
 
 const PatientRegister: React.FC = () => {
   const { goToPatients, goToDashboard, goToSchedule } = useNavigation();
+  const { getParam } = useRouter();
   const [userSession, setUserSession] = useState<UserSession | null>(null);
   const [formData, setFormData] = useState<PatientFormData>({
     name: "",
@@ -111,11 +112,11 @@ const PatientRegister: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('cadastro');
+  const [isNewPatient, setIsNewPatient] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [cepLoading, setCepLoading] = useState(false);
+  const [originalFormData, setOriginalFormData] = useState<PatientFormData | null>(null);
 
   // Limpar campo "Indicado por" quando canal não for indicação
   useEffect(() => {
@@ -145,6 +146,71 @@ const PatientRegister: React.FC = () => {
 
     setUserSession(simulatedUserSession);
   }, []);
+
+  // Carregar dados do paciente se houver ID na URL
+  useEffect(() => {
+    const patientId = getParam('id');
+
+    if (patientId) {
+      // Paciente existente - modo visualização
+      setIsNewPatient(false);
+      setIsEditing(false);
+
+      // Dados mockados de um paciente existente
+      const mockPatientData: PatientFormData = {
+        id: patientId,
+        name: "João Silva Santos",
+        isResponsible: false,
+        phone: "11999999999",
+        cep: "01310100",
+        documentType: "CPF",
+        document: "12345678900",
+        email: "joao.silva@email.com",
+        responsibleName: "Maria Silva Santos",
+        address: "Avenida Paulista",
+        number: "1578",
+        expeditorOrgan: "SSP",
+        birthDate: "1990-05-15",
+        responsibleDocumentType: "CPF",
+        responsibleDocument: "98765432100",
+        complement: "Apto 101",
+        neighborhood: "Bela Vista",
+        gender: "Masculino",
+        kinship: "Mãe",
+        responsiblePhone: "11988888888",
+        city: "São Paulo",
+        uf: "SP",
+        nativeLanguage: "Português",
+        originCountry: "Brasil",
+        responsibleEmail: "maria.silva@email.com",
+        isComplete: true,
+        observations: "Paciente com histórico de hipertensão. Acompanhamento mensal necessário.",
+        referredBy: "Dr. Carlos Mendes",
+        entryChannel: "Indicação profissional",
+        photo: undefined,
+        photoRotation: 0,
+        photoZoom: 1,
+        photoFlipX: 1,
+        photoPositionX: 0,
+        photoPositionY: 0,
+        responsible2Name: "Pedro Silva Santos",
+        responsible2DocumentType: "CPF",
+        responsible2Document: "11122233344",
+        responsible2Kinship: "Pai",
+        responsible2Phone: "11977777777",
+        responsible2Email: "pedro.silva@email.com",
+        responsibleFinancial: true,
+        responsible2Financial: false
+      };
+
+      setFormData(mockPatientData);
+      setOriginalFormData(mockPatientData);
+    } else {
+      // Novo paciente
+      setIsNewPatient(true);
+      setIsEditing(false);
+    }
+  }, [getParam]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -354,22 +420,49 @@ const PatientRegister: React.FC = () => {
   };
 
   const handleCancel = () => {
-    goToPatients();
+    if (isNewPatient) {
+      goToPatients();
+    } else {
+      // Cancelar edição - restaurar dados originais
+      if (originalFormData) {
+        setFormData(originalFormData);
+      }
+      setIsEditing(false);
+      setErrors({});
+    }
   };
+
+  const handleEdit = () => {
+    // Salvar os dados atuais antes de editar
+    setOriginalFormData({ ...formData });
+    setIsEditing(true);
+
+    // Focar no primeiro campo após um pequeno delay para garantir que o campo foi habilitado
+    setTimeout(() => {
+      const nameInput = document.getElementById('name');
+      if (nameInput) {
+        nameInput.focus();
+        nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  };
+
+  // Determina se os campos podem ser editados
+  const canEdit = isNewPatient || isEditing;
 
   const getAvailableTabs = () => {
     const allTabs = [
-      { id: 'cadastro', label: 'Cadastro', enabled: true },
-      { id: 'resumo', label: 'Resumo', enabled: true },
-      { id: 'anotacoes', label: 'Anotações', enabled: true },
-      { id: 'agenda', label: 'Agenda', enabled: true },
-      { id: 'diagnostico', label: 'Diagnóstico', enabled: true },
-      { id: 'avaliacoes', label: 'Avaliações', enabled: true },
-      { id: 'plano-terap', label: 'Plano Terap', enabled: true },
-      { id: 'evolucoes', label: 'Evoluções', enabled: true },
-      { id: 'financeiro', label: 'Financeiro', enabled: true },
-      { id: 'receituario', label: 'Receituário', enabled: true },
-      { id: 'arquivos', label: 'Arquivos', enabled: true }
+      { id: 'cadastro', label: 'Cadastro', enabled: true, icon: Person },
+      { id: 'resumo', label: 'Resumo', enabled: true, icon: Assessment },
+      { id: 'anotacoes', label: 'Anotações', enabled: true, icon: Note },
+      { id: 'agenda', label: 'Agenda', enabled: true, icon: Event },
+      { id: 'diagnostico', label: 'Diagnóstico', enabled: true, icon: LocalHospital },
+      { id: 'avaliacoes', label: 'Avaliações', enabled: true, icon: Assignment },
+      { id: 'plano-terap', label: 'Plano Terap', enabled: true, icon: Psychology },
+      { id: 'evolucoes', label: 'Evoluções', enabled: true, icon: Timeline },
+      { id: 'financeiro', label: 'Financeiro', enabled: true, icon: AttachMoney },
+      { id: 'receituario', label: 'Receituário', enabled: true, icon: LocalPharmacy },
+      { id: 'arquivos', label: 'Arquivos', enabled: true, icon: Folder }
     ];
 
     // Filter tabs based on user permissions
@@ -432,48 +525,6 @@ const PatientRegister: React.FC = () => {
 
   const handleLogoClick = () => {
     goToDashboard();
-  };
-
-  // Funções para arrastar a foto
-  const handlePhotoMouseDown = (e: React.MouseEvent) => {
-    if (!formData.photo) return;
-    e.preventDefault();
-    setIsDragging(true);
-    setDragStart({
-      x: e.clientX - (formData.photoPositionX || 0),
-      y: e.clientY - (formData.photoPositionY || 0)
-    });
-  };
-
-  const handlePhotoMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !formData.photo) return;
-    e.preventDefault();
-
-    const newX = e.clientX - dragStart.x;
-    const newY = e.clientY - dragStart.y;
-
-    // Limitar o movimento dentro da área do preview (250x250px)
-    const maxX = 125;
-    const maxY = 125;
-    const minX = -125;
-    const minY = -125;
-
-    const clampedX = Math.max(minX, Math.min(maxX, newX));
-    const clampedY = Math.max(minY, Math.min(maxY, newY));
-
-    setFormData(prev => ({
-      ...prev,
-      photoPositionX: clampedX,
-      photoPositionY: clampedY
-    }));
-  };
-
-  const handlePhotoMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handlePhotoMouseLeave = () => {
-    setIsDragging(false);
   };
 
   // Função para criar a foto cortada no tamanho do preview
@@ -539,25 +590,42 @@ const PatientRegister: React.FC = () => {
 
       <main className="patient-register-main">
         {/* Título da Página */}
-        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', padding: '0 1rem' }}>
-          <h1 className="page-title">Cadastro de Paciente</h1>
+        <div className="page-header-container">
+          <div className="page-header-content">
+            <h1 className="page-header-title">
+              {isNewPatient ? 'Cadastro de Paciente' : formData.name || 'Paciente'}
+            </h1>
+            {isNewPatient ? (
+              <p className="page-header-description">
+                Preencha os dados para cadastrar um novo paciente no sistema.
+              </p>
+            ) : (
+              <p className="page-header-description">
+                ID: {formData.id}
+              </p>
+            )}
+          </div>
           <FaqButton />
         </div>
 
         {/* Tabs de navegação */}
         <div className="patient-tabs-container">
           <div className="patient-tabs">
-            {getAvailableTabs().map(tab => (
-              <button
-                key={tab.id}
-                className={`tab-button ${activeTab === tab.id ? 'active' : ''} ${!tab.enabled ? 'disabled' : ''}`}
-                data-tab={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                disabled={!tab.enabled}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {getAvailableTabs().map(tab => {
+              const IconComponent = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  className={`tab-button ${activeTab === tab.id ? 'active' : ''} ${!tab.enabled ? 'disabled' : ''}`}
+                  data-tab={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  disabled={!tab.enabled}
+                >
+                  <IconComponent sx={{ fontSize: '0.95rem', marginRight: '0.35rem', verticalAlign: 'middle' }} />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -570,206 +638,18 @@ const PatientRegister: React.FC = () => {
                 <div className="personal-data-layout">
                     {/* Seção de Upload de Foto */}
                     <div className="photo-upload-container">
-                      <div className="photo-upload-component">
-                        <div
-                          className="photo-preview"
-                          onClick={() => !formData.photo && document.getElementById('photo-upload')?.click()}
-                          onMouseMove={handlePhotoMouseMove}
-                          onMouseUp={handlePhotoMouseUp}
-                          onMouseLeave={handlePhotoMouseLeave}
-                        >
-                          {formData.photo ? (
-                            <img
-                              src={formData.photo}
-                              alt="Foto do paciente"
-                              className="patient-photo"
-                              style={{
-                                transform: `translate(-50%, -50%) translate(${formData.photoPositionX || 0}px, ${formData.photoPositionY || 0}px) rotate(${formData.photoRotation || 0}deg) scale(${formData.photoZoom || 1}) scaleX(${formData.photoFlipX || 1})`,
-                                transformOrigin: 'center',
-                                transition: isDragging ? 'none' : 'transform 0.3s ease',
-                                cursor: isDragging ? 'grabbing' : 'grab'
-                              }}
-                              onMouseDown={handlePhotoMouseDown}
-                              draggable={false}
-                              onLoad={(e) => {
-                                const img = e.target as HTMLImageElement;
+                      <PhotoUpload
+                        photo={formData.photo}
+                        photoRotation={formData.photoRotation}
+                        photoZoom={formData.photoZoom}
+                        photoFlipX={formData.photoFlipX}
+                        photoPositionX={formData.photoPositionX}
+                        photoPositionY={formData.photoPositionY}
+                        onPhotoChange={(photoData) => setFormData(prev => ({ ...prev, ...photoData }))}
+                      />
 
-                                // Only set initial scale if it's not already set
-                                if (formData.photoZoom === undefined) {
-                                  const containerWidth = 250;
-                                  const containerHeight = 250;
-                                  const imgAspectRatio = img.naturalWidth / img.naturalHeight;
-                                  const containerAspectRatio = containerWidth / containerHeight;
-
-                                  let initialScale = 1;
-                                  if (imgAspectRatio > containerAspectRatio) {
-                                    // Image is wider than container - scale to fit width
-                                    initialScale = containerWidth / img.naturalWidth;
-                                  } else {
-                                    // Image is taller than container - scale to fit height
-                                    initialScale = containerHeight / img.naturalHeight;
-                                  }
-
-                                  // Set initial scale to fit the image in the container while preserving aspect ratio
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    photoZoom: initialScale
-                                  }));
-                                }
-                              }}
-                            />
-                          ) : (
-                            <div className="no-photo-placeholder">
-                              <div className="photo-icon">📷</div>
-                              <span>Clique para adicionar foto</span>
-                            </div>
-                          )}
-                        </div>
-                        <input
-                          type="file"
-                          id="photo-upload"
-                          accept="image/*"
-                          style={{ display: 'none' }}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (event) => {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  photo: event.target?.result as string,
-                                  photoRotation: 0,
-                                  photoZoom: undefined, // Will be set by onLoad
-                                  photoFlipX: 1,
-                                  photoPositionX: 0,
-                                  photoPositionY: 0
-                                }));
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-
-                        {/* Controles principais */}
-                        <div className="photo-main-controls">
-                          <button
-                            type="button"
-                            className="btn-photo-main"
-                            onClick={() => document.getElementById('photo-upload')?.click()}
-                          >
-                            {formData.photo ? 'Alterar' : 'Selecionar'}
-                          </button>
-                          {formData.photo && (
-                            <button
-                              type="button"
-                              className="btn-photo-main btn-remove"
-                              onClick={() => setFormData(prev => ({
-                                ...prev,
-                                photo: '',
-                                photoRotation: 0,
-                                photoZoom: 1,
-                                photoFlipX: 1,
-                                photoPositionX: 0,
-                                photoPositionY: 0
-                              }))}
-                              title="Remover foto"
-                            >
-                              Remover
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Controles de edição */}
-                        {formData.photo && (
-                          <div className="photo-edit-controls">
-                            <div className="edit-control-row">
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Girar à esquerda"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoRotation: (prev.photoRotation || 0) - 90
-                                }))}
-                              >
-                                <Rotate90DegreesCw fontSize="small" />
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Girar à direita"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoRotation: (prev.photoRotation || 0) + 90
-                                }))}
-                              >
-                                🔃
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Zoom out"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoZoom: Math.max(0.5, (prev.photoZoom || 1) - 0.1)
-                                }))}
-                              >
-                                <Search fontSize="small" />
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Zoom in"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoZoom: Math.min(3, (prev.photoZoom || 1) + 0.1)
-                                }))}
-                              >
-                                🔎
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Reset"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoRotation: 0,
-                                  photoZoom: 1,
-                                  photoFlipX: 1,
-                                  photoPositionX: 0,
-                                  photoPositionY: 0
-                                }))}
-                              >
-                                ⚡
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Centralizar posição"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoPositionX: 0,
-                                  photoPositionY: 0
-                                }))}
-                              >
-                                🎯
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="photo-instructions">
-                          <small>JPG, PNG, GIF • Max 5MB</small>
-                          {formData.photo && (
-                            <>
-                              <small>🖱️ Arraste a foto para posicioná-la</small>
-                              <small>📐 A foto será cortada no tamanho do preview ao salvar</small>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Mini Dashboard de Presenças */}
-                        <div className="mini-dashboard">
+                      {/* Mini Dashboard de Presenças */}
+                      <div className="mini-dashboard">
                           <h4 className="dashboard-title"><BarChart fontSize="small" style={{marginRight: '0.5rem', verticalAlign: 'middle'}} />Resumo de Presenças</h4>
 
                           <div className="dashboard-item">
@@ -813,7 +693,6 @@ const PatientRegister: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                      </div>
                     </div>
 
                     {/* Seção de Campos */}
@@ -829,6 +708,7 @@ const PatientRegister: React.FC = () => {
                             value={formData.name}
                             onChange={handleInputChange}
                             placeholder="Nome completo do paciente"
+                            disabled={!canEdit}
                           />
                         </div>
                         <div className="form-group birth-age-group">
@@ -841,6 +721,7 @@ const PatientRegister: React.FC = () => {
                                 name="birthDate"
                                 value={formData.birthDate}
                                 onChange={handleInputChange}
+                                disabled={!canEdit}
                               />
                             </div>
                             <div className="form-subgroup">
@@ -865,6 +746,7 @@ const PatientRegister: React.FC = () => {
                             name="gender"
                             value={formData.gender}
                             onChange={handleInputChange}
+                            disabled={!canEdit}
                           >
                             <option value="">Selecione o gênero</option>
                             <option value="Masculino">Masculino</option>
@@ -886,6 +768,7 @@ const PatientRegister: React.FC = () => {
                                 value={formData.documentType}
                                 onChange={handleInputChange}
                                 className="document-type-input"
+                                disabled={!canEdit}
                               >
                                 <option value="CPF">CPF</option>
                                 <option value="RG">RG</option>
@@ -903,6 +786,7 @@ const PatientRegister: React.FC = () => {
                                 onChange={handleInputChange}
                                 placeholder="000.000.000-00"
                                 className="document-number-input"
+                                disabled={!canEdit}
                               />
                             </div>
                           </div>
@@ -916,6 +800,7 @@ const PatientRegister: React.FC = () => {
                             value={formData.expeditorOrgan}
                             onChange={handleInputChange}
                             placeholder="SSP, DETRAN, etc."
+                            disabled={!canEdit}
                           />
                         </div>
                         <div className="form-group country-language">
@@ -928,6 +813,7 @@ const PatientRegister: React.FC = () => {
                                 value={formData.originCountry}
                                 onChange={handleInputChange}
                                 className="country-input"
+                                disabled={!canEdit}
                               >
                                 <option value="Brasil">Brasil</option>
                                 <option value="Argentina">Argentina</option>
@@ -942,6 +828,7 @@ const PatientRegister: React.FC = () => {
                                 value={formData.nativeLanguage}
                                 onChange={handleInputChange}
                                 className="language-input"
+                                disabled={!canEdit}
                               >
                                 <option value="Português">Português</option>
                                 <option value="Inglês">Inglês</option>
@@ -1002,6 +889,7 @@ const PatientRegister: React.FC = () => {
                             placeholder="(11) 99999-9999"
                             maxLength={15}
                             className={errors.phone ? 'error' : ''}
+                            disabled={!canEdit}
                           />
                           {errors.phone && <span className="error-message">{errors.phone}</span>}
                         </div>
@@ -1017,6 +905,7 @@ const PatientRegister: React.FC = () => {
                             onChange={handleInputChange}
                             placeholder="email@exemplo.com"
                             className={errors.email ? 'error' : ''}
+                            disabled={!canEdit}
                           />
                           {errors.email && <span className="error-message">{errors.email}</span>}
                         </div>
@@ -1039,6 +928,7 @@ const PatientRegister: React.FC = () => {
                                 value={formData.responsibleName}
                                 onChange={handleInputChange}
                                 placeholder="Nome completo do responsável"
+                                disabled={!canEdit}
                               />
                             </div>
                             <div className="form-group cpf-financial-group">
@@ -1052,6 +942,7 @@ const PatientRegister: React.FC = () => {
                                     value={formData.responsibleDocument}
                                     onChange={handleInputChange}
                                     placeholder="000.000.000-00"
+                                    disabled={!canEdit}
                                   />
                                 </div>
                                 <div className="form-subgroup checkbox-subgroup">
@@ -1082,6 +973,7 @@ const PatientRegister: React.FC = () => {
                                     })}
                                     placeholder="(11) 99999-9999"
                                     maxLength={15}
+                                    disabled={!canEdit}
                                   />
                                 </div>
                                 <div className="form-subgroup">
@@ -1093,6 +985,7 @@ const PatientRegister: React.FC = () => {
                                     value={formData.responsibleEmail}
                                     onChange={handleInputChange}
                                     placeholder="email@exemplo.com"
+                                    disabled={!canEdit}
                                   />
                                 </div>
                               </div>
@@ -1110,6 +1003,7 @@ const PatientRegister: React.FC = () => {
                                 value={formData.responsible2Name}
                                 onChange={handleInputChange}
                                 placeholder="Nome completo do 2º responsável"
+                                disabled={!canEdit}
                               />
                             </div>
                             <div className="form-group cpf-financial-group">
@@ -1123,6 +1017,7 @@ const PatientRegister: React.FC = () => {
                                     value={formData.responsible2Document}
                                     onChange={handleInputChange}
                                     placeholder="000.000.000-00"
+                                    disabled={!canEdit}
                                   />
                                 </div>
                                 <div className="form-subgroup checkbox-subgroup">
@@ -1153,6 +1048,7 @@ const PatientRegister: React.FC = () => {
                                     })}
                                     placeholder="(11) 99999-9999"
                                     maxLength={15}
+                                    disabled={!canEdit}
                                   />
                                 </div>
                                 <div className="form-subgroup">
@@ -1164,6 +1060,7 @@ const PatientRegister: React.FC = () => {
                                     value={formData.responsible2Email}
                                     onChange={handleInputChange}
                                     placeholder="email@exemplo.com"
+                                    disabled={!canEdit}
                                   />
                                 </div>
                               </div>
@@ -1206,6 +1103,7 @@ const PatientRegister: React.FC = () => {
                               }}
                               placeholder="00000-000"
                               maxLength={9}
+                              disabled={!canEdit}
                             />
                             {cepLoading && <span className="cep-loading"><Search fontSize="small" /></span>}
                           </div>
@@ -1219,6 +1117,7 @@ const PatientRegister: React.FC = () => {
                             value={formData.address}
                             onChange={handleInputChange}
                             placeholder="Rua, Avenida, etc."
+                            disabled={!canEdit}
                           />
                         </div>
                         <div className="form-group address-number-complement">
@@ -1233,6 +1132,7 @@ const PatientRegister: React.FC = () => {
                                 onChange={handleInputChange}
                                 placeholder="123"
                                 className="number-input"
+                                disabled={!canEdit}
                               />
                             </div>
                             <div className="form-subgroup">
@@ -1245,6 +1145,7 @@ const PatientRegister: React.FC = () => {
                                 onChange={handleInputChange}
                                 placeholder="Apto, Bloco, etc."
                                 className="complement-input"
+                                disabled={!canEdit}
                               />
                             </div>
                           </div>
@@ -1262,6 +1163,7 @@ const PatientRegister: React.FC = () => {
                             value={formData.neighborhood}
                             onChange={handleInputChange}
                             placeholder="Nome do bairro"
+                            disabled={!canEdit}
                           />
                         </div>
                         <div className="form-group">
@@ -1273,6 +1175,7 @@ const PatientRegister: React.FC = () => {
                             value={formData.city}
                             onChange={handleInputChange}
                             placeholder="Nome da cidade"
+                            disabled={!canEdit}
                           />
                         </div>
                         <div className="form-group">
@@ -1282,6 +1185,7 @@ const PatientRegister: React.FC = () => {
                             name="uf"
                             value={formData.uf}
                             onChange={handleInputChange}
+                            disabled={!canEdit}
                           >
                             <option value="">Selecione</option>
                             <option value="AC">AC</option>
@@ -1331,6 +1235,7 @@ const PatientRegister: React.FC = () => {
                             rows={4}
                             placeholder="Observações importantes sobre o paciente, medicações, alergias, etc."
                             className="observations-textarea"
+                            disabled={!canEdit}
                           />
                         </div>
                       </div>
@@ -1344,6 +1249,7 @@ const PatientRegister: React.FC = () => {
                             name="entryChannel"
                             value={formData.entryChannel}
                             onChange={handleInputChange}
+                            disabled={!canEdit}
                           >
                             <option value="">Selecione</option>
                             <option value="Instagram">Instagram</option>
@@ -1364,7 +1270,7 @@ const PatientRegister: React.FC = () => {
                             value={formData.referredBy || ''}
                             onChange={handleInputChange}
                             placeholder="Nome da pessoa ou instituição que indicou o paciente"
-                            disabled={!formData.entryChannel.includes('Indicação')}
+                            disabled={!canEdit || !formData.entryChannel.includes('Indicação')}
                           />
                         </div>
                         <div className="form-group">
@@ -1413,20 +1319,32 @@ const PatientRegister: React.FC = () => {
                         </div>
                         <div className="form-group">
                           <div className="form-actions-inline">
-                            <button
-                              type="button"
-                              className="btn-cancel-form-small"
-                              onClick={handleCancel}
-                            >
-                              Cancelar
-                            </button>
-                            <button
-                              type="submit"
-                              className="btn-save-small"
-                              disabled={isLoading}
-                            >
-                              {isLoading ? "Salvando..." : "Salvar"}
-                            </button>
+                            {isNewPatient || isEditing ? (
+                              <>
+                                <button
+                                  type="button"
+                                  className="btn-cancel-form-small"
+                                  onClick={handleCancel}
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  type="submit"
+                                  className="btn-save-small"
+                                  disabled={isLoading}
+                                >
+                                  {isLoading ? "Salvando..." : "Salvar"}
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                className="btn-save-small"
+                                onClick={handleEdit}
+                              >
+                                Editar
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>

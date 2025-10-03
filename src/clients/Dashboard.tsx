@@ -246,8 +246,11 @@ const Dashboard: React.FC = () => {
           <div className="dashboard-content">
 
             {/* Título da Página */}
-            <div className="dashboard-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h1 className="dashboard-page-title">Dashboard</h1>
+            <div className="page-header-container">
+              <div className="page-header-content">
+                <h1 className="page-header-title">Dashboard</h1>
+                <p className="page-header-description">Visão geral dos principais indicadores e estatísticas da clínica.</p>
+              </div>
               <FaqButton />
             </div>
 
