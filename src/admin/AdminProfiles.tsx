@@ -50,6 +50,7 @@ const AdminProfiles: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
   // Estado da ordenação
+  const [sortField, setSortField] = useState<'name' | 'type'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Estados dos modais
@@ -158,14 +159,15 @@ const AdminProfiles: React.FC = () => {
       return matchesSearch && matchesType;
     })
     .sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
+      let compareValue = 0;
 
-      if (sortOrder === 'asc') {
-        return nameA.localeCompare(nameB, 'pt-BR');
-      } else {
-        return nameB.localeCompare(nameA, 'pt-BR');
+      if (sortField === 'name') {
+        compareValue = a.name.localeCompare(b.name, 'pt-BR');
+      } else if (sortField === 'type') {
+        compareValue = a.type.localeCompare(b.type, 'pt-BR');
       }
+
+      return sortOrder === 'asc' ? compareValue : -compareValue;
     });
 
   // Calcular paginação
@@ -197,10 +199,14 @@ const AdminProfiles: React.FC = () => {
     setTimeout(scrollToTop, 100);
   };
 
-  const handleSortOrderChange = (newSortOrder: 'asc' | 'desc') => {
-    setSortOrder(newSortOrder);
+  const handleSort = (field: 'name' | 'type') => {
+    if (sortField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
     setCurrentPage(1);
-    setTimeout(scrollToTop, 100);
   };
 
   // Gerar opções para o seletor de itens por página
@@ -236,6 +242,7 @@ const AdminProfiles: React.FC = () => {
   const clearFilters = () => {
     setSearchTerm('');
     setTypeFilter('Todos');
+    setSortField('name');
     setSortOrder('asc');
     setCurrentPage(1);
   };
@@ -481,43 +488,6 @@ const AdminProfiles: React.FC = () => {
                 </select>
               </div>
 
-              {/* Ordenação */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Ordenação</label>
-                <select
-                  value={sortOrder}
-                  onChange={(e) => handleSortOrderChange(e.target.value as 'asc' | 'desc')}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="asc">A → Z</option>
-                  <option value="desc">Z → A</option>
-                </select>
-              </div>
-
               {/* Botão limpar filtros */}
               <div style={{
                 display: 'flex',
@@ -566,10 +536,24 @@ const AdminProfiles: React.FC = () => {
                 display: 'flex',
                 gridTemplateColumns: 'unset'
               }}>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '0 0 200px' }}>Perfil</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '0 0 200px' }}>Tipo</div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', flex: '0 0 200px', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('name')}
+                  title="Ordenar por perfil"
+                >
+                  Perfil {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', flex: '0 0 200px', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('type')}
+                  title="Ordenar por tipo"
+                >
+                  Tipo {sortField === 'type' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
                 <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '1 1 auto' }}>Funcionalidades</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'right', flex: '0 0 140px' }}>Ações</div>
+                <div className="admin-plans-header-cell" style={{ justifyContent: 'flex-end', flex: '0 0 140px' }}>Ações</div>
               </div>
 
               <div className="admin-plans-table-body">
@@ -602,18 +586,16 @@ const AdminProfiles: React.FC = () => {
                       display: 'flex'
                     }}>
                       <button
-                        className="action-btn"
+                        className="btn-action-edit"
                         onClick={(e) => { e.stopPropagation(); handleProfileAction('edit', profile.id); }}
                         title="Editar perfil"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Edit fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-delete"
                         onClick={(e) => { e.stopPropagation(); handleProfileAction('delete', profile.id); }}
                         title="Excluir perfil"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Delete fontSize="small" />
                       </button>

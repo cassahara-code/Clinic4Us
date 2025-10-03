@@ -50,6 +50,7 @@ const AdminProfessionalTypes: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
   // Estado da ordenação
+  const [sortField, setSortField] = useState<'name' | 'status'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Estados dos modais
@@ -122,14 +123,17 @@ const AdminProfessionalTypes: React.FC = () => {
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
+      let compareValue = 0;
 
-      if (sortOrder === 'asc') {
-        return nameA.localeCompare(nameB, 'pt-BR');
-      } else {
-        return nameB.localeCompare(nameA, 'pt-BR');
+      if (sortField === 'name') {
+        compareValue = a.name.localeCompare(b.name, 'pt-BR');
+      } else if (sortField === 'status') {
+        const statusA = a.active ? 'Ativo' : 'Inativo';
+        const statusB = b.active ? 'Ativo' : 'Inativo';
+        compareValue = statusA.localeCompare(statusB, 'pt-BR');
       }
+
+      return sortOrder === 'asc' ? compareValue : -compareValue;
     });
 
   // Calcular paginação
@@ -161,10 +165,14 @@ const AdminProfessionalTypes: React.FC = () => {
     setTimeout(scrollToTop, 100);
   };
 
-  const handleSortOrderChange = (newSortOrder: 'asc' | 'desc') => {
-    setSortOrder(newSortOrder);
+  const handleSort = (field: 'name' | 'status') => {
+    if (sortField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
     setCurrentPage(1);
-    setTimeout(scrollToTop, 100);
   };
 
   // Gerar opções para o seletor de itens por página
@@ -201,6 +209,7 @@ const AdminProfessionalTypes: React.FC = () => {
   const clearFilters = () => {
     setSearchTerm('');
     setStatusFilter('Todos');
+    setSortField('name');
     setSortOrder('asc');
     setCurrentPage(1);
   };
@@ -436,43 +445,6 @@ const AdminProfessionalTypes: React.FC = () => {
                 </select>
               </div>
 
-              {/* Ordenação */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Ordenação</label>
-                <select
-                  value={sortOrder}
-                  onChange={(e) => handleSortOrderChange(e.target.value as 'asc' | 'desc')}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="asc">A → Z</option>
-                  <option value="desc">Z → A</option>
-                </select>
-              </div>
-
               {/* Botão limpar filtros */}
               <div style={{
                 display: 'flex',
@@ -521,10 +493,24 @@ const AdminProfessionalTypes: React.FC = () => {
                 display: 'flex',
                 gridTemplateColumns: 'unset'
               }}>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '0 0 250px' }}>Tipo de Profissional</div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', flex: '0 0 250px', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('name')}
+                  title="Ordenar por tipo de profissional"
+                >
+                  Tipo de Profissional {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
                 <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '1 1 auto' }}>Descrição</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'center', flex: '0 0 100px' }}>Status</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'right', flex: '0 0 140px' }}>Ações</div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'center', flex: '0 0 100px', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('status')}
+                  title="Ordenar por status"
+                >
+                  Status {sortField === 'status' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div className="admin-plans-header-cell" style={{ justifyContent: 'flex-end', flex: '0 0 140px' }}>Ações</div>
               </div>
 
               <div className="admin-plans-table-body">
@@ -566,18 +552,16 @@ const AdminProfessionalTypes: React.FC = () => {
                       display: 'flex'
                     }}>
                       <button
-                        className="action-btn"
+                        className="btn-action-edit"
                         onClick={(e) => { e.stopPropagation(); handleTypeAction('edit', type.id); }}
                         title="Editar tipo"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Edit fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-delete"
                         onClick={(e) => { e.stopPropagation(); handleTypeAction('delete', type.id); }}
                         title="Excluir tipo"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Delete fontSize="small" />
                       </button>

@@ -38,6 +38,10 @@ const AdminEntities: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
+  // Estado da ordenação
+  const [sortField, setSortField] = useState<'fantasyName' | 'cnpjCpf' | 'socialName'>('fantasyName');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
   // Estados dos modais
   const [isEntityModalOpen, setIsEntityModalOpen] = useState(false);
   const [entityModalMode, setEntityModalMode] = useState<'create' | 'edit'>('create');
@@ -83,21 +87,35 @@ const AdminEntities: React.FC = () => {
     return entities;
   });
 
-  // Lógica de filtragem
-  const filteredEntities = entities.filter(entity => {
-    const matchesSearch = searchTerm === '' ||
-      entity.fantasyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entity.cnpjCpf.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entity.socialName.toLowerCase().includes(searchTerm.toLowerCase());
+  // Lógica de filtragem e ordenação
+  const filteredAndSortedEntities = entities
+    .filter(entity => {
+      const matchesSearch = searchTerm === '' ||
+        entity.fantasyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entity.cnpjCpf.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entity.socialName.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesSearch;
-  });
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      let compareValue = 0;
+
+      if (sortField === 'fantasyName') {
+        compareValue = a.fantasyName.localeCompare(b.fantasyName, 'pt-BR');
+      } else if (sortField === 'cnpjCpf') {
+        compareValue = a.cnpjCpf.localeCompare(b.cnpjCpf);
+      } else if (sortField === 'socialName') {
+        compareValue = a.socialName.localeCompare(b.socialName, 'pt-BR');
+      }
+
+      return sortOrder === 'asc' ? compareValue : -compareValue;
+    });
 
   // Lógica de paginação
-  const totalPages = Math.ceil(filteredEntities.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredAndSortedEntities.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedEntities = filteredEntities.slice(startIndex, endIndex);
+  const paginatedEntities = filteredAndSortedEntities.slice(startIndex, endIndex);
 
   const handleRevalidateLogin = () => {
     console.log('Revalidando login...');
@@ -135,6 +153,16 @@ const AdminEntities: React.FC = () => {
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1);
     setTimeout(scrollToTop, 100);
+  };
+
+  const handleSort = (field: 'fantasyName' | 'cnpjCpf' | 'socialName') => {
+    if (sortField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1);
   };
 
   // Gerar opções para o seletor de itens por página
@@ -358,7 +386,7 @@ const AdminEntities: React.FC = () => {
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
               itemsPerPageOptions={itemsPerPageOptions}
-              totalItems={filteredEntities.length}
+              totalItems={filteredAndSortedEntities.length}
               itemLabel="entidades"
               onPageChange={(page) => {
                 setCurrentPage(page);
@@ -375,11 +403,32 @@ const AdminEntities: React.FC = () => {
                 display: 'flex',
                 gridTemplateColumns: 'unset'
               }}>
-                <div className="admin-plans-header-cell" style={{ flex: '0 0 250px', textAlign: 'left' }}>N.Fantasia/Apelido</div>
-                <div className="admin-plans-header-cell" style={{ flex: '0 0 180px', textAlign: 'left' }}>CNPJ/CPF</div>
-                <div className="admin-plans-header-cell" style={{ flex: '1 1 auto', textAlign: 'left' }}>Razão Social/Nome</div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ flex: '0 0 250px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('fantasyName')}
+                  title="Ordenar por nome fantasia"
+                >
+                  N.Fantasia/Apelido {sortField === 'fantasyName' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ flex: '0 0 180px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('cnpjCpf')}
+                  title="Ordenar por CNPJ/CPF"
+                >
+                  CNPJ/CPF {sortField === 'cnpjCpf' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ flex: '1 1 auto', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('socialName')}
+                  title="Ordenar por razão social"
+                >
+                  Razão Social/Nome {sortField === 'socialName' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
                 <div className="admin-plans-header-cell" style={{ flex: '0 0 180px', textAlign: 'left' }}>Horário de funcionamento</div>
-                <div className="admin-plans-header-cell" style={{ flex: '0 0 200px', textAlign: 'right' }}>Ações</div>
+                <div className="admin-plans-header-cell" style={{ flex: '0 0 200px', justifyContent: 'flex-end' }}>Ações</div>
               </div>
 
               <div className="admin-plans-table-body">
@@ -406,36 +455,32 @@ const AdminEntities: React.FC = () => {
                     <div className="admin-plans-cell" style={{ flex: '0 0 180px', textAlign: 'left' }} data-label="Horário de funcionamento">
                       {entity.workingHours}
                     </div>
-                    <div className="admin-plans-actions" style={{ flex: '0 0 200px', textAlign: 'left' }} data-label="Ações">
+                    <div className="admin-plans-actions" style={{ flex: '0 0 200px', textAlign: 'right' }} data-label="Ações">
                       <button
-                        className="action-btn"
+                        className="btn-action-view"
                         onClick={(e) => { e.stopPropagation(); handleEntityAction('view', entity.id); }}
                         title="Visualizar entidade"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <ViewModule fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-users"
                         onClick={(e) => { e.stopPropagation(); handleEntityAction('user', entity.id); }}
                         title="Gerenciar usuários"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Person fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-edit"
                         onClick={(e) => { e.stopPropagation(); handleEntityAction('edit', entity.id); }}
                         title="Editar entidade"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Edit fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-delete"
                         onClick={(e) => { e.stopPropagation(); handleEntityAction('delete', entity.id); }}
                         title="Excluir entidade"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Delete fontSize="small" />
                       </button>
@@ -460,7 +505,7 @@ const AdminEntities: React.FC = () => {
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
               itemsPerPageOptions={itemsPerPageOptions}
-              totalItems={filteredEntities.length}
+              totalItems={filteredAndSortedEntities.length}
               itemLabel="entidades"
               onPageChange={(page) => {
                 setCurrentPage(page);

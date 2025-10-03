@@ -46,6 +46,7 @@ const AdminFaq: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
   // Estado da ordenação
+  const [sortField, setSortField] = useState<'question' | 'category'>('question');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Estados dos modais
@@ -126,7 +127,12 @@ const AdminFaq: React.FC = () => {
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
-      const compareValue = a.question.localeCompare(b.question);
+      let compareValue = 0;
+      if (sortField === 'question') {
+        compareValue = a.question.localeCompare(b.question);
+      } else if (sortField === 'category') {
+        compareValue = a.category.localeCompare(b.category);
+      }
       return sortOrder === 'asc' ? compareValue : -compareValue;
     });
 
@@ -181,8 +187,13 @@ const AdminFaq: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const toggleSortOrder = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  const handleSort = (field: 'question' | 'category') => {
+    if (sortField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
   };
 
   // Handlers do modal
@@ -428,17 +439,24 @@ const AdminFaq: React.FC = () => {
                 <div className="admin-plans-table-header" style={{ display: 'flex' }}>
                   <div
                     className="admin-plans-header-cell"
-                    style={{ flex: '0 0 250px', cursor: 'pointer' }}
-                    onClick={toggleSortOrder}
+                    style={{ flex: '0 0 250px', cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('question')}
                     title="Ordenar por pergunta"
                   >
-                    Pergunta {sortOrder === 'asc' ? '↑' : '↓'}
+                    Pergunta {sortField === 'question' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
                   </div>
-                  <div className="admin-plans-header-cell" style={{ flex: '0 0 150px' }}>Categoria</div>
+                  <div
+                    className="admin-plans-header-cell"
+                    style={{ flex: '0 0 150px', cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('category')}
+                    title="Ordenar por categoria"
+                  >
+                    Categoria {sortField === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                  </div>
                   <div className="admin-plans-header-cell" style={{ flex: '1 1 auto' }}>Resposta (Prévia)</div>
                   <div className="admin-plans-header-cell" style={{ flex: '0 0 80px' }}>Vídeo</div>
                   <div className="admin-plans-header-cell" style={{ flex: '0 0 80px' }}>Links</div>
-                  <div className="admin-plans-header-cell" style={{ flex: '0 0 150px' }}>Ações</div>
+                  <div className="admin-plans-header-cell" style={{ flex: '0 0 150px', justifyContent: 'flex-end' }}>Ações</div>
                 </div>
 
                 {/* Linhas */}
@@ -473,18 +491,18 @@ const AdminFaq: React.FC = () => {
                       </div>
                       <div className="admin-plans-actions" style={{ flex: '0 0 150px' }}>
                         <button
-                          className="action-btn edit-btn"
+                          className="btn-action-edit"
                           onClick={() => handleOpenEditModal(faq)}
                           title="Editar FAQ"
                         >
-                          <Edit />
+                          <Edit fontSize="small" />
                         </button>
                         <button
-                          className="action-btn delete-btn"
+                          className="btn-action-delete"
                           onClick={() => handleOpenDeleteModal(faq)}
                           title="Excluir FAQ"
                         >
-                          <Delete />
+                          <Delete fontSize="small" />
                         </button>
                       </div>
                     </div>

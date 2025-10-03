@@ -51,6 +51,7 @@ const PatientsList: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
   // Estado da ordenação
+  const [sortField, setSortField] = useState<'name' | 'document' | 'age'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Estados do modal de exclusão
@@ -193,6 +194,20 @@ const PatientsList: React.FC = () => {
     return [...basePatients, ...additionalPatients];
   });
 
+  // Função para calcular idade
+  const calculateAge = (birthDate: string): number => {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
   // Filtrar e ordenar pacientes
   const filteredAndSortedPatients = patients
     .filter(patient => {
@@ -208,14 +223,19 @@ const PatientsList: React.FC = () => {
       return matchesSearch && matchesStatus && matchesGender && matchesProfessional;
     })
     .sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
+      let compareValue = 0;
 
-      if (sortOrder === 'asc') {
-        return nameA.localeCompare(nameB, 'pt-BR');
-      } else {
-        return nameB.localeCompare(nameA, 'pt-BR');
+      if (sortField === 'name') {
+        compareValue = a.name.localeCompare(b.name, 'pt-BR');
+      } else if (sortField === 'document') {
+        compareValue = a.document.localeCompare(b.document);
+      } else if (sortField === 'age') {
+        const ageA = calculateAge(a.birthDate);
+        const ageB = calculateAge(b.birthDate);
+        compareValue = ageA - ageB;
       }
+
+      return sortOrder === 'asc' ? compareValue : -compareValue;
     });
 
   // Calcular paginação
@@ -248,10 +268,14 @@ const PatientsList: React.FC = () => {
     setTimeout(scrollToTop, 100);
   };
 
-  const handleSortOrderChange = (newSortOrder: 'asc' | 'desc') => {
-    setSortOrder(newSortOrder);
-    setCurrentPage(1); // Reset para primeira página
-    setTimeout(scrollToTop, 100);
+  const handleSort = (field: 'name' | 'document' | 'age') => {
+    if (sortField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1);
   };
 
   // Gerar opções para o seletor de itens por página
@@ -284,20 +308,6 @@ const PatientsList: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, genderFilter, professionalFilter, sortOrder]);
-
-  // Função para calcular idade
-  const calculateAge = (birthDate: string): number => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-
-    return age;
-  };
 
   // Função para formatar data de nascimento
   const formatBirthDate = (birthDate: string): string => {
@@ -619,43 +629,6 @@ const PatientsList: React.FC = () => {
                 </select>
               </div>
 
-              {/* Ordenação */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Ordenação</label>
-                <select
-                  value={sortOrder}
-                  onChange={(e) => handleSortOrderChange(e.target.value as 'asc' | 'desc')}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="asc">A → Z</option>
-                  <option value="desc">Z → A</option>
-                </select>
-              </div>
-
               {/* Botão limpar filtros */}
               <div style={{
                 display: 'flex',
@@ -702,14 +675,35 @@ const PatientsList: React.FC = () => {
             <div className="patients-table">
               <div className="patients-table-header">
                 <div className="patients-header-cell">Foto</div>
-                <div className="patients-header-cell">Nome do Paciente</div>
-                <div className="patients-header-cell">Documento</div>
+                <div
+                  className="patients-header-cell"
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('name')}
+                  title="Ordenar por nome"
+                >
+                  Nome do Paciente {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="patients-header-cell"
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('document')}
+                  title="Ordenar por documento"
+                >
+                  Documento {sortField === 'document' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
                 <div className="patients-header-cell">Nascimento</div>
-                <div className="patients-header-cell">Idade</div>
+                <div
+                  className="patients-header-cell"
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('age')}
+                  title="Ordenar por idade"
+                >
+                  Idade {sortField === 'age' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
                 <div className="patients-header-cell">Responsável</div>
                 <div className="patients-header-cell">Celular</div>
                 <div className="patients-header-cell">Completo</div>
-                <div className="patients-header-cell">Ações</div>
+                <div className="patients-header-cell" style={{ justifyContent: 'flex-end' }}>Ações</div>
               </div>
 
               <div className="patients-table-body">
@@ -750,42 +744,37 @@ const PatientsList: React.FC = () => {
                     </div>
                     <div className="patients-cell patients-actions" data-label="Ações">
                       <button
-                        className="action-btn"
+                        className="btn-action-email"
                         onClick={(e) => { e.stopPropagation(); handlePatientAction('email', patient.id); }}
                         title="Enviar email"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Email fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-whatsapp"
                         onClick={(e) => { e.stopPropagation(); handlePatientAction('whatsapp', patient.id); }}
                         title="WhatsApp"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <WhatsApp fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-schedule"
                         onClick={(e) => { e.stopPropagation(); handlePatientAction('calendar', patient.id); }}
                         title="Agendar consulta"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <CalendarToday fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-manage"
                         onClick={(e) => { e.stopPropagation(); handlePatientAction('cadastro', patient.id); }}
                         title="Gerenciar cadastro"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Folder fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-delete"
                         onClick={(e) => { e.stopPropagation(); handlePatientAction('delete', patient.id); }}
                         title="Excluir paciente"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Delete fontSize="small" />
                       </button>

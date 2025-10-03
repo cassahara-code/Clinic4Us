@@ -51,6 +51,10 @@ const AdminFunctionalities: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
+  // Estado da ordenação
+  const [sortField, setSortField] = useState<'name' | 'order' | 'category'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
   // Estados dos modais
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [functionalityToDelete, setFunctionalityToDelete] = useState<Functionality | null>(null);
@@ -134,22 +138,36 @@ const AdminFunctionalities: React.FC = () => {
     }
   ]);
 
-  // Filtrar funcionalidades
-  const filteredFunctionalities = functionalities.filter(func => {
-    const matchesSearch = func.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         func.url.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         func.description.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filtrar e ordenar funcionalidades
+  const filteredAndSortedFunctionalities = functionalities
+    .filter(func => {
+      const matchesSearch = func.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           func.url.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           func.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory = categoryFilter === 'Todos' || func.category === categoryFilter;
+      const matchesCategory = categoryFilter === 'Todos' || func.category === categoryFilter;
 
-    return matchesSearch && matchesCategory;
-  });
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      let compareValue = 0;
+
+      if (sortField === 'name') {
+        compareValue = a.name.localeCompare(b.name, 'pt-BR');
+      } else if (sortField === 'order') {
+        compareValue = a.order - b.order;
+      } else if (sortField === 'category') {
+        compareValue = a.category.localeCompare(b.category, 'pt-BR');
+      }
+
+      return sortOrder === 'asc' ? compareValue : -compareValue;
+    });
 
   // Calcular paginação
-  const totalPages = Math.ceil(filteredFunctionalities.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredAndSortedFunctionalities.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedFunctionalities = filteredFunctionalities.slice(startIndex, endIndex);
+  const paginatedFunctionalities = filteredAndSortedFunctionalities.slice(startIndex, endIndex);
 
   // Gerar opções para o seletor de itens por página
   const itemsPerPageOptions = [];
@@ -184,6 +202,8 @@ const AdminFunctionalities: React.FC = () => {
   const clearFilters = () => {
     setSearchTerm('');
     setCategoryFilter('Todos');
+    setSortField('name');
+    setSortOrder('asc');
     setCurrentPage(1);
   };
 
@@ -193,6 +213,16 @@ const AdminFunctionalities: React.FC = () => {
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
+  const handleSort = (field: 'name' | 'order' | 'category') => {
+    if (sortField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
     setCurrentPage(1);
   };
 
@@ -506,7 +536,7 @@ const AdminFunctionalities: React.FC = () => {
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
               itemsPerPageOptions={itemsPerPageOptions}
-              totalItems={filteredFunctionalities.length}
+              totalItems={filteredAndSortedFunctionalities.length}
               itemLabel="funcionalidades"
               onPageChange={(page) => {
                 setCurrentPage(page);
@@ -523,12 +553,33 @@ const AdminFunctionalities: React.FC = () => {
                 display: 'flex',
                 gridTemplateColumns: 'unset'
               }}>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '0 0 180px' }}>Funcionalidade</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '0 0 80px' }}>Ordem</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '0 0 220px' }}>Categoria</div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', flex: '0 0 180px', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('name')}
+                  title="Ordenar por funcionalidade"
+                >
+                  Funcionalidade {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', flex: '0 0 80px', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('order')}
+                  title="Ordenar por ordem"
+                >
+                  Ordem {sortField === 'order' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', flex: '0 0 220px', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('category')}
+                  title="Ordenar por categoria"
+                >
+                  Categoria {sortField === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
                 <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '0 0 180px' }}>URL</div>
                 <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '1 1 auto' }}>Descrição</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'right', flex: '0 0 100px' }}>Ações</div>
+                <div className="admin-plans-header-cell" style={{ justifyContent: 'flex-end', flex: '0 0 100px' }}>Ações</div>
               </div>
 
               <div className="admin-plans-table-body">
@@ -567,18 +618,16 @@ const AdminFunctionalities: React.FC = () => {
                       display: 'flex'
                     }}>
                       <button
-                        className="action-btn"
+                        className="btn-action-edit"
                         onClick={(e) => { e.stopPropagation(); handleFunctionalityAction('edit', functionality.id); }}
                         title="Editar funcionalidade"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Edit fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-delete"
                         onClick={(e) => { e.stopPropagation(); handleFunctionalityAction('delete', functionality.id); }}
                         title="Excluir funcionalidade"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Delete fontSize="small" />
                       </button>
@@ -603,7 +652,7 @@ const AdminFunctionalities: React.FC = () => {
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
               itemsPerPageOptions={itemsPerPageOptions}
-              totalItems={filteredFunctionalities.length}
+              totalItems={filteredAndSortedFunctionalities.length}
               itemLabel="funcionalidades"
               onPageChange={(page) => {
                 setCurrentPage(page);

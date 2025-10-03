@@ -53,6 +53,7 @@ const AdminPlans: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
   // Estado da ordenação
+  const [sortField, setSortField] = useState<'name' | 'price' | 'duration' | 'maxUsers' | 'status' | 'createdAt'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Estados dos modais
@@ -162,14 +163,23 @@ const AdminPlans: React.FC = () => {
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
+      let compareValue = 0;
 
-      if (sortOrder === 'asc') {
-        return nameA.localeCompare(nameB, 'pt-BR');
-      } else {
-        return nameB.localeCompare(nameA, 'pt-BR');
+      if (sortField === 'name') {
+        compareValue = a.name.localeCompare(b.name, 'pt-BR');
+      } else if (sortField === 'price') {
+        compareValue = a.price - b.price;
+      } else if (sortField === 'duration') {
+        compareValue = a.duration - b.duration;
+      } else if (sortField === 'maxUsers') {
+        compareValue = a.maxUsers - b.maxUsers;
+      } else if (sortField === 'status') {
+        compareValue = a.status.localeCompare(b.status, 'pt-BR');
+      } else if (sortField === 'createdAt') {
+        compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
+
+      return sortOrder === 'asc' ? compareValue : -compareValue;
     });
 
   // Calcular paginação
@@ -202,10 +212,14 @@ const AdminPlans: React.FC = () => {
     setTimeout(scrollToTop, 100);
   };
 
-  const handleSortOrderChange = (newSortOrder: 'asc' | 'desc') => {
-    setSortOrder(newSortOrder);
-    setCurrentPage(1); // Reset para primeira página
-    setTimeout(scrollToTop, 100);
+  const handleSort = (field: 'name' | 'price' | 'duration' | 'maxUsers' | 'status' | 'createdAt') => {
+    if (sortField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1);
   };
 
   // Gerar opções para o seletor de itens por página
@@ -255,6 +269,7 @@ const AdminPlans: React.FC = () => {
   const clearFilters = () => {
     setSearchTerm('');
     setStatusFilter('Ativo');
+    setSortField('name');
     setSortOrder('asc');
     setCurrentPage(1);
   };
@@ -532,43 +547,6 @@ const AdminPlans: React.FC = () => {
                 </select>
               </div>
 
-              {/* Ordenação */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Ordenação</label>
-                <select
-                  value={sortOrder}
-                  onChange={(e) => handleSortOrderChange(e.target.value as 'asc' | 'desc')}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="asc">A → Z</option>
-                  <option value="desc">Z → A</option>
-                </select>
-              </div>
-
               {/* Botão limpar filtros */}
               <div style={{
                 display: 'flex',
@@ -614,14 +592,56 @@ const AdminPlans: React.FC = () => {
           <div className="admin-plans-list-container">
             <div className="admin-plans-table">
               <div className="admin-plans-table-header">
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Nome</div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('name')}
+                  title="Ordenar por nome"
+                >
+                  Nome {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
                 <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Descrição</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Preço</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Duração</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Max Usuários</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Status</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Criado em</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Ações</div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('price')}
+                  title="Ordenar por preço"
+                >
+                  Preço {sortField === 'price' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('duration')}
+                  title="Ordenar por duração"
+                >
+                  Duração {sortField === 'duration' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('maxUsers')}
+                  title="Ordenar por máx usuários"
+                >
+                  Max Usuários {sortField === 'maxUsers' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('status')}
+                  title="Ordenar por status"
+                >
+                  Status {sortField === 'status' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('createdAt')}
+                  title="Ordenar por data de criação"
+                >
+                  Criado em {sortField === 'createdAt' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div className="admin-plans-header-cell" style={{ justifyContent: 'flex-end' }}>Ações</div>
               </div>
 
               <div className="admin-plans-table-body">
@@ -655,20 +675,18 @@ const AdminPlans: React.FC = () => {
                     <div className="admin-plans-cell admin-plans-created" data-label="Criado em" style={{ textAlign: 'left' }}>
                       {formatDate(plan.createdAt)}
                     </div>
-                    <div className="admin-plans-cell admin-plans-actions" data-label="Ações" style={{ textAlign: 'left' }}>
+                    <div className="admin-plans-cell admin-plans-actions" data-label="Ações" style={{ textAlign: 'right' }}>
                       <button
-                        className="action-btn"
+                        className="btn-action-edit"
                         onClick={(e) => { e.stopPropagation(); handlePlanAction('edit', plan.id); }}
                         title="Editar plano"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Edit fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-delete"
                         onClick={(e) => { e.stopPropagation(); handlePlanAction('delete', plan.id); }}
                         title="Excluir plano"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Delete fontSize="small" />
                       </button>
