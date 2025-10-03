@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Person, LocationOn, Add, FirstPage, LastPage, ChevronLeft, ChevronRight, ViewModule } from '@mui/icons-material';
+import { Delete, Edit, Person, Add, ViewModule } from '@mui/icons-material';
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import EntityModal, { EntityData } from "../components/modals/EntityModal";
 import { FaqButton } from "../components/FaqButton";
+import Pagination from "../components/Pagination";
 
 interface UserSession {
   email: string;
@@ -115,27 +116,19 @@ const AdminEntities: React.FC = () => {
   };
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    const listContainer = document.querySelector('.admin-plans-list-container');
+    if (listContainer) {
+      const containerRect = listContainer.getBoundingClientRect();
+      const offset = 100;
+      const targetPosition = window.pageYOffset + containerRect.top - offset;
 
-  const goToFirstPage = () => {
-    setCurrentPage(1);
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToLastPage = () => {
-    setCurrentPage(totalPages);
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToPreviousPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-    setTimeout(scrollToTop, 100);
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
@@ -383,147 +376,30 @@ const AdminEntities: React.FC = () => {
                 </button>
               </div>
             </div>
+          </div>
 
-            {/* Botões de ação e paginação */}
-            <div className="schedule-filters-actions" style={{
-              display: 'flex',
-              gap: '1rem',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div style={{
-                color: '#4a5568',
-                fontSize: '0.9rem'
-              }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredEntities.length)} de <strong style={{
-                  color: '#2d3748',
-                  fontWeight: '600'
-                }}>{filteredEntities.length}</strong> entidades
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'center',
-                flexWrap: 'wrap'
-              }}>
-                {/* Seletor de itens por página */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label style={{
-                    fontSize: '0.85rem',
-                    color: '#6c757d',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    Itens por página:
-                  </label>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                    style={{
-                      padding: '0.25rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem',
-                      color: '#495057',
-                      background: 'white'
-                    }}
-                  >
-                    {itemsPerPageOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Navegação de páginas */}
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  alignItems: 'center'
-                }}>
-                  <button
-                    onClick={goToFirstPage}
-                    disabled={currentPage === 1}
-                    title="Primeira página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <FirstPage />
-                  </button>
-
-                  <button
-                    onClick={goToPreviousPage}
-                    disabled={currentPage === 1}
-                    title="Página anterior"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronLeft />
-                  </button>
-
-                  <span style={{
-                    padding: '0.4rem 0.8rem',
-                    fontSize: '0.85rem',
-                    color: '#495057',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {currentPage} de {totalPages}
-                  </span>
-
-                  <button
-                    onClick={goToNextPage}
-                    disabled={currentPage === totalPages}
-                    title="Próxima página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronRight />
-                  </button>
-
-                  <button
-                    onClick={goToLastPage}
-                    disabled={currentPage === totalPages}
-                    title="Última página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <LastPage />
-                  </button>
-                </div>
-              </div>
-            </div>
+          {/* Paginação superior */}
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '1rem',
+            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+            border: '1px solid #e9ecef',
+            marginBottom: '1rem'
+          }}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              totalItems={filteredEntities.length}
+              itemLabel="entidades"
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
           </div>
 
           {/* Lista de entidades */}
@@ -613,145 +489,19 @@ const AdminEntities: React.FC = () => {
             border: '1px solid #e9ecef',
             marginTop: '1rem'
           }}>
-            <div className="schedule-filters-actions" style={{
-              display: 'flex',
-              gap: '1rem',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div style={{
-                color: '#4a5568',
-                fontSize: '0.9rem'
-              }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredEntities.length)} de <strong style={{
-                  color: '#2d3748',
-                  fontWeight: '600'
-                }}>{filteredEntities.length}</strong> entidades
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'center',
-                flexWrap: 'wrap'
-              }}>
-                {/* Seletor de itens por página */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label style={{
-                    fontSize: '0.85rem',
-                    color: '#6c757d',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    Itens por página:
-                  </label>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                    style={{
-                      padding: '0.25rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem',
-                      color: '#495057',
-                      background: 'white'
-                    }}
-                  >
-                    {itemsPerPageOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Navegação de páginas */}
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  alignItems: 'center'
-                }}>
-                  <button
-                    onClick={goToFirstPage}
-                    disabled={currentPage === 1}
-                    title="Primeira página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <FirstPage />
-                  </button>
-
-                  <button
-                    onClick={goToPreviousPage}
-                    disabled={currentPage === 1}
-                    title="Página anterior"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronLeft />
-                  </button>
-
-                  <span style={{
-                    padding: '0.4rem 0.8rem',
-                    fontSize: '0.85rem',
-                    color: '#495057',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {currentPage} de {totalPages}
-                  </span>
-
-                  <button
-                    onClick={goToNextPage}
-                    disabled={currentPage === totalPages}
-                    title="Próxima página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronRight />
-                  </button>
-
-                  <button
-                    onClick={goToLastPage}
-                    disabled={currentPage === totalPages}
-                    title="Última página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <LastPage />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              totalItems={filteredEntities.length}
+              itemLabel="entidades"
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
           </div>
         </div>
       </main>
