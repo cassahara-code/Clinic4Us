@@ -21,6 +21,7 @@ interface AuthContextType {
   renewSession: (password: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (entity: string, profile: string) => void;
   getTimeRemaining: () => number;
+  refreshSession: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -215,6 +216,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Função para forçar atualização da sessão do state
+  const refreshSession = () => {
+    try {
+      const sessionData = localStorage.getItem('clinic4us-user-session');
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        setUser(session);
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar sessão:', error);
+    }
+  };
+
   // Verificar se está autenticado
   const isAuthenticated = !!user && getTimeRemaining() > 0;
 
@@ -226,7 +240,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     renewSession,
     updateProfile,
-    getTimeRemaining
+    getTimeRemaining,
+    refreshSession
   };
 
   return (

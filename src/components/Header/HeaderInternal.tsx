@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import logo from "../../images/logo_clinic4us.png";
-import { NotificationsOutlined, Person, AccessTime, Refresh, Logout, Settings, Schedule, Visibility, VisibilityOff } from '@mui/icons-material';
+import { NotificationsOutlined, Person, Refresh, Logout, Settings, Schedule, Visibility, VisibilityOff } from '@mui/icons-material';
+import SessionTimer from "../SessionTimer";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface MenuItemProps {
   label: string;
@@ -55,6 +57,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
   onNotificationClick,
   onUserClick,
 }) => {
+  const { renewSession: renewAuthSession, refreshSession } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false);
   const [isChangeProfileModalOpen, setIsChangeProfileModalOpen] = useState(false);
@@ -63,84 +66,14 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
   const [revalidatePassword, setRevalidatePassword] = useState('');
   const [revalidateError, setRevalidateError] = useState('');
   const [showRevalidatePassword, setShowRevalidatePassword] = useState(false);
-  const [timerKey, setTimerKey] = useState(0); // Key para forçar reinicialização do timer
-  const [timeRemaining, setTimeRemaining] = useState(() => {
-    if (!isLoggedIn) return 3600;
 
-    try {
-      const sessionData = localStorage.getItem('clinic4us-user-session');
-      if (sessionData) {
-        const session = JSON.parse(sessionData);
-        const loginTimestamp = session.loginTimestamp || new Date(session.loginTime).getTime();
-        const sessionDuration = session.sessionDuration || 3600; // 1 hora padrão
-        const currentTime = Date.now();
-        const elapsedSeconds = Math.floor((currentTime - loginTimestamp) / 1000);
-        const remaining = Math.max(0, sessionDuration - elapsedSeconds);
-
-        console.log('Session timer initialized:', {
-          loginTimestamp: new Date(loginTimestamp).toLocaleString(),
-          elapsedSeconds,
-          remaining: `${Math.floor(remaining / 3600)}h ${Math.floor((remaining % 3600) / 60)}m ${remaining % 60}s`
-        });
-
-        return remaining;
-      }
-    } catch (error) {
-      console.error('Erro ao calcular tempo da sessão:', error);
-    }
-
-    return 3600; // Fallback para 1 hora
-  });
-
-  useEffect(() => {
-    if (!isLoggedIn) return;
-
-    let timerId: NodeJS.Timeout | number;
-
-    const updateTimer = () => {
-      setTimeRemaining((prevTime) => {
-        const newTime = prevTime - 1;
-
-        if (newTime <= 0) {
-          // Limpar timer antes de abrir o modal
-          if (typeof timerId === 'number') {
-            clearInterval(timerId);
-          } else {
-            clearInterval(timerId as NodeJS.Timeout);
-          }
-
-          // Abrir modal de sessão expirada ao invés de logout direto
-          setTimeout(() => {
-            setIsSessionExpiredModalOpen(true);
-            setRevalidatePassword('');
-            setRevalidateError('');
-            setShowRevalidatePassword(false);
-          }, 100);
-
-          return 0;
-        }
-
-        return newTime;
-      });
-    };
-
-    // Usar setInterval com verificação de compatibilidade
-    if (typeof window !== 'undefined' && window.setInterval) {
-      timerId = window.setInterval(updateTimer, 1000);
-    } else {
-      // Fallback para ambientes que não suportam window.setInterval
-      timerId = setInterval(updateTimer, 1000);
-    }
-
-    // Cleanup function
-    return () => {
-      if (typeof timerId === 'number') {
-        clearInterval(timerId);
-      } else {
-        clearInterval(timerId as NodeJS.Timeout);
-      }
-    };
-  }, [isLoggedIn, onRevalidateLogin, timerKey]);
+  // Função chamada quando a sessão expira
+  const handleSessionExpiredFromTimer = () => {
+    setIsSessionExpiredModalOpen(true);
+    setRevalidatePassword('');
+    setRevalidateError('');
+    setShowRevalidatePassword(false);
+  };
 
   // Cleanup mobile menu state when component unmounts
   useEffect(() => {
@@ -148,22 +81,6 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
       document.body.classList.remove('mobile-menu-open');
     };
   }, []);
-
-  const formatTime = (seconds: number): string => {
-    // Garantir que seconds seja um número válido
-    const safeSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
-
-    const hours = Math.floor(safeSeconds / 3600);
-    const minutes = Math.floor((safeSeconds % 3600) / 60);
-    const secs = safeSeconds % 60;
-
-    // Usar método compatível com todos os browsers
-    const padZero = (num: number): string => {
-      return num < 10 ? '0' + num : num.toString();
-    };
-
-    return `${padZero(hours)}:${padZero(minutes)}:${padZero(secs)}`;
-  };
 
 
   const handleSessionExpiredRevalidate = async () => {
@@ -175,48 +92,23 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
     }
 
     try {
-      const sessionData = localStorage.getItem('clinic4us-user-session');
-      if (!sessionData) {
-        setRevalidateError('Sessão não encontrada.');
-        return;
+      // Usar função de renovação do AuthContext
+      const result = await renewAuthSession(revalidatePassword);
+
+      if (result.success) {
+        // Atualizar sessão no contexto
+        refreshSession();
+
+        // Fechar modal e limpar campos
+        setIsSessionExpiredModalOpen(false);
+        setRevalidatePassword('');
+        setRevalidateError('');
+        setShowRevalidatePassword(false);
+
+        console.log('Session renewed successfully');
+      } else {
+        setRevalidateError(result.error || 'Erro ao renovar sessão.');
       }
-
-      const session = JSON.parse(sessionData);
-
-      // Validação de senha
-      const validPasswords: { [key: string]: string } = {
-        'admin@clinic4us.com': '123456',
-        'diretoria@ninhoinstituto.com.br': '123456',
-        'recepcao@clinic4us.com': '123456'
-      };
-
-      const expectedPassword = validPasswords[session.email];
-      if (!expectedPassword || revalidatePassword !== expectedPassword) {
-        setRevalidateError('Senha incorreta.');
-        return;
-      }
-
-      // Renovar sessão
-      const newTimestamp = Date.now();
-      session.loginTime = new Date().toISOString();
-      session.loginTimestamp = newTimestamp;
-      session.sessionDuration = 3600; // 1 hora
-
-      localStorage.setItem('clinic4us-user-session', JSON.stringify(session));
-      setTimeRemaining(3600);
-      setTimerKey(prev => prev + 1); // Força reinicialização do timer
-
-      // Fechar modal e limpar campos
-      setIsSessionExpiredModalOpen(false);
-      setRevalidatePassword('');
-      setRevalidateError('');
-      setShowRevalidatePassword(false);
-
-      console.log('Session renewed after expiration:', {
-        newTimestamp: new Date(newTimestamp).toLocaleString(),
-        duration: '1 hour'
-      });
-
     } catch (error) {
       console.error('Erro ao renovar sessão expirada:', error);
       setRevalidateError('Erro interno. Tente novamente.');
@@ -234,17 +126,29 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
         clinicParam = session.clinic || session.alias || 'ninho';
       }
 
+      // Fechar modal
+      setIsSessionExpiredModalOpen(false);
+
       // Limpar dados da sessão
       localStorage.removeItem('clinic4us-user-session');
       localStorage.removeItem('clinic4us-remember-me');
+
+      // Limpar estados do modal
+      setRevalidatePassword('');
+      setRevalidateError('');
+      setShowRevalidatePassword(false);
 
       // Redirecionar para login com a clinic correta
       window.location.href = `${window.location.origin}/?page=login&clinic=${clinicParam}`;
     } catch (error) {
       console.error('Erro durante logout:', error);
       // Fallback em caso de erro
+      setIsSessionExpiredModalOpen(false);
       localStorage.removeItem('clinic4us-user-session');
       localStorage.removeItem('clinic4us-remember-me');
+      setRevalidatePassword('');
+      setRevalidateError('');
+      setShowRevalidatePassword(false);
       window.location.href = `${window.location.origin}/?page=login&clinic=ninho`;
     }
   };
@@ -315,37 +219,12 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
     }
 
     try {
-      // Obter sessão atual
-      const sessionData = localStorage.getItem('clinic4us-user-session');
-      if (sessionData) {
-        const session = JSON.parse(sessionData);
+      // Usar função do AuthContext para atualizar perfil
+      const { updateProfile } = useAuth();
+      updateProfile(selectedEntity, selectedProfile);
 
-        // Atualizar dados da sessão com novo perfil e entidade
-        const newTimestamp = Date.now();
-        session.role = selectedProfile;
-        session.clinicName = selectedEntity;
-        session.alias = selectedEntity;
-        session.loginTime = new Date().toISOString();
-        session.loginTimestamp = newTimestamp;
-        session.sessionDuration = 3600; // Renovar para 1 hora
-
-        // Salvar sessão atualizada
-        localStorage.setItem('clinic4us-user-session', JSON.stringify(session));
-
-        // Renovar timer
-        setTimeRemaining(3600);
-        setTimerKey(prev => prev + 1);
-
-        console.log('Profile changed:', {
-          newProfile: selectedProfile,
-          newEntity: selectedEntity,
-          timestamp: new Date(newTimestamp).toLocaleString()
-        });
-      }
-
-      // Fechar modal e recarregar página para aplicar mudanças
+      // Fechar modal - o updateProfile já recarrega a página
       handleCloseChangeProfileModal();
-      window.location.reload();
     } catch (error) {
       console.error('Erro ao mudar perfil:', error);
       alert('Erro ao alterar perfil. Tente novamente.');
@@ -395,19 +274,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
           {isLoggedIn ? (
             <div className="logged-actions">
               <div className="timer-section">
-                <span
-                  className="timer-text"
-                  style={{
-                    color: timeRemaining < 600 ? '#dc3545' : 'inherit',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    paddingTop: '6px'
-                  }}
-                >
-                  <AccessTime className="timer-icon" />
-                  {formatTime(timeRemaining)}
-                </span>
+                <SessionTimer onSessionExpired={handleSessionExpiredFromTimer} />
               </div>
 
               <button
@@ -651,6 +518,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                   value={revalidatePassword}
                   onChange={(e) => setRevalidatePassword(e.target.value)}
                   placeholder="Digite sua senha para continuar"
+                  autoComplete="off"
                   autoFocus
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
