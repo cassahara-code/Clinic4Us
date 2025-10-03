@@ -57,7 +57,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
   onNotificationClick,
   onUserClick,
 }) => {
-  const { renewSession: renewAuthSession, refreshSession } = useAuth();
+  const { renewSession: renewAuthSession, refreshSession, updateProfile } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false);
   const [isChangeProfileModalOpen, setIsChangeProfileModalOpen] = useState(false);
@@ -220,7 +220,6 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
 
     try {
       // Usar função do AuthContext para atualizar perfil
-      const { updateProfile } = useAuth();
       updateProfile(selectedEntity, selectedProfile);
 
       // Fechar modal - o updateProfile já recarrega a página

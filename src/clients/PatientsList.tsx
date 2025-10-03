@@ -524,7 +524,9 @@ const PatientsList: React.FC = () => {
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value as any)}
                   style={{
+                    minWidth: '120px',
                     width: '100%',
+                    paddingRight: '2rem',
                     padding: '0.375rem 0.5rem',
                     border: '1px solid #ced4da',
                     borderRadius: '4px',
@@ -562,7 +564,9 @@ const PatientsList: React.FC = () => {
                   value={genderFilter}
                   onChange={(e) => setGenderFilter(e.target.value as any)}
                   style={{
+                    minWidth: '120px',
                     width: '100%',
+                    paddingRight: '2rem',
                     padding: '0.375rem 0.5rem',
                     border: '1px solid #ced4da',
                     borderRadius: '4px',
@@ -601,7 +605,9 @@ const PatientsList: React.FC = () => {
                   value={professionalFilter}
                   onChange={(e) => setProfessionalFilter(e.target.value)}
                   style={{
+                    minWidth: '120px',
                     width: '100%',
+                    paddingRight: '2rem',
                     padding: '0.375rem 0.5rem',
                     border: '1px solid #ced4da',
                     borderRadius: '4px',

@@ -451,7 +451,9 @@ const AdminProfiles: React.FC = () => {
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value as any)}
                   style={{
+                    minWidth: '120px',
                     width: '100%',
+                    paddingRight: '2rem',
                     padding: '0.375rem 0.5rem',
                     border: '1px solid #ced4da',
                     borderRadius: '4px',

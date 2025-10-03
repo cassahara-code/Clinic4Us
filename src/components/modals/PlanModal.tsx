@@ -215,6 +215,11 @@ const PlanModal: React.FC<PlanModalProps> = ({
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as 'Ativo' | 'Inativo' })}
+                style={{
+                  minWidth: '120px',
+                  width: '100%',
+                  paddingRight: '2rem'
+                }}
               >
                 <option value="Ativo">Ativo</option>
                 <option value="Inativo">Inativo</option>

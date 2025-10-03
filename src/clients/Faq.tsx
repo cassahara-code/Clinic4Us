@@ -207,6 +207,11 @@ const Faq: React.FC = () => {
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="faq-category-select"
+                    style={{
+                      minWidth: '120px',
+                      width: '100%',
+                      paddingRight: '2rem'
+                    }}
                   >
                     <option value="all">Todas as categorias</option>
                     {categories.filter(cat => cat !== "all").map(category => (
@@ -250,6 +255,11 @@ const Faq: React.FC = () => {
                     <select
                       value={itemsPerPage}
                       onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                      style={{
+                        minWidth: '120px',
+                        width: '100%',
+                        paddingRight: '2rem'
+                      }}
                     >
                       {itemsPerPageOptions.map(option => (
                         <option key={option} value={option}>{option}</option>
@@ -401,6 +411,11 @@ const Faq: React.FC = () => {
                       <select
                         value={itemsPerPage}
                         onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                        style={{
+                          minWidth: '120px',
+                          width: '100%',
+                          paddingRight: '2rem'
+                        }}
                       >
                         {itemsPerPageOptions.map(option => (
                           <option key={option} value={option}>{option}</option>

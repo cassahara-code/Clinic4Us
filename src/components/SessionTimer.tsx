@@ -50,14 +50,22 @@ const SessionTimer: React.FC<SessionTimerProps> = ({ onSessionExpired }) => {
     <span
       className="timer-text"
       style={{
-        color: timeRemaining < 600 ? '#dc3545' : 'inherit',
+        color: timeRemaining < 600 ? '#dc3545' : '#03B4C6',
         display: 'flex',
         alignItems: 'center',
         gap: '6px',
-        paddingTop: '6px'
+        paddingTop: '6px',
+        fontWeight: '500',
+        fontSize: '0.95rem'
       }}
     >
-      <WatchLater className="timer-icon" />
+      <WatchLater
+        className="timer-icon"
+        style={{
+          fontSize: '1.25rem',
+          color: timeRemaining < 600 ? '#dc3545' : '#03B4C6'
+        }}
+      />
       {formatTime(timeRemaining)}
     </span>
   );
