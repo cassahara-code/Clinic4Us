@@ -432,20 +432,11 @@ const AdminPlans: React.FC = () => {
           padding: '0'
         }}>
           {/* Título da Lista de Planos */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '1.5rem'
-          }}>
-            <h1 style={{
-              margin: '0',
-              fontSize: '1.3rem',
-              fontWeight: '600',
-              color: '#6c757d'
-            }}>
-              Gestão de Planos
-            </h1>
+          <div className="page-header-container">
+            <div className="page-header-content">
+              <h1 className="page-header-title">Gestão de Planos</h1>
+              <p className="page-header-description">Gestão de planos e serviços oferecidos pela clínica.</p>
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaqButton />
               <button

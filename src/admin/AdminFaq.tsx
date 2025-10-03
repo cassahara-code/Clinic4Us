@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add, FilterAltOff } from '@mui/icons-material';
+import { Delete, Edit, Add, FilterAltOff, FirstPage, ChevronLeft, ChevronRight, LastPage } from '@mui/icons-material';
 import ConfirmModal from "../components/modals/ConfirmModal";
 import FaqModal, { FaqData } from "../components/modals/FaqModal";
 import { Toast } from "../components/Toast";
@@ -293,8 +293,11 @@ const AdminFaq: React.FC = () => {
         <div className="dashboard-container">
           <div className="dashboard-content">
             {/* Título da Página */}
-            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h1 className="page-title">Gestão de FAQ</h1>
+            <div className="page-header-container">
+              <div className="page-header-content">
+                <h1 className="page-header-title">Gestão de FAQ</h1>
+                <p className="page-header-description">Gestão de perguntas frequentes e respostas do sistema.</p>
+              </div>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <FaqButton />
                 <button

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Person, WhatsApp, CalendarToday, Edit, Warning, Add, Email, Check, Close, Folder, FilterAltOff } from '@mui/icons-material';
+import { Delete, Person, WhatsApp, CalendarToday, Edit, Warning, Add, Email, Check, Close, Folder, FilterAltOff, FirstPage, ChevronLeft, ChevronRight, LastPage } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import Pagination from "../components/Pagination";
 
@@ -388,8 +388,8 @@ const PatientsList: React.FC = () => {
       const scheduleUrl = `${window.location.origin}${window.location.pathname}?page=schedule&patient=${encodeURIComponent(patient.name)}`;
       window.open(scheduleUrl, '_blank');
     } else if (action === 'cadastro' && patient) {
-      // Abrir página de cadastro do paciente em nova janela
-      window.open(`/cadastro-paciente?id=${patient.id}`, '_blank');
+      // Navegar para página de cadastro do paciente
+      goToPatientRegister(patient.id);
     } else if (action === 'delete' && patient) {
       // Abrir modal de confirmação de exclusão
       setPatientToDelete(patient);
@@ -442,12 +442,13 @@ const PatientsList: React.FC = () => {
         <div className="dashboard-container">
           <div className="dashboard-content">
             {/* Título da Lista de Pacientes */}
-            <div className="page-header" style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <h1 className="page-title">Lista de Pacientes</h1>
+            <div className="page-header-container">
+              <div className="page-header-content">
+                <h1 className="page-header-title">Lista de Pacientes</h1>
+                <p className="page-header-description">
+                  Visualize, pesquise e gerencie todos os pacientes cadastrados no sistema.
+                </p>
+              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <FaqButton />
                 <button

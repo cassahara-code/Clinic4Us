@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Rotate90DegreesCw, RotateRight, ZoomOut, ZoomIn, Restore, CenterFocusStrong } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
+import PhotoUpload from "../components/PhotoUpload";
 
 interface MenuItemProps {
   label: string;
@@ -50,12 +50,12 @@ const UserProfile: React.FC = () => {
     photoPositionX: 0,
     photoPositionY: 0
   });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
+    document.title = "Clinic4Us - Meu Perfil";
+
     const simulatedUserSession: UserSession = {
       email: "cassahara@gmail.com",
       alias: "Usuário Demo",
@@ -174,47 +174,6 @@ const UserProfile: React.FC = () => {
     }
   };
 
-  // Funções para arrastar a foto (mesma lógica do PatientRegister)
-  const handlePhotoMouseDown = (e: React.MouseEvent) => {
-    if (!formData.photo) return;
-    e.preventDefault();
-    setIsDragging(true);
-    setDragStart({
-      x: e.clientX - (formData.photoPositionX || 0),
-      y: e.clientY - (formData.photoPositionY || 0)
-    });
-  };
-
-  const handlePhotoMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !formData.photo) return;
-    e.preventDefault();
-
-    const newX = e.clientX - dragStart.x;
-    const newY = e.clientY - dragStart.y;
-
-    const maxX = 125;
-    const maxY = 125;
-    const minX = -125;
-    const minY = -125;
-
-    const clampedX = Math.max(minX, Math.min(maxX, newX));
-    const clampedY = Math.max(minY, Math.min(maxY, newY));
-
-    setFormData(prev => ({
-      ...prev,
-      photoPositionX: clampedX,
-      photoPositionY: clampedY
-    }));
-  };
-
-  const handlePhotoMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handlePhotoMouseLeave = () => {
-    setIsDragging(false);
-  };
-
   if (!userSession) {
     return <div>Carregando...</div>;
   }
@@ -237,12 +196,13 @@ const UserProfile: React.FC = () => {
 
       <main className="user-profile-main">
         {/* Título da Página */}
-        <div className="page-header">
-          <h1 className="page-title">Meu perfil</h1>
+        <div className="page-header-container">
+          <div className="page-header-content">
+            <h1 className="page-header-title">Meu perfil</h1>
+            <p className="page-header-description">Aqui você pode visualizar e alterar os dados de sua conta.</p>
+          </div>
           <FaqButton />
         </div>
-
-        <p className="page-subtitle">Aqui você pode visualizar e alterar os dados de sua conta.</p>
 
         <div className="user-profile-container">
           {/* Coluna 1: Dados do usuário */}
@@ -250,189 +210,6 @@ const UserProfile: React.FC = () => {
             {/* Seção: Dados do usuário */}
             <div className="profile-section">
               <h3 className="section-title">Dados do usuário</h3>
-
-              {/* Upload de foto */}
-              <div className="photo-upload-section">
-                <div
-                  className="photo-preview-profile"
-                  onClick={() => !formData.photo && document.getElementById('profile-photo-upload')?.click()}
-                  onMouseMove={handlePhotoMouseMove}
-                  onMouseUp={handlePhotoMouseUp}
-                  onMouseLeave={handlePhotoMouseLeave}
-                >
-                  {formData.photo ? (
-                    <img
-                      src={formData.photo}
-                      alt="Foto do perfil"
-                      className="profile-photo"
-                      style={{
-                        transform: `translate(-50%, -50%) translate(${formData.photoPositionX || 0}px, ${formData.photoPositionY || 0}px) rotate(${formData.photoRotation || 0}deg) scale(${formData.photoZoom || 1}) scaleX(${formData.photoFlipX || 1})`,
-                        transformOrigin: 'center',
-                        transition: isDragging ? 'none' : 'transform 0.3s ease',
-                        cursor: isDragging ? 'grabbing' : 'grab'
-                      }}
-                      onMouseDown={handlePhotoMouseDown}
-                      draggable={false}
-                      onLoad={(e) => {
-                        const img = e.target as HTMLImageElement;
-                        if (formData.photoZoom === 1) {
-                          const containerSize = 150;
-                          const imgAspectRatio = img.naturalWidth / img.naturalHeight;
-
-                          let initialScale = 1;
-                          if (imgAspectRatio > 1) {
-                            initialScale = containerSize / img.naturalWidth;
-                          } else {
-                            initialScale = containerSize / img.naturalHeight;
-                          }
-
-                          setFormData(prev => ({
-                            ...prev,
-                            photoZoom: initialScale
-                          }));
-                        }
-                      }}
-                    />
-                  ) : (
-                    <div className="no-photo-placeholder-profile">
-                      <div className="photo-icon">📷</div>
-                      <span>Adicionar foto</span>
-                    </div>
-                  )}
-                </div>
-
-                <input
-                  type="file"
-                  id="profile-photo-upload"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onload = (event) => {
-                        setFormData(prev => ({
-                          ...prev,
-                          photo: event.target?.result as string,
-                          photoRotation: 0,
-                          photoZoom: 1,
-                          photoFlipX: 1,
-                          photoPositionX: 0,
-                          photoPositionY: 0
-                        }));
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                />
-
-                {/* Controles principais */}
-                <div className="photo-controls">
-                  <button
-                    type="button"
-                    className="btn-photo-control"
-                    onClick={() => document.getElementById('profile-photo-upload')?.click()}
-                  >
-                    {formData.photo ? 'Alterar' : 'Selecionar'}
-                  </button>
-                  {formData.photo && (
-                    <>
-                      <button
-                        type="button"
-                        className="btn-photo-control btn-remove"
-                        onClick={() => setFormData(prev => ({
-                          ...prev,
-                          photo: '',
-                          photoRotation: 0,
-                          photoZoom: 1,
-                          photoFlipX: 1,
-                          photoPositionX: 0,
-                          photoPositionY: 0
-                        }))}
-                      >
-                        Remover
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {/* Controles de edição */}
-                {formData.photo && (
-                  <div className="photo-edit-controls-profile">
-                    <button
-                      type="button"
-                      className="btn-photo-edit"
-                      title="Girar à esquerda"
-                      onClick={() => setFormData(prev => ({
-                        ...prev,
-                        photoRotation: (prev.photoRotation || 0) - 90
-                      }))}
-                    >
-                      <Rotate90DegreesCw fontSize="small" />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-photo-edit"
-                      title="Girar à direita"
-                      onClick={() => setFormData(prev => ({
-                        ...prev,
-                        photoRotation: (prev.photoRotation || 0) + 90
-                      }))}
-                    >
-                      <RotateRight fontSize="small" />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-photo-edit"
-                      title="Zoom out"
-                      onClick={() => setFormData(prev => ({
-                        ...prev,
-                        photoZoom: Math.max(0.5, (prev.photoZoom || 1) - 0.1)
-                      }))}
-                    >
-                      <ZoomOut fontSize="small" />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-photo-edit"
-                      title="Zoom in"
-                      onClick={() => setFormData(prev => ({
-                        ...prev,
-                        photoZoom: Math.min(3, (prev.photoZoom || 1) + 0.1)
-                      }))}
-                    >
-                      <ZoomIn fontSize="small" />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-photo-edit"
-                      title="Reset"
-                      onClick={() => setFormData(prev => ({
-                        ...prev,
-                        photoRotation: 0,
-                        photoZoom: 1,
-                        photoFlipX: 1,
-                        photoPositionX: 0,
-                        photoPositionY: 0
-                      }))}
-                    >
-                      <Restore fontSize="small" />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-photo-edit"
-                      title="Centralizar posição"
-                      onClick={() => setFormData(prev => ({
-                        ...prev,
-                        photoPositionX: 0,
-                        photoPositionY: 0
-                      }))}
-                    >
-                      <CenterFocusStrong fontSize="small" />
-                    </button>
-                  </div>
-                )}
-              </div>
 
               {/* Email atual */}
               <div className="form-group">
@@ -447,10 +224,25 @@ const UserProfile: React.FC = () => {
                   className="readonly-field"
                 />
               </div>
+
+              {/* Seção: Perfis de acesso */}
+              <div style={{ marginTop: '1.5rem' }}>
+                <h4 className="section-title" style={{ fontSize: '1rem', marginBottom: '0.75rem' }}>Perfis de acesso</h4>
+                <p className="section-description" style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>
+                  Seu usuário tem acesso aos seguintes perfis:
+                </p>
+                <div className="profiles-list">
+                  {userSession?.userProfiles?.map((profile, index) => (
+                    <div key={index} className="profile-badge">
+                      {profile}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Coluna 2: Nova senha e Perfis de acesso */}
+          {/* Coluna 2: Nova senha e Trocar usuário */}
           <div className="profile-column">
             {/* Seção: Nova senha */}
             <div className="profile-section">
@@ -474,28 +266,11 @@ const UserProfile: React.FC = () => {
               )}
             </div>
 
-            {/* Seção: Perfis de acesso */}
-            <div className="profile-section">
-              <h3 className="section-title">Perfis de acesso</h3>
-              <p className="section-description">
-                Seu usuário tem acesso aos seguintes perfis:
-              </p>
-              <div className="profiles-list">
-                {userSession?.userProfiles?.map((profile, index) => (
-                  <div key={index} className="profile-badge">
-                    {profile}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Coluna 3: Trocar usuário */}
-          <div className="profile-column">
+            {/* Seção: Trocar usuário */}
             <div className="profile-section">
               <h3 className="section-title">Trocar usuário</h3>
 
-              <form onSubmit={handleChangeEmail}>
+              <form onSubmit={handleChangeEmail} autoComplete="off">
                 <div className="form-group">
                   <label htmlFor="newEmail">Informe um novo e-mail diferente do anterior</label>
                   <input
@@ -505,6 +280,7 @@ const UserProfile: React.FC = () => {
                     value={formData.newEmail}
                     onChange={handleInputChange}
                     placeholder="E-mail"
+                    autoComplete="off"
                   />
                 </div>
 
@@ -517,6 +293,7 @@ const UserProfile: React.FC = () => {
                     value={formData.confirmEmail}
                     onChange={handleInputChange}
                     placeholder="E-mail"
+                    autoComplete="off"
                   />
                 </div>
 
@@ -529,6 +306,7 @@ const UserProfile: React.FC = () => {
                     value={formData.currentPassword}
                     onChange={handleInputChange}
                     placeholder="Senha"
+                    autoComplete="new-password"
                   />
                 </div>
 
@@ -544,6 +322,38 @@ const UserProfile: React.FC = () => {
                   {isLoading ? "Processando..." : "Prosseguir"}
                 </button>
               </form>
+            </div>
+          </div>
+
+          {/* Coluna 3: Foto do perfil */}
+          <div className="profile-column">
+            <div className="profile-section" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <h3 className="section-title" style={{ alignSelf: 'flex-start' }}>Foto do perfil</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                <PhotoUpload
+                  photo={formData.photo}
+                  photoRotation={formData.photoRotation}
+                  photoZoom={formData.photoZoom}
+                  photoFlipX={formData.photoFlipX}
+                  photoPositionX={formData.photoPositionX}
+                  photoPositionY={formData.photoPositionY}
+                  onPhotoChange={(photoData) => setFormData(prev => ({ ...prev, ...photoData }))}
+                />
+
+                {formData.photo && (
+                  <button
+                    type="button"
+                    className="btn-primary"
+                    style={{ marginTop: '1rem', width: '100%' }}
+                    onClick={() => {
+                      // Aqui você implementaria a lógica de salvar a foto no backend
+                      alert('Foto salva com sucesso!');
+                    }}
+                  >
+                    Salvar Foto
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

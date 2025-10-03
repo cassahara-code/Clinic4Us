@@ -6,6 +6,39 @@
    ================================================================== */
 
 /* ====================================================================
+   PAGE HEADER STYLES
+   ================================================================== */
+
+/* Título principal da página */
+.page-header-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+/* Subtítulo/descrição da página */
+.page-header-description {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #868e96;
+}
+
+/* Container do cabeçalho da página */
+.page-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
+}
+
+.page-header-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ====================================================================
    HEADER INTERNAL STYLES
    ================================================================== */
 
@@ -4492,3 +4525,1801 @@ body.mobile-menu-open .hamburger,
 
 /* Botão FAQ (?) - Padrão do componente FaqButton */
 /* Estilos já definidos no componente FaqButton */
+
+/* ====================================================================
+   FORM FIELDS GLOBAL STYLES
+   ================================================================== */
+
+/* Estilos globais padronizados para campos de formulário */
+/* Baseados nos campos da página de Agenda Profissional */
+
+/* Labels de formulário */
+.form-label,
+label {
+  display: block !important;
+  font-size: 0.95rem !important;
+  color: #6c757d !important;
+  margin-bottom: 0.5rem !important;
+  font-weight: 400 !important;
+}
+
+/* Inputs de texto, email, password, date, number */
+.form-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="number"],
+input[type="tel"],
+input[type="search"] {
+  width: 100%;
+  padding: 0.375rem 0.5rem !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  font-size: 1rem !important;
+  color: #495057 !important;
+  height: 40px !important;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  background: white !important;
+}
+
+.form-input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="search"]:focus {
+  border-color: #03B4C6;
+  box-shadow: 0 0 0 3px rgba(3, 180, 198, 0.1);
+  outline: none;
+}
+
+.form-input::placeholder,
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="tel"]::placeholder,
+input[type="search"]::placeholder {
+  color: #6c757d;
+}
+
+/* Select */
+.form-select,
+select {
+  width: 100%;
+  padding: 0.375rem 0.5rem !important;
+  padding-right: 2rem !important;
+  border: 1px solid #ced4da !important;
+  border-radius: 4px !important;
+  font-size: 1rem !important;
+  color: #495057 !important;
+  height: 40px !important;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  background: white !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.5rem center !important;
+  background-size: 1rem !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+.form-select:focus,
+select:focus {
+  border-color: #03B4C6 !important;
+  box-shadow: 0 0 0 3px rgba(3, 180, 198, 0.1) !important;
+  outline: none !important;
+}
+
+/* Textarea */
+.form-textarea,
+textarea {
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #495057;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: white;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-textarea:focus,
+textarea:focus {
+  border-color: #03B4C6;
+  box-shadow: 0 0 0 3px rgba(3, 180, 198, 0.1);
+  outline: none;
+}
+
+/* Campos desabilitados ou readonly */
+.form-input:disabled,
+.form-select:disabled,
+.form-textarea:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+.readonly-field {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Form group - container de campo com label */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+/* Sobrescrever o width para permitir definição individual por página */
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+}
+
+.form-group textarea {
+  height: auto;
+  min-height: 80px;
+}
+
+/* ====================================================================
+   PATIENT REGISTER STYLES
+   ================================================================== */
+
+/* Estilos para a página de cadastro de paciente */
+
+.patient-register-page {
+  min-height: 100vh;
+  background: #f7fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.patient-register-main {
+  flex: 1;
+  padding: 1rem;
+  padding-top: calc(85px + 1rem);
+  width: 100%;
+  background: #f8f9fa;
+}
+
+.patient-register-container {
+  background: white;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  border-top: none;
+  padding: 1rem 1.5rem;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+
+/* Container das abas */
+.patient-tabs-container {
+  background: white;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
+  border-bottom: none;
+  padding: 0.75rem 1rem 0 1rem;
+  margin-bottom: 0;
+}
+
+/* Estilos das abas */
+.patient-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0;
+  border-bottom: 2px solid #2EAAA1;
+  padding-bottom: 0.375rem;
+}
+
+.tab-button {
+  background: #f7fafc;
+  border: 1px solid #cbd5e0;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  padding: 0.6375rem 0.65rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  top: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Cores sempre visíveis para cada aba */
+.tab-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #cbd5e0; /* Cor padrão */
+}
+
+.tab-button:hover:not(.disabled) {
+  background: #edf2f7;
+  color: #2d3748;
+}
+
+
+.tab-button.active {
+  background: #2EAAA1;
+  color: white;
+  border-color: #2EAAA1;
+  box-shadow: 0 2px 8px rgba(46, 170, 161, 0.3);
+  padding: 0.7125rem 0.65rem;
+}
+
+/* Cores específicas sempre visíveis para cada aba */
+.tab-button[data-tab="cadastro"]::before {
+  background: #2563eb; /* Azul */
+}
+
+.tab-button[data-tab="resumo"]::before {
+  background: #059669; /* Verde */
+}
+
+.tab-button[data-tab="anotacoes"]::before {
+  background: #7c3aed; /* Roxo */
+}
+
+.tab-button[data-tab="agenda"]::before {
+  background: #dc2626; /* Vermelho */
+}
+
+.tab-button[data-tab="diagnostico"]::before {
+  background: #ea580c; /* Laranja */
+}
+
+.tab-button[data-tab="avaliacoes"]::before {
+  background: #0891b2; /* Ciano */
+}
+
+.tab-button[data-tab="plano-terap"]::before {
+  background: #be185d; /* Rosa */
+}
+
+.tab-button[data-tab="evolucoes"]::before {
+  background: #65a30d; /* Verde lima */
+}
+
+.tab-button[data-tab="financeiro"]::before {
+  background: #ca8a04; /* Amarelo */
+}
+
+.tab-button[data-tab="receituario"]::before {
+  background: #0d9488; /* Teal */
+}
+
+.tab-button[data-tab="arquivos"]::before {
+  background: #6b7280; /* Cinza */
+}
+
+.tab-button.disabled {
+  background: #f7fafc;
+  color: #a0aec0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Conteúdo das abas */
+.tab-content {
+  background: white;
+  padding: 0.75rem 0;
+}
+
+.tab-placeholder {
+  text-align: center;
+  padding: 3rem;
+  color: #718096;
+}
+
+.tab-placeholder h3 {
+  color: #2d3748;
+  margin-bottom: 1rem;
+}
+
+/* Formulário */
+.patient-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.25rem;
+  align-items: end;
+  margin-bottom: 0.125rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.form-group.large {
+  grid-column: span 2;
+}
+
+.form-group.small {
+  min-width: 80px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+  font-weight: normal;
+}
+
+/* Width já definido acima em FORM FIELDS GLOBAL STYLES */
+
+/* Input com botão */
+.input-with-button {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.input-with-button input {
+  flex: 1;
+}
+
+.search-btn {
+  background: #2EAAA1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.search-btn:hover {
+  background: #26a399;
+}
+
+/* Radio buttons */
+.radio-group {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Radio buttons em campos de dados pessoais - mais compactos */
+.personal-data-fields .radio-group {
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Divisor para seção de responsáveis */
+.responsible-divider {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.responsible-divider::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #06b6d4;
+}
+
+/* Remover linha do último divisor */
+.responsible-divider:last-of-type::after {
+  display: none;
+}
+
+/* Divisor apenas com linha (sem título) */
+.form-divider-line {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-top: 1px solid #06b6d4 !important;
+}
+
+.responsible-divider h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #495057;
+  background: white;
+  padding-right: 1rem;
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+}
+
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #495057;
+}
+
+.radio-label input[type="radio"] {
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 !important;
+  margin-right: 0.5rem !important;
+  accent-color: #2EAAA1 !important;
+  vertical-align: middle !important;
+}
+
+/* Checkboxes */
+input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  accent-color: #2EAAA1 !important;
+  cursor: pointer !important;
+  margin-right: 0.5rem !important;
+  vertical-align: middle !important;
+}
+
+/* Layout de Dados Pessoais com Foto */
+.personal-data-layout {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Container de Upload de Foto */
+.photo-upload-container {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.photo-upload-component {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Preview da Foto */
+.photo-preview {
+  width: 250px;
+  height: 250px;
+  border: 2px dashed #ced4da;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  user-select: none;
+}
+
+.photo-preview:hover {
+  border-color: #2EAAA1;
+  background: #f0fff4;
+}
+
+.patient-photo {
+  max-width: none;
+  max-height: none;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center;
+}
+
+.no-photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6c757d;
+  text-align: center;
+  padding: 1rem;
+}
+
+.photo-icon {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+.no-photo-placeholder span {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Controles principais da foto */
+.photo-main-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  width: 250px;
+}
+
+.btn-photo-main {
+  background: #2EAAA1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-photo-main:hover {
+  background: #26a399;
+}
+
+.btn-photo-main.btn-remove {
+  background: #e53e3e;
+}
+
+.btn-photo-main.btn-remove:hover {
+  background: #c53030;
+}
+
+/* Controles de edição da foto */
+.photo-edit-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 250px;
+  margin-top: 0.75rem;
+}
+
+.edit-control-row {
+  display: flex;
+  width: 250px;
+  gap: 2px;
+  justify-content: space-between;
+}
+
+.btn-photo-edit {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}
+
+.btn-photo-edit:hover {
+  background: #e9ecef;
+  border-color: #2EAAA1;
+  color: #2EAAA1;
+}
+
+.btn-photo-edit-small {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 32px;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 38px;
+}
+
+.btn-photo-edit-small:hover {
+  background: #e9ecef;
+  border-color: #2EAAA1;
+  color: #2EAAA1;
+}
+
+/* Instruções da Foto */
+.photo-instructions {
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 2px solid #2EAAA1;
+  width: 250px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Mini Dashboard */
+.mini-dashboard {
+  width: 250px;
+  margin-top: 2rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-title {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #03B4C6;
+  text-align: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+.dashboard-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid #f7fafc;
+}
+
+.dashboard-label {
+  font-size: 0.75rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.dashboard-value {
+  font-size: 0.75rem;
+  color: #2d3748;
+  font-weight: 600;
+}
+
+.dashboard-section {
+  margin-top: 0.75rem;
+}
+
+.dashboard-subtitle {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4a5568;
+  text-align: center;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.25rem;
+}
+
+.stat-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.375rem 0.25rem !important;
+  border-radius: 4px !important;
+  text-align: center !important;
+  min-width: 70px !important;
+  min-height: 52px !important;
+}
+
+.stat-present {
+  background: #f0fff4 !important;
+  border: 1px solid #9ae6b4 !important;
+}
+
+.stat-absent {
+  background: #fffbf0 !important;
+  border: 1px solid #feb2b2 !important;
+}
+
+.stat-cancelled {
+  background: #f7fafc !important;
+  border: 1px solid #cbd5e0 !important;
+}
+
+.stat-number {
+  font-size: 1.0625rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.125rem !important;
+  min-width: 32px !important;
+}
+
+.stat-present .stat-number {
+  color: #2f855a !important;
+}
+
+.stat-absent .stat-number {
+  color: #c53030 !important;
+}
+
+.stat-cancelled .stat-number {
+  color: #4a5568 !important;
+}
+
+.stat-label {
+  font-size: 0.6875rem !important;
+  font-weight: 500 !important;
+  color: #4a5568 !important;
+  line-height: 1.1 !important;
+}
+
+.photo-instructions small {
+  color: #6c757d;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+/* Campos de Dados Pessoais */
+.personal-data-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+/* Grid específico para dados pessoais - 3 colunas uniformes */
+.personal-data-fields .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.25rem;
+  align-items: end;
+  margin-bottom: 0.125rem;
+}
+
+/* Terceira linha com 2 campos */
+.personal-data-fields .form-row:nth-child(3) {
+  grid-template-columns: 1fr 1fr 1fr;
+  max-width: 100%;
+}
+
+/* Quarta linha com 3 campos */
+.personal-data-fields .form-row:nth-child(4) {
+  grid-template-columns: 1fr 1fr 1fr;
+  max-width: 100%;
+}
+
+/* Seção de formulário */
+.form-section {
+  margin-top: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+.form-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+/* Títulos das seções - padrão igual ao da página schedule */
+.section-title {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+/* Ações do formulário */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.btn-save {
+  background: #2EAAA1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.875rem 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 140px;
+}
+
+.btn-save:hover {
+  background: #26a399;
+}
+
+.btn-save:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+
+.btn-cancel-form {
+  background: white;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.875rem 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.btn-cancel-form:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+  color: #2d3748;
+}
+
+/* Ações do formulário inline (na mesma linha dos campos) */
+.form-actions-inline {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+/* Remover qualquer borda após os botões (exceto a linha demarcatória) */
+.form-actions-inline ~ *:not(.form-divider-line) {
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+/* Remover borda do container pai dos botões */
+.form-actions-inline,
+.form-actions-inline .form-group {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+/* Botões pequenos para usar inline */
+.btn-save-small {
+  background: #2EAAA1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex: 1;
+}
+
+.btn-save-small:hover {
+  background: #26a399;
+}
+
+.btn-save-small:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+
+.btn-cancel-form-small {
+  background: white;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+}
+
+.btn-cancel-form-small:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+/* Estilos para o conteúdo das abas */
+.tab-content-section {
+  padding: 1.5rem 0;
+}
+
+.tab-content-section h3 {
+  color: #2d3748;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  border-bottom: 2px solid #2EAAA1;
+  padding-bottom: 0.5rem;
+}
+
+/* Estilos para aba Resumo */
+.resume-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.resume-card {
+  background: #f8f9fa;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.resume-card h4 {
+  color: #2EAAA1;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.resume-card p {
+  margin: 0.5rem 0;
+  color: #4a5568;
+  font-size: 0.875rem;
+}
+
+/* Estilos para aba Anotações */
+.notes-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.btn-add-note {
+  background: #2EAAA1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-add-note:hover {
+  background: #26a399;
+}
+
+.notes-filter {
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.note-item {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.note-date {
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+.note-type {
+  background: #2EAAA1;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.note-content {
+  color: #2d3748;
+  line-height: 1.5;
+  margin: 0.75rem 0;
+}
+
+.note-footer {
+  text-align: right;
+}
+
+.note-author {
+  color: #718096;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+/* Estilos para aba Agenda */
+.agenda-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.btn-schedule {
+  background: #48bb78;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-schedule:hover {
+  background: #38a169;
+}
+
+.appointment-item {
+  display: grid;
+  grid-template-columns: 150px 1fr auto;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.appointment-item.future {
+  background: #f0fff4;
+  border-color: #48bb78;
+}
+
+.appointment-item.past {
+  background: #f7fafc;
+}
+
+.appointment-time .date {
+  display: block;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.appointment-time .time {
+  display: block;
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+.appointment-details h4 {
+  margin: 0 0 0.25rem 0;
+  color: #2d3748;
+}
+
+.appointment-details p {
+  margin: 0 0 0.5rem 0;
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+.status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status.confirmed {
+  background: #c6f6d5;
+  color: #2f855a;
+}
+
+.status.completed {
+  background: #bee3f8;
+  color: #2b6cb0;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-edit, .btn-cancel, .btn-view {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: white;
+  color: #4a5568;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-edit:hover {
+  background: #edf2f7;
+  border-color: #2EAAA1;
+}
+
+.btn-cancel:hover {
+  background: #fed7d7;
+  border-color: #e53e3e;
+  color: #e53e3e;
+}
+
+.btn-view:hover {
+  background: #edf2f7;
+  border-color: #4a5568;
+}
+
+/* Estilos gerais para toolbars */
+.diagnosis-toolbar,
+.evaluations-toolbar,
+.therapy-toolbar,
+.evolution-toolbar,
+.prescription-toolbar,
+.files-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+/* Botões de ação gerais */
+.btn-add-diagnosis,
+.btn-new-evaluation,
+.btn-new-plan,
+.btn-new-evolution,
+.btn-new-prescription,
+.btn-upload {
+  background: #2EAAA1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-add-diagnosis:hover,
+.btn-new-evaluation:hover,
+.btn-new-plan:hover,
+.btn-new-evolution:hover,
+.btn-new-prescription:hover,
+.btn-upload:hover {
+  background: #26a399;
+}
+
+/* Estilos para itens de lista */
+.diagnosis-item,
+.evaluation-item,
+.therapy-plan-item,
+.evolution-item,
+.prescription-item {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.diagnosis-header,
+.evaluation-header,
+.plan-header,
+.prescription-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* Estilos para status */
+.diagnosis-status.active,
+.evaluation-status.completed,
+.status.active {
+  background: #c6f6d5;
+  color: #2f855a;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Estilos para aba Financeiro */
+.financial-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.financial-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.financial-card h4 {
+  margin: 0 0 1rem 0;
+  color: #4a5568;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.amount.pending {
+  color: #e53e3e;
+}
+
+.amount.paid {
+  color: #48bb78;
+}
+
+.transaction-item {
+  display: grid;
+  grid-template-columns: 100px 1fr 100px 100px;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  align-items: center;
+}
+
+/* Estilos para aba Arquivos */
+.files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.file-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.file-info {
+  flex: 1;
+}
+
+.file-info h4 {
+  margin: 0 0 0.25rem 0;
+  color: #2d3748;
+  font-size: 0.875rem;
+}
+
+.file-info p {
+  margin: 0 0 0.25rem 0;
+  color: #718096;
+  font-size: 0.75rem;
+}
+
+.file-date {
+  color: #a0aec0;
+  font-size: 0.75rem;
+}
+
+.file-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-download,
+.btn-view,
+.btn-print,
+.btn-view-evaluation {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: white;
+  color: #4a5568;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-download:hover,
+.btn-view:hover,
+.btn-print:hover,
+.btn-view-evaluation:hover {
+  background: #edf2f7;
+  border-color: #2EAAA1;
+}
+
+/* Timeline para evoluções */
+.evolution-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.evolution-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e2e8f0;
+}
+
+.evolution-item {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.evolution-item::before {
+  content: '';
+  position: absolute;
+  left: -2.25rem;
+  top: 0.5rem;
+  width: 12px;
+  height: 12px;
+  background: #2EAAA1;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 0 0 2px #e2e8f0;
+}
+
+.evolution-date {
+  font-weight: 600;
+  color: #2EAAA1;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.evolution-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2d3748;
+}
+
+.evolution-content p {
+  margin: 0 0 0.75rem 0;
+  color: #4a5568;
+  line-height: 1.5;
+}
+
+.evolution-author {
+  color: #718096;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+/* Responsividade */
+@media (max-width: 1200px) {
+  .form-row {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .form-group.large {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .patient-register-main {
+    padding: 0.5rem;
+    padding-top: calc(85px + 0.5rem);
+  }
+
+  .patient-register-container {
+    padding: 1rem;
+  }
+
+  .patient-tabs-container {
+    border-radius: 8px 8px 0 0;
+    padding: 0.5rem 0.75rem 0 0.75rem;
+  }
+
+  .patient-tabs {
+    flex-direction: column;
+    gap: 0.5rem;
+    border-bottom: none;
+  }
+
+  .tab-button {
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    top: 0;
+  }
+
+  .patient-register-container {
+    border-radius: 0 0 8px 8px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form-group.large,
+  .form-group.small {
+    grid-column: span 1;
+  }
+
+  .input-with-button {
+    flex-direction: column;
+  }
+
+  /* Responsividade para layout de dados pessoais */
+  .personal-data-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .photo-upload-container {
+    order: -1;
+  }
+
+  .photo-preview {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+  }
+
+  .photo-main-controls,
+  .photo-edit-controls,
+  .photo-instructions {
+    width: 200px;
+    margin: 0 auto;
+  }
+
+  .edit-control-row {
+    gap: 0.125rem;
+  }
+
+  .btn-photo-edit {
+    font-size: 0.75rem;
+    height: 28px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-save,
+  .btn-cancel-form {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .patient-register-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .tab-button {
+    padding: 0.625rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .radio-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .photo-hint {
+    max-width: none;
+  }
+}
+
+/* Estados de erro */
+.form-group input.error,
+.form-group select.error,
+.form-group textarea.error {
+  border-color: #e53e3e;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+}
+
+.error-message {
+  color: #e53e3e;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* Melhorias visuais */
+
+.form-group select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+  appearance: none;
+}
+
+/* Animações */
+.tab-button {
+  transform: translateY(0);
+}
+
+.search-btn:active,
+.btn-save:active,
+.btn-photo:active {
+  transform: translateY(1px);
+}
+
+/* CEP Input Container */
+.cep-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cep-loading {
+  position: absolute;
+  right: 0.75rem;
+  color: #2EAAA1;
+  font-size: 1rem;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Address Number and Complement Container */
+.address-number-complement {
+  display: flex;
+  flex-direction: column;
+}
+
+.number-complement-container {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.form-subgroup {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.form-subgroup label {
+  color: #4a5568;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.number-input {
+  width: 100%;
+  min-width: 80px;
+}
+
+.complement-input {
+  width: 100%;
+  min-width: 120px;
+}
+
+/* Document Type and Number Container */
+.document-type-number {
+  display: flex;
+  flex-direction: column;
+}
+
+.document-container {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.document-type-input {
+  width: 100%;
+  min-width: 120px;
+}
+
+.document-number-input {
+  width: 100%;
+  min-width: 150px;
+}
+
+/* Country and Language Container */
+.country-language {
+  display: flex;
+  flex-direction: column;
+}
+
+.country-language-container {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.country-input {
+  width: 100%;
+  min-width: 120px;
+}
+
+.language-input {
+  width: 100%;
+  min-width: 120px;
+}
+
+/* Phone and Email Container */
+.phone-email {
+  display: flex;
+  flex-direction: column;
+}
+
+.phone-email-container {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.phone-email-container .form-subgroup {
+  flex: 1;
+}
+
+/* Birth Date and Age Container */
+.birth-age-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.birth-age-container {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+/* Age field styling */
+.age-field {
+  background-color: #f7fafc !important;
+  color: #4a5568 !important;
+  cursor: not-allowed;
+  font-style: italic;
+}
+
+.age-field:disabled {
+  opacity: 0.8;
+}
+
+/* CPF and Financial Responsible Container */
+.cpf-financial-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.cpf-financial-container {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  align-items: end;
+}
+
+.cpf-financial-container .form-subgroup:first-child {
+  flex: 2;
+}
+
+.cpf-financial-container .checkbox-subgroup {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  justify-content: flex-start;
+}
+
+.checkbox-subgroup {
+  display: flex;
+  align-items: end;
+  padding-bottom: 0.25rem;
+  justify-content: flex-start;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: #4a5568;
+  margin: 0;
+  white-space: nowrap;
+  justify-content: flex-start;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin: 0;
+  margin-right: 0;
+}
+
+/* Observations Section */
+.observations-group {
+  grid-column: 1 / -1; /* Ocupa todas as colunas disponíveis */
+}
+
+.observations-textarea {
+  width: 100%;
+  min-height: 100px;
+  resize: vertical;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.observations-textarea:focus {
+  outline: none;
+  border-color: #2EAAA1;
+  box-shadow: 0 0 0 3px rgba(46, 170, 161, 0.1);
+}
+
+/* Responsible Contact Container */
+.responsible-contact-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.responsible-contact-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.responsible-contact-container .checkbox-subgroup {
+  padding-bottom: 0;
+  margin-bottom: 0.5rem;
+}

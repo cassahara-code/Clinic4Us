@@ -1,0 +1,125 @@
+            {/* Conteúdo da aba Resumo */}
+            {activeTab === 'resumo' && (
+              <div className="tab-content-section resume-section">
+                {/* Workflow Section */}
+                <div className="workflow-section">
+                  <h3 className="section-title">Workflow</h3>
+                  <div className="workflow-cards">
+                    <div className="workflow-card completed">
+                      <div className="workflow-header">
+                        <span className="workflow-number">1.</span>
+                        <span className="workflow-title">Cadastro</span>
+                        <span className="workflow-status-icon">✓</span>
+                      </div>
+                      <p className="workflow-description">Cadastro completo.</p>
+                      <Person className="workflow-icon" style={{fontSize: 48, color: '#2EAAA1'}} />
+                    </div>
+
+                    <div className="workflow-card warning">
+                      <div className="workflow-header">
+                        <span className="workflow-number">2.</span>
+                        <span className="workflow-title">Diagnóstico</span>
+                        <span className="workflow-status-icon warning">⚠</span>
+                      </div>
+                      <p className="workflow-description">Informe o diagnóstico do paciente.</p>
+                      <LocalHospital className="workflow-icon" style={{fontSize: 48, color: '#94a3b8'}} />
+                    </div>
+
+                    <div className="workflow-card warning">
+                      <div className="workflow-header">
+                        <span className="workflow-number">3.</span>
+                        <span className="workflow-title">Plano terap.</span>
+                        <span className="workflow-status-icon warning">⚠</span>
+                      </div>
+                      <p className="workflow-description">Cadastre um plano terapêutico.</p>
+                      <Healing className="workflow-icon" style={{fontSize: 48, color: '#94a3b8'}} />
+                    </div>
+
+                    <div className="workflow-card completed">
+                      <div className="workflow-header">
+                        <span className="workflow-number">4.</span>
+                        <span className="workflow-title">Agendamento</span>
+                        <span className="workflow-status-icon">✓</span>
+                      </div>
+                      <p className="workflow-description">4 agendamentos ativos.</p>
+                      <Event className="workflow-icon" style={{fontSize: 48, color: '#2EAAA1'}} />
+                    </div>
+
+                    <div className="workflow-card warning">
+                      <div className="workflow-header">
+                        <span className="workflow-number">5.</span>
+                        <span className="workflow-title">Atendimentos</span>
+                        <span className="workflow-status-icon warning">⚠</span>
+                      </div>
+                      <p className="workflow-description">Registre os atendimentos.</p>
+                      <Description className="workflow-icon" style={{fontSize: 48, color: '#94a3b8'}} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Atendimentos Section */}
+                <div className="appointments-section">
+                  <h3 className="section-title">Atendimentos (todos os atendimentos)</h3>
+                  <div className="appointments-filters">
+                    <div className="filter-group">
+                      <label>Profissional</label>
+                      <select className="filter-select">
+                        <option>Profissionais</option>
+                      </select>
+                    </div>
+                    <div className="filter-group">
+                      <label>Data inicial</label>
+                      <input type="date" className="filter-date" defaultValue="2025-07-23" />
+                    </div>
+                    <div className="filter-group">
+                      <label>Data final</label>
+                      <input type="date" className="filter-date" defaultValue="2025-09-20" />
+                    </div>
+                  </div>
+
+                  <div className="appointments-summary">
+                    <p><strong>Total de agendamentos no período: 1</strong></p>
+                  </div>
+
+                  <div className="appointments-table">
+                    <div className="appointment-row header">
+                      <span>Confirmado</span>
+                      <span>1</span>
+                    </div>
+                    <div className="appointment-row">
+                      <span>Presença: Compareceu</span>
+                      <span>1</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status de Presença Section */}
+                <div className="presence-section">
+                  <h3 className="section-title">Status de presença</h3>
+                  <div className="presence-chart">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                      <circle cx="100" cy="100" r="80" fill="none" stroke="#ef4444" strokeWidth="40" strokeDasharray="502.65 502.65" strokeDashoffset="0" />
+                      <circle cx="100" cy="100" r="80" fill="none" stroke="#fca5a5" strokeWidth="40" strokeDasharray="502.65 502.65" strokeDashoffset="-502.65" />
+                    </svg>
+                    <div className="chart-legend">
+                      <div className="legend-item">
+                        <span className="legend-color" style={{backgroundColor: '#ef4444'}}></span>
+                        <span>Faltas</span>
+                      </div>
+                      <div className="legend-item">
+                        <span className="legend-color" style={{backgroundColor: '#fca5a5'}}></span>
+                        <span>Presenças</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Supervisores Section */}
+                <div className="supervisors-section">
+                  <h3 className="section-title">Supervisores x Supervisionados</h3>
+                  <div className="supervisors-content">
+                    <p className="empty-state">Nenhum supervisor/supervisionado cadastrado</p>
+                  </div>
+                </div>
+              </div>
+            )}

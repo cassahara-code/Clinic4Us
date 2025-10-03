@@ -967,12 +967,11 @@ const ProfessionalSchedule: React.FC = () => {
         <div className="dashboard-container">
           <div className="dashboard-content">
             {/* Título da Agenda */}
-            <div className="page-header" style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <h1 className="page-title">Agenda Profissional</h1>
+            <div className="page-header-container">
+              <div className="page-header-content">
+                <h1 className="page-header-title">Agenda Profissional</h1>
+                <p className="page-header-description">Gerencie sua agenda, visualize compromissos e organize horários de atendimento.</p>
+              </div>
               <FaqButton />
             </div>
 
