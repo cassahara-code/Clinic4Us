@@ -4,6 +4,7 @@ import "./index.css";
 import "./global.css";
 import reportWebVitals from "./reportWebVitals";
 import { RouterProvider, useRouter } from "./contexts/RouterContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import LandingPage from "./components/LandingPage";
 import Login from "./clients/Login";
 import AliasRegister from "./clients/AliasRegister";
@@ -27,7 +28,52 @@ const root = ReactDOM.createRoot(
 
 // Main app component with routing
 const AppContent = () => {
-  const { currentPage } = useRouter();
+  const { currentPage, navigateTo } = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Lista de páginas que requerem autenticação (admin e clients)
+  const protectedPages: string[] = [
+    'dashboard',
+    'schedule',
+    'patients',
+    'patient-register',
+    'page-model',
+    'admin-plans',
+    'admin-profiles',
+    'admin-functionalities',
+    'admin-entities',
+    'admin-faq',
+    'admin-professional-types',
+    'user-profile'
+  ];
+
+  // Verificar se a página atual requer autenticação
+  React.useEffect(() => {
+    if (!isLoading && protectedPages.includes(currentPage) && !isAuthenticated) {
+      // Obter parâmetro clinic da URL se existir
+      const urlParams = new URLSearchParams(window.location.search);
+      const clinic = urlParams.get('clinic') || 'ninho';
+
+      // Redirecionar para login
+      navigateTo('login', { clinic });
+    }
+  }, [currentPage, isAuthenticated, isLoading]);
+
+  // Mostrar loading enquanto verifica autenticação
+  if (isLoading) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        fontSize: '1.2rem',
+        color: '#6c757d'
+      }}>
+        Carregando...
+      </div>
+    );
+  }
 
   switch (currentPage) {
     case 'login':
@@ -35,43 +81,45 @@ const AppContent = () => {
     case 'alias-register':
       return <AliasRegister />;
     case 'dashboard':
-      return <Dashboard />;
+      return isAuthenticated ? <Dashboard /> : <Login />;
     case 'schedule':
-      return <ProfessionalSchedule />;
+      return isAuthenticated ? <ProfessionalSchedule /> : <Login />;
     case 'patients':
-      return <PatientsList />;
+      return isAuthenticated ? <PatientsList /> : <Login />;
     case 'patient-register':
-      return <PatientRegister />;
+      return isAuthenticated ? <PatientRegister /> : <Login />;
     case 'page-model':
-      return <PageModel />;
+      return isAuthenticated ? <PageModel /> : <Login />;
     case 'admin-plans':
-      return <AdminPlans />;
+      return isAuthenticated ? <AdminPlans /> : <Login />;
     case 'admin-profiles':
-      return <AdminProfiles />;
+      return isAuthenticated ? <AdminProfiles /> : <Login />;
     case 'admin-functionalities':
-      return <AdminFunctionalities />;
+      return isAuthenticated ? <AdminFunctionalities /> : <Login />;
     case 'admin-entities':
-      return <AdminEntities />;
+      return isAuthenticated ? <AdminEntities /> : <Login />;
     case 'admin-faq':
-      return <AdminFaq />;
+      return isAuthenticated ? <AdminFaq /> : <Login />;
     case 'admin-professional-types':
-      return <AdminProfessionalTypes />;
+      return isAuthenticated ? <AdminProfessionalTypes /> : <Login />;
     case 'faq':
       return <Faq />;
     case 'user-profile':
-      return <UserProfile />;
+      return isAuthenticated ? <UserProfile /> : <Login />;
     case 'landing':
     default:
       return <LandingPage />;
   }
 };
 
-// Root component with router provider
+// Root component with providers
 const App = () => {
   return (
-    <RouterProvider>
-      <AppContent />
-    </RouterProvider>
+    <AuthProvider>
+      <RouterProvider>
+        <AppContent />
+      </RouterProvider>
+    </AuthProvider>
   );
 };
 

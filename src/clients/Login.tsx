@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import ContactForm from "../components/ContactForm";
+import { useAuth } from "../contexts/AuthContext";
 import { LocalHospital, CalendarToday, BarChart, Visibility, VisibilityOff, CheckCircle, Info, Assignment } from '@mui/icons-material';
 
 interface LoginFormData {
@@ -11,6 +12,7 @@ interface LoginFormData {
 }
 
 const Login: React.FC = () => {
+  const { login } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -126,94 +128,22 @@ const Login: React.FC = () => {
     setErrors({});
 
     try {
-      // Simulate API call
+      // Simulate API call delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // For demo purposes, check if it's a valid email/password combination
-      if (formData.email === "admin@clinic4us.com" && formData.password === "123456") {
-        // Salvar dados se "Lembrar de mim" estiver marcado
-        if (formData.rememberMe) {
-          try {
-            const dataToSave = {
-              email: formData.email
-              // Por segurança, senha nunca é salva
-            };
-            localStorage.setItem('clinic4us-remember-me', JSON.stringify(dataToSave));
-          } catch (error) {
-            console.error('Erro ao salvar dados para lembrar:', error);
-          }
-        }
+      // Pegar parâmetro clinic da URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const clinic = urlParams.get('clinic') || 'ninho';
 
-        // Pegar parâmetro clinic da URL para o alias
-        const urlParams = new URLSearchParams(window.location.search);
-        const clinicAlias = urlParams.get('clinic') || 'ninho';
+      // Fazer login usando o AuthContext
+      const result = await login(formData.email, formData.password, formData.rememberMe, clinic);
 
-        // Criar sessão do usuário com perfis mais detalhados
-        const userProfiles = {
-          'admin@clinic4us.com': {
-            profile: 'Administrador',
-            permissions: ['dashboard', 'agenda', 'pacientes', 'relatorios', 'financeiro', 'configuracoes', 'usuarios'],
-            menuItems: [
-              { label: 'Dashboard', href: '#dashboard' },
-              { label: 'Agenda', href: '#agenda' },
-              { label: 'Pacientes', href: '#pacientes' },
-              { label: 'Relatórios', href: '#relatorios' },
-              { label: 'Financeiro', href: '#financeiro' },
-              { label: 'Usuários', href: '#usuarios' },
-              { label: 'Configurações', href: '#configuracoes' }
-            ]
-          },
-          'medico@clinic4us.com': {
-            profile: 'Médico',
-            permissions: ['dashboard', 'agenda', 'pacientes', 'relatorios'],
-            menuItems: [
-              { label: 'Dashboard', href: '#dashboard' },
-              { label: 'Agenda', href: '#agenda' },
-              { label: 'Pacientes', href: '#pacientes' },
-              { label: 'Relatórios', href: '#relatorios' }
-            ]
-          },
-          'recepcao@clinic4us.com': {
-            profile: 'Recepção',
-            permissions: ['dashboard', 'agenda', 'pacientes'],
-            menuItems: [
-              { label: 'Dashboard', href: '#dashboard' },
-              { label: 'Agenda', href: '#agenda' },
-              { label: 'Pacientes', href: '#pacientes' }
-            ]
-          }
-        };
-
-        const userProfile = userProfiles[formData.email as keyof typeof userProfiles] || userProfiles['admin@clinic4us.com'];
-
-        const userSession = {
-          email: formData.email,
-          alias: clinicAlias,
-          clinic: clinicAlias,
-          clinicName: clinicAlias === 'ninho' ? 'Instituto Ninho' : `Clínica ${clinicAlias}`,
-          role: userProfile.profile,
-          permissions: userProfile.permissions,
-          menuItems: userProfile.menuItems,
-          loginTime: new Date().toISOString(), // ISO string para melhor precisão
-          loginTimestamp: Date.now(), // Timestamp para cálculos
-          sessionId: Date.now().toString(),
-          sessionDuration: 300, // 5 minutos em segundos para homologação
-        };
-
-        // Salvar sessão diretamente no localStorage (o contexto carregará automaticamente)
-        try {
-          localStorage.setItem('clinic4us-user-session', JSON.stringify(userSession));
-        } catch (error) {
-          console.error('Erro ao criar sessão:', error);
-        }
-
-        alert("Login realizado com sucesso! Redirecionando...");
-
+      if (result.success) {
         // Redirecionar para dashboard
         window.location.href = window.location.origin + '/?page=dashboard';
       } else {
         setErrors({
-          general: "Credenciais inválidas. Tente novamente.",
+          general: result.error || "Credenciais inválidas. Tente novamente.",
         });
       }
     } catch (error) {
