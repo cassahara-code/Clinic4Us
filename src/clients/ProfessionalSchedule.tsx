@@ -3,7 +3,7 @@ import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
 import { useNavigation } from "../contexts/RouterContext";
-import { CalendarToday, Delete } from '@mui/icons-material';
+import { CalendarToday, Delete, FilterAltOff } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 
 interface MenuItemProps {
@@ -99,8 +99,62 @@ const ProfessionalSchedule: React.FC = () => {
   // Estados dos filtros da agenda
   const [filters, setFilters] = useState(getInitialFilters());
 
+  // Função para gerar eventos mockados até o final de 2025
+  const generateMockEvents = (): ScheduleEvent[] => {
+    const events: ScheduleEvent[] = [];
+    const services = ['Avaliação', 'Retorno', 'Consulta', 'Terapia', 'Exame'];
+    const statuses = ['confirmed', 'pending', 'attended', 'cancelled', 'no_show'];
+    const patients = [
+      'Maria Alice', 'João Santos', 'Ana Costa', 'Sofia Martins', 'Carlos Eduardo',
+      'Pedro Oliveira', 'Amanda Silva', 'Roberto Mendes', 'Carla Mendes', 'Bruno Costa',
+      'Lucas Almeida', 'Patricia Santos', 'Eduardo Lima', 'Fernanda Rocha', 'Isabel Santos',
+      'Fernanda Lima', 'Carlos Alberto', 'João Silva', 'Rafael Costa', 'Ana Paula',
+      'Carlos Henrique', 'Maria Santos', 'Beatriz Rocha', 'Diego Martins', 'Camila Souza',
+      'Ricardo Lima', 'Juliana Costa', 'Paulo Henrique', 'Larissa Silva', 'André Oliveira',
+      'Priscila Mendes', 'Gabriel Nunes', 'Tatiana Ferreira', 'Felipe Santos', 'Vanessa Lima',
+      'Marina Silva', 'Roberto Silva', 'Cristiana Rocha', 'Eduardo Mendes', 'Marcos Santos',
+      'Marilia Costa', 'Mariana Ferreira', 'Marcela Rodrigues'
+    ];
+    const durations = [30, 45, 60, 90];
+    const hours = ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+                   '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00'];
+
+    // Gerar eventos de outubro até dezembro de 2025
+    const startDate = new Date(2025, 9, 1); // Outubro (mês 9)
+    const endDate = new Date(2025, 11, 31); // Dezembro (mês 11)
+
+    let currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const dayOfWeek = currentDate.getDay();
+
+      // Gerar de 3 a 8 eventos por dia útil (segunda a sexta)
+      // Fim de semana: 1 a 3 eventos
+      const eventsPerDay = dayOfWeek === 0 || dayOfWeek === 6
+        ? Math.floor(Math.random() * 3) + 1
+        : Math.floor(Math.random() * 6) + 3;
+
+      for (let i = 0; i < eventsPerDay; i++) {
+        events.push({
+          date: dateStr,
+          time: hours[Math.floor(Math.random() * hours.length)],
+          duration: durations[Math.floor(Math.random() * durations.length)],
+          patient: patients[Math.floor(Math.random() * patients.length)],
+          service: services[Math.floor(Math.random() * services.length)],
+          doctor: professionalsList[Math.floor(Math.random() * professionalsList.length)],
+          status: statuses[Math.floor(Math.random() * statuses.length)]
+        });
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return events;
+  };
+
   // Dados de eventos de exemplo para setembro de 2025 (com duração)
-  const sampleEvents = [
+  const septemberEvents = [
     { date: '2025-09-15', time: '09:00', duration: 60, patient: 'Maria Alice', service: 'Avaliação', doctor: 'Dra. Ana Costa', status: 'confirmed' },
     { date: '2025-09-15', time: '10:30', duration: 45, patient: 'João Santos', service: 'Retorno', doctor: 'Dr. Carlos Ferreira', status: 'pending' },
     { date: '2025-09-15', time: '14:00', duration: 30, patient: 'Ana Costa', service: 'Consulta', doctor: 'Dra. Maria Santos', status: 'cancelled' },
@@ -162,9 +216,12 @@ const ProfessionalSchedule: React.FC = () => {
     { date: '2025-09-25', time: '16:30', duration: 45, patient: 'Marcela Rodrigues', service: 'Retorno', doctor: 'Dra. Patricia Mendes', status: 'attended' }
   ];
 
+  // Combinar todos os eventos (setembro + gerados)
+  const allMockEvents = [...septemberEvents, ...generateMockEvents()];
+
   // Estados de controle
   const [isLoading, setIsLoading] = useState(false);
-  const [events, setEvents] = useState<ScheduleEvent[]>(sampleEvents);
+  const [events, setEvents] = useState<ScheduleEvent[]>(allMockEvents);
 
   const patientsList = [
     'Maria Silva Santos - CPF: 123.456.789-00 - Resp: João Santos',
@@ -536,7 +593,7 @@ const ProfessionalSchedule: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Por enquanto, filtra os dados locais baseado nos filtros
-      let filteredEvents = sampleEvents;
+      let filteredEvents = allMockEvents;
 
       // Filtrar por profissionais selecionados
       if (filterParams.professionals && filterParams.professionals.length > 0) {
@@ -1043,7 +1100,7 @@ const ProfessionalSchedule: React.FC = () => {
                 </div>
 
                 {/* Nome do Profissional */}
-                <div style={{ position: 'relative' }}>
+                <div style={{ position: 'relative', minWidth: '250px' }}>
                   <label style={{
                     display: 'block',
                     fontSize: '0.95rem',
@@ -1072,7 +1129,8 @@ const ProfessionalSchedule: React.FC = () => {
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       transition: 'border-color 0.2s',
-                      outline: 'none'
+                      outline: 'none',
+                      minWidth: '250px'
                     }}
                   >
                     <span style={{
@@ -1091,7 +1149,8 @@ const ProfessionalSchedule: React.FC = () => {
                     <span style={{
                       color: '#6c757d',
                       marginLeft: '0.5rem',
-                      fontSize: '0.8rem'
+                      fontSize: '0.8rem',
+                      flexShrink: 0
                     }}>
                       {isDropdownOpen ? '▲' : '▼'}
                     </span>
@@ -1293,27 +1352,7 @@ const ProfessionalSchedule: React.FC = () => {
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       <button
                         onClick={() => openNewAppointmentModal(new Date())}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = '#218838';
-                          e.currentTarget.style.transform = 'scale(1.05)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = '#28a745';
-                          e.currentTarget.style.transform = 'scale(1)';
-                        }}
-                        style={{
-                        background: '#28a745',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        width: '40px',
-                        height: '40px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.2s ease'
-                      }}
+                        className="btn-add-schedule"
                         title="Agendar novo compromisso">
                         <CalendarToday />
                       </button>
@@ -1321,32 +1360,10 @@ const ProfessionalSchedule: React.FC = () => {
                       <button
                         onClick={handleClearFilters}
                         disabled={isLoading}
-                        style={{
-                          background: isLoading ? '#adb5bd' : '#6c757d',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: isLoading ? 'not-allowed' : 'pointer',
-                          width: '40px',
-                          height: '40px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'all 0.2s ease'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!isLoading) {
-                            e.currentTarget.style.background = '#5a6268';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isLoading) {
-                            e.currentTarget.style.background = '#6c757d';
-                          }
-                        }}
+                        className="btn-clear-filters"
                         title="Limpar filtros"
                       >
-                        <Delete fontSize="small" />
+                        <FilterAltOff fontSize="small" />
                       </button>
                     </div>
                   </div>
@@ -1580,12 +1597,12 @@ const ProfessionalSchedule: React.FC = () => {
               )}
               {/* Visão Mensal */}
               {calendarView === 'month' && (
-                <div className="schedule-month-view" style={{ overflowX: 'auto', width: '100%' }}>
-                  <div className="schedule-month-grid" style={{ minWidth: '560px', width: 'max-content' }}>
+                <div className="schedule-month-view" style={{ width: '100%', overflow: 'hidden' }}>
+                  <div className="schedule-month-grid" style={{ width: '100%' }}>
                     {/* Cabeçalho dos dias da semana */}
                     <div className="schedule-month-header" style={{
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(7, 1fr)',
+                      gridTemplateColumns: 'repeat(7, minmax(120px, 1fr))',
                       background: '#f8f9fa',
                       borderBottom: '1px solid #e9ecef'
                     }}>
@@ -1606,7 +1623,8 @@ const ProfessionalSchedule: React.FC = () => {
                     {/* Dias do mês */}
                     <div className="schedule-month-days-grid" style={{
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(7, 1fr)'
+                      gridTemplateColumns: 'repeat(7, minmax(120px, 1fr))',
+                      gridAutoRows: 'minmax(140px, auto)'
                     }}>
                       {getDaysInMonth().map((date, index) => {
                         const isCurrentMonth = date.getMonth() === currentDate.getMonth();
@@ -1615,13 +1633,15 @@ const ProfessionalSchedule: React.FC = () => {
 
                         return (
                           <div key={index} className="schedule-month-day" style={{
-                            minHeight: '120px',
                             padding: '0.5rem',
                             borderRight: (index + 1) % 7 !== 0 ? '1px solid #e9ecef' : 'none',
-                            borderBottom: index < 35 ? '1px solid #e9ecef' : 'none',
+                            borderBottom: '1px solid #e9ecef',
                             background: isCurrentMonth ? 'white' : '#f8f9fa',
                             position: 'relative',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            overflow: 'hidden'
                           }}
                         onClick={() => openNewAppointmentModal(date)}
                         onMouseEnter={(e) => {
@@ -1643,39 +1663,43 @@ const ProfessionalSchedule: React.FC = () => {
                               {date.getDate()}
                             </div>
 
-                            {events.slice(0, 3).map((event, eventIndex) => (
-                              <div
-                                key={eventIndex}
-                                className="schedule-month-event"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  openEditModal(event);
-                                }}
-                                style={{
-                                  background: getStatusColor(event.status),
-                                  color: 'white',
-                                  padding: '3px 6px',
-                                  marginBottom: '3px',
-                                  borderRadius: '3px',
-                                  fontSize: '0.85rem',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                  lineHeight: '1.3',
-                                  cursor: 'pointer',
-                                  transition: 'opacity 0.2s'
-                                }}
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                            >
-                              <div style={{ fontWeight: '500' }}>{event.time} {event.patient}</div>
-                              <div style={{ fontSize: '0.8rem', opacity: 0.95 }}>
-                                {event.service} - {event.doctor}
+                            <div style={{
+                              flex: 1,
+                              overflow: 'hidden',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '2px'
+                            }}>
+                              {events.slice(0, 2).map((event, eventIndex) => (
+                                <div
+                                  key={eventIndex}
+                                  className="schedule-month-event"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openEditModal(event);
+                                  }}
+                                  style={{
+                                    background: getStatusColor(event.status),
+                                    color: 'white',
+                                    padding: '2px 4px',
+                                    borderRadius: '2px',
+                                    fontSize: '0.75rem',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    cursor: 'pointer',
+                                    transition: 'opacity 0.2s',
+                                    lineHeight: '1.2'
+                                  }}
+                                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                              >
+                                {event.time} {event.patient}
                               </div>
+                            ))}
                             </div>
-                          ))}
 
-                          {events.length > 3 && (
+                          {events.length > 2 && (
                             <div
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1691,7 +1715,7 @@ const ProfessionalSchedule: React.FC = () => {
                                 fontWeight: '500'
                               }}
                             >
-                              +{events.length - 3} mais
+                              +{events.length - 2} mais
                             </div>
                           )}
                         </div>

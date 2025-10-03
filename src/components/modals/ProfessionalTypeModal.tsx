@@ -123,9 +123,9 @@ const ProfessionalTypeModal: React.FC<ProfessionalTypeModalProps> = ({
         </div>
 
         {/* Formulário */}
-        <form style={{ padding: '2rem' }}>
+        <form style={{ padding: '1.5rem' }}>
           {/* Nome do Tipo de Profissional */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>Nome do Tipo de Profissional</label>
             <input
               type="text"
@@ -136,7 +136,7 @@ const ProfessionalTypeModal: React.FC<ProfessionalTypeModalProps> = ({
           </div>
 
           {/* Descrição */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>Descrição</label>
             <textarea
               value={formData.description}

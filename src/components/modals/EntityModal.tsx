@@ -168,9 +168,9 @@ const EntityModal: React.FC<EntityModalProps> = ({
         </div>
 
         {/* Formulário */}
-        <form style={{ padding: '2rem' }}>
+        <form style={{ padding: '1.5rem' }}>
           {/* Tipo de Pessoa */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <div style={{ display: 'flex', gap: '2rem' }}>
               <label style={{
                 display: 'flex',
@@ -222,7 +222,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           {/* CNPJ/CPF */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>{formData.entityType === 'juridica' ? 'CNPJ' : 'CPF'}</label>
             <input
               type="text"
@@ -233,7 +233,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           {/* Inscrições */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label>Insc. Estadual</label>
               <input
@@ -255,7 +255,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           {/* Nome Fantasia */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>Nome Fantasia</label>
             <input
               type="text"
@@ -266,7 +266,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           {/* Razão Social */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>Razão Social</label>
             <input
               type="text"
@@ -277,7 +277,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           {/* DDD e Telefone */}
-          <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label>DDD</label>
               <input
@@ -300,7 +300,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           {/* E-mail */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>E-mail</label>
             <input
               type="email"
@@ -311,7 +311,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           {/* CEP */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>CEP</label>
             <input
               type="text"
@@ -323,7 +323,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           {/* Logradouro e Número */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label>Logradouro (Rua, Avenida, etc.)</label>
               <input
@@ -345,7 +345,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           {/* Complemento e Bairro */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label>Complemento</label>
               <input
@@ -367,7 +367,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           {/* Cidade e UF */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label>Cidade</label>
               <input
@@ -390,7 +390,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           </div>
 
           {/* Horário Inicial e Final */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '2rem' }}>
             <div className="form-group">
               <label>Hora Inicial</label>
               <select

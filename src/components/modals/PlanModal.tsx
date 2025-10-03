@@ -197,9 +197,9 @@ const PlanModal: React.FC<PlanModalProps> = ({
         </div>
 
         {/* Formulário */}
-        <form style={{ padding: '2rem' }}>
+        <form style={{ padding: '1.5rem' }}>
           {/* Primeira linha: Nome e Status */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label>Nome do Plano</label>
               <input
@@ -223,7 +223,7 @@ const PlanModal: React.FC<PlanModalProps> = ({
           </div>
 
           {/* Segunda linha: Descrição */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>Descrição</label>
             <textarea
               value={formData.description}
@@ -235,7 +235,7 @@ const PlanModal: React.FC<PlanModalProps> = ({
           </div>
 
           {/* Terceira linha: Valores Mensal e Anual */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label>Valor mensal (R$)</label>
               <input
@@ -258,7 +258,7 @@ const PlanModal: React.FC<PlanModalProps> = ({
           </div>
 
           {/* Quarta linha: Duração e Máximo de Usuários */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label>Duração (meses)</label>
               <input

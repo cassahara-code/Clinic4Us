@@ -141,6 +141,41 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     }
   }, [formData.startTime]);
 
+  // Tabela de preços por tipo de serviço
+  const servicePrices: { [key: string]: { unitValue: number; discount: number } } = {
+    'Consulta': { unitValue: 150.00, discount: 10.00 },
+    'Exame': { unitValue: 200.00, discount: 15.00 },
+    'Procedimento': { unitValue: 300.00, discount: 20.00 },
+    'Retorno': { unitValue: 80.00, discount: 5.00 },
+    'Avaliação': { unitValue: 120.00, discount: 8.00 }
+  };
+
+  // Calcular valores automaticamente quando tipo de serviço ou tipo de agendamento mudar
+  useEffect(() => {
+    if (formData.serviceType && servicePrices[formData.serviceType]) {
+      const { unitValue, discount } = servicePrices[formData.serviceType];
+      const totalUnit = unitValue - discount;
+      const occurrences = formData.appointmentType === 'recurring' ? formData.maxOccurrences : 1;
+      const totalValue = totalUnit * occurrences;
+
+      setFormData(prev => ({
+        ...prev,
+        unitValue: unitValue.toFixed(2),
+        discount: discount.toFixed(2),
+        totalUnit: totalUnit.toFixed(2),
+        totalValue: totalValue.toFixed(2)
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        unitValue: '',
+        discount: '',
+        totalUnit: '',
+        totalValue: ''
+      }));
+    }
+  }, [formData.serviceType, formData.appointmentType, formData.maxOccurrences]);
+
   // Limpar formulário ao fechar
   const handleClose = () => {
     setFormData({
@@ -239,8 +274,8 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
         </div>
 
         {/* Formulário */}
-        <form style={{ padding: '2rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+        <form style={{ padding: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
             {/* Paciente */}
             <div className="form-group" style={{ position: 'relative' }}>
               <label>Paciente (Digite pelo menos 3 letras)</label>
@@ -308,74 +343,6 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               )}
             </div>
 
-            {/* Data/Hora Inicial */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <div className="form-group">
-                <label>Data Inicial</label>
-                <input
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Horário</label>
-                <input
-                  type="time"
-                  value={formData.startTime}
-                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Segunda linha */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-            {/* 1º Responsável */}
-            <div className="form-group">
-              <label>1º Responsável</label>
-              <input
-                type="text"
-                value={formData.firstResponsible}
-                onChange={(e) => setFormData({ ...formData, firstResponsible: e.target.value })}
-                placeholder="Não informado"
-              />
-            </div>
-
-            {/* 2º Responsável */}
-            <div className="form-group">
-              <label>2º Responsável</label>
-              <input
-                type="text"
-                value={formData.secondResponsible}
-                onChange={(e) => setFormData({ ...formData, secondResponsible: e.target.value })}
-                placeholder="Não informado"
-              />
-            </div>
-          </div>
-
-          {/* Terceira linha */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-            {/* Data/Hora Final */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-              <div className="form-group">
-                <label>Data Final</label>
-                <input
-                  type="date"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Horário Final</label>
-                <input
-                  type="time"
-                  value={formData.endTime}
-                  onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                />
-              </div>
-            </div>
-
             {/* Profissional */}
             <div className="form-group">
               <label>Profissional</label>
@@ -396,82 +363,293 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
             </div>
           </div>
 
-          {/* Tipo de agendamento */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.95rem',
-              color: '#6c757d',
-              marginBottom: '0.5rem',
-              fontWeight: '500'
-            }}>Tipo de agendamento</label>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {/* Segunda linha */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+            {/* Coluna esquerda: Responsáveis e Equipe */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {/* 1º Responsável */}
+              <div className="form-group">
+                <label>1º Responsável</label>
                 <input
-                  type="radio"
-                  name="appointmentType"
-                  value="unique"
-                  checked={formData.appointmentType === 'unique'}
-                  onChange={(e) => setFormData({ ...formData, appointmentType: e.target.value as 'unique' | 'recurring' })}
-                />
-                Único
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <input
-                  type="radio"
-                  name="appointmentType"
-                  value="recurring"
-                  checked={formData.appointmentType === 'recurring'}
-                  onChange={(e) => setFormData({ ...formData, appointmentType: e.target.value as 'unique' | 'recurring' })}
-                />
-                Recorrente
-              </label>
-              {formData.appointmentType === 'recurring' && (
-                <input
-                  type="number"
-                  min="1"
-                  placeholder="Qtde máxima (2 horas atrás)"
-                  value={formData.maxOccurrences}
-                  onChange={(e) => setFormData({ ...formData, maxOccurrences: Number(e.target.value) })}
+                  type="text"
+                  value={formData.firstResponsible}
+                  readOnly
+                  disabled
+                  placeholder="Não informado"
                   style={{
-                    padding: '0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    width: '200px'
+                    backgroundColor: '#e9ecef',
+                    cursor: 'not-allowed'
                   }}
                 />
-              )}
+              </div>
+
+              {/* 2º Responsável */}
+              <div className="form-group">
+                <label>2º Responsável</label>
+                <input
+                  type="text"
+                  value={formData.secondResponsible}
+                  readOnly
+                  disabled
+                  placeholder="Não informado"
+                  style={{
+                    backgroundColor: '#e9ecef',
+                    cursor: 'not-allowed'
+                  }}
+                />
+              </div>
+
+              {/* Equipe */}
+              <div className="form-group">
+                <label>Equipe</label>
+                <select
+                  value={formData.team}
+                  onChange={(e) => setFormData({ ...formData, team: e.target.value })}
+                >
+                  <option value="">Selecione uma equipe</option>
+                  <option value="Equipe A">Equipe A</option>
+                  <option value="Equipe B">Equipe B</option>
+                  <option value="Equipe C">Equipe C</option>
+                </select>
+              </div>
+
+              {/* Tipo de serviço */}
+              <div className="form-group">
+                <label>Tipo de serviço</label>
+                <select
+                  value={formData.serviceType}
+                  onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
+                >
+                  <option value="">Tipo de serviço</option>
+                  <option value="Consulta">Consulta</option>
+                  <option value="Exame">Exame</option>
+                  <option value="Procedimento">Procedimento</option>
+                  <option value="Retorno">Retorno</option>
+                  <option value="Avaliação">Avaliação</option>
+                </select>
+              </div>
+
+              {/* Observações */}
+              <div className="form-group">
+                <label>Observações</label>
+                <textarea
+                  value={formData.observations}
+                  onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+                  placeholder="Observações"
+                  rows={2}
+                  style={{
+                    resize: 'vertical',
+                    padding: '0.5rem',
+                    fontSize: '0.95rem'
+                  }}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Tipo de serviço */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-            <label>Tipo de serviço</label>
-            <select
-              value={formData.serviceType}
-              onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
-            >
-              <option value="">Tipo de serviço</option>
-              <option value="Consulta">Consulta</option>
-              <option value="Exame">Exame</option>
-              <option value="Procedimento">Procedimento</option>
-              <option value="Retorno">Retorno</option>
-              <option value="Avaliação">Avaliação</option>
-            </select>
-          </div>
+            {/* Coluna direita: Data/Hora Inicial, Final, Tipo de agendamento e Valores */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {/* Data/Hora Inicial */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <div className="form-group">
+                  <label>Data Inicial</label>
+                  <input
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Horário</label>
+                  <input
+                    type="time"
+                    value={formData.startTime}
+                    onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                  />
+                </div>
+              </div>
 
-          {/* Observações */}
-          <div className="form-group" style={{ marginBottom: '2rem' }}>
-            <label>Observações</label>
-            <textarea
-              value={formData.observations}
-              onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
-              placeholder="Observações"
-              rows={3}
-              style={{
-                resize: 'vertical'
-              }}
-            />
+              {/* Data/Hora Final */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <div className="form-group">
+                  <label>Data Final</label>
+                  <input
+                    type="date"
+                    value={formData.endDate}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Horário Final</label>
+                  <input
+                    type="time"
+                    value={formData.endTime}
+                    onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              {/* Tipo de agendamento */}
+              <div className="form-group">
+                <label>Tipo de agendamento</label>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                    <input
+                      type="radio"
+                      name="appointmentType"
+                      value="unique"
+                      checked={formData.appointmentType === 'unique'}
+                      onChange={(e) => setFormData({ ...formData, appointmentType: e.target.value as 'unique' | 'recurring' })}
+                    />
+                    Único
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                    <input
+                      type="radio"
+                      name="appointmentType"
+                      value="recurring"
+                      checked={formData.appointmentType === 'recurring'}
+                      onChange={(e) => setFormData({ ...formData, appointmentType: e.target.value as 'unique' | 'recurring' })}
+                    />
+                    Recorrente
+                  </label>
+                  {formData.appointmentType === 'recurring' && (
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="Qtde máxima"
+                      value={formData.maxOccurrences}
+                      onChange={(e) => setFormData({ ...formData, maxOccurrences: Number(e.target.value) })}
+                      style={{
+                        padding: '0.5rem',
+                        border: '1px solid #ced4da',
+                        borderRadius: '6px',
+                        width: '100px',
+                        fontSize: '1rem'
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* Opções de recorrência */}
+                {formData.appointmentType === 'recurring' && (
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '0.9rem',
+                      color: '#495057',
+                      marginBottom: '0.25rem',
+                      fontWeight: '500'
+                    }}>Periodicidade</label>
+                    <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem' }}>
+                        <input
+                          type="radio"
+                          name="recurrenceType"
+                          value="daily"
+                          checked={formData.recurrenceType === 'daily'}
+                          onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
+                        />
+                        Diário
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem' }}>
+                        <input
+                          type="radio"
+                          name="recurrenceType"
+                          value="weekly"
+                          checked={formData.recurrenceType === 'weekly'}
+                          onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
+                        />
+                        Semanal
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem' }}>
+                        <input
+                          type="radio"
+                          name="recurrenceType"
+                          value="biweekly"
+                          checked={formData.recurrenceType === 'biweekly'}
+                          onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
+                        />
+                        Quinzenal
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem' }}>
+                        <input
+                          type="radio"
+                          name="recurrenceType"
+                          value="monthly"
+                          checked={formData.recurrenceType === 'monthly'}
+                          onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
+                        />
+                        Mensal
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Valores calculados em grid 2x2 */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                {/* Valor Unitário */}
+                <div className="form-group">
+                  <label>Valor Unitário</label>
+                  <input
+                    type="text"
+                    value={formData.unitValue ? `R$ ${formData.unitValue}` : ''}
+                    readOnly
+                    disabled
+                    style={{
+                      backgroundColor: '#e9ecef',
+                      cursor: 'not-allowed'
+                    }}
+                  />
+                </div>
+
+                {/* Desconto Unitário */}
+                <div className="form-group">
+                  <label>Desconto Unitário</label>
+                  <input
+                    type="text"
+                    value={formData.discount ? `R$ ${formData.discount}` : ''}
+                    readOnly
+                    disabled
+                    style={{
+                      backgroundColor: '#e9ecef',
+                      cursor: 'not-allowed'
+                    }}
+                  />
+                </div>
+
+                {/* Total Unitário */}
+                <div className="form-group">
+                  <label>Total Unitário</label>
+                  <input
+                    type="text"
+                    value={formData.totalUnit ? `R$ ${formData.totalUnit}` : ''}
+                    readOnly
+                    disabled
+                    style={{
+                      backgroundColor: '#e9ecef',
+                      cursor: 'not-allowed'
+                    }}
+                  />
+                </div>
+
+                {/* Total Geral */}
+                <div className="form-group">
+                  <label>Total</label>
+                  <input
+                    type="text"
+                    value={formData.totalValue ? `R$ ${formData.totalValue}` : ''}
+                    readOnly
+                    disabled
+                    style={{
+                      backgroundColor: '#e9ecef',
+                      cursor: 'not-allowed',
+                      fontWeight: 'bold'
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Botões */}
@@ -479,7 +657,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
             display: 'flex',
             justifyContent: 'flex-end',
             gap: '1rem',
-            paddingTop: '1rem',
+            paddingTop: '0.75rem',
             borderTop: '1px solid #e9ecef'
           }}>
             <button

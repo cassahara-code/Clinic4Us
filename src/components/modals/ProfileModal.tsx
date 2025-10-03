@@ -180,9 +180,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         </div>
 
         {/* Formulário */}
-        <form style={{ padding: '2rem' }}>
+        <form style={{ padding: '1.5rem' }}>
           {/* Primeira linha: Nome e Tipo */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div className="form-group">
               <label>Nome do Perfil</label>
               <input
@@ -208,7 +208,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           </div>
 
           {/* Segunda linha: Descrição */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>Descrição</label>
             <textarea
               value={formData.description}
