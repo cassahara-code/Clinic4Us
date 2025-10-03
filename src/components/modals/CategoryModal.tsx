@@ -139,7 +139,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
           </p>
 
           {/* Campo de adicionar/editar categoria */}
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ marginBottom: '0.75rem' }}>
             <label style={{
               display: 'block',
               fontSize: '0.85rem',

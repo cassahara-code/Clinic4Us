@@ -4092,20 +4092,20 @@ body.mobile-menu-open .hamburger,
 
 /* Form elements */
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .form-group label {
   display: block;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #495057;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   font-weight: 500;
 }
 
 .form-group input {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.5rem;
   border: 1px solid #ced4da;
   border-radius: 6px;
   font-size: 1rem;
@@ -4240,3 +4240,255 @@ body.mobile-menu-open .hamburger,
     font-size: 1.1rem;
   }
 }
+
+/* ====================================================================
+   ACTION BUTTONS STYLES
+   ================================================================== */
+
+/* Botão Adicionar (+) - Verde */
+.btn-add {
+  background: #48bb78;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-add:hover {
+  background: #38a169;
+}
+
+/* Botão Limpar Filtros (Lixeira) - Cinza */
+.btn-clear-filters {
+  width: 40px;
+  height: 40px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-clear-filters:hover {
+  background: #5a6268;
+}
+
+/* Botão Configurar (Engrenagem) - Cinza */
+.btn-settings {
+  width: 40px;
+  height: 40px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-settings:hover {
+  background: #5a6268;
+}
+
+/* Botões de Ação - Cores Pastéis */
+
+/* Botão Enviar Email - Azul Pastel */
+.btn-action-email {
+  width: 32px;
+  height: 32px;
+  background: #dbeafe;
+  color: #1e40af;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-action-email:hover {
+  background: #bfdbfe;
+}
+
+/* Botão WhatsApp - Verde Pastel */
+.btn-action-whatsapp {
+  width: 32px;
+  height: 32px;
+  background: #d1fae5;
+  color: #059669;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-action-whatsapp:hover {
+  background: #a7f3d0;
+}
+
+/* Botão Agendar - Laranja Pastel */
+.btn-action-schedule {
+  width: 32px;
+  height: 32px;
+  background: #fed7aa;
+  color: #c2410c;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-action-schedule:hover {
+  background: #fdba74;
+}
+
+/* Botão Gerenciar/Pasta - Roxo Pastel */
+.btn-action-manage {
+  width: 32px;
+  height: 32px;
+  background: #e9d5ff;
+  color: #7c3aed;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-action-manage:hover {
+  background: #d8b4fe;
+}
+
+/* Botão Editar - Cinza Pastel */
+.btn-action-edit {
+  width: 32px;
+  height: 32px;
+  background: #e2e8f0;
+  color: #475569;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-action-edit:hover {
+  background: #cbd5e1;
+}
+
+/* Botão Excluir - Vermelho Pastel */
+.btn-action-delete {
+  width: 32px;
+  height: 32px;
+  background: #fecaca;
+  color: #dc2626;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-action-delete:hover {
+  background: #fca5a5;
+}
+
+/* Botão Visualizar - Ciano Pastel */
+.btn-action-view {
+  width: 32px;
+  height: 32px;
+  background: #cffafe;
+  color: #0891b2;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-action-view:hover {
+  background: #a5f3fc;
+}
+
+/* Botão Usuários - Índigo Pastel */
+.btn-action-users {
+  width: 32px;
+  height: 32px;
+  background: #e0e7ff;
+  color: #4f46e5;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-action-users:hover {
+  background: #c7d2fe;
+}
+
+/* Botão Adicionar Agendamento - Verde */
+.btn-add-schedule {
+  width: 40px;
+  height: 40px;
+  background: #03B4C6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-add-schedule:hover {
+  background: #029aaa;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-add-schedule:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-add-schedule:disabled {
+  background: #adb5bd;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Botão FAQ (?) - Padrão do componente FaqButton */
+/* Estilos já definidos no componente FaqButton */

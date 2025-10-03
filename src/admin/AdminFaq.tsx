@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add, FirstPage, LastPage, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { Delete, Edit, Add, FilterAltOff } from '@mui/icons-material';
 import ConfirmModal from "../components/modals/ConfirmModal";
 import FaqModal, { FaqData } from "../components/modals/FaqModal";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import { FaqButton } from "../components/FaqButton";
+import Pagination from "../components/Pagination";
 
 interface MenuItemProps {
   label: string;
@@ -45,6 +46,7 @@ const AdminFaq: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
   // Estado da ordenação
+  const [sortField, setSortField] = useState<'question' | 'category'>('question');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Estados dos modais
@@ -125,7 +127,12 @@ const AdminFaq: React.FC = () => {
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
-      const compareValue = a.question.localeCompare(b.question);
+      let compareValue = 0;
+      if (sortField === 'question') {
+        compareValue = a.question.localeCompare(b.question);
+      } else if (sortField === 'category') {
+        compareValue = a.category.localeCompare(b.category);
+      }
       return sortOrder === 'asc' ? compareValue : -compareValue;
     });
 
@@ -153,32 +160,25 @@ const AdminFaq: React.FC = () => {
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    const listContainer = document.querySelector('.admin-plans-list-container');
+    if (listContainer) {
+      const containerRect = listContainer.getBoundingClientRect();
+      const offset = 100;
+      const targetPosition = window.pageYOffset + containerRect.top - offset;
 
-  const goToFirstPage = () => {
-    setCurrentPage(1);
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToLastPage = () => {
-    setCurrentPage(totalPages);
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToPreviousPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-    setTimeout(scrollToTop, 100);
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1);
+    setTimeout(scrollToTop, 100);
   };
 
   const clearFilters = () => {
@@ -187,8 +187,13 @@ const AdminFaq: React.FC = () => {
     setCurrentPage(1);
   };
 
-  const toggleSortOrder = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  const handleSort = (field: 'question' | 'category') => {
+    if (sortField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
   };
 
   // Handlers do modal
@@ -295,23 +300,7 @@ const AdminFaq: React.FC = () => {
                 <button
                   onClick={handleOpenCreateModal}
                   title="Adicionar novo item FAQ"
-                  style={{
-                    background: '#48bb78',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    width: '40px',
-                    height: '40px',
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#38a169'}
-                  onMouseOut={(e) => e.currentTarget.style.background = '#48bb78'}
+                  className="btn-add"
                 >
                   <Add />
                 </button>
@@ -411,150 +400,36 @@ const AdminFaq: React.FC = () => {
                   <button
                     onClick={clearFilters}
                     title="Limpar filtros"
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      background: '#6c757d',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#5a6268';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#6c757d';
-                    }}
+                    className="btn-clear-filters"
                   >
-                    <Delete fontSize="small" />
+                    <FilterAltOff fontSize="small" />
                   </button>
                 </div>
               </div>
+            </div>
 
-              {/* Paginação e Ações */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                marginTop: '1rem',
-                gap: '1rem',
-                flexWrap: 'wrap'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  {/* Contador de itens */}
-                  <span style={{ fontSize: '0.85rem', color: '#6c757d', whiteSpace: 'nowrap' }}>
-                    Mostrando {filteredAndSortedFaqs.length === 0 ? 0 : startIndex + 1}-{Math.min(endIndex, filteredAndSortedFaqs.length)} de {filteredAndSortedFaqs.length} itens
-                  </span>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <label style={{ fontSize: '0.85rem', color: '#6c757d', whiteSpace: 'nowrap' }}>Itens por página:</label>
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                      style={{
-                        padding: '0.25rem 0.5rem',
-                        border: '1px solid #ced4da',
-                        borderRadius: '4px',
-                        fontSize: '0.85rem',
-                        color: '#495057',
-                        background: 'white'
-                      }}
-                    >
-                      {itemsPerPageOptions.map(option => (
-                        <option key={option} value={option}>{option}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Navegação de páginas */}
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <button
-                      onClick={goToFirstPage}
-                      disabled={currentPage === 1}
-                      title="Primeira página"
-                      style={{
-                        padding: '0.4rem 0.6rem',
-                        background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                        color: currentPage === 1 ? '#6c757d' : 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                        transition: 'background-color 0.2s'
-                      }}
-                    >
-                      <FirstPage />
-                    </button>
-
-                    <button
-                      onClick={goToPreviousPage}
-                      disabled={currentPage === 1}
-                      title="Página anterior"
-                      style={{
-                        padding: '0.4rem 0.6rem',
-                        background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                        color: currentPage === 1 ? '#6c757d' : 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                        transition: 'background-color 0.2s'
-                      }}
-                    >
-                      <ChevronLeft />
-                    </button>
-
-                    <span style={{
-                      padding: '0.4rem 0.8rem',
-                      fontSize: '0.85rem',
-                      color: '#495057'
-                    }}>
-                      {currentPage} de {totalPages}
-                    </span>
-
-                    <button
-                      onClick={goToNextPage}
-                      disabled={currentPage === totalPages}
-                      title="Próxima página"
-                      style={{
-                        padding: '0.4rem 0.6rem',
-                        background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                        color: currentPage === totalPages ? '#6c757d' : 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                        transition: 'background-color 0.2s'
-                      }}
-                    >
-                      <ChevronRight />
-                    </button>
-
-                    <button
-                      onClick={goToLastPage}
-                      disabled={currentPage === totalPages}
-                      title="Última página"
-                      style={{
-                        padding: '0.4rem 0.6rem',
-                        background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                        color: currentPage === totalPages ? '#6c757d' : 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                        transition: 'background-color 0.2s'
-                      }}
-                    >
-                      <LastPage />
-                    </button>
-                  </div>
-                </div>
-              </div>
+            {/* Paginação superior */}
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '1rem',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+              border: '1px solid #e9ecef',
+              marginBottom: '1rem'
+            }}>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                itemsPerPageOptions={itemsPerPageOptions}
+                totalItems={filteredAndSortedFaqs.length}
+                itemLabel="itens"
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  setTimeout(scrollToTop, 100);
+                }}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
             </div>
 
             {/* Tabela de FAQs */}
@@ -564,17 +439,24 @@ const AdminFaq: React.FC = () => {
                 <div className="admin-plans-table-header" style={{ display: 'flex' }}>
                   <div
                     className="admin-plans-header-cell"
-                    style={{ flex: '0 0 250px', cursor: 'pointer' }}
-                    onClick={toggleSortOrder}
+                    style={{ flex: '0 0 250px', cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('question')}
                     title="Ordenar por pergunta"
                   >
-                    Pergunta {sortOrder === 'asc' ? '↑' : '↓'}
+                    Pergunta {sortField === 'question' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
                   </div>
-                  <div className="admin-plans-header-cell" style={{ flex: '0 0 150px' }}>Categoria</div>
+                  <div
+                    className="admin-plans-header-cell"
+                    style={{ flex: '0 0 150px', cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('category')}
+                    title="Ordenar por categoria"
+                  >
+                    Categoria {sortField === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                  </div>
                   <div className="admin-plans-header-cell" style={{ flex: '1 1 auto' }}>Resposta (Prévia)</div>
                   <div className="admin-plans-header-cell" style={{ flex: '0 0 80px' }}>Vídeo</div>
                   <div className="admin-plans-header-cell" style={{ flex: '0 0 80px' }}>Links</div>
-                  <div className="admin-plans-header-cell" style={{ flex: '0 0 150px' }}>Ações</div>
+                  <div className="admin-plans-header-cell" style={{ flex: '0 0 150px', justifyContent: 'flex-end' }}>Ações</div>
                 </div>
 
                 {/* Linhas */}
@@ -609,18 +491,18 @@ const AdminFaq: React.FC = () => {
                       </div>
                       <div className="admin-plans-actions" style={{ flex: '0 0 150px' }}>
                         <button
-                          className="action-btn edit-btn"
+                          className="btn-action-edit"
                           onClick={() => handleOpenEditModal(faq)}
                           title="Editar FAQ"
                         >
-                          <Edit />
+                          <Edit fontSize="small" />
                         </button>
                         <button
-                          className="action-btn delete-btn"
+                          className="btn-action-delete"
                           onClick={() => handleOpenDeleteModal(faq)}
                           title="Excluir FAQ"
                         >
-                          <Delete />
+                          <Delete fontSize="small" />
                         </button>
                       </div>
                     </div>
@@ -629,123 +511,29 @@ const AdminFaq: React.FC = () => {
               </div>
             </div>
 
-            {/* Paginação Inferior */}
-            {currentFaqs.length > 0 && (
-              <div style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                marginTop: '1rem',
-                padding: '1rem',
-                background: 'white',
-                borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <label style={{ fontSize: '0.85rem', color: '#6c757d', whiteSpace: 'nowrap' }}>Itens por página:</label>
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                      style={{
-                        padding: '0.25rem 0.5rem',
-                        border: '1px solid #ced4da',
-                        borderRadius: '4px',
-                        fontSize: '0.85rem',
-                        color: '#495057',
-                        background: 'white'
-                      }}
-                    >
-                      {itemsPerPageOptions.map(option => (
-                        <option key={option} value={option}>{option}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <button
-                      onClick={goToFirstPage}
-                      disabled={currentPage === 1}
-                      title="Primeira página"
-                      style={{
-                        padding: '0.4rem 0.6rem',
-                        background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                        color: currentPage === 1 ? '#6c757d' : 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                        transition: 'background-color 0.2s'
-                      }}
-                    >
-                      <FirstPage />
-                    </button>
-
-                    <button
-                      onClick={goToPreviousPage}
-                      disabled={currentPage === 1}
-                      title="Página anterior"
-                      style={{
-                        padding: '0.4rem 0.6rem',
-                        background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                        color: currentPage === 1 ? '#6c757d' : 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                        transition: 'background-color 0.2s'
-                      }}
-                    >
-                      <ChevronLeft />
-                    </button>
-
-                    <span style={{
-                      padding: '0.4rem 0.8rem',
-                      fontSize: '0.85rem',
-                      color: '#495057'
-                    }}>
-                      {currentPage} de {totalPages}
-                    </span>
-
-                    <button
-                      onClick={goToNextPage}
-                      disabled={currentPage === totalPages}
-                      title="Próxima página"
-                      style={{
-                        padding: '0.4rem 0.6rem',
-                        background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                        color: currentPage === totalPages ? '#6c757d' : 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                        transition: 'background-color 0.2s'
-                      }}
-                    >
-                      <ChevronRight />
-                    </button>
-
-                    <button
-                      onClick={goToLastPage}
-                      disabled={currentPage === totalPages}
-                      title="Última página"
-                      style={{
-                        padding: '0.4rem 0.6rem',
-                        background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                        color: currentPage === totalPages ? '#6c757d' : 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                        transition: 'background-color 0.2s'
-                      }}
-                    >
-                      <LastPage />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Paginação inferior */}
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '1rem',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+              border: '1px solid #e9ecef',
+              marginTop: '1rem'
+            }}>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                itemsPerPageOptions={itemsPerPageOptions}
+                totalItems={filteredAndSortedFaqs.length}
+                itemLabel="itens"
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  setTimeout(scrollToTop, 100);
+                }}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            </div>
           </div>
         </div>
       </main>

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Person, LocationOn, Add, FirstPage, LastPage, ChevronLeft, ChevronRight, ViewModule } from '@mui/icons-material';
+import { Delete, Edit, Person, Add, ViewModule, FilterAltOff } from '@mui/icons-material';
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import EntityModal, { EntityData } from "../components/modals/EntityModal";
 import { FaqButton } from "../components/FaqButton";
+import Pagination from "../components/Pagination";
 
 interface UserSession {
   email: string;
@@ -36,6 +37,10 @@ const AdminEntities: React.FC = () => {
   // Estados da paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
+
+  // Estado da ordenação
+  const [sortField, setSortField] = useState<'fantasyName' | 'cnpjCpf' | 'socialName'>('fantasyName');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Estados dos modais
   const [isEntityModalOpen, setIsEntityModalOpen] = useState(false);
@@ -82,21 +87,35 @@ const AdminEntities: React.FC = () => {
     return entities;
   });
 
-  // Lógica de filtragem
-  const filteredEntities = entities.filter(entity => {
-    const matchesSearch = searchTerm === '' ||
-      entity.fantasyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entity.cnpjCpf.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entity.socialName.toLowerCase().includes(searchTerm.toLowerCase());
+  // Lógica de filtragem e ordenação
+  const filteredAndSortedEntities = entities
+    .filter(entity => {
+      const matchesSearch = searchTerm === '' ||
+        entity.fantasyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entity.cnpjCpf.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entity.socialName.toLowerCase().includes(searchTerm.toLowerCase());
 
-    return matchesSearch;
-  });
+      return matchesSearch;
+    })
+    .sort((a, b) => {
+      let compareValue = 0;
+
+      if (sortField === 'fantasyName') {
+        compareValue = a.fantasyName.localeCompare(b.fantasyName, 'pt-BR');
+      } else if (sortField === 'cnpjCpf') {
+        compareValue = a.cnpjCpf.localeCompare(b.cnpjCpf);
+      } else if (sortField === 'socialName') {
+        compareValue = a.socialName.localeCompare(b.socialName, 'pt-BR');
+      }
+
+      return sortOrder === 'asc' ? compareValue : -compareValue;
+    });
 
   // Lógica de paginação
-  const totalPages = Math.ceil(filteredEntities.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredAndSortedEntities.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedEntities = filteredEntities.slice(startIndex, endIndex);
+  const paginatedEntities = filteredAndSortedEntities.slice(startIndex, endIndex);
 
   const handleRevalidateLogin = () => {
     console.log('Revalidando login...');
@@ -115,33 +134,35 @@ const AdminEntities: React.FC = () => {
   };
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    const listContainer = document.querySelector('.admin-plans-list-container');
+    if (listContainer) {
+      const containerRect = listContainer.getBoundingClientRect();
+      const offset = 100;
+      const targetPosition = window.pageYOffset + containerRect.top - offset;
 
-  const goToFirstPage = () => {
-    setCurrentPage(1);
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToLastPage = () => {
-    setCurrentPage(totalPages);
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToPreviousPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-    setTimeout(scrollToTop, 100);
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1);
     setTimeout(scrollToTop, 100);
+  };
+
+  const handleSort = (field: 'fantasyName' | 'cnpjCpf' | 'socialName') => {
+    if (sortField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1);
   };
 
   // Gerar opções para o seletor de itens por página
@@ -277,23 +298,7 @@ const AdminEntities: React.FC = () => {
               <button
                 onClick={handleAddEntity}
                 title="Adicionar nova entidade"
-                style={{
-                  background: '#48bb78',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  width: '40px',
-                  height: '40px',
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.background = '#38a169'}
-                onMouseOut={(e) => e.currentTarget.style.background = '#48bb78'}
+                className="btn-add"
               >
                 <Add />
               </button>
@@ -359,171 +364,36 @@ const AdminEntities: React.FC = () => {
                 <button
                   onClick={clearFilters}
                   title="Limpar filtros"
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    background: '#6c757d',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#5a6268';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#6c757d';
-                  }}
+                  className="btn-clear-filters"
                 >
-                  <Delete fontSize="small" />
+                  <FilterAltOff fontSize="small" />
                 </button>
               </div>
             </div>
+          </div>
 
-            {/* Botões de ação e paginação */}
-            <div className="schedule-filters-actions" style={{
-              display: 'flex',
-              gap: '1rem',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div style={{
-                color: '#4a5568',
-                fontSize: '0.9rem'
-              }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredEntities.length)} de <strong style={{
-                  color: '#2d3748',
-                  fontWeight: '600'
-                }}>{filteredEntities.length}</strong> entidades
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'center',
-                flexWrap: 'wrap'
-              }}>
-                {/* Seletor de itens por página */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label style={{
-                    fontSize: '0.85rem',
-                    color: '#6c757d',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    Itens por página:
-                  </label>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                    style={{
-                      padding: '0.25rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem',
-                      color: '#495057',
-                      background: 'white'
-                    }}
-                  >
-                    {itemsPerPageOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Navegação de páginas */}
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  alignItems: 'center'
-                }}>
-                  <button
-                    onClick={goToFirstPage}
-                    disabled={currentPage === 1}
-                    title="Primeira página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <FirstPage />
-                  </button>
-
-                  <button
-                    onClick={goToPreviousPage}
-                    disabled={currentPage === 1}
-                    title="Página anterior"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronLeft />
-                  </button>
-
-                  <span style={{
-                    padding: '0.4rem 0.8rem',
-                    fontSize: '0.85rem',
-                    color: '#495057',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {currentPage} de {totalPages}
-                  </span>
-
-                  <button
-                    onClick={goToNextPage}
-                    disabled={currentPage === totalPages}
-                    title="Próxima página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronRight />
-                  </button>
-
-                  <button
-                    onClick={goToLastPage}
-                    disabled={currentPage === totalPages}
-                    title="Última página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <LastPage />
-                  </button>
-                </div>
-              </div>
-            </div>
+          {/* Paginação superior */}
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '1rem',
+            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+            border: '1px solid #e9ecef',
+            marginBottom: '1rem'
+          }}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              totalItems={filteredAndSortedEntities.length}
+              itemLabel="entidades"
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
           </div>
 
           {/* Lista de entidades */}
@@ -533,11 +403,32 @@ const AdminEntities: React.FC = () => {
                 display: 'flex',
                 gridTemplateColumns: 'unset'
               }}>
-                <div className="admin-plans-header-cell" style={{ flex: '0 0 250px', textAlign: 'left' }}>N.Fantasia/Apelido</div>
-                <div className="admin-plans-header-cell" style={{ flex: '0 0 180px', textAlign: 'left' }}>CNPJ/CPF</div>
-                <div className="admin-plans-header-cell" style={{ flex: '1 1 auto', textAlign: 'left' }}>Razão Social/Nome</div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ flex: '0 0 250px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('fantasyName')}
+                  title="Ordenar por nome fantasia"
+                >
+                  N.Fantasia/Apelido {sortField === 'fantasyName' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ flex: '0 0 180px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('cnpjCpf')}
+                  title="Ordenar por CNPJ/CPF"
+                >
+                  CNPJ/CPF {sortField === 'cnpjCpf' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ flex: '1 1 auto', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('socialName')}
+                  title="Ordenar por razão social"
+                >
+                  Razão Social/Nome {sortField === 'socialName' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
                 <div className="admin-plans-header-cell" style={{ flex: '0 0 180px', textAlign: 'left' }}>Horário de funcionamento</div>
-                <div className="admin-plans-header-cell" style={{ flex: '0 0 200px', textAlign: 'right' }}>Ações</div>
+                <div className="admin-plans-header-cell" style={{ flex: '0 0 200px', justifyContent: 'flex-end' }}>Ações</div>
               </div>
 
               <div className="admin-plans-table-body">
@@ -564,36 +455,32 @@ const AdminEntities: React.FC = () => {
                     <div className="admin-plans-cell" style={{ flex: '0 0 180px', textAlign: 'left' }} data-label="Horário de funcionamento">
                       {entity.workingHours}
                     </div>
-                    <div className="admin-plans-actions" style={{ flex: '0 0 200px', textAlign: 'left' }} data-label="Ações">
+                    <div className="admin-plans-actions" style={{ flex: '0 0 200px', textAlign: 'right' }} data-label="Ações">
                       <button
-                        className="action-btn"
+                        className="btn-action-view"
                         onClick={(e) => { e.stopPropagation(); handleEntityAction('view', entity.id); }}
                         title="Visualizar entidade"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <ViewModule fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-users"
                         onClick={(e) => { e.stopPropagation(); handleEntityAction('user', entity.id); }}
                         title="Gerenciar usuários"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Person fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-edit"
                         onClick={(e) => { e.stopPropagation(); handleEntityAction('edit', entity.id); }}
                         title="Editar entidade"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Edit fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-delete"
                         onClick={(e) => { e.stopPropagation(); handleEntityAction('delete', entity.id); }}
                         title="Excluir entidade"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Delete fontSize="small" />
                       </button>
@@ -613,145 +500,19 @@ const AdminEntities: React.FC = () => {
             border: '1px solid #e9ecef',
             marginTop: '1rem'
           }}>
-            <div className="schedule-filters-actions" style={{
-              display: 'flex',
-              gap: '1rem',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div style={{
-                color: '#4a5568',
-                fontSize: '0.9rem'
-              }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredEntities.length)} de <strong style={{
-                  color: '#2d3748',
-                  fontWeight: '600'
-                }}>{filteredEntities.length}</strong> entidades
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'center',
-                flexWrap: 'wrap'
-              }}>
-                {/* Seletor de itens por página */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label style={{
-                    fontSize: '0.85rem',
-                    color: '#6c757d',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    Itens por página:
-                  </label>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                    style={{
-                      padding: '0.25rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem',
-                      color: '#495057',
-                      background: 'white'
-                    }}
-                  >
-                    {itemsPerPageOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Navegação de páginas */}
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  alignItems: 'center'
-                }}>
-                  <button
-                    onClick={goToFirstPage}
-                    disabled={currentPage === 1}
-                    title="Primeira página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <FirstPage />
-                  </button>
-
-                  <button
-                    onClick={goToPreviousPage}
-                    disabled={currentPage === 1}
-                    title="Página anterior"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronLeft />
-                  </button>
-
-                  <span style={{
-                    padding: '0.4rem 0.8rem',
-                    fontSize: '0.85rem',
-                    color: '#495057',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {currentPage} de {totalPages}
-                  </span>
-
-                  <button
-                    onClick={goToNextPage}
-                    disabled={currentPage === totalPages}
-                    title="Próxima página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronRight />
-                  </button>
-
-                  <button
-                    onClick={goToLastPage}
-                    disabled={currentPage === totalPages}
-                    title="Última página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <LastPage />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              totalItems={filteredAndSortedEntities.length}
+              itemLabel="entidades"
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
           </div>
         </div>
       </main>

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Person, WhatsApp, CalendarToday, Edit, Warning, Add, Email, Check, Close, Folder, FirstPage, LastPage, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { Delete, Person, WhatsApp, CalendarToday, Edit, Warning, Add, Email, Check, Close, Folder, FilterAltOff } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
+import Pagination from "../components/Pagination";
 
 interface MenuItemProps {
   label: string;
@@ -38,6 +39,7 @@ const PatientsList: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
   const { goToDashboard, goToSchedule, goToPatients, goToPatientRegister } = useNavigation();
 
+
   // Estados dos filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'Todos' | 'Ativo' | 'Inativo'>('Ativo');
@@ -49,6 +51,7 @@ const PatientsList: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
   // Estado da ordenação
+  const [sortField, setSortField] = useState<'name' | 'document' | 'age'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Estados do modal de exclusão
@@ -191,6 +194,20 @@ const PatientsList: React.FC = () => {
     return [...basePatients, ...additionalPatients];
   });
 
+  // Função para calcular idade
+  const calculateAge = (birthDate: string): number => {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
   // Filtrar e ordenar pacientes
   const filteredAndSortedPatients = patients
     .filter(patient => {
@@ -206,14 +223,19 @@ const PatientsList: React.FC = () => {
       return matchesSearch && matchesStatus && matchesGender && matchesProfessional;
     })
     .sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
+      let compareValue = 0;
 
-      if (sortOrder === 'asc') {
-        return nameA.localeCompare(nameB, 'pt-BR');
-      } else {
-        return nameB.localeCompare(nameA, 'pt-BR');
+      if (sortField === 'name') {
+        compareValue = a.name.localeCompare(b.name, 'pt-BR');
+      } else if (sortField === 'document') {
+        compareValue = a.document.localeCompare(b.document);
+      } else if (sortField === 'age') {
+        const ageA = calculateAge(a.birthDate);
+        const ageB = calculateAge(b.birthDate);
+        compareValue = ageA - ageB;
       }
+
+      return sortOrder === 'asc' ? compareValue : -compareValue;
     });
 
   // Calcular paginação
@@ -240,37 +262,20 @@ const PatientsList: React.FC = () => {
     }
   };
 
-  // Funções de paginação com scroll
-  const goToFirstPage = () => {
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
     setCurrentPage(1);
     setTimeout(scrollToTop, 100);
   };
 
-  const goToLastPage = () => {
-    setCurrentPage(totalPages);
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToPreviousPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-    setTimeout(scrollToTop, 100);
-  };
-
-  const handleItemsPerPageChange = (newItemsPerPage: number) => {
-    setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // Reset para primeira página
-    setTimeout(scrollToTop, 100);
-  };
-
-  const handleSortOrderChange = (newSortOrder: 'asc' | 'desc') => {
-    setSortOrder(newSortOrder);
-    setCurrentPage(1); // Reset para primeira página
-    setTimeout(scrollToTop, 100);
+  const handleSort = (field: 'name' | 'document' | 'age') => {
+    if (sortField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1);
   };
 
   // Gerar opções para o seletor de itens por página
@@ -303,20 +308,6 @@ const PatientsList: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, genderFilter, professionalFilter, sortOrder]);
-
-  // Função para calcular idade
-  const calculateAge = (birthDate: string): number => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-
-    return age;
-  };
 
   // Função para formatar data de nascimento
   const formatBirthDate = (birthDate: string): string => {
@@ -462,23 +453,7 @@ const PatientsList: React.FC = () => {
                 <button
                   onClick={handleAddPatient}
                   title="Adicionar novo paciente"
-                  style={{
-                    background: '#48bb78',
-                    color: '#212529',
-                    border: 'none',
-                    borderRadius: '6px',
-                    width: '40px',
-                    height: '40px',
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#38a169'}
-                  onMouseOut={(e) => e.currentTarget.style.background = '#48bb78'}
+                  className="btn-add"
                 >
                   <Add />
                 </button>
@@ -654,43 +629,6 @@ const PatientsList: React.FC = () => {
                 </select>
               </div>
 
-              {/* Ordenação */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Ordenação</label>
-                <select
-                  value={sortOrder}
-                  onChange={(e) => handleSortOrderChange(e.target.value as 'asc' | 'desc')}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="asc">A → Z</option>
-                  <option value="desc">Z → A</option>
-                </select>
-              </div>
-
               {/* Botão limpar filtros */}
               <div style={{
                 display: 'flex',
@@ -700,168 +638,36 @@ const PatientsList: React.FC = () => {
                 <button
                   onClick={clearFilters}
                   title="Limpar todos os filtros"
-                  style={{
-                    padding: '0.4rem',
-                    background: '#6c757d',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    transition: 'background 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '40px',
-                    height: '40px'
-                  }}
-                  onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = '#5a6268'}
-                  onMouseLeave={(e) => (e.target as HTMLButtonElement).style.background = '#6c757d'}
+                  className="btn-clear-filters"
                 >
-                  <Delete fontSize="small" />
+                  <FilterAltOff fontSize="small" />
                 </button>
               </div>
             </div>
+          </div>
 
-            {/* Botões de ação e paginação */}
-            <div className="schedule-filters-actions" style={{
-              display: 'flex',
-              gap: '1rem',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div style={{
-                color: '#4a5568',
-                fontSize: '0.9rem'
-              }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPatients.length)} de <strong style={{
-                  color: '#2d3748',
-                  fontWeight: '600'
-                }}>{filteredAndSortedPatients.length}</strong> pacientes
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'center',
-                flexWrap: 'wrap'
-              }}>
-                {/* Seletor de itens por página */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label style={{
-                    fontSize: '0.85rem',
-                    color: '#6c757d',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    Itens por página:
-                  </label>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                    style={{
-                      padding: '0.25rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem',
-                      color: '#495057',
-                      background: 'white'
-                    }}
-                  >
-                    {itemsPerPageOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Navegação de páginas */}
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  alignItems: 'center'
-                }}>
-                  <button
-                    onClick={goToFirstPage}
-                    disabled={currentPage === 1}
-                    title="Primeira página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <FirstPage />
-                  </button>
-
-                  <button
-                    onClick={goToPreviousPage}
-                    disabled={currentPage === 1}
-                    title="Página anterior"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronLeft />
-                  </button>
-
-                  <span style={{
-                    padding: '0.4rem 0.8rem',
-                    fontSize: '0.85rem',
-                    color: '#495057',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {currentPage} de {totalPages}
-                  </span>
-
-                  <button
-                    onClick={goToNextPage}
-                    disabled={currentPage === totalPages}
-                    title="Próxima página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronRight />
-                  </button>
-
-                  <button
-                    onClick={goToLastPage}
-                    disabled={currentPage === totalPages}
-                    title="Última página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <LastPage />
-                  </button>
-                </div>
-              </div>
-            </div>
+          {/* Paginação superior */}
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '1rem',
+            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+            border: '1px solid #e9ecef',
+            marginBottom: '1rem'
+          }}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              totalItems={filteredAndSortedPatients.length}
+              itemLabel="pacientes"
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
           </div>
 
           {/* Lista de pacientes */}
@@ -869,14 +675,35 @@ const PatientsList: React.FC = () => {
             <div className="patients-table">
               <div className="patients-table-header">
                 <div className="patients-header-cell">Foto</div>
-                <div className="patients-header-cell">Nome do Paciente</div>
-                <div className="patients-header-cell">Documento</div>
+                <div
+                  className="patients-header-cell"
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('name')}
+                  title="Ordenar por nome"
+                >
+                  Nome do Paciente {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="patients-header-cell"
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('document')}
+                  title="Ordenar por documento"
+                >
+                  Documento {sortField === 'document' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
                 <div className="patients-header-cell">Nascimento</div>
-                <div className="patients-header-cell">Idade</div>
+                <div
+                  className="patients-header-cell"
+                  style={{ cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('age')}
+                  title="Ordenar por idade"
+                >
+                  Idade {sortField === 'age' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
                 <div className="patients-header-cell">Responsável</div>
                 <div className="patients-header-cell">Celular</div>
                 <div className="patients-header-cell">Completo</div>
-                <div className="patients-header-cell">Ações</div>
+                <div className="patients-header-cell" style={{ justifyContent: 'flex-end' }}>Ações</div>
               </div>
 
               <div className="patients-table-body">
@@ -917,42 +744,37 @@ const PatientsList: React.FC = () => {
                     </div>
                     <div className="patients-cell patients-actions" data-label="Ações">
                       <button
-                        className="action-btn"
+                        className="btn-action-email"
                         onClick={(e) => { e.stopPropagation(); handlePatientAction('email', patient.id); }}
                         title="Enviar email"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Email fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-whatsapp"
                         onClick={(e) => { e.stopPropagation(); handlePatientAction('whatsapp', patient.id); }}
                         title="WhatsApp"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <WhatsApp fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-schedule"
                         onClick={(e) => { e.stopPropagation(); handlePatientAction('calendar', patient.id); }}
                         title="Agendar consulta"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <CalendarToday fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-manage"
                         onClick={(e) => { e.stopPropagation(); handlePatientAction('cadastro', patient.id); }}
                         title="Gerenciar cadastro"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Folder fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-delete"
                         onClick={(e) => { e.stopPropagation(); handlePatientAction('delete', patient.id); }}
                         title="Excluir paciente"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Delete fontSize="small" />
                       </button>
@@ -972,145 +794,19 @@ const PatientsList: React.FC = () => {
             border: '1px solid #e9ecef',
             marginTop: '1rem'
           }}>
-            <div className="schedule-filters-actions" style={{
-              display: 'flex',
-              gap: '1rem',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div style={{
-                color: '#4a5568',
-                fontSize: '0.9rem'
-              }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPatients.length)} de <strong style={{
-                  color: '#2d3748',
-                  fontWeight: '600'
-                }}>{filteredAndSortedPatients.length}</strong> pacientes
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'center',
-                flexWrap: 'wrap'
-              }}>
-                {/* Seletor de itens por página */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label style={{
-                    fontSize: '0.85rem',
-                    color: '#6c757d',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    Itens por página:
-                  </label>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                    style={{
-                      padding: '0.25rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem',
-                      color: '#495057',
-                      background: 'white'
-                    }}
-                  >
-                    {itemsPerPageOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Navegação de páginas */}
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  alignItems: 'center'
-                }}>
-                  <button
-                    onClick={goToFirstPage}
-                    disabled={currentPage === 1}
-                    title="Primeira página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <FirstPage />
-                  </button>
-
-                  <button
-                    onClick={goToPreviousPage}
-                    disabled={currentPage === 1}
-                    title="Página anterior"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronLeft />
-                  </button>
-
-                  <span style={{
-                    padding: '0.4rem 0.8rem',
-                    fontSize: '0.85rem',
-                    color: '#495057',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {currentPage} de {totalPages}
-                  </span>
-
-                  <button
-                    onClick={goToNextPage}
-                    disabled={currentPage === totalPages}
-                    title="Próxima página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronRight />
-                  </button>
-
-                  <button
-                    onClick={goToLastPage}
-                    disabled={currentPage === totalPages}
-                    title="Última página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <LastPage />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              totalItems={filteredAndSortedPatients.length}
+              itemLabel="pacientes"
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
           </div>
         </div>
       </div>

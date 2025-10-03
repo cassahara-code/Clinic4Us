@@ -152,9 +152,9 @@ const FunctionalityModal: React.FC<FunctionalityModalProps> = ({
         </div>
 
         {/* Formulário */}
-        <form style={{ padding: '2rem' }}>
+        <form style={{ padding: '1.5rem' }}>
           {/* Categoria */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>Categoria</label>
             <select
               value={formData.category}
@@ -170,7 +170,7 @@ const FunctionalityModal: React.FC<FunctionalityModalProps> = ({
           </div>
 
           {/* Funcionalidade */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>Funcionalidade</label>
             <input
               type="text"
@@ -181,7 +181,7 @@ const FunctionalityModal: React.FC<FunctionalityModalProps> = ({
           </div>
 
           {/* Descrição */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>Descrição</label>
             <textarea
               value={formData.description}
@@ -193,7 +193,7 @@ const FunctionalityModal: React.FC<FunctionalityModalProps> = ({
           </div>
 
           {/* URL */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>URL - Não pode ser igual a outra já cadastrada</label>
             <input
               type="text"
@@ -204,7 +204,7 @@ const FunctionalityModal: React.FC<FunctionalityModalProps> = ({
           </div>
 
           {/* Ordenação */}
-          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
             <label>Ordenação</label>
             <input
               type="number"
@@ -216,7 +216,7 @@ const FunctionalityModal: React.FC<FunctionalityModalProps> = ({
           </div>
 
           {/* Checkboxes de área */}
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ marginBottom: '0.75rem' }}>
             <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
               <label
                 style={{
@@ -269,7 +269,7 @@ const FunctionalityModal: React.FC<FunctionalityModalProps> = ({
           </div>
 
           {/* Aparece no Menu */}
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ marginBottom: '0.75rem' }}>
             <label
               style={{
                 display: 'flex',

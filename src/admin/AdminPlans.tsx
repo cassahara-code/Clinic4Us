@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, ContentCopy, ToggleOff, ToggleOn, Add, FirstPage, LastPage, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { Delete, Edit, Add, FilterAltOff } from '@mui/icons-material';
 import PlanModal, { PlanData } from "../components/modals/PlanModal";
 import ConfirmModal from "../components/modals/ConfirmModal";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import { FaqButton } from "../components/FaqButton";
+import Pagination from "../components/Pagination";
 
 interface MenuItemProps {
   label: string;
@@ -52,6 +53,7 @@ const AdminPlans: React.FC = () => {
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
   // Estado da ordenação
+  const [sortField, setSortField] = useState<'name' | 'price' | 'duration' | 'maxUsers' | 'status' | 'createdAt'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Estados dos modais
@@ -161,14 +163,23 @@ const AdminPlans: React.FC = () => {
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
+      let compareValue = 0;
 
-      if (sortOrder === 'asc') {
-        return nameA.localeCompare(nameB, 'pt-BR');
-      } else {
-        return nameB.localeCompare(nameA, 'pt-BR');
+      if (sortField === 'name') {
+        compareValue = a.name.localeCompare(b.name, 'pt-BR');
+      } else if (sortField === 'price') {
+        compareValue = a.price - b.price;
+      } else if (sortField === 'duration') {
+        compareValue = a.duration - b.duration;
+      } else if (sortField === 'maxUsers') {
+        compareValue = a.maxUsers - b.maxUsers;
+      } else if (sortField === 'status') {
+        compareValue = a.status.localeCompare(b.status, 'pt-BR');
+      } else if (sortField === 'createdAt') {
+        compareValue = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
+
+      return sortOrder === 'asc' ? compareValue : -compareValue;
     });
 
   // Calcular paginação
@@ -195,37 +206,20 @@ const AdminPlans: React.FC = () => {
     }
   };
 
-  // Funções de paginação com scroll
-  const goToFirstPage = () => {
-    setCurrentPage(1);
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToLastPage = () => {
-    setCurrentPage(totalPages);
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToPreviousPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-    setTimeout(scrollToTop, 100);
-  };
-
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1); // Reset para primeira página
     setTimeout(scrollToTop, 100);
   };
 
-  const handleSortOrderChange = (newSortOrder: 'asc' | 'desc') => {
-    setSortOrder(newSortOrder);
-    setCurrentPage(1); // Reset para primeira página
-    setTimeout(scrollToTop, 100);
+  const handleSort = (field: 'name' | 'price' | 'duration' | 'maxUsers' | 'status' | 'createdAt') => {
+    if (sortField === field) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1);
   };
 
   // Gerar opções para o seletor de itens por página
@@ -275,6 +269,7 @@ const AdminPlans: React.FC = () => {
   const clearFilters = () => {
     setSearchTerm('');
     setStatusFilter('Ativo');
+    setSortField('name');
     setSortOrder('asc');
     setCurrentPage(1);
   };
@@ -456,23 +451,7 @@ const AdminPlans: React.FC = () => {
               <button
                 onClick={handleAddPlan}
                 title="Adicionar novo plano"
-                style={{
-                  background: '#48bb78',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  width: '40px',
-                  height: '40px',
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.background = '#38a169'}
-                onMouseOut={(e) => e.currentTarget.style.background = '#48bb78'}
+                className="btn-add"
               >
                 <Add />
               </button>
@@ -568,43 +547,6 @@ const AdminPlans: React.FC = () => {
                 </select>
               </div>
 
-              {/* Ordenação */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Ordenação</label>
-                <select
-                  value={sortOrder}
-                  onChange={(e) => handleSortOrderChange(e.target.value as 'asc' | 'desc')}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="asc">A → Z</option>
-                  <option value="desc">Z → A</option>
-                </select>
-              </div>
-
               {/* Botão limpar filtros */}
               <div style={{
                 display: 'flex',
@@ -614,185 +556,92 @@ const AdminPlans: React.FC = () => {
                 <button
                   onClick={clearFilters}
                   title="Limpar filtros"
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    background: '#6c757d',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#5a6268';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#6c757d';
-                  }}
+                  className="btn-clear-filters"
                 >
-                  <Delete fontSize="small" />
+                  <FilterAltOff fontSize="small" />
                 </button>
               </div>
             </div>
+          </div>
 
-            {/* Botões de ação e paginação */}
-            <div className="schedule-filters-actions" style={{
-              display: 'flex',
-              gap: '1rem',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div style={{
-                color: '#4a5568',
-                fontSize: '0.9rem'
-              }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPlans.length)} de <strong style={{
-                  color: '#2d3748',
-                  fontWeight: '600'
-                }}>{filteredAndSortedPlans.length}</strong> planos
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'center',
-                flexWrap: 'wrap'
-              }}>
-                {/* Seletor de itens por página */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label style={{
-                    fontSize: '0.85rem',
-                    color: '#6c757d',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    Itens por página:
-                  </label>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                    style={{
-                      padding: '0.25rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem',
-                      color: '#495057',
-                      background: 'white'
-                    }}
-                  >
-                    {itemsPerPageOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Navegação de páginas */}
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  alignItems: 'center'
-                }}>
-                  <button
-                    onClick={goToFirstPage}
-                    disabled={currentPage === 1}
-                    title="Primeira página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <FirstPage />
-                  </button>
-
-                  <button
-                    onClick={goToPreviousPage}
-                    disabled={currentPage === 1}
-                    title="Página anterior"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronLeft />
-                  </button>
-
-                  <span style={{
-                    padding: '0.4rem 0.8rem',
-                    fontSize: '0.85rem',
-                    color: '#495057',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {currentPage} de {totalPages}
-                  </span>
-
-                  <button
-                    onClick={goToNextPage}
-                    disabled={currentPage === totalPages}
-                    title="Próxima página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronRight />
-                  </button>
-
-                  <button
-                    onClick={goToLastPage}
-                    disabled={currentPage === totalPages}
-                    title="Última página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <LastPage />
-                  </button>
-                </div>
-              </div>
-            </div>
+          {/* Paginação superior */}
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '1rem',
+            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+            border: '1px solid #e9ecef',
+            marginBottom: '1rem'
+          }}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              totalItems={filteredAndSortedPlans.length}
+              itemLabel="planos"
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
           </div>
 
           {/* Lista de planos */}
           <div className="admin-plans-list-container">
             <div className="admin-plans-table">
               <div className="admin-plans-table-header">
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Nome</div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('name')}
+                  title="Ordenar por nome"
+                >
+                  Nome {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
                 <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Descrição</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Preço</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Duração</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Max Usuários</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Status</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Criado em</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left' }}>Ações</div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('price')}
+                  title="Ordenar por preço"
+                >
+                  Preço {sortField === 'price' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('duration')}
+                  title="Ordenar por duração"
+                >
+                  Duração {sortField === 'duration' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('maxUsers')}
+                  title="Ordenar por máx usuários"
+                >
+                  Max Usuários {sortField === 'maxUsers' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('status')}
+                  title="Ordenar por status"
+                >
+                  Status {sortField === 'status' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div
+                  className="admin-plans-header-cell"
+                  style={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('createdAt')}
+                  title="Ordenar por data de criação"
+                >
+                  Criado em {sortField === 'createdAt' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </div>
+                <div className="admin-plans-header-cell" style={{ justifyContent: 'flex-end' }}>Ações</div>
               </div>
 
               <div className="admin-plans-table-body">
@@ -826,20 +675,18 @@ const AdminPlans: React.FC = () => {
                     <div className="admin-plans-cell admin-plans-created" data-label="Criado em" style={{ textAlign: 'left' }}>
                       {formatDate(plan.createdAt)}
                     </div>
-                    <div className="admin-plans-cell admin-plans-actions" data-label="Ações" style={{ textAlign: 'left' }}>
+                    <div className="admin-plans-cell admin-plans-actions" data-label="Ações" style={{ textAlign: 'right' }}>
                       <button
-                        className="action-btn"
+                        className="btn-action-edit"
                         onClick={(e) => { e.stopPropagation(); handlePlanAction('edit', plan.id); }}
                         title="Editar plano"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Edit fontSize="small" />
                       </button>
                       <button
-                        className="action-btn"
+                        className="btn-action-delete"
                         onClick={(e) => { e.stopPropagation(); handlePlanAction('delete', plan.id); }}
                         title="Excluir plano"
-                        style={{ backgroundColor: '#f0f0f0', color: '#6c757d' }}
                       >
                         <Delete fontSize="small" />
                       </button>
@@ -859,145 +706,19 @@ const AdminPlans: React.FC = () => {
             border: '1px solid #e9ecef',
             marginTop: '1rem'
           }}>
-            <div className="schedule-filters-actions" style={{
-              display: 'flex',
-              gap: '1rem',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div style={{
-                color: '#4a5568',
-                fontSize: '0.9rem'
-              }}>
-                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPlans.length)} de <strong style={{
-                  color: '#2d3748',
-                  fontWeight: '600'
-                }}>{filteredAndSortedPlans.length}</strong> planos
-              </div>
-
-              <div style={{
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'center',
-                flexWrap: 'wrap'
-              }}>
-                {/* Seletor de itens por página */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label style={{
-                    fontSize: '0.85rem',
-                    color: '#6c757d',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    Itens por página:
-                  </label>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                    style={{
-                      padding: '0.25rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '0.85rem',
-                      color: '#495057',
-                      background: 'white'
-                    }}
-                  >
-                    {itemsPerPageOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Navegação de páginas */}
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  alignItems: 'center'
-                }}>
-                  <button
-                    onClick={goToFirstPage}
-                    disabled={currentPage === 1}
-                    title="Primeira página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <FirstPage />
-                  </button>
-
-                  <button
-                    onClick={goToPreviousPage}
-                    disabled={currentPage === 1}
-                    title="Página anterior"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                      color: currentPage === 1 ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronLeft />
-                  </button>
-
-                  <span style={{
-                    padding: '0.4rem 0.8rem',
-                    fontSize: '0.85rem',
-                    color: '#495057',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {currentPage} de {totalPages}
-                  </span>
-
-                  <button
-                    onClick={goToNextPage}
-                    disabled={currentPage === totalPages}
-                    title="Próxima página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ChevronRight />
-                  </button>
-
-                  <button
-                    onClick={goToLastPage}
-                    disabled={currentPage === totalPages}
-                    title="Última página"
-                    style={{
-                      padding: '0.4rem 0.6rem',
-                      background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                      color: currentPage === totalPages ? '#6c757d' : 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <LastPage />
-                  </button>
-                </div>
-              </div>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              totalItems={filteredAndSortedPlans.length}
+              itemLabel="planos"
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
           </div>
         </div>
       </main>
