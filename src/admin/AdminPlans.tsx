@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add, FilterAltOff } from '@mui/icons-material';
+import { Delete, Edit, Add, FilterAltOff, Settings } from '@mui/icons-material';
 import PlanModal, { PlanData } from "../components/modals/PlanModal";
 import ConfirmModal from "../components/modals/ConfirmModal";
+import BenefitsModal from "../components/modals/BenefitsModal";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import { FaqButton } from "../components/FaqButton";
@@ -64,6 +65,9 @@ const AdminPlans: React.FC = () => {
   // Estados do modal de plano
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [planModalMode, setPlanModalMode] = useState<'create' | 'edit'>('create');
+
+  // Estado do modal de benefícios
+  const [isBenefitsModalOpen, setIsBenefitsModalOpen] = useState(false);
 
   // Dados de exemplo dos planos - geração de dados para testar paginação
   const [plans] = useState<Plan[]>(() => {
@@ -280,6 +284,15 @@ const AdminPlans: React.FC = () => {
     setIsPlanModalOpen(true);
   };
 
+  const handleOpenBenefitsModal = () => {
+    setIsBenefitsModalOpen(true);
+  };
+
+  const handleSaveBenefits = (benefits: any[]) => {
+    console.log('Benefícios atualizados:', benefits);
+    showToast('Benefícios atualizados com sucesso!', 'success');
+  };
+
   const handleSavePlan = (data: PlanData) => {
     // Converter features de array de objetos para array de strings incluídas
     const includedFeatures = data.features
@@ -439,6 +452,13 @@ const AdminPlans: React.FC = () => {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FaqButton />
+              <button
+                onClick={handleOpenBenefitsModal}
+                title="Gerenciar benefícios"
+                className="btn-settings"
+              >
+                <Settings />
+              </button>
               <button
                 onClick={handleAddPlan}
                 title="Adicionar novo plano"
@@ -748,6 +768,13 @@ const AdminPlans: React.FC = () => {
           features: planToEdit.features.map(f => ({ name: f, included: true })),
           status: planToEdit.status
         } : undefined}
+      />
+
+      {/* Modal de gestão de benefícios */}
+      <BenefitsModal
+        isOpen={isBenefitsModalOpen}
+        onClose={() => setIsBenefitsModalOpen(false)}
+        onSave={handleSaveBenefits}
       />
 
       {/* Toast de notificação */}
