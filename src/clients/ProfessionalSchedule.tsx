@@ -3,7 +3,7 @@ import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
 import { useNavigation } from "../contexts/RouterContext";
-import { CalendarToday, Delete, FilterAltOff } from '@mui/icons-material';
+import { CalendarToday, Delete, FilterAltOff, EventNote, PersonAdd, List, Folder } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 
 interface MenuItemProps {
@@ -1382,40 +1382,70 @@ const ProfessionalSchedule: React.FC = () => {
                   disabled={selectedPatients.length === 0}
                   style={{
                     padding: '0.5rem 1rem',
-                    background: selectedPatients.length === 0 ? '#adb5bd' : '#28a745',
+                    background: selectedPatients.length === 0 ? '#adb5bd' : '#007bff',
                     color: 'white',
                     border: 'none',
                     borderRadius: '4px',
                     fontSize: '0.85rem',
                     cursor: selectedPatients.length === 0 ? 'not-allowed' : 'pointer',
-                    opacity: selectedPatients.length === 0 ? 0.6 : 1
+                    opacity: selectedPatients.length === 0 ? 0.6 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
                   }}
                 >
+                  <EventNote fontSize="small" />
                   Agenda Paciente
                 </button>
                 <button
                   onClick={() => {
                     if (selectedPatients.length > 0) {
                       const patientId = selectedPatients[0].split(' - ')[0];
-                      goToPatientRegister(patientId);
+                      const registerUrl = `${window.location.origin}${window.location.pathname}?page=patient-register&id=${patientId}`;
+                      window.open(registerUrl, '_blank');
                     }
                   }}
                   disabled={selectedPatients.length === 0}
                   style={{
                     padding: '0.5rem 1rem',
-                    background: selectedPatients.length === 0 ? '#adb5bd' : '#17a2b8',
+                    background: selectedPatients.length === 0 ? '#adb5bd' : '#6f42c1',
                     color: 'white',
                     border: 'none',
                     borderRadius: '4px',
                     fontSize: '0.85rem',
                     cursor: selectedPatients.length === 0 ? 'not-allowed' : 'pointer',
-                    opacity: selectedPatients.length === 0 ? 0.6 : 1
+                    opacity: selectedPatients.length === 0 ? 0.6 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
                   }}
                 >
+                  <Folder fontSize="small" />
                   Cadastro do Paciente
                 </button>
                 <button
                   onClick={handleNewPatientClick}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <PersonAdd fontSize="small" />
+                  Novo Paciente
+                </button>
+                <button
+                  onClick={() => {
+                    const patientsUrl = `${window.location.origin}${window.location.pathname}?page=patients`;
+                    window.open(patientsUrl, '_blank');
+                  }}
                   style={{
                     padding: '0.5rem 1rem',
                     background: '#ffc107',
@@ -1423,23 +1453,13 @@ const ProfessionalSchedule: React.FC = () => {
                     border: 'none',
                     borderRadius: '4px',
                     fontSize: '0.85rem',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
                   }}
                 >
-                  Novo Paciente
-                </button>
-                <button
-                  onClick={goToPatients}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    background: '#6f42c1',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    fontSize: '0.85rem',
-                    cursor: 'pointer'
-                  }}
-                >
+                  <List fontSize="small" />
                   Lista de pacientes
                 </button>
               </div>
@@ -1462,6 +1482,7 @@ const ProfessionalSchedule: React.FC = () => {
                 <div className="schedule-calendar-nav-buttons" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   <button
                     onClick={goToToday}
+                    title="Ir para hoje"
                     style={{
                       padding: '0.5rem 1rem',
                       background: '#6c757d',
@@ -1475,6 +1496,7 @@ const ProfessionalSchedule: React.FC = () => {
                   </button>
                   <button
                     onClick={goToPrevious}
+                    title="Período anterior"
                     style={{
                       padding: '0.5rem',
                       background: '#495057',
@@ -1487,6 +1509,7 @@ const ProfessionalSchedule: React.FC = () => {
                   </button>
                   <button
                     onClick={goToNext}
+                    title="Próximo período"
                     style={{
                       padding: '0.5rem',
                       background: '#495057',
@@ -1511,6 +1534,7 @@ const ProfessionalSchedule: React.FC = () => {
                 <div className="schedule-calendar-view-buttons" style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
                     onClick={() => setCalendarView('month')}
+                    title="Visualizar mês"
                     style={{
                       padding: '0.5rem 1rem',
                       background: calendarView === 'month' ? '#495057' : 'transparent',
@@ -1524,6 +1548,7 @@ const ProfessionalSchedule: React.FC = () => {
                   </button>
                   <button
                     onClick={() => setCalendarView('week')}
+                    title="Visualizar semana"
                     style={{
                       padding: '0.5rem 1rem',
                       background: calendarView === 'week' ? '#495057' : 'transparent',
@@ -1537,6 +1562,7 @@ const ProfessionalSchedule: React.FC = () => {
                   </button>
                   <button
                     onClick={() => setCalendarView('day')}
+                    title="Visualizar dia"
                     style={{
                       padding: '0.5rem 1rem',
                       background: calendarView === 'day' ? '#495057' : 'transparent',
