@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add } from '@mui/icons-material';
+import { Delete, Edit, Add, FilterAltOff } from '@mui/icons-material';
 import ConfirmModal from "../components/modals/ConfirmModal";
 import FaqModal, { FaqData } from "../components/modals/FaqModal";
 import { Toast } from "../components/Toast";
@@ -289,23 +289,7 @@ const AdminFaq: React.FC = () => {
                 <button
                   onClick={handleOpenCreateModal}
                   title="Adicionar novo item FAQ"
-                  style={{
-                    background: '#48bb78',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    width: '40px',
-                    height: '40px',
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#38a169'}
-                  onMouseOut={(e) => e.currentTarget.style.background = '#48bb78'}
+                  className="btn-add"
                 >
                   <Add />
                 </button>
@@ -405,27 +389,9 @@ const AdminFaq: React.FC = () => {
                   <button
                     onClick={clearFilters}
                     title="Limpar filtros"
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      background: '#6c757d',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#5a6268';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#6c757d';
-                    }}
+                    className="btn-clear-filters"
                   >
-                    <Delete fontSize="small" />
+                    <FilterAltOff fontSize="small" />
                   </button>
                 </div>
               </div>

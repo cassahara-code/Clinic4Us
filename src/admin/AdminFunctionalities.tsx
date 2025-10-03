@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add, Settings } from '@mui/icons-material';
+import { Delete, Edit, Add, Settings, FilterAltOff } from '@mui/icons-material';
 import ConfirmModal from "../components/modals/ConfirmModal";
 import FunctionalityModal, { FunctionalityData } from "../components/modals/FunctionalityModal";
 import CategoryModal from "../components/modals/CategoryModal";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import { FaqButton } from "../components/FaqButton";
+import Pagination from "../components/Pagination";
 
 interface MenuItemProps {
   label: string;
@@ -186,6 +187,15 @@ const AdminFunctionalities: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+  };
+
   const handleAddFunctionality = () => {
     setFunctionalityModalMode('create');
     setFunctionalityToEdit(null);
@@ -344,23 +354,7 @@ const AdminFunctionalities: React.FC = () => {
               <button
                 onClick={handleOpenCategoryModal}
                 title="Gerenciar categorias"
-                style={{
-                  background: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  width: '40px',
-                  height: '40px',
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.background = '#5a6268'}
-                onMouseOut={(e) => e.currentTarget.style.background = '#6c757d'}
+                className="btn-settings"
               >
                 <Settings />
               </button>
@@ -480,7 +474,46 @@ const AdminFunctionalities: React.FC = () => {
                   ))}
                 </select>
               </div>
+
+              {/* Botão limpar filtros */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-end',
+                paddingBottom: '2px'
+              }}>
+                <button
+                  onClick={clearFilters}
+                  title="Limpar filtros"
+                  className="btn-clear-filters"
+                >
+                  <FilterAltOff fontSize="small" />
+                </button>
+              </div>
             </div>
+          </div>
+
+          {/* Paginação superior */}
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '1rem',
+            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+            border: '1px solid #e9ecef',
+            marginBottom: '1rem'
+          }}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              totalItems={filteredFunctionalities.length}
+              itemLabel="funcionalidades"
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
           </div>
 
           {/* Lista de funcionalidades */}
@@ -556,25 +589,28 @@ const AdminFunctionalities: React.FC = () => {
             </div>
           </div>
 
-          {/* Informação de paginação */}
+          {/* Paginação inferior */}
           <div style={{
             background: 'white',
             borderRadius: '12px',
             padding: '1rem',
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e9ecef',
-            marginTop: '1rem',
-            textAlign: 'center'
+            marginTop: '1rem'
           }}>
-            <div style={{
-              color: '#4a5568',
-              fontSize: '0.9rem'
-            }}>
-              Mostrando {startIndex + 1}-{Math.min(endIndex, filteredFunctionalities.length)} de <strong style={{
-                color: '#2d3748',
-                fontWeight: '600'
-              }}>{filteredFunctionalities.length}</strong> funcionalidades
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              totalItems={filteredFunctionalities.length}
+              itemLabel="funcionalidades"
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
           </div>
         </div>
       </main>

@@ -4240,3 +4240,69 @@ body.mobile-menu-open .hamburger,
     font-size: 1.1rem;
   }
 }
+
+/* ====================================================================
+   ACTION BUTTONS STYLES
+   ================================================================== */
+
+/* Botão Adicionar (+) - Verde */
+.btn-add {
+  background: #48bb78;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-add:hover {
+  background: #38a169;
+}
+
+/* Botão Limpar Filtros (Lixeira) - Cinza */
+.btn-clear-filters {
+  width: 40px;
+  height: 40px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-clear-filters:hover {
+  background: #5a6268;
+}
+
+/* Botão Configurar (Engrenagem) - Cinza */
+.btn-settings {
+  width: 40px;
+  height: 40px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-settings:hover {
+  background: #5a6268;
+}
+
+/* Botão FAQ (?) - Padrão do componente FaqButton */
+/* Estilos já definidos no componente FaqButton */

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Person, WhatsApp, CalendarToday, Edit, Warning, Add, Email, Check, Close, Folder } from '@mui/icons-material';
+import { Delete, Person, WhatsApp, CalendarToday, Edit, Warning, Add, Email, Check, Close, Folder, FilterAltOff } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import Pagination from "../components/Pagination";
 
@@ -443,23 +443,7 @@ const PatientsList: React.FC = () => {
                 <button
                   onClick={handleAddPatient}
                   title="Adicionar novo paciente"
-                  style={{
-                    background: '#48bb78',
-                    color: '#212529',
-                    border: 'none',
-                    borderRadius: '6px',
-                    width: '40px',
-                    height: '40px',
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.background = '#38a169'}
-                  onMouseOut={(e) => e.currentTarget.style.background = '#48bb78'}
+                  className="btn-add"
                 >
                   <Add />
                 </button>
@@ -681,24 +665,9 @@ const PatientsList: React.FC = () => {
                 <button
                   onClick={clearFilters}
                   title="Limpar todos os filtros"
-                  style={{
-                    padding: '0.4rem',
-                    background: '#6c757d',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    transition: 'background 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '40px',
-                    height: '40px'
-                  }}
-                  onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = '#5a6268'}
-                  onMouseLeave={(e) => (e.target as HTMLButtonElement).style.background = '#6c757d'}
+                  className="btn-clear-filters"
                 >
-                  <Delete fontSize="small" />
+                  <FilterAltOff fontSize="small" />
                 </button>
               </div>
             </div>
