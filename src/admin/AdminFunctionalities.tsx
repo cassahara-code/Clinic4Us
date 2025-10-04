@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  MenuItem,
+  IconButton,
+  Paper
+} from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add, Settings, FilterAltOff } from '@mui/icons-material';
+import { Delete, Edit, Settings } from '@mui/icons-material';
 import ConfirmModal from "../components/modals/ConfirmModal";
 import FunctionalityModal, { FunctionalityData } from "../components/modals/FunctionalityModal";
 import CategoryModal from "../components/modals/CategoryModal";
@@ -10,6 +19,9 @@ import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import { FaqButton } from "../components/FaqButton";
 import StandardPagination from "../components/Pagination/StandardPagination";
+import AddButton from "../components/AddButton";
+import ClearFiltersButton from "../components/ClearFiltersButton";
+import { colors, typography, inputs } from "../theme/designSystem";
 
 interface MenuItemProps {
   label: string;
@@ -66,6 +78,17 @@ const AdminFunctionalities: React.FC = () => {
 
   // Estado do modal de categorias
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
+  // Estado para detectar mudanças nos filtros
+  const [hasFilterChanges, setHasFilterChanges] = useState(false);
+
+  // Valores iniciais dos filtros
+  const initialFilters = {
+    searchTerm: '',
+    categoryFilter: 'Todos',
+    sortField: 'name' as 'name' | 'order' | 'category',
+    sortOrder: 'asc' as 'asc' | 'desc'
+  };
 
   // Lista de categorias disponíveis
   const categories = [
@@ -193,21 +216,46 @@ const AdminFunctionalities: React.FC = () => {
     setCurrentPage(1);
   }, [searchTerm, categoryFilter]);
 
+  // Verificar se há mudanças nos filtros
+  useEffect(() => {
+    const hasChanges =
+      searchTerm !== initialFilters.searchTerm ||
+      categoryFilter !== initialFilters.categoryFilter ||
+      sortField !== initialFilters.sortField ||
+      sortOrder !== initialFilters.sortOrder;
+
+    setHasFilterChanges(hasChanges);
+  }, [searchTerm, categoryFilter, sortField, sortOrder]);
+
   const clearFilters = () => {
-    setSearchTerm('');
-    setCategoryFilter('Todos');
-    setSortField('name');
-    setSortOrder('asc');
+    setSearchTerm(initialFilters.searchTerm);
+    setCategoryFilter(initialFilters.categoryFilter);
+    setSortField(initialFilters.sortField);
+    setSortOrder(initialFilters.sortOrder);
     setCurrentPage(1);
+    setHasFilterChanges(false);
   };
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const listContainer = document.querySelector('.admin-functionalities-list-container');
+    if (listContainer) {
+      const containerRect = listContainer.getBoundingClientRect();
+      const offset = 100;
+      const targetPosition = window.pageYOffset + containerRect.top - offset;
+
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth'
+      });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1);
+    setTimeout(scrollToTop, 100);
   };
 
   const handleSort = (field: 'name' | 'order' | 'category') => {
@@ -297,7 +345,11 @@ const AdminFunctionalities: React.FC = () => {
   };
 
   if (!userSession) {
-    return <div>Carregando...</div>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Typography>Carregando...</Typography>
+      </Box>
+    );
   }
 
 
@@ -321,7 +373,7 @@ const AdminFunctionalities: React.FC = () => {
   };
 
   return (
-    <div className="professional-schedule">
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <HeaderInternal
         showCTAButton={false}
         className="login-header"
@@ -336,177 +388,162 @@ const AdminFunctionalities: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main style={{
-        padding: '1rem',
-        minHeight: 'calc(100vh - 120px)',
-        background: '#f8f9fa',
-        marginTop: '85px'
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '100%',
-          margin: '0',
-          padding: '0'
-        }}>
-          {/* Título da página */}
-          <div className="page-header-container">
-            <div className="page-header-content">
-              <h1 className="page-header-title">Funcionalidades</h1>
-              <p className="page-header-description">Gestão de páginas de funcionalidades de todo o sistema.</p>
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+      <Box
+        component="main"
+        sx={{
+          padding: '1rem',
+          minHeight: 'calc(100vh - 120px)',
+          background: colors.background,
+          marginTop: '85px',
+          flex: 1
+        }}
+      >
+        <Container maxWidth={false} disableGutters>
+          {/* Título da Página */}
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            mb: 3,
+            gap: 2
+          }}>
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontSize: '1.3rem',
+                  mb: 1,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: colors.textPrimary
+                }}
+              >
+                Funcionalidades
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary
+                }}
+              >
+                Gestão de páginas de funcionalidades de todo o sistema.
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <FaqButton />
-              <button
+              <IconButton
                 onClick={handleOpenCategoryModal}
                 title="Gerenciar categorias"
                 className="btn-settings"
-              >
-                <Settings />
-              </button>
-              <button
-                onClick={handleAddFunctionality}
-                title="Adicionar nova funcionalidade"
-                style={{
-                  background: '#48bb78',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
+                sx={{
                   width: '40px',
                   height: '40px',
-                  fontSize: '1.5rem',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'background-color 0.2s'
+                  backgroundColor: colors.textSecondary,
+                  color: colors.white,
+                  borderRadius: '4px',
+                  '&:hover': {
+                    backgroundColor: '#5a6268',
+                  },
                 }}
-                onMouseOver={(e) => e.currentTarget.style.background = '#38a169'}
-                onMouseOut={(e) => e.currentTarget.style.background = '#48bb78'}
               >
-                <Add />
-              </button>
-            </div>
-          </div>
+                <Settings />
+              </IconButton>
+              <AddButton onClick={handleAddFunctionality} title="Adicionar nova funcionalidade" />
+            </Box>
+          </Box>
 
-          {/* Filtros */}
-          <div className="schedule-filters" style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginBottom: '1rem'
-          }}>
-            <div className="schedule-filters-grid" style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '0.75rem',
-              marginBottom: '1rem'
-            }}>
-              {/* Busca por palavra */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.85rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Busca por palavra</label>
-                <input
-                  type="text"
-                  placeholder="Buscar"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-              </div>
+          {/* Filtros, Paginação e Lista */}
+          <Paper
+            elevation={0}
+            sx={{
+              padding: '1.5rem',
+              mb: 2,
+              borderRadius: '12px',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${colors.backgroundAlt}`,
+            }}
+          >
+            {/* Filtros */}
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <TextField
+                label="Busca por palavra"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar"
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  flex: '2 1 300px',
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.primary,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: colors.primary,
+                    },
+                  },
+                }}
+              />
 
-              {/* Filtro por categoria */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.85rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Filtro por categoria</label>
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  style={{
-                    minWidth: '120px',
-                    width: '100%',
-                    paddingRight: '2rem',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  {categories.map((category, index) => (
-                    <option key={index} value={category}>
-                      {category === 'Todos' ? 'Categoria' : category}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <TextField
+                select
+                label="Filtro por categoria"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  minWidth: '150px',
+                  flex: '1 1 150px',
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.primary,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: colors.primary,
+                    },
+                  },
+                }}
+              >
+                {categories.map((category, index) => (
+                  <MenuItem key={index} value={category}>
+                    {category === 'Todos' ? 'Categoria' : category}
+                  </MenuItem>
+                ))}
+              </TextField>
 
-              {/* Botão limpar filtros */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'flex-end',
-                paddingBottom: '2px'
-              }}>
-                <button
-                  onClick={clearFilters}
-                  title="Limpar filtros"
-                  className="btn-clear-filters"
-                >
-                  <FilterAltOff fontSize="small" />
-                </button>
-              </div>
-            </div>
-          </div>
+              <Box sx={{ opacity: hasFilterChanges ? 1 : 0.5, pointerEvents: hasFilterChanges ? 'auto' : 'none' }}>
+                <ClearFiltersButton onClick={clearFilters} />
+              </Box>
+              </Box>
+            </Box>
 
-          {/* Paginação superior */}
-          <div style={{
-            borderRadius: '12px',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginBottom: '1rem',
-            overflow: 'hidden'
-          }}>
+            {/* Paginação */}
             <StandardPagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -518,64 +555,63 @@ const AdminFunctionalities: React.FC = () => {
               }}
               onItemsPerPageChange={handleItemsPerPageChange}
             />
-          </div>
 
-          {/* Lista de funcionalidades */}
-          <div className="admin-plans-list-container">
-            <div className="admin-plans-table" style={{ display: 'block' }}>
-              <div className="admin-plans-table-header" style={{
+            {/* Lista de Funcionalidades */}
+            <Box className="admin-functionalities-list-container" sx={{ mt: 2 }}>
+            <Box className="admin-plans-table" style={{ display: 'block' }}>
+              <Box className="admin-plans-table-header" style={{
                 display: 'flex',
                 gridTemplateColumns: 'unset'
               }}>
-                <div
+                <Box
                   className="admin-plans-header-cell"
-                  style={{ textAlign: 'left', flex: '0 0 180px', cursor: 'pointer', userSelect: 'none' }}
+                  sx={{ textAlign: 'left', flex: '0 0 180px', cursor: 'pointer', userSelect: 'none' }}
                   onClick={() => handleSort('name')}
                   title="Ordenar por funcionalidade"
                 >
                   Funcionalidade {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div
+                </Box>
+                <Box
                   className="admin-plans-header-cell"
-                  style={{ textAlign: 'left', flex: '0 0 80px', cursor: 'pointer', userSelect: 'none' }}
+                  sx={{ textAlign: 'left', flex: '0 0 80px', cursor: 'pointer', userSelect: 'none' }}
                   onClick={() => handleSort('order')}
                   title="Ordenar por ordem"
                 >
                   Ordem {sortField === 'order' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div
+                </Box>
+                <Box
                   className="admin-plans-header-cell"
-                  style={{ textAlign: 'left', flex: '0 0 220px', cursor: 'pointer', userSelect: 'none' }}
+                  sx={{ textAlign: 'left', flex: '0 0 220px', cursor: 'pointer', userSelect: 'none' }}
                   onClick={() => handleSort('category')}
                   title="Ordenar por categoria"
                 >
                   Categoria {sortField === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '0 0 180px' }}>URL</div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '1 1 auto' }}>Descrição</div>
-                <div className="admin-plans-header-cell" style={{ justifyContent: 'flex-end', flex: '0 0 100px' }}>Ações</div>
-              </div>
+                </Box>
+                <Box className="admin-plans-header-cell" sx={{ textAlign: 'left', flex: '0 0 180px' }}>URL</Box>
+                <Box className="admin-plans-header-cell" sx={{ textAlign: 'left', flex: '1 1 auto' }}>Descrição</Box>
+                <Box className="admin-plans-header-cell" sx={{ justifyContent: 'flex-end', flex: '0 0 100px' }}>Ações</Box>
+              </Box>
 
-              <div className="admin-plans-table-body">
+              <Box className="admin-plans-table-body">
                 {paginatedFunctionalities.map((functionality) => (
-                  <div
+                  <Box
                     key={functionality.id}
                     className="admin-plans-table-row"
-                    style={{ cursor: 'default', display: 'flex', gridTemplateColumns: 'unset' }}
+                    sx={{ cursor: 'default', display: 'flex', gridTemplateColumns: 'unset' }}
                   >
-                    <div className="admin-plans-cell admin-plans-name" data-label="Funcionalidade" style={{ textAlign: 'left', flex: '0 0 180px' }}>
+                    <Box className="admin-plans-cell admin-plans-name" data-label="Funcionalidade" sx={{ textAlign: 'left', flex: '0 0 180px' }}>
                       {functionality.name}
-                    </div>
-                    <div className="admin-plans-cell" data-label="Ordem" style={{ textAlign: 'left', flex: '0 0 80px' }}>
+                    </Box>
+                    <Box className="admin-plans-cell" data-label="Ordem" sx={{ textAlign: 'left', flex: '0 0 80px' }}>
                       {functionality.order}
-                    </div>
-                    <div className="admin-plans-cell admin-plans-description" data-label="Categoria" style={{ textAlign: 'left', flex: '0 0 220px' }}>
+                    </Box>
+                    <Box className="admin-plans-cell admin-plans-description" data-label="Categoria" sx={{ textAlign: 'left', flex: '0 0 220px' }}>
                       {functionality.category}
-                    </div>
-                    <div className="admin-plans-cell" data-label="URL" style={{ textAlign: 'left', flex: '0 0 180px' }}>
+                    </Box>
+                    <Box className="admin-plans-cell" data-label="URL" sx={{ textAlign: 'left', flex: '0 0 180px' }}>
                       {functionality.url}
-                    </div>
-                    <div className="admin-plans-cell admin-plans-description" data-label="Descrição" style={{
+                    </Box>
+                    <Box className="admin-plans-cell admin-plans-description" data-label="Descrição" sx={{
                       textAlign: 'left',
                       flex: '1 1 auto',
                       overflow: 'hidden',
@@ -584,63 +620,89 @@ const AdminFunctionalities: React.FC = () => {
                       wordBreak: 'break-word'
                     }}>
                       {functionality.description}
-                    </div>
-                    <div className="admin-plans-cell admin-plans-actions" data-label="Ações" style={{
+                    </Box>
+                    <Box className="admin-plans-cell admin-plans-actions" data-label="Ações" sx={{
                       textAlign: 'right',
                       flex: '0 0 100px',
                       justifyContent: 'flex-end',
                       display: 'flex'
                     }}>
-                      <button
-                        className="btn-action-edit"
-                        onClick={(e) => { e.stopPropagation(); handleFunctionalityAction('edit', functionality.id); }}
-                        title="Editar funcionalidade"
-                      >
-                        <Edit fontSize="small" />
-                      </button>
-                      <button
-                        className="btn-action-delete"
-                        onClick={(e) => { e.stopPropagation(); handleFunctionalityAction('delete', functionality.id); }}
-                        title="Excluir funcionalidade"
-                      >
-                        <Delete fontSize="small" />
-                      </button>
-                    </div>
-                  </div>
+                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); handleFunctionalityAction('edit', functionality.id); }}
+                          title="Editar funcionalidade"
+                          sx={{
+                            backgroundColor: '#03B4C6',
+                            color: 'white',
+                            width: '32px',
+                            height: '32px',
+                            '&:hover': {
+                              backgroundColor: '#029AAB',
+                            }
+                          }}
+                        >
+                          <Edit sx={{ fontSize: '1rem' }} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); handleFunctionalityAction('delete', functionality.id); }}
+                          title="Excluir funcionalidade"
+                          sx={{
+                            backgroundColor: '#dc3545',
+                            color: 'white',
+                            width: '32px',
+                            height: '32px',
+                            '&:hover': {
+                              backgroundColor: '#c82333',
+                            }
+                          }}
+                        >
+                          <Delete sx={{ fontSize: '1rem' }} />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  </Box>
                 ))}
-              </div>
-            </div>
-          </div>
+              </Box>
+            </Box>
+            </Box>
 
-          {/* Paginação inferior */}
-          <div style={{
-            borderRadius: '12px',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginTop: '1rem',
-            overflow: 'hidden'
-          }}>
-            <StandardPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredAndSortedFunctionalities.length}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
-          </div>
-        </div>
-      </main>
+            {/* Paginação Inferior */}
+            <Box sx={{ mt: 2 }}>
+              <StandardPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredAndSortedFunctionalities.length}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  setTimeout(scrollToTop, 100);
+                }}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
 
       <FooterInternal
         simplified={true}
         className="login-footer-component"
       />
 
-      {/* Modal de criar/editar funcionalidade */}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Confirmar Exclusão"
+        message={`Tem certeza que deseja excluir a funcionalidade ${functionalityToDelete?.name}?`}
+        warningMessage="Esta ação não poderá ser desfeita e afetará todos os perfis que utilizam esta funcionalidade."
+        confirmButtonText="Excluir Funcionalidade"
+        cancelButtonText="Cancelar"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        type="danger"
+      />
+
       <FunctionalityModal
         isOpen={isFunctionalityModalOpen}
         onClose={() => setIsFunctionalityModalOpen(false)}
@@ -659,34 +721,19 @@ const AdminFunctionalities: React.FC = () => {
         } : undefined}
       />
 
-      {/* Modal de gestão de categorias */}
       <CategoryModal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
         onSave={handleSaveCategories}
       />
 
-      {/* Modal de confirmação de exclusão */}
-      <ConfirmModal
-        isOpen={isDeleteModalOpen}
-        title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir a funcionalidade ${functionalityToDelete?.name}?`}
-        warningMessage="Esta ação não poderá ser desfeita e afetará todos os perfis que utilizam esta funcionalidade."
-        confirmButtonText="Excluir Funcionalidade"
-        cancelButtonText="Cancelar"
-        onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
-        type="danger"
-      />
-
-      {/* Toast de notificação */}
       <Toast
         message={toast.message}
         type={toast.type}
         isVisible={toast.isVisible}
         onClose={hideToast}
       />
-    </div>
+    </Box>
   );
 };
 

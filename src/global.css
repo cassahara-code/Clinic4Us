@@ -3150,13 +3150,12 @@ body.mobile-menu-open .hamburger,
 }
 
 .admin-plans-table-header {
-  display: grid;
-  grid-template-columns: 2fr 2.5fr 1fr 1fr 1.2fr 0.8fr 1.2fr 1.8fr;
-  background: #f7fafc;
+  display: flex;
+  background: #e9ecef;
   border-bottom: 1px solid #e2e8f0;
   padding: 0.75rem 1rem;
   font-weight: 600;
-  color: #4a5568;
+  color: #495057;
   font-size: 0.875rem;
   width: 100%;
   box-sizing: border-box;
@@ -3169,6 +3168,9 @@ body.mobile-menu-open .hamburger,
   padding: 0 0.5rem;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #495057;
 }
 
 .admin-plans-table-body {
@@ -3178,8 +3180,7 @@ body.mobile-menu-open .hamburger,
 }
 
 .admin-plans-table-row {
-  display: grid;
-  grid-template-columns: 2fr 2.5fr 1fr 1fr 1.2fr 0.8fr 1.2fr 1.8fr;
+  display: flex;
   padding: 1rem;
   border-bottom: 1px solid #e2e8f0;
   transition: background-color 0.15s;
@@ -3202,7 +3203,7 @@ body.mobile-menu-open .hamburger,
   justify-content: flex-start;
   padding: 0 0.5rem;
   font-size: 0.875rem;
-  color: #2d3748;
+  color: #495057;
   word-wrap: break-word;
   overflow-wrap: break-word;
   min-width: 0;
@@ -3614,7 +3615,9 @@ body.mobile-menu-open .hamburger,
 @media (min-width: 1200px) {
   .admin-plans-table-header,
   .admin-plans-table-row {
-    grid-template-columns: 2.2fr 3fr 1.2fr 1.2fr 1.4fr 1fr 1.4fr 2fr;
+    display: grid;
+    grid-template-columns: 2fr 2.5fr 1.2fr 1fr 1.2fr 0.8fr 1.2fr 1.5fr;
+    width: 100%;
   }
 
   .admin-plans-list-container {
@@ -3630,7 +3633,9 @@ body.mobile-menu-open .hamburger,
 @media (min-width: 1400px) {
   .admin-plans-table-header,
   .admin-plans-table-row {
-    grid-template-columns: 2.5fr 3.5fr 1.3fr 1.3fr 1.5fr 1.1fr 1.5fr 2.2fr;
+    display: grid;
+    grid-template-columns: 2fr 2.5fr 1.2fr 1fr 1.2fr 0.8fr 1.2fr 1.5fr;
+    width: 100%;
   }
 }
 

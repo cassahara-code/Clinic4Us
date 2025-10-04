@@ -41,6 +41,7 @@ export const colors = {
   white: '#ffffff',
 
   // Cores de texto
+  text: '#495057', // Alias para textPrimary
   textPrimary: '#495057',
   textSecondary: '#6c757d',
   textMuted: '#868e96',
@@ -249,6 +250,50 @@ export const inputs = {
     labelColor: colors.textSecondary,
     labelBackground: colors.white,
     labelPadding: '0 4px',
+  },
+
+  // Multiline (TextField com multiline)
+  multiline: {
+    fontSize: typography.fontSize.base,
+    backgroundColor: colors.white,
+    borderColor: colors.border,
+    borderRadius: '4px',
+    minHeight: '80px',
+
+    // Propriedades específicas para evitar quebra e expansão transparente
+    alignItems: 'flex-start',
+    wordWrap: 'break-word' as const,
+    whiteSpace: 'pre-wrap' as const,
+
+    // Prevenir overlay/expansão
+    position: 'relative' as const,
+    opacity: 1,
+
+    // Controle de altura fixa com scroll interno
+    maxHeight: '120px',
+    overflow: 'hidden' as const,
+
+    // Propriedades do textarea interno
+    textareaHeight: '100%' as const,
+    textareaMaxHeight: '100%' as const,
+    textareaOverflow: 'auto' as const,
+    textareaBoxSizing: 'border-box' as const,
+
+    // Scrollbar customizada
+    scrollbarWidth: '8px',
+    scrollbarTrackColor: colors.background,
+    scrollbarThumbColor: colors.border,
+    scrollbarThumbHoverColor: colors.borderHover,
+
+    // Label sempre visível
+    labelShrink: true,
+    labelFontSize: '0.95rem',
+    labelColor: colors.textSecondary,
+    labelBackground: colors.white,
+    labelPadding: '0 4px',
+
+    // Padding interno
+    inputPadding: '8.5px 14px',
   },
 } as const;
 

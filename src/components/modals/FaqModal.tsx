@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Typography,
+  IconButton,
+  Box
+} from '@mui/material';
+import { Close, Delete } from '@mui/icons-material';
+import { colors, typography, inputs } from '../../theme/designSystem';
 
 export interface FaqData {
   id?: string;
@@ -101,307 +113,345 @@ const FaqModal: React.FC<FaqModalProps> = ({ isOpen, onClose, onSave, faqData, m
     onClose();
   };
 
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.5)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem'
-      }}
-      onClick={handleClose}
-    >
-      <div
-        style={{
-          background: 'white',
+  return (
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
           borderRadius: '12px',
-          width: '100%',
-          maxWidth: '900px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
           maxHeight: '90vh',
-          overflow: 'auto',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Cabeçalho do modal */}
-        <div style={{
-          background: '#03B4C6',
-          color: 'white',
+        }
+      }}
+    >
+      <DialogTitle
+        sx={{
+          backgroundColor: colors.primary,
+          color: colors.white,
           padding: '1.5rem',
-          borderRadius: '12px 12px 0 0',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <h3 style={{
-            margin: 0,
+          alignItems: 'center',
+        }}
+      >
+        <Typography
+          variant="h6"
+          component="h3"
+          sx={{
             fontSize: '1.4rem',
-            fontWeight: '600'
-          }}>
-            {mode === 'create' ? 'Novo Item FAQ' : 'Editar Item FAQ'}
-          </h3>
-          <button
-            onClick={handleClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              padding: '0.25rem'
+            fontWeight: typography.fontWeight.semibold,
+            margin: 0,
+          }}
+        >
+          {mode === 'create' ? 'Novo Item FAQ' : 'Editar Item FAQ'}
+        </Typography>
+        <IconButton
+          onClick={handleClose}
+          sx={{
+            color: colors.white,
+            padding: '0.25rem',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            }
+          }}
+        >
+          <Close />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent sx={{ padding: '1.5rem !important', paddingTop: '2rem !important' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+          {/* Categoria */}
+          <TextField
+            label="Categoria"
+            required
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="Ex: Administração Cliente"
+            error={!!errors.category}
+            helperText={errors.category}
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': {
+                  borderColor: errors.category ? '#E53E3E' : colors.border,
+                },
+                '&:hover fieldset': {
+                  borderColor: errors.category ? '#E53E3E' : colors.border,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: errors.category ? '#E53E3E' : colors.primary,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': {
+                  color: errors.category ? '#E53E3E' : colors.primary,
+                },
+              },
             }}
-          >
-            ×
-          </button>
-        </div>
+          />
 
-        {/* Corpo do modal */}
-        <div style={{ padding: '1.5rem' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '1rem'
-          }}>
-            {/* Categoria */}
-            <div>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontWeight: '600',
-                color: '#2D3748',
-                fontSize: '0.9rem'
-              }}>Categoria *</label>
-              <input
-                type="text"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="Ex: Administração Cliente"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: errors.category ? '1px solid #E53E3E' : '1px solid #E2E8F0',
-                  borderRadius: '6px',
-                  fontSize: '1rem',
-                  outline: 'none'
-                }}
-              />
-              {errors.category && <span style={{ color: '#E53E3E', fontSize: '0.875rem' }}>{errors.category}</span>}
-            </div>
-
-            {/* Pergunta */}
-            <div>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontWeight: '600',
-                color: '#2D3748',
-                fontSize: '0.9rem'
-              }}>Pergunta *</label>
-              <input
-                type="text"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Digite a pergunta"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: errors.question ? '1px solid #E53E3E' : '1px solid #E2E8F0',
-                  borderRadius: '6px',
-                  fontSize: '1rem',
-                  outline: 'none'
-                }}
-              />
-              {errors.question && <span style={{ color: '#E53E3E', fontSize: '0.875rem' }}>{errors.question}</span>}
-            </div>
-
-            {/* Resposta */}
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontWeight: '600',
-                color: '#2D3748',
-                fontSize: '0.9rem'
-              }}>Resposta *</label>
-              <textarea
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                placeholder="Digite a resposta"
-                rows={6}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: errors.answer ? '1px solid #E53E3E' : '1px solid #E2E8F0',
-                  borderRadius: '6px',
-                  fontSize: '1rem',
-                  outline: 'none',
-                  fontFamily: 'inherit',
-                  resize: 'vertical'
-                }}
-              />
-              {errors.answer && <span style={{ color: '#E53E3E', fontSize: '0.875rem' }}>{errors.answer}</span>}
-            </div>
-
-            {/* URL do Vídeo */}
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontWeight: '600',
-                color: '#2D3748',
-                fontSize: '0.9rem'
-              }}>URL do Vídeo (opcional)</label>
-              <input
-                type="text"
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="https://www.youtube.com/embed/exemplo"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: '1px solid #E2E8F0',
-                  borderRadius: '6px',
-                  fontSize: '1rem',
-                  outline: 'none'
-                }}
-              />
-            </div>
-
-            {/* Links */}
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontWeight: '600',
-                color: '#2D3748',
-                fontSize: '0.9rem'
-              }}>Links Relacionados</label>
-              {links.map((link, index) => (
-                <div key={index} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <input
-                    type="text"
-                    value={link.text}
-                    onChange={(e) => handleLinkChange(index, 'text', e.target.value)}
-                    placeholder="Texto do link"
-                    style={{
-                      flex: 1,
-                      padding: '0.5rem',
-                      border: '1px solid #E2E8F0',
-                      borderRadius: '6px',
-                      fontSize: '1rem',
-                      outline: 'none'
-                    }}
-                  />
-                  <input
-                    type="text"
-                    value={link.url}
-                    onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
-                    placeholder="URL"
-                    style={{
-                      flex: 1,
-                      padding: '0.5rem',
-                      border: '1px solid #E2E8F0',
-                      borderRadius: '6px',
-                      fontSize: '1rem',
-                      outline: 'none'
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveLink(index)}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      background: '#E2E8F0',
-                      color: '#2D3748',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontWeight: '500'
-                    }}
-                  >
-                    Remover
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={handleAddLink}
-                style={{
-                  padding: '0.5rem 1rem',
-                  background: '#E2E8F0',
-                  color: '#2D3748',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: '500',
-                  marginTop: '0.5rem'
-                }}
-              >
-                + Adicionar Link
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer do modal */}
-        <div style={{
-          padding: '1rem 1.5rem',
-          background: '#F7FAFC',
-          borderTop: '1px solid #E2E8F0',
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: '0.75rem',
-          borderRadius: '0 0 12px 12px'
-        }}>
-          <button
-            onClick={handleClose}
-            style={{
-              padding: '0.625rem 1.25rem',
-              background: '#E2E8F0',
-              color: '#2D3748',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '1rem',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s'
+          {/* Pergunta */}
+          <TextField
+            label="Pergunta"
+            required
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="Digite a pergunta"
+            error={!!errors.question}
+            helperText={errors.question}
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': {
+                  borderColor: errors.question ? '#E53E3E' : colors.border,
+                },
+                '&:hover fieldset': {
+                  borderColor: errors.question ? '#E53E3E' : colors.border,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: errors.question ? '#E53E3E' : colors.primary,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': {
+                  color: errors.question ? '#E53E3E' : colors.primary,
+                },
+              },
             }}
-            onMouseOver={(e) => e.currentTarget.style.background = '#CBD5E0'}
-            onMouseOut={(e) => e.currentTarget.style.background = '#E2E8F0'}
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleSave}
-            style={{
-              padding: '0.625rem 1.25rem',
-              background: '#03B4C6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '1rem',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s'
+          />
+
+          {/* Resposta */}
+          <TextField
+            label="Resposta"
+            required
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            placeholder="Digite a resposta"
+            multiline
+            rows={6}
+            error={!!errors.answer}
+            helperText={errors.answer}
+            InputLabelProps={{
+              shrink: inputs.multiline.labelShrink,
+              sx: {
+                fontSize: inputs.multiline.labelFontSize,
+                color: inputs.multiline.labelColor,
+                backgroundColor: inputs.multiline.labelBackground,
+                padding: inputs.multiline.labelPadding,
+                '&.Mui-focused': {
+                  color: errors.answer ? '#E53E3E' : colors.primary,
+                },
+              },
             }}
-            onMouseOver={(e) => e.currentTarget.style.background = '#0299AB'}
-            onMouseOut={(e) => e.currentTarget.style.background = '#03B4C6'}
-          >
-            {mode === 'create' ? 'Criar' : 'Salvar'}
-          </button>
-        </div>
-      </div>
-    </div>,
-    document.body
+            sx={{
+              gridColumn: '1 / -1',
+              '& .MuiOutlinedInput-root': {
+                position: inputs.multiline.position,
+                opacity: inputs.multiline.opacity,
+                alignItems: inputs.multiline.alignItems,
+                fontSize: inputs.multiline.fontSize,
+                minHeight: inputs.multiline.minHeight,
+                maxHeight: inputs.multiline.maxHeight,
+                overflow: inputs.multiline.overflow,
+                padding: 0,
+                '& fieldset': {
+                  borderColor: errors.answer ? '#E53E3E' : inputs.multiline.borderColor,
+                },
+                '&:hover fieldset': {
+                  borderColor: errors.answer ? '#E53E3E' : inputs.multiline.borderColor,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: errors.answer ? '#E53E3E' : colors.primary,
+                },
+                '& textarea': {
+                  wordWrap: inputs.multiline.wordWrap,
+                  whiteSpace: inputs.multiline.whiteSpace,
+                  padding: inputs.multiline.inputPadding,
+                  height: inputs.multiline.textareaHeight,
+                  maxHeight: inputs.multiline.textareaMaxHeight,
+                  overflow: `${inputs.multiline.textareaOverflow} !important`,
+                  boxSizing: inputs.multiline.textareaBoxSizing,
+                  '&::-webkit-scrollbar': {
+                    width: inputs.multiline.scrollbarWidth,
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    backgroundColor: inputs.multiline.scrollbarTrackColor,
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: inputs.multiline.scrollbarThumbColor,
+                    borderRadius: '4px',
+                    '&:hover': {
+                      backgroundColor: inputs.multiline.scrollbarThumbHoverColor,
+                    },
+                  },
+                },
+              },
+            }}
+          />
+
+          {/* URL do Vídeo */}
+          <TextField
+            label="URL do Vídeo (opcional)"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            placeholder="https://www.youtube.com/embed/exemplo"
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              gridColumn: '1 / -1',
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': {
+                  borderColor: colors.border,
+                },
+                '&:hover fieldset': {
+                  borderColor: colors.border,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: colors.primary,
+                },
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': {
+                  color: colors.primary,
+                },
+              },
+            }}
+          />
+
+          {/* Links Relacionados */}
+          <Box sx={{ gridColumn: '1 / -1' }}>
+            <Typography
+              sx={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                fontWeight: typography.fontWeight.semibold,
+                color: colors.text,
+                fontSize: typography.fontSize.sm,
+              }}
+            >
+              Links Relacionados
+            </Typography>
+            {links.map((link, index) => (
+              <Box key={index} sx={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <TextField
+                  value={link.text}
+                  onChange={(e) => handleLinkChange(index, 'text', e.target.value)}
+                  placeholder="Texto do link"
+                  size="small"
+                  sx={{ flex: 1 }}
+                />
+                <TextField
+                  value={link.url}
+                  onChange={(e) => handleLinkChange(index, 'url', e.target.value)}
+                  placeholder="URL"
+                  size="small"
+                  sx={{ flex: 1 }}
+                />
+                <IconButton
+                  onClick={() => handleRemoveLink(index)}
+                  sx={{
+                    backgroundColor: '#dc3545',
+                    color: colors.white,
+                    width: '40px',
+                    height: '40px',
+                    '&:hover': {
+                      backgroundColor: '#c82333',
+                    }
+                  }}
+                >
+                  <Delete sx={{ fontSize: '1rem' }} />
+                </IconButton>
+              </Box>
+            ))}
+            <Button
+              onClick={handleAddLink}
+              variant="outlined"
+              sx={{
+                marginTop: '0.5rem',
+                textTransform: 'none',
+                borderColor: colors.border,
+                color: colors.textSecondary,
+                '&:hover': {
+                  borderColor: colors.primary,
+                  backgroundColor: 'rgba(3, 180, 198, 0.04)',
+                }
+              }}
+            >
+              + Adicionar Link
+            </Button>
+          </Box>
+        </Box>
+      </DialogContent>
+
+      <DialogActions
+        sx={{
+          padding: '1.5rem 2rem',
+          borderTop: `1px solid ${colors.backgroundAlt}`,
+          backgroundColor: colors.background,
+          gap: '1rem',
+        }}
+      >
+        <Button
+          onClick={handleClose}
+          variant="outlined"
+          sx={{
+            padding: '0.75rem 1.5rem',
+            border: `1px solid ${colors.border}`,
+            borderRadius: '6px',
+            backgroundColor: colors.white,
+            color: colors.textSecondary,
+            fontSize: '1rem',
+            fontWeight: typography.fontWeight.medium,
+            textTransform: 'none',
+            '&:hover': {
+              backgroundColor: colors.background,
+              borderColor: '#adb5bd',
+            }
+          }}
+        >
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleSave}
+          variant="contained"
+          sx={{
+            padding: '0.75rem 1.5rem',
+            borderRadius: '6px',
+            backgroundColor: colors.primary,
+            color: colors.white,
+            fontSize: '1rem',
+            fontWeight: typography.fontWeight.medium,
+            textTransform: 'none',
+            boxShadow: 'none',
+            '&:hover': {
+              backgroundColor: '#029AAB',
+              boxShadow: 'none',
+              transform: 'translateY(-1px)',
+            }
+          }}
+        >
+          {mode === 'create' ? 'Criar' : 'Salvar'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
