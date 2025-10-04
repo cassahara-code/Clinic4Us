@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Chip,
+  Alert
+} from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
 import { FaqButton } from "../components/FaqButton";
 import PhotoUpload from "../components/PhotoUpload";
+import { colors, spacing, buttons, inputs, typography } from "../theme/designSystem";
 
 interface MenuItemProps {
   label: string;
@@ -175,11 +186,15 @@ const UserProfile: React.FC = () => {
   };
 
   if (!userSession) {
-    return <div>Carregando...</div>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Typography>Carregando...</Typography>
+      </Box>
+    );
   }
 
   return (
-    <div className="user-profile-page">
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <HeaderInternal
         showCTAButton={false}
         className=""
@@ -194,142 +209,390 @@ const UserProfile: React.FC = () => {
         onUserClick={handleUserClick}
       />
 
-      <main className="user-profile-main">
-        {/* Título da Página */}
-        <div className="page-header-container">
-          <div className="page-header-content">
-            <h1 className="page-header-title">Meu perfil</h1>
-            <p className="page-header-description">Aqui você pode visualizar e alterar os dados de sua conta.</p>
-          </div>
-          <FaqButton />
-        </div>
+      <Box
+        component="main"
+        sx={{
+          padding: '1rem',
+          minHeight: 'calc(100vh - 120px)',
+          background: colors.background,
+          marginTop: '85px',
+          flex: 1
+        }}
+      >
+        <Container maxWidth={false} disableGutters>
+          {/* Título da Página */}
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            mb: 3,
+            gap: 2
+          }}>
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontSize: '1.3rem',
+                  mb: 1,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: colors.textPrimary
+                }}
+              >
+                Meu perfil
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary
+                }}
+              >
+                Aqui você pode visualizar e alterar os dados de sua conta.
+              </Typography>
+            </Box>
+            <FaqButton />
+          </Box>
 
-        <div className="user-profile-container">
-          {/* Coluna 1: Dados do usuário */}
-          <div className="profile-column">
-            {/* Seção: Dados do usuário */}
-            <div className="profile-section">
-              <h3 className="section-title">Dados do usuário</h3>
+          {/* Paper único contendo todo o conteúdo */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: '12px',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${colors.backgroundAlt}`,
+            }}
+          >
+            {/* Grid de 3 colunas */}
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+              gap: 3,
+              alignItems: 'start'
+            }}>
+              {/* Coluna 1: Dados do usuário */}
+              <Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontSize: typography.fontSize.lg,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: colors.textPrimary,
+                  mb: 2
+                }}
+              >
+                Dados do usuário
+              </Typography>
 
               {/* Email atual */}
-              <div className="form-group">
-                <label htmlFor="currentEmail">Seu usuário</label>
-                <input
-                  type="email"
-                  id="currentEmail"
-                  name="currentEmail"
-                  value={formData.currentEmail}
-                  readOnly
-                  disabled
-                  className="readonly-field"
-                />
-              </div>
+              <TextField
+                fullWidth
+                label="Seu usuário"
+                value={formData.currentEmail}
+                disabled
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  mb: 3,
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    backgroundColor: colors.backgroundAlt,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                  },
+                }}
+              />
 
               {/* Seção: Perfis de acesso */}
-              <div style={{ marginTop: '1.5rem' }}>
-                <h4 className="section-title" style={{ fontSize: '1rem', marginBottom: '0.75rem' }}>Perfis de acesso</h4>
-                <p className="section-description" style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>
-                  Seu usuário tem acesso aos seguintes perfis:
-                </p>
-                <div className="profiles-list">
-                  {userSession?.userProfiles?.map((profile, index) => (
-                    <div key={index} className="profile-badge">
-                      {profile}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Coluna 2: Nova senha e Trocar usuário */}
-          <div className="profile-column">
-            {/* Seção: Nova senha */}
-            <div className="profile-section">
-              <h3 className="section-title">Nova senha</h3>
-              <p className="section-description">
-                Para criar uma nova senha clique no botão abaixo. Uma mensagem será enviada para seu e-mail de cadastro com instruções sobre o procedimento.
-              </p>
-
-              <form onSubmit={handleChangePassword}>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  disabled={isLoading}
+              <Box sx={{ mt: 3 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontSize: typography.fontSize.base,
+                    fontWeight: typography.fontWeight.semibold,
+                    color: colors.textPrimary,
+                    mb: 1
+                  }}
                 >
-                  {isLoading ? "Processando..." : "Prosseguir"}
-                </button>
-              </form>
+                  Perfis de acesso
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: typography.fontSize.sm,
+                    color: colors.textSecondary,
+                    mb: 2
+                  }}
+                >
+                  Seu usuário tem acesso aos seguintes perfis:
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {userSession?.userProfiles?.map((profile, index) => (
+                    <Chip
+                      key={index}
+                      label={profile}
+                      sx={{
+                        backgroundColor: colors.primaryLight,
+                        color: colors.primary,
+                        fontWeight: typography.fontWeight.medium,
+                        fontSize: typography.fontSize.sm,
+                        border: `1px solid ${colors.primary}`,
+                      }}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            </Box>
 
-              {successMessage && (
-                <div className="success-message">{successMessage}</div>
-              )}
-            </div>
+            {/* Coluna 2: Nova senha e Trocar usuário */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* Seção: Nova senha */}
+              <Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontSize: typography.fontSize.lg,
+                    fontWeight: typography.fontWeight.semibold,
+                    color: colors.textPrimary,
+                    mb: 2
+                  }}
+                >
+                  Nova senha
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: typography.fontSize.sm,
+                    color: colors.textSecondary,
+                    mb: 2
+                  }}
+                >
+                  Para criar uma nova senha clique no botão abaixo. Uma mensagem será enviada para seu e-mail de cadastro com instruções sobre o procedimento.
+                </Typography>
 
-            {/* Seção: Trocar usuário */}
-            <div className="profile-section">
-              <h3 className="section-title">Trocar usuário</h3>
+                <form onSubmit={handleChangePassword}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isLoading}
+                    sx={{
+                      backgroundColor: colors.primary,
+                      color: colors.white,
+                      textTransform: 'none',
+                      fontSize: typography.fontSize.sm,
+                      fontWeight: typography.fontWeight.semibold,
+                      height: buttons.primary.height,
+                      borderRadius: buttons.primary.borderRadius,
+                      boxShadow: 'none',
+                      '&:hover': {
+                        backgroundColor: colors.primaryHover,
+                        boxShadow: 'none',
+                      },
+                      '&:disabled': {
+                        backgroundColor: colors.backgroundAlt,
+                        color: colors.textMuted,
+                      },
+                    }}
+                  >
+                    {isLoading ? "Processando..." : "Prosseguir"}
+                  </Button>
+                </form>
 
-              <form onSubmit={handleChangeEmail} autoComplete="off">
-                <div className="form-group">
-                  <label htmlFor="newEmail">Informe um novo e-mail diferente do anterior</label>
-                  <input
+                {successMessage && (
+                  <Alert
+                    severity="success"
+                    sx={{
+                      mt: 2,
+                      fontSize: typography.fontSize.sm,
+                      borderRadius: '8px',
+                    }}
+                  >
+                    {successMessage}
+                  </Alert>
+                )}
+              </Box>
+
+              {/* Seção: Trocar usuário */}
+              <Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontSize: typography.fontSize.lg,
+                    fontWeight: typography.fontWeight.semibold,
+                    color: colors.textPrimary,
+                    mb: 2
+                  }}
+                >
+                  Trocar usuário
+                </Typography>
+
+                <Box component="form" onSubmit={handleChangeEmail} autoComplete="off" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <TextField
+                    fullWidth
+                    label="Informe um novo e-mail diferente do anterior"
                     type="email"
-                    id="newEmail"
                     name="newEmail"
                     value={formData.newEmail}
                     onChange={handleInputChange}
-                    placeholder="E-mail"
                     autoComplete="off"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        height: inputs.default.height,
+                        '& fieldset': {
+                          borderColor: colors.border,
+                        },
+                        '&:hover fieldset': {
+                          borderColor: colors.border,
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: colors.primary,
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: inputs.default.labelFontSize,
+                        color: colors.textSecondary,
+                        backgroundColor: colors.white,
+                        padding: inputs.default.labelPadding,
+                        '&.Mui-focused': {
+                          color: colors.primary,
+                        },
+                      },
+                    }}
                   />
-                </div>
 
-                <div className="form-group">
-                  <label htmlFor="confirmEmail">Para sua segurança repita o e-mail informado</label>
-                  <input
+                  <TextField
+                    fullWidth
+                    label="Para sua segurança repita o e-mail informado"
                     type="email"
-                    id="confirmEmail"
                     name="confirmEmail"
                     value={formData.confirmEmail}
                     onChange={handleInputChange}
-                    placeholder="E-mail"
                     autoComplete="off"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        height: inputs.default.height,
+                        '& fieldset': {
+                          borderColor: colors.border,
+                        },
+                        '&:hover fieldset': {
+                          borderColor: colors.border,
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: colors.primary,
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: inputs.default.labelFontSize,
+                        color: colors.textSecondary,
+                        backgroundColor: colors.white,
+                        padding: inputs.default.labelPadding,
+                        '&.Mui-focused': {
+                          color: colors.primary,
+                        },
+                      },
+                    }}
                   />
-                </div>
 
-                <div className="form-group">
-                  <label htmlFor="currentPassword">Digite sua antiga senha</label>
-                  <input
+                  <TextField
+                    fullWidth
+                    label="Digite sua antiga senha"
                     type="password"
-                    id="currentPassword"
                     name="currentPassword"
                     value={formData.currentPassword}
                     onChange={handleInputChange}
-                    placeholder="Senha"
                     autoComplete="new-password"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        height: inputs.default.height,
+                        '& fieldset': {
+                          borderColor: colors.border,
+                        },
+                        '&:hover fieldset': {
+                          borderColor: colors.border,
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: colors.primary,
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: inputs.default.labelFontSize,
+                        color: colors.textSecondary,
+                        backgroundColor: colors.white,
+                        padding: inputs.default.labelPadding,
+                        '&.Mui-focused': {
+                          color: colors.primary,
+                        },
+                      },
+                    }}
                   />
-                </div>
 
-                <p className="section-footer-text">
-                  Uma mensagem será enviada para seu novo e-mail de cadastro com instruções sobre o procedimento.
-                </p>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontSize: typography.fontSize.sm,
+                      color: colors.textSecondary,
+                    }}
+                  >
+                    Uma mensagem será enviada para seu novo e-mail de cadastro com instruções sobre o procedimento.
+                  </Typography>
 
-                <button
-                  type="submit"
-                  className="btn-secondary"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Processando..." : "Prosseguir"}
-                </button>
-              </form>
-            </div>
-          </div>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isLoading}
+                    sx={{
+                      backgroundColor: colors.textSecondary,
+                      color: colors.white,
+                      textTransform: 'none',
+                      fontSize: typography.fontSize.sm,
+                      fontWeight: typography.fontWeight.semibold,
+                      height: buttons.secondary.height,
+                      borderRadius: buttons.secondary.borderRadius,
+                      boxShadow: 'none',
+                      '&:hover': {
+                        backgroundColor: '#5a6268',
+                        boxShadow: 'none',
+                      },
+                      '&:disabled': {
+                        backgroundColor: colors.backgroundAlt,
+                        color: colors.textMuted,
+                      },
+                    }}
+                  >
+                    {isLoading ? "Processando..." : "Prosseguir"}
+                  </Button>
+                </Box>
+              </Box>
+            </Box>
 
-          {/* Coluna 3: Foto do perfil */}
-          <div className="profile-column">
-            <div className="profile-section" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <h3 className="section-title" style={{ alignSelf: 'flex-start' }}>Foto do perfil</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+            {/* Coluna 3: Foto do perfil */}
+            <Box sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontSize: typography.fontSize.lg,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: colors.textPrimary,
+                  mb: 2,
+                  alignSelf: 'flex-start'
+                }}
+              >
+                Foto do perfil
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                 <PhotoUpload
                   photo={formData.photo}
                   photoRotation={formData.photoRotation}
@@ -341,29 +604,43 @@ const UserProfile: React.FC = () => {
                 />
 
                 {formData.photo && (
-                  <button
-                    type="button"
-                    className="btn-primary"
-                    style={{ marginTop: '1rem', width: '100%' }}
+                  <Button
+                    variant="contained"
+                    sx={{
+                      mt: 2,
+                      width: '100%',
+                      backgroundColor: colors.primary,
+                      color: colors.white,
+                      textTransform: 'none',
+                      fontSize: typography.fontSize.sm,
+                      fontWeight: typography.fontWeight.semibold,
+                      height: buttons.primary.height,
+                      borderRadius: buttons.primary.borderRadius,
+                      boxShadow: 'none',
+                      '&:hover': {
+                        backgroundColor: colors.primaryHover,
+                        boxShadow: 'none',
+                      },
+                    }}
                     onClick={() => {
-                      // Aqui você implementaria a lógica de salvar a foto no backend
                       alert('Foto salva com sucesso!');
                     }}
                   >
                     Salvar Foto
-                  </button>
+                  </Button>
                 )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+              </Box>
+            </Box>
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
 
       <FooterInternal
         simplified={true}
         className="login-footer-component"
       />
-    </div>
+    </Box>
   );
 };
 

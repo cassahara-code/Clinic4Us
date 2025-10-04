@@ -35,7 +35,6 @@ const StandardPagination: React.FC<StandardPaginationProps> = ({
         gap: 2,
         padding: pagination.container.padding,
         backgroundColor: pagination.container.backgroundColor,
-        borderTop: '1px solid #e9ecef',
         flexWrap: 'wrap',
       }}
     >

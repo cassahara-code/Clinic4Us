@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { Box, Container, Typography } from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
 import { FaqButton } from "../components/FaqButton";
+import { colors, typography } from "../theme/designSystem";
 
 interface MenuItemProps {
   label: string;
@@ -43,11 +45,6 @@ const PageModel: React.FC = () => {
     setUserSession(simulatedUserSession);
   }, []);
 
-  if (!userSession) {
-    return <div>Carregando...</div>;
-  }
-
-
   const handleRevalidateLogin = () => {
     localStorage.removeItem('clinic4us-user-session');
     localStorage.removeItem('clinic4us-remember-me');
@@ -67,8 +64,16 @@ const PageModel: React.FC = () => {
     goToDashboard();
   };
 
+  if (!userSession) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Typography>Carregando...</Typography>
+      </Box>
+    );
+  }
+
   return (
-    <div className="professional-schedule">
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <HeaderInternal
         showCTAButton={false}
         className="login-header"
@@ -83,37 +88,69 @@ const PageModel: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main style={{
-        padding: '1rem',
-        paddingTop: '2rem',
-        minHeight: 'calc(100vh - 120px)',
-        background: '#f8f9fa',
-        marginTop: '80px'
-      }}>
-        {/* Título da Página */}
-        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h1 className="page-title">Título da Página</h1>
-          <FaqButton />
-        </div>
+      <Box
+        component="main"
+        sx={{
+          padding: '1rem',
+          minHeight: 'calc(100vh - 120px)',
+          background: colors.background,
+          marginTop: '85px',
+          flex: 1
+        }}
+      >
+        <Container maxWidth={false} disableGutters>
+          {/* Título da Página */}
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            mb: 3,
+            gap: 2
+          }}>
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontSize: '1.3rem',
+                  mb: 1,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: colors.textPrimary
+                }}
+              >
+                Título da Página
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary
+                }}
+              >
+                Descrição breve da funcionalidade da página.
+              </Typography>
+            </Box>
+            <FaqButton />
+          </Box>
 
-        {/* Conteúdo da página vai aqui */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '60vh',
-          fontSize: '1.2rem',
-          color: '#6c757d'
-        }}>
-          Conteúdo da página será adicionado aqui
-        </div>
-      </main>
+          {/* Conteúdo da página vai aqui */}
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '60vh',
+            fontSize: '1.2rem',
+            color: colors.textSecondary
+          }}>
+            Conteúdo da página será adicionado aqui
+          </Box>
+        </Container>
+      </Box>
 
       <FooterInternal
         simplified={true}
         className="login-footer-component"
       />
-    </div>
+    </Box>
   );
 };
 
