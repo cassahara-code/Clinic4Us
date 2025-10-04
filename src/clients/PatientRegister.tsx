@@ -16,7 +16,10 @@ import {
   Checkbox,
   Typography,
   Box,
-  CircularProgress
+  CircularProgress,
+  Button,
+  Tabs,
+  Tab
 } from '@mui/material';
 
 interface MenuItemProps {
@@ -650,25 +653,45 @@ const PatientRegister: React.FC = () => {
         </div>
 
         {/* Tabs de navegação */}
-        <div className="patient-tabs-container">
-          <div className="patient-tabs">
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', backgroundColor: '#ffffff', marginBottom: '1.5rem' }}>
+          <Tabs
+            value={activeTab}
+            onChange={(e, newValue) => handleTabChange(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                minHeight: '48px',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                color: '#6c757d',
+                '&.Mui-selected': {
+                  color: '#03B4C6',
+                  fontWeight: 600,
+                },
+              },
+              '& .MuiTabs-indicator': {
+                backgroundColor: '#03B4C6',
+                height: '3px',
+              },
+            }}
+          >
             {getAvailableTabs().map(tab => {
               const IconComponent = tab.icon;
               return (
-                <button
+                <Tab
                   key={tab.id}
-                  className={`tab-button ${activeTab === tab.id ? 'active' : ''} ${!tab.enabled ? 'disabled' : ''}`}
-                  data-tab={tab.id}
-                  onClick={() => handleTabChange(tab.id)}
+                  value={tab.id}
+                  label={tab.label}
+                  icon={<IconComponent sx={{ fontSize: '1rem' }} />}
+                  iconPosition="start"
                   disabled={!tab.enabled}
-                >
-                  <IconComponent sx={{ fontSize: '0.95rem', marginRight: '0.35rem', verticalAlign: 'middle' }} />
-                  {tab.label}
-                </button>
+                />
               );
             })}
-          </div>
-        </div>
+          </Tabs>
+        </Box>
 
         <div className="patient-register-container">
           {/* Conteúdo da aba ativa */}
@@ -1022,72 +1045,88 @@ const PatientRegister: React.FC = () => {
                           {/* 1º Responsável */}
                           <div className="form-row">
                             <div className="form-group">
-                              <label htmlFor="responsibleName">Nome Completo (1º Resp)*</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="responsibleName"
                                 name="responsibleName"
+                                label="Nome Completo (1º Resp)*"
                                 value={formData.responsibleName}
                                 onChange={handleInputChange}
                                 placeholder="Nome completo do responsável"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                             <div className="form-group cpf-financial-group">
                               <div className="cpf-financial-container">
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsibleDocument">CPF</label>
-                                  <input
-                                    type="text"
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     id="responsibleDocument"
                                     name="responsibleDocument"
+                                    label="CPF"
                                     value={formData.responsibleDocument}
                                     onChange={handleInputChange}
                                     placeholder="000.000.000-00"
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                                 <div className="form-subgroup checkbox-subgroup">
-                                  <label className="checkbox-label">
-                                    <input
-                                      type="checkbox"
-                                      name="responsibleFinancial"
-                                      checked={formData.responsibleFinancial}
-                                      onChange={handleInputChange}
-                                    />
-                                    Resp. Financeiro
-                                  </label>
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        name="responsibleFinancial"
+                                        checked={formData.responsibleFinancial}
+                                        onChange={handleInputChange}
+                                        size="small"
+                                        disabled={!canEdit}
+                                      />
+                                    }
+                                    label="Resp. Financeiro"
+                                  />
                                 </div>
                               </div>
                             </div>
                             <div className="form-group phone-email">
                               <div className="phone-email-container">
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsiblePhone">Telefone (Whatsapp)</label>
-                                  <input
-                                    type="text"
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     id="responsiblePhone"
                                     name="responsiblePhone"
+                                    label="Telefone (Whatsapp)"
                                     value={formatPhone(formData.responsiblePhone)}
                                     onChange={(e) => handleInputChange({
                                       ...e,
                                       target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
                                     })}
                                     placeholder="(11) 99999-9999"
-                                    maxLength={15}
+                                    inputProps={{ maxLength: 15 }}
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsibleEmail">E-mail</label>
-                                  <input
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     type="email"
                                     id="responsibleEmail"
                                     name="responsibleEmail"
+                                    label="E-mail"
                                     value={formData.responsibleEmail}
                                     onChange={handleInputChange}
                                     placeholder="email@exemplo.com"
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                               </div>
@@ -1097,72 +1136,88 @@ const PatientRegister: React.FC = () => {
                           {/* 2º Responsável */}
                           <div className="form-row">
                             <div className="form-group">
-                              <label htmlFor="responsible2Name">Nome Completo (2º Resp)</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="responsible2Name"
                                 name="responsible2Name"
+                                label="Nome Completo (2º Resp)"
                                 value={formData.responsible2Name}
                                 onChange={handleInputChange}
                                 placeholder="Nome completo do 2º responsável"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                             <div className="form-group cpf-financial-group">
                               <div className="cpf-financial-container">
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsible2Document">CPF</label>
-                                  <input
-                                    type="text"
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     id="responsible2Document"
                                     name="responsible2Document"
+                                    label="CPF"
                                     value={formData.responsible2Document}
                                     onChange={handleInputChange}
                                     placeholder="000.000.000-00"
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                                 <div className="form-subgroup checkbox-subgroup">
-                                  <label className="checkbox-label">
-                                    <input
-                                      type="checkbox"
-                                      name="responsible2Financial"
-                                      checked={formData.responsible2Financial}
-                                      onChange={handleInputChange}
-                                    />
-                                    Resp. Financeiro
-                                  </label>
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        name="responsible2Financial"
+                                        checked={formData.responsible2Financial}
+                                        onChange={handleInputChange}
+                                        size="small"
+                                        disabled={!canEdit}
+                                      />
+                                    }
+                                    label="Resp. Financeiro"
+                                  />
                                 </div>
                               </div>
                             </div>
                             <div className="form-group phone-email">
                               <div className="phone-email-container">
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsible2Phone">Telefone (Whatsapp)</label>
-                                  <input
-                                    type="text"
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     id="responsible2Phone"
                                     name="responsible2Phone"
+                                    label="Telefone (Whatsapp)"
                                     value={formatPhone(formData.responsible2Phone)}
                                     onChange={(e) => handleInputChange({
                                       ...e,
                                       target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
                                     })}
                                     placeholder="(11) 99999-9999"
-                                    maxLength={15}
+                                    inputProps={{ maxLength: 15 }}
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsible2Email">E-mail</label>
-                                  <input
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     type="email"
                                     id="responsible2Email"
                                     name="responsible2Email"
+                                    label="E-mail"
                                     value={formData.responsible2Email}
                                     onChange={handleInputChange}
                                     placeholder="email@exemplo.com"
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                               </div>
@@ -1460,34 +1515,74 @@ const PatientRegister: React.FC = () => {
                           {/* Segunda coluna vazia */}
                         </div>
                         <div className="form-group">
-                          <div className="form-actions-inline">
+                          <Box sx={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
                             {isNewPatient || isEditing ? (
                               <>
-                                <button
-                                  type="button"
-                                  className="btn-cancel-form-small"
+                                <Button
+                                  variant="outlined"
                                   onClick={handleCancel}
+                                  sx={{
+                                    color: '#6c757d',
+                                    borderColor: '#6c757d',
+                                    textTransform: 'none',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    padding: '0.5rem 1.5rem',
+                                    '&:hover': {
+                                      borderColor: '#5a6268',
+                                      backgroundColor: 'rgba(108, 117, 125, 0.04)',
+                                    },
+                                  }}
                                 >
                                   Cancelar
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   type="submit"
-                                  className="btn-save-small"
+                                  variant="contained"
                                   disabled={isLoading}
+                                  sx={{
+                                    backgroundColor: '#03B4C6',
+                                    color: '#ffffff',
+                                    textTransform: 'none',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    padding: '0.5rem 1.5rem',
+                                    boxShadow: 'none',
+                                    '&:hover': {
+                                      backgroundColor: '#029AAB',
+                                      boxShadow: 'none',
+                                    },
+                                    '&:disabled': {
+                                      backgroundColor: '#ced4da',
+                                      color: '#ffffff',
+                                    },
+                                  }}
                                 >
                                   {isLoading ? "Salvando..." : "Salvar"}
-                                </button>
+                                </Button>
                               </>
                             ) : (
-                              <button
-                                type="button"
-                                className="btn-save-small"
+                              <Button
+                                variant="contained"
                                 onClick={handleEdit}
+                                sx={{
+                                  backgroundColor: '#03B4C6',
+                                  color: '#ffffff',
+                                  textTransform: 'none',
+                                  fontSize: '0.875rem',
+                                  fontWeight: 600,
+                                  padding: '0.5rem 1.5rem',
+                                  boxShadow: 'none',
+                                  '&:hover': {
+                                    backgroundColor: '#029AAB',
+                                    boxShadow: 'none',
+                                  },
+                                }}
                               >
                                 Editar
-                              </button>
+                              </Button>
                             )}
-                          </div>
+                          </Box>
                         </div>
                       </div>
                     </div>
@@ -1525,17 +1620,46 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Anotações */}
             {activeTab === 'anotacoes' && (
               <div className="tab-content-section">
-                <h3>Anotações do Paciente</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Anotações do Paciente
+                </Typography>
                 <div className="notes-section">
-                  <div className="notes-toolbar">
-                    <button className="btn-add-note">+ Nova Anotação</button>
-                    <select className="notes-filter">
-                      <option>Todas as anotações</option>
-                      <option>Consultas</option>
-                      <option>Observações</option>
-                      <option>Exames</option>
-                    </select>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Anotação
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="all"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">Todas as anotações</MenuItem>
+                      <MenuItem value="consultas">Consultas</MenuItem>
+                      <MenuItem value="observacoes">Observações</MenuItem>
+                      <MenuItem value="exames">Exames</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="notes-list">
                     <div className="note-item">
                       <div className="note-header">
@@ -1565,18 +1689,45 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Agenda */}
             {activeTab === 'agenda' && (
               <div className="tab-content-section">
-                <h3>Agenda do Paciente</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Agenda do Paciente
+                </Typography>
                 <div className="agenda-section">
-                  <div className="agenda-toolbar">
-                    <button className="btn-schedule">+ Agendar Consulta</button>
-                    <div className="agenda-filters">
-                      <select>
-                        <option>Próximos 30 dias</option>
-                        <option>Próximos 7 dias</option>
-                        <option>Histórico</option>
-                      </select>
-                    </div>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Agendar Consulta
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="30days"
+                      sx={{
+                        minWidth: '180px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="30days">Próximos 30 dias</MenuItem>
+                      <MenuItem value="7days">Próximos 7 dias</MenuItem>
+                      <MenuItem value="history">Histórico</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="appointments-list">
                     <div className="appointment-item future">
                       <div className="appointment-time">
@@ -1588,10 +1739,40 @@ const PatientRegister: React.FC = () => {
                         <p>Dr. João Silva - Cardiologia</p>
                         <span className="status confirmed">Confirmada</span>
                       </div>
-                      <div className="appointment-actions">
-                        <button className="btn-edit">Editar</button>
-                        <button className="btn-cancel">Cancelar</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#dc3545',
+                            color: '#dc3545',
+                            '&:hover': {
+                              borderColor: '#c82333',
+                              backgroundColor: 'rgba(220, 53, 69, 0.04)',
+                            },
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                      </Box>
                     </div>
                     <div className="appointment-item past">
                       <div className="appointment-time">
@@ -1603,9 +1784,24 @@ const PatientRegister: React.FC = () => {
                         <p>Dr. João Silva - Cardiologia</p>
                         <span className="status completed">Realizada</span>
                       </div>
-                      <div className="appointment-actions">
-                        <button className="btn-view">Ver Detalhes</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Ver Detalhes
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>
@@ -1615,11 +1811,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Diagnóstico */}
             {activeTab === 'diagnostico' && (
               <div className="tab-content-section">
-                <h3>Diagnósticos</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Diagnósticos
+                </Typography>
                 <div className="diagnosis-section">
-                  <div className="diagnosis-toolbar">
-                    <button className="btn-add-diagnosis">+ Novo Diagnóstico</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Novo Diagnóstico
+                    </Button>
+                  </Box>
                   <div className="diagnosis-list">
                     <div className="diagnosis-item">
                       <div className="diagnosis-header">
@@ -1641,17 +1855,46 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Avaliações */}
             {activeTab === 'avaliacoes' && (
               <div className="tab-content-section">
-                <h3>Avaliações</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Avaliações
+                </Typography>
                 <div className="evaluations-section">
-                  <div className="evaluations-toolbar">
-                    <button className="btn-new-evaluation">+ Nova Avaliação</button>
-                    <select className="evaluation-type-filter">
-                      <option>Todos os tipos</option>
-                      <option>Avaliação Inicial</option>
-                      <option>Reavaliação</option>
-                      <option>Avaliação Especializada</option>
-                    </select>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Avaliação
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="all"
+                      sx={{
+                        minWidth: '220px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">Todos os tipos</MenuItem>
+                      <MenuItem value="inicial">Avaliação Inicial</MenuItem>
+                      <MenuItem value="reavaliacao">Reavaliação</MenuItem>
+                      <MenuItem value="especializada">Avaliação Especializada</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="evaluations-list">
                     <div className="evaluation-item">
                       <div className="evaluation-header">
@@ -1659,10 +1902,25 @@ const PatientRegister: React.FC = () => {
                         <span className="evaluation-date">15/03/2024</span>
                       </div>
                       <p className="evaluation-summary">Avaliação inicial completa com ECG e ecocardiograma.</p>
-                      <div className="evaluation-footer">
+                      <Box sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
                         <span className="evaluation-status completed">Concluída</span>
-                        <button className="btn-view-evaluation">Ver Detalhes</button>
-                      </div>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Ver Detalhes
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>
@@ -1672,11 +1930,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Plano Terapêutico */}
             {activeTab === 'plano-terap' && (
               <div className="tab-content-section">
-                <h3>Plano Terapêutico</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Plano Terapêutico
+                </Typography>
                 <div className="therapy-plan-section">
-                  <div className="therapy-toolbar">
-                    <button className="btn-new-plan">+ Novo Plano</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Novo Plano
+                    </Button>
+                  </Box>
                   <div className="therapy-plans">
                     <div className="therapy-plan-item">
                       <div className="plan-header">
@@ -1711,11 +1987,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Evoluções */}
             {activeTab === 'evolucoes' && (
               <div className="tab-content-section">
-                <h3>Evoluções</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Evoluções
+                </Typography>
                 <div className="evolution-section">
-                  <div className="evolution-toolbar">
-                    <button className="btn-new-evolution">+ Nova Evolução</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Evolução
+                    </Button>
+                  </Box>
                   <div className="evolution-timeline">
                     <div className="evolution-item">
                       <div className="evolution-date">22/03/2024</div>
@@ -1775,11 +2069,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Receituário */}
             {activeTab === 'receituario' && (
               <div className="tab-content-section">
-                <h3>Receituário</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Receituário
+                </Typography>
                 <div className="prescription-section">
-                  <div className="prescription-toolbar">
-                    <button className="btn-new-prescription">+ Nova Receita</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Receita
+                    </Button>
+                  </Box>
                   <div className="prescriptions-list">
                     <div className="prescription-item">
                       <div className="prescription-header">
@@ -1794,10 +2106,25 @@ const PatientRegister: React.FC = () => {
                           <strong>Hidroclorotiazida 25mg</strong> - 1 comprimido ao dia, pela manhã
                         </div>
                       </div>
-                      <div className="prescription-footer">
+                      <Box sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
                         <span className="prescription-doctor">Dr. João Silva - CRM 12345</span>
-                        <button className="btn-print">Imprimir</button>
-                      </div>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Imprimir
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>
@@ -1807,17 +2134,46 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Arquivos */}
             {activeTab === 'arquivos' && (
               <div className="tab-content-section">
-                <h3>Arquivos</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Arquivos
+                </Typography>
                 <div className="files-section">
-                  <div className="files-toolbar">
-                    <button className="btn-upload">+ Upload Arquivo</button>
-                    <select className="file-type-filter">
-                      <option>Todos os tipos</option>
-                      <option>Exames</option>
-                      <option>Documentos</option>
-                      <option>Imagens</option>
-                    </select>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Upload Arquivo
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="all"
+                      sx={{
+                        minWidth: '180px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">Todos os tipos</MenuItem>
+                      <MenuItem value="exames">Exames</MenuItem>
+                      <MenuItem value="documentos">Documentos</MenuItem>
+                      <MenuItem value="imagens">Imagens</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="files-grid">
                     <div className="file-item">
                       <div className="file-icon"><InsertDriveFile fontSize="large" /></div>
@@ -1826,10 +2182,40 @@ const PatientRegister: React.FC = () => {
                         <p>Eletrocardiograma</p>
                         <span className="file-date">15/03/2024</span>
                       </div>
-                      <div className="file-actions">
-                        <button className="btn-download">Download</button>
-                        <button className="btn-view">Visualizar</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Download
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#03B4C6',
+                            color: '#03B4C6',
+                            '&:hover': {
+                              borderColor: '#029AAB',
+                              backgroundColor: 'rgba(3, 180, 198, 0.04)',
+                            },
+                          }}
+                        >
+                          Visualizar
+                        </Button>
+                      </Box>
                     </div>
                     <div className="file-item">
                       <div className="file-icon">🖼️</div>
@@ -1838,10 +2224,40 @@ const PatientRegister: React.FC = () => {
                         <p>Raio-X de Tórax</p>
                         <span className="file-date">15/03/2024</span>
                       </div>
-                      <div className="file-actions">
-                        <button className="btn-download">Download</button>
-                        <button className="btn-view">Visualizar</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Download
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#03B4C6',
+                            color: '#03B4C6',
+                            '&:hover': {
+                              borderColor: '#029AAB',
+                              backgroundColor: 'rgba(3, 180, 198, 0.04)',
+                            },
+                          }}
+                        >
+                          Visualizar
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>

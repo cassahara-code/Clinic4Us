@@ -1,5 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { TextField } from '@mui/material';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Typography,
+  IconButton,
+  Box,
+  MenuItem,
+  Autocomplete,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+} from '@mui/material';
+import { Close } from '@mui/icons-material';
+import { colors, typography, inputs } from '../../theme/designSystem';
 
 // Interface para os dados do agendamento
 export interface AppointmentData {
@@ -21,6 +40,8 @@ export interface AppointmentData {
   totalUnit: string;
   totalValue: string;
   observations: string;
+  confirmationStatus: string;
+  attendanceStatus: string;
 }
 
 // Props do componente
@@ -32,6 +53,7 @@ interface AppointmentModalProps {
   initialData?: Partial<AppointmentData>;
   title?: string;
   patientsList: string[];
+  showPricing?: boolean; // Controla a visibilidade dos campos de valores
 }
 
 const AppointmentModal: React.FC<AppointmentModalProps> = ({
@@ -41,7 +63,8 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   mode,
   initialData = {},
   title,
-  patientsList
+  patientsList,
+  showPricing = true
 }) => {
   // Estado do formulário
   const [formData, setFormData] = useState<AppointmentData>({
@@ -63,70 +86,21 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     totalUnit: '',
     totalValue: '',
     observations: '',
+    confirmationStatus: '',
+    attendanceStatus: '',
     ...initialData
   });
 
-  // Estados para busca de pacientes
-  const [patientSearchTerm, setPatientSearchTerm] = useState('');
-  const [isPatientDropdownOpen, setIsPatientDropdownOpen] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState<string>('');
-
   // Atualizar form quando initialData mudar
   useEffect(() => {
-    if (initialData) {
+    if (initialData && Object.keys(initialData).length > 0) {
       setFormData(prev => ({ ...prev, ...initialData }));
-      if (initialData.patient) {
-        setSelectedPatient(initialData.patient);
-        setPatientSearchTerm(initialData.patient);
-      }
     }
   }, [initialData]);
 
-  // Fechar dropdown quando clicar fora
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setIsPatientDropdownOpen(false);
-    };
-
-    if (isPatientDropdownOpen) {
-      document.addEventListener('click', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [isPatientDropdownOpen]);
-
-  // Funções para busca de pacientes
-  const getFilteredPatients = () => {
-    if (patientSearchTerm.length < 3) return [];
-    return patientsList.filter(patient =>
-      patient.toLowerCase().includes(patientSearchTerm.toLowerCase())
-    );
-  };
-
-  const handlePatientSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setPatientSearchTerm(value);
-
-    if (value === '') {
-      setSelectedPatient('');
-      setFormData({ ...formData, patient: '' });
-    }
-
-    setIsPatientDropdownOpen(value.length >= 3);
-  };
-
-  const handlePatientSelect = (patient: string) => {
-    const patientName = patient.split(' - ')[0];
-    setSelectedPatient(patient);
-    setPatientSearchTerm(patientName);
-    setFormData({ ...formData, patient: patientName });
-    setIsPatientDropdownOpen(false);
-  };
-
   // Função para calcular horário final
   const calculateEndTime = (startTime: string) => {
+    if (!startTime) return '';
     const [hours, minutes] = startTime.split(':').map(Number);
     const endHours = hours + 1;
     return `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
@@ -151,7 +125,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     'Avaliação': { unitValue: 120.00, discount: 8.00 }
   };
 
-  // Calcular valores automaticamente quando tipo de serviço ou tipo de agendamento mudar
+  // Calcular valores automaticamente
   useEffect(() => {
     if (formData.serviceType && servicePrices[formData.serviceType]) {
       const { unitValue, discount } = servicePrices[formData.serviceType];
@@ -197,11 +171,10 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
       discount: '',
       totalUnit: '',
       totalValue: '',
-      observations: ''
+      observations: '',
+      confirmationStatus: '',
+      attendanceStatus: ''
     });
-    setPatientSearchTerm('');
-    setIsPatientDropdownOpen(false);
-    setSelectedPatient('');
     onClose();
   };
 
@@ -211,804 +184,862 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     handleClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.5)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem'
-      }}
-      onClick={handleClose}
-    >
-      <div
-        style={{
-          background: 'white',
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
           borderRadius: '12px',
-          width: '100%',
-          maxWidth: '900px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
           maxHeight: '90vh',
-          overflow: 'auto',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Cabeçalho do modal */}
-        <div style={{
-          background: '#03B4C6',
-          color: 'white',
+        }
+      }}
+    >
+      {/* Cabeçalho do modal */}
+      <DialogTitle
+        sx={{
+          backgroundColor: colors.primary,
+          color: colors.white,
           padding: '1.5rem',
-          borderRadius: '12px 12px 0 0',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <h3 style={{
-            margin: 0,
+          alignItems: 'center',
+        }}
+      >
+        <Typography
+          variant="h6"
+          component="h3"
+          sx={{
             fontSize: '1.4rem',
-            fontWeight: '600'
-          }}>
-            {title || (mode === 'create' ? 'Novo Agendamento' : 'Editar Agendamento')}
-          </h3>
-          <button
-            onClick={handleClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              padding: '0.25rem'
+            fontWeight: typography.fontWeight.semibold,
+            margin: 0
+          }}
+        >
+          {title || (mode === 'create' ? 'Novo Agendamento' : 'Editar Agendamento')}
+        </Typography>
+        <IconButton
+          onClick={handleClose}
+          sx={{
+            color: colors.white,
+            padding: '0.25rem',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.1)'
+            }
+          }}
+        >
+          <Close />
+        </IconButton>
+      </DialogTitle>
+
+      {/* Conteúdo do modal */}
+      <DialogContent sx={{ padding: '1.5rem !important', paddingTop: '2rem !important' }}>
+        {/* Primeira linha: Paciente e Profissional */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <Autocomplete
+            freeSolo
+            options={patientsList}
+            value={formData.patient}
+            onChange={(_, newValue) => {
+              const patientName = newValue ? newValue.split(' - ')[0] : '';
+              setFormData({ ...formData, patient: patientName });
+            }}
+            onInputChange={(_, newInputValue) => {
+              setFormData({ ...formData, patient: newInputValue });
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Paciente"
+                placeholder="Digite pelo menos 3 letras"
+                InputLabelProps={{
+                  shrink: true,
+                  sx: {
+                    fontSize: inputs.default.labelFontSize,
+                    color: inputs.default.labelColor,
+                    backgroundColor: inputs.default.labelBackground,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: inputs.default.focus.labelColor,
+                    },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    fontSize: inputs.default.fontSize,
+                    '& fieldset': {
+                      borderColor: inputs.default.borderColor,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: inputs.default.hover.borderColor,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: inputs.default.focus.borderColor,
+                      boxShadow: inputs.default.focus.boxShadow,
+                    },
+                  },
+                }}
+              />
+            )}
+          />
+
+          <TextField
+            select
+            label="Profissional"
+            value={formData.professional}
+            onChange={(e) => setFormData({ ...formData, professional: e.target.value })}
+            InputLabelProps={{
+              shrink: true,
+              sx: {
+                fontSize: inputs.select.labelFontSize,
+                color: inputs.select.labelColor,
+                backgroundColor: inputs.select.labelBackground,
+                padding: inputs.select.labelPadding,
+              },
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.select.height,
+                fontSize: inputs.select.fontSize,
+                '& fieldset': {
+                  borderColor: inputs.select.borderColor,
+                },
+              },
             }}
           >
-            ×
-          </button>
-        </div>
+            <MenuItem value="">Selecione um profissional</MenuItem>
+            <MenuItem value="Dr. João Silva">Dr. João Silva</MenuItem>
+            <MenuItem value="Dra. Maria Santos">Dra. Maria Santos</MenuItem>
+            <MenuItem value="Dr. Pedro Costa">Dr. Pedro Costa</MenuItem>
+            <MenuItem value="Dra. Ana Oliveira">Dra. Ana Oliveira</MenuItem>
+            <MenuItem value="Dr. Carlos Ferreira">Dr. Carlos Ferreira</MenuItem>
+            <MenuItem value="Dra. Lucia Almeida">Dra. Lucia Almeida</MenuItem>
+            <MenuItem value="Dr. Roberto Lima">Dr. Roberto Lima</MenuItem>
+            <MenuItem value="Dra. Patricia Rocha">Dra. Patricia Rocha</MenuItem>
+          </TextField>
+        </Box>
 
-        {/* Formulário */}
-        <form style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
-            {/* Paciente */}
-            <div className="form-group" style={{ position: 'relative' }}>
-              <label>Paciente (Digite pelo menos 3 letras)</label>
+        {/* Segunda linha: Layout com 2 colunas */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          {/* Coluna esquerda */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <TextField
+              label="1º Responsável"
+              value={formData.firstResponsible}
+              placeholder="Não informado"
+              disabled
+              InputLabelProps={{
+                shrink: true,
+                sx: {
+                  fontSize: inputs.default.labelFontSize,
+                  color: inputs.default.labelColor,
+                  backgroundColor: inputs.default.labelBackground,
+                  padding: inputs.default.labelPadding,
+                },
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  height: inputs.default.height,
+                  fontSize: inputs.default.fontSize,
+                  backgroundColor: colors.backgroundAlt,
+                  '& fieldset': {
+                    borderColor: inputs.default.borderColor,
+                  },
+                },
+              }}
+            />
 
-              <input
-                type="text"
-                placeholder={selectedPatient ? selectedPatient.split(' - ')[0] : "Digite o nome do paciente..."}
-                value={selectedPatient ? selectedPatient.split(' - ')[0] : patientSearchTerm}
-                onChange={handlePatientSearchChange}
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  border: isPatientDropdownOpen ? '1px solid #03B4C6' : undefined,
-                  fontWeight: selectedPatient ? '500' : 'normal'
+            <TextField
+              label="2º Responsável"
+              value={formData.secondResponsible}
+              placeholder="Não informado"
+              disabled
+              InputLabelProps={{
+                shrink: true,
+                sx: {
+                  fontSize: inputs.default.labelFontSize,
+                  color: inputs.default.labelColor,
+                  backgroundColor: inputs.default.labelBackground,
+                  padding: inputs.default.labelPadding,
+                },
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  height: inputs.default.height,
+                  fontSize: inputs.default.fontSize,
+                  backgroundColor: colors.backgroundAlt,
+                  '& fieldset': {
+                    borderColor: inputs.default.borderColor,
+                  },
+                },
+              }}
+            />
+
+            <TextField
+              select
+              label="Equipe"
+              value={formData.team}
+              onChange={(e) => setFormData({ ...formData, team: e.target.value })}
+              InputLabelProps={{
+                shrink: true,
+                sx: {
+                  fontSize: inputs.select.labelFontSize,
+                  color: inputs.select.labelColor,
+                  backgroundColor: inputs.select.labelBackground,
+                  padding: inputs.select.labelPadding,
+                },
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  height: inputs.select.height,
+                  fontSize: inputs.select.fontSize,
+                  '& fieldset': {
+                    borderColor: inputs.select.borderColor,
+                  },
+                },
+              }}
+            >
+              <MenuItem value="">Selecione uma equipe</MenuItem>
+              <MenuItem value="Equipe A">Equipe A</MenuItem>
+              <MenuItem value="Equipe B">Equipe B</MenuItem>
+              <MenuItem value="Equipe C">Equipe C</MenuItem>
+            </TextField>
+
+            <TextField
+              select
+              label="Tipo de serviço"
+              value={formData.serviceType}
+              onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
+              InputLabelProps={{
+                shrink: true,
+                sx: {
+                  fontSize: inputs.select.labelFontSize,
+                  color: inputs.select.labelColor,
+                  backgroundColor: inputs.select.labelBackground,
+                  padding: inputs.select.labelPadding,
+                },
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  height: inputs.select.height,
+                  fontSize: inputs.select.fontSize,
+                  '& fieldset': {
+                    borderColor: inputs.select.borderColor,
+                  },
+                },
+              }}
+            >
+              <MenuItem value="">Tipo de serviço</MenuItem>
+              <MenuItem value="Consulta">Consulta</MenuItem>
+              <MenuItem value="Exame">Exame</MenuItem>
+              <MenuItem value="Procedimento">Procedimento</MenuItem>
+              <MenuItem value="Retorno">Retorno</MenuItem>
+              <MenuItem value="Avaliação">Avaliação</MenuItem>
+            </TextField>
+
+            <TextField
+              label="Observações"
+              value={formData.observations}
+              onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+              placeholder="Observações"
+              multiline
+              rows={2}
+              InputLabelProps={{
+                shrink: inputs.multiline.labelShrink,
+                sx: {
+                  fontSize: inputs.multiline.labelFontSize,
+                  color: inputs.multiline.labelColor,
+                  backgroundColor: inputs.multiline.labelBackground,
+                  padding: inputs.multiline.labelPadding,
+                  '&.Mui-focused': {
+                    color: colors.primary,
+                  },
+                },
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  position: inputs.multiline.position,
+                  opacity: inputs.multiline.opacity,
+                  alignItems: inputs.multiline.alignItems,
+                  fontSize: inputs.multiline.fontSize,
+                  minHeight: inputs.multiline.minHeight,
+                  maxHeight: inputs.multiline.maxHeight,
+                  overflow: inputs.multiline.overflow,
+                  padding: 0,
+                  '& fieldset': {
+                    borderColor: inputs.multiline.borderColor,
+                  },
+                  '&:hover fieldset': {
+                    borderColor: inputs.multiline.borderColor,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: colors.primary,
+                  },
+                  '& textarea': {
+                    wordWrap: inputs.multiline.wordWrap,
+                    whiteSpace: inputs.multiline.whiteSpace,
+                    padding: inputs.multiline.inputPadding,
+                    height: inputs.multiline.textareaHeight,
+                    maxHeight: inputs.multiline.textareaMaxHeight,
+                    overflow: `${inputs.multiline.textareaOverflow} !important`,
+                    boxSizing: inputs.multiline.textareaBoxSizing,
+                    '&::-webkit-scrollbar': {
+                      width: inputs.multiline.scrollbarWidth,
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      backgroundColor: inputs.multiline.scrollbarTrackColor,
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      backgroundColor: inputs.multiline.scrollbarThumbColor,
+                      borderRadius: '4px',
+                      '&:hover': {
+                        backgroundColor: inputs.multiline.scrollbarThumbHoverColor,
+                      },
+                    },
+                  },
+                },
+              }}
+            />
+          </Box>
+
+          {/* Coluna direita */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Data/Hora Inicial */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <TextField
+                label="Data Inicial"
+                type="date"
+                value={formData.startDate}
+                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                InputLabelProps={{
+                  shrink: true,
+                  sx: {
+                    fontSize: inputs.default.labelFontSize,
+                    color: inputs.default.labelColor,
+                    backgroundColor: inputs.default.labelBackground,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: inputs.default.focus.labelColor,
+                    },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    fontSize: inputs.default.fontSize,
+                    '& fieldset': {
+                      borderColor: inputs.default.borderColor,
+                      legend: {
+                        maxWidth: inputs.default.legendMaxWidth,
+                      },
+                    },
+                    '&:hover fieldset': {
+                      borderColor: inputs.default.hover.borderColor,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: inputs.default.focus.borderColor,
+                      boxShadow: inputs.default.focus.boxShadow,
+                    },
+                  },
                 }}
               />
 
-              {/* Dropdown com resultados */}
-              {isPatientDropdownOpen && getFilteredPatients().length > 0 && (
-                <div style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 2px)',
-                  left: 0,
-                  right: 0,
-                  background: 'white',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                  zIndex: 1000,
-                  maxHeight: '200px',
-                  overflowY: 'auto'
-                }}>
-                  {getFilteredPatients().map((patient, index) => (
-                    <div
-                      key={patient}
-                      onClick={() => handlePatientSelect(patient)}
-                      style={{
-                        padding: '0.75rem',
-                        cursor: 'pointer',
-                        borderBottom: index < getFilteredPatients().length - 1 ? '1px solid #e9ecef' : 'none',
-                        transition: 'background-color 0.2s',
-                        display: 'flex',
-                        alignItems: 'center'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                    >
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{
-                          fontWeight: '500',
-                          color: '#495057'
-                        }}>
-                          {patient.split(' - ')[0]}
-                        </span>
-                        <span style={{
-                          fontSize: '0.85rem',
-                          color: '#6c757d',
-                          marginTop: '2px'
-                        }}>
-                          {patient.split(' - ').slice(1).join(' - ')}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+              <TextField
+                label="Horário"
+                type="time"
+                value={formData.startTime}
+                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                InputLabelProps={{
+                  shrink: true,
+                  sx: {
+                    fontSize: inputs.default.labelFontSize,
+                    color: inputs.default.labelColor,
+                    backgroundColor: inputs.default.labelBackground,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: inputs.default.focus.labelColor,
+                    },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    fontSize: inputs.default.fontSize,
+                    '& fieldset': {
+                      borderColor: inputs.default.borderColor,
+                      legend: {
+                        maxWidth: inputs.default.legendMaxWidth,
+                      },
+                    },
+                    '&:hover fieldset': {
+                      borderColor: inputs.default.hover.borderColor,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: inputs.default.focus.borderColor,
+                      boxShadow: inputs.default.focus.boxShadow,
+                    },
+                  },
+                }}
+              />
+            </Box>
 
-            {/* Profissional */}
-            <div className="form-group">
-              <label>Profissional</label>
-              <select
-                value={formData.professional}
-                onChange={(e) => setFormData({ ...formData, professional: e.target.value })}
-                style={{
-                  minWidth: '120px',
-                  width: '100%',
-                  paddingRight: '2rem'
+            {/* Data/Hora Final */}
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <TextField
+                label="Data Final"
+                type="date"
+                value={formData.endDate}
+                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                InputLabelProps={{
+                  shrink: true,
+                  sx: {
+                    fontSize: inputs.default.labelFontSize,
+                    color: inputs.default.labelColor,
+                    backgroundColor: inputs.default.labelBackground,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: inputs.default.focus.labelColor,
+                    },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    fontSize: inputs.default.fontSize,
+                    '& fieldset': {
+                      borderColor: inputs.default.borderColor,
+                      legend: {
+                        maxWidth: inputs.default.legendMaxWidth,
+                      },
+                    },
+                    '&:hover fieldset': {
+                      borderColor: inputs.default.hover.borderColor,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: inputs.default.focus.borderColor,
+                      boxShadow: inputs.default.focus.boxShadow,
+                    },
+                  },
+                }}
+              />
+
+              <TextField
+                label="Horário Final"
+                type="time"
+                value={formData.endTime}
+                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                InputLabelProps={{
+                  shrink: true,
+                  sx: {
+                    fontSize: inputs.default.labelFontSize,
+                    color: inputs.default.labelColor,
+                    backgroundColor: inputs.default.labelBackground,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: inputs.default.focus.labelColor,
+                    },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    fontSize: inputs.default.fontSize,
+                    '& fieldset': {
+                      borderColor: inputs.default.borderColor,
+                      legend: {
+                        maxWidth: inputs.default.legendMaxWidth,
+                      },
+                    },
+                    '&:hover fieldset': {
+                      borderColor: inputs.default.hover.borderColor,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: inputs.default.focus.borderColor,
+                      boxShadow: inputs.default.focus.boxShadow,
+                    },
+                  },
+                }}
+              />
+            </Box>
+
+            {/* Tipo de agendamento */}
+            <FormControl>
+              <FormLabel
+                sx={{
+                  fontSize: '0.8rem',
+                  fontWeight: typography.fontWeight.semibold,
+                  color: '#2D3748',
+                  marginBottom: '0.5rem',
+                  '&.Mui-focused': {
+                    color: '#2D3748',
+                  },
                 }}
               >
-                <option value="">Selecione um profissional</option>
-                <option value="Dr. João Silva">Dr. João Silva</option>
-                <option value="Dra. Maria Santos">Dra. Maria Santos</option>
-                <option value="Dr. Pedro Costa">Dr. Pedro Costa</option>
-                <option value="Dra. Ana Oliveira">Dra. Ana Oliveira</option>
-                <option value="Dr. Carlos Ferreira">Dr. Carlos Ferreira</option>
-                <option value="Dra. Lucia Almeida">Dra. Lucia Almeida</option>
-                <option value="Dr. Roberto Lima">Dr. Roberto Lima</option>
-                <option value="Dra. Patricia Rocha">Dra. Patricia Rocha</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Segunda linha */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
-            {/* Coluna esquerda: Responsáveis e Equipe */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {/* 1º Responsável */}
-              <div className="form-group">
-                <label>1º Responsável</label>
-                <input
-                  type="text"
-                  value={formData.firstResponsible}
-                  readOnly
-                  disabled
-                  placeholder="Não informado"
-                  style={{
-                    backgroundColor: '#e9ecef',
-                    cursor: 'not-allowed'
-                  }}
-                />
-              </div>
-
-              {/* 2º Responsável */}
-              <div className="form-group">
-                <label>2º Responsável</label>
-                <input
-                  type="text"
-                  value={formData.secondResponsible}
-                  readOnly
-                  disabled
-                  placeholder="Não informado"
-                  style={{
-                    backgroundColor: '#e9ecef',
-                    cursor: 'not-allowed'
-                  }}
-                />
-              </div>
-
-              {/* Equipe */}
-              <div className="form-group">
-                <label>Equipe</label>
-                <select
-                  value={formData.team}
-                  onChange={(e) => setFormData({ ...formData, team: e.target.value })}
-                  style={{
-                    minWidth: '120px',
-                    width: '100%',
-                    paddingRight: '2rem'
-                  }}
+                Tipo de agendamento
+              </FormLabel>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <RadioGroup
+                  row
+                  value={formData.appointmentType}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    appointmentType: e.target.value as 'unique' | 'recurring',
+                    recurrenceType: e.target.value === 'unique' ? '' : formData.recurrenceType,
+                    maxOccurrences: e.target.value === 'unique' ? 1 : Math.max(formData.maxOccurrences, 2)
+                  })}
+                  sx={{ flexShrink: 0 }}
                 >
-                  <option value="">Selecione uma equipe</option>
-                  <option value="Equipe A">Equipe A</option>
-                  <option value="Equipe B">Equipe B</option>
-                  <option value="Equipe C">Equipe C</option>
-                </select>
-              </div>
-
-              {/* Tipo de serviço */}
-              <div className="form-group">
-                <label>Tipo de serviço</label>
-                <select
-                  value={formData.serviceType}
-                  onChange={(e) => setFormData({ ...formData, serviceType: e.target.value })}
-                  style={{
-                    minWidth: '120px',
-                    width: '100%',
-                    paddingRight: '2rem'
-                  }}
-                >
-                  <option value="">Tipo de serviço</option>
-                  <option value="Consulta">Consulta</option>
-                  <option value="Exame">Exame</option>
-                  <option value="Procedimento">Procedimento</option>
-                  <option value="Retorno">Retorno</option>
-                  <option value="Avaliação">Avaliação</option>
-                </select>
-              </div>
-
-              {/* Observações */}
-              <div className="form-group">
-                <label>Observações</label>
-                <textarea
-                  value={formData.observations}
-                  onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
-                  placeholder="Observações"
-                  rows={2}
-                  style={{
-                    resize: 'vertical',
-                    padding: '0.5rem',
-                    fontSize: '0.95rem'
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Coluna direita: Data/Hora Inicial, Final, Tipo de agendamento e Valores */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {/* Data/Hora Inicial */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <div className="form-group">
-                  <TextField
-                    label="Data Inicial"
-                    type="date"
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    fullWidth
-                    size="small"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        height: '40px',
-                        fontSize: '1rem',
-                        backgroundColor: 'white',
-                        '& fieldset': {
-                          borderColor: '#ced4da',
-                          borderWidth: '1px',
-                          legend: {
-                            maxWidth: '100%',
-                          },
-                        },
-                        '&:hover fieldset': {
-                          borderColor: '#ced4da',
-                          borderWidth: '1px',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#03B4C6',
-                          borderWidth: '1px',
-                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
-                        },
-                      },
-                      '& .MuiOutlinedInput-input': {
-                        padding: '0.375rem 0.5rem',
-                        color: '#495057',
-                      },
-                      '& .MuiInputLabel-root': {
-                        fontSize: '0.95rem',
-                        color: '#6c757d',
-                        backgroundColor: 'white',
-                        paddingLeft: '4px',
-                        paddingRight: '4px',
-                        '&.Mui-focused': {
-                          color: '#03B4C6',
-                        },
-                      },
-                    }}
+                  <FormControlLabel
+                    value="unique"
+                    control={<Radio sx={{ color: colors.primary, '&.Mui-checked': { color: colors.primary } }} />}
+                    label="Único"
+                    sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                   />
-                </div>
-                <div className="form-group">
-                  <TextField
-                    label="Horário"
-                    type="time"
-                    value={formData.startTime}
-                    onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                    fullWidth
-                    size="small"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        height: '40px',
-                        fontSize: '1rem',
-                        backgroundColor: 'white',
-                        '& fieldset': {
-                          borderColor: '#ced4da',
-                          borderWidth: '1px',
-                          legend: {
-                            maxWidth: '100%',
-                          },
-                        },
-                        '&:hover fieldset': {
-                          borderColor: '#ced4da',
-                          borderWidth: '1px',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#03B4C6',
-                          borderWidth: '1px',
-                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
-                        },
-                      },
-                      '& .MuiOutlinedInput-input': {
-                        padding: '0.375rem 0.5rem',
-                        color: '#495057',
-                        '&::-webkit-calendar-picker-indicator': {
-                          filter: 'invert(0.5)',
-                        },
-                        '&::-webkit-datetime-edit-fields-wrapper': {
-                          padding: 0,
-                          border: 'none',
-                          outline: 'none',
-                        },
-                        '&::-webkit-datetime-edit': {
-                          padding: 0,
-                          border: 'none',
-                          outline: 'none',
-                        },
-                        '&::-webkit-datetime-edit-hour-field': {
-                          padding: '2px',
-                          border: 'none',
-                          outline: 'none',
-                          color: '#495057',
-                          backgroundColor: 'transparent',
-                          '&:focus': {
-                            backgroundColor: 'transparent',
-                            outline: 'none',
-                            border: 'none',
-                          },
-                        },
-                        '&::-webkit-datetime-edit-minute-field': {
-                          padding: '2px',
-                          border: 'none',
-                          outline: 'none',
-                          color: '#495057',
-                          backgroundColor: 'transparent',
-                          '&:focus': {
-                            backgroundColor: 'transparent',
-                            outline: 'none',
-                            border: 'none',
-                          },
-                        },
-                        '&::-webkit-datetime-edit-ampm-field': {
-                          padding: '2px',
-                          border: 'none',
-                          outline: 'none',
-                          color: '#495057',
-                          backgroundColor: 'transparent',
-                          '&:focus': {
-                            backgroundColor: 'transparent',
-                            outline: 'none',
-                            border: 'none',
-                          },
-                        },
-                        '&:focus': {
-                          outline: 'none',
-                        },
-                      },
-                      '& .MuiInputLabel-root': {
-                        fontSize: '0.95rem',
-                        color: '#6c757d',
-                        backgroundColor: 'white',
-                        paddingLeft: '4px',
-                        paddingRight: '4px',
-                        '&.Mui-focused': {
-                          color: '#03B4C6',
-                        },
-                      },
-                    }}
+                  <FormControlLabel
+                    value="recurring"
+                    control={<Radio sx={{ color: colors.primary, '&.Mui-checked': { color: colors.primary } }} />}
+                    label="Recorrente"
+                    sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                   />
-                </div>
-              </div>
-
-              {/* Data/Hora Final */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                <div className="form-group">
+                </RadioGroup>
+                {formData.appointmentType === 'recurring' && (
                   <TextField
-                    label="Data Final"
-                    type="date"
-                    value={formData.endDate}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    fullWidth
-                    size="small"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        height: '40px',
-                        fontSize: '1rem',
-                        backgroundColor: 'white',
-                        '& fieldset': {
-                          borderColor: '#ced4da',
-                          borderWidth: '1px',
-                          legend: {
-                            maxWidth: '100%',
-                          },
-                        },
-                        '&:hover fieldset': {
-                          borderColor: '#ced4da',
-                          borderWidth: '1px',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#03B4C6',
-                          borderWidth: '1px',
-                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
-                        },
-                      },
-                      '& .MuiOutlinedInput-input': {
-                        padding: '0.375rem 0.5rem',
-                        color: '#495057',
-                      },
-                      '& .MuiInputLabel-root': {
-                        fontSize: '0.95rem',
-                        color: '#6c757d',
-                        backgroundColor: 'white',
-                        paddingLeft: '4px',
-                        paddingRight: '4px',
-                        '&.Mui-focused': {
-                          color: '#03B4C6',
-                        },
-                      },
-                    }}
-                  />
-                </div>
-                <div className="form-group">
-                  <TextField
-                    label="Horário Final"
-                    type="time"
-                    value={formData.endTime}
-                    onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                    fullWidth
-                    size="small"
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        height: '40px',
-                        fontSize: '1rem',
-                        backgroundColor: 'white',
-                        '& fieldset': {
-                          borderColor: '#ced4da',
-                          borderWidth: '1px',
-                          legend: {
-                            maxWidth: '100%',
-                          },
-                        },
-                        '&:hover fieldset': {
-                          borderColor: '#ced4da',
-                          borderWidth: '1px',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#03B4C6',
-                          borderWidth: '1px',
-                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
-                        },
-                      },
-                      '& .MuiOutlinedInput-input': {
-                        padding: '0.375rem 0.5rem',
-                        color: '#495057',
-                        '&::-webkit-calendar-picker-indicator': {
-                          filter: 'invert(0.5)',
-                        },
-                        '&::-webkit-datetime-edit-fields-wrapper': {
-                          padding: 0,
-                          border: 'none',
-                          outline: 'none',
-                        },
-                        '&::-webkit-datetime-edit': {
-                          padding: 0,
-                          border: 'none',
-                          outline: 'none',
-                        },
-                        '&::-webkit-datetime-edit-hour-field': {
-                          padding: '2px',
-                          border: 'none',
-                          outline: 'none',
-                          color: '#495057',
-                          backgroundColor: 'transparent',
-                          '&:focus': {
-                            backgroundColor: 'transparent',
-                            outline: 'none',
-                            border: 'none',
-                          },
-                        },
-                        '&::-webkit-datetime-edit-minute-field': {
-                          padding: '2px',
-                          border: 'none',
-                          outline: 'none',
-                          color: '#495057',
-                          backgroundColor: 'transparent',
-                          '&:focus': {
-                            backgroundColor: 'transparent',
-                            outline: 'none',
-                            border: 'none',
-                          },
-                        },
-                        '&::-webkit-datetime-edit-ampm-field': {
-                          padding: 0,
-                          color: '#495057',
-                          '&:focus': {
-                            backgroundColor: 'transparent',
-                            outline: 'none',
-                          },
-                        },
-                        '&:focus': {
-                          outline: 'none',
-                        },
-                      },
-                      '& .MuiInputLabel-root': {
-                        fontSize: '0.95rem',
-                        color: '#6c757d',
-                        backgroundColor: 'white',
-                        paddingLeft: '4px',
-                        paddingRight: '4px',
-                        '&.Mui-focused': {
-                          color: '#03B4C6',
-                        },
-                      },
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Tipo de agendamento */}
-              <div style={{ marginBottom: '0.875rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#4A5568', fontSize: '0.8rem' }}>Tipo de agendamento</label>
-                <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'center', flexWrap: 'nowrap' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                    <input
-                      type="radio"
-                      name="appointmentType"
-                      value="unique"
-                      checked={formData.appointmentType === 'unique'}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        appointmentType: e.target.value as 'unique' | 'recurring',
-                        recurrenceType: '',
-                        maxOccurrences: 0
-                      })}
-                      style={{ marginRight: '0.25rem' }}
-                    />
-                    Único
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                    <input
-                      type="radio"
-                      name="appointmentType"
-                      value="recurring"
-                      checked={formData.appointmentType === 'recurring'}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        appointmentType: e.target.value as 'unique' | 'recurring',
-                        maxOccurrences: formData.maxOccurrences < 2 ? 2 : formData.maxOccurrences
-                      })}
-                      style={{ marginRight: '0.25rem' }}
-                    />
-                    Recorrente
-                  </label>
-                  <input
                     type="number"
-                    min="2"
-                    max="100"
                     placeholder="Qtde máxima"
                     value={formData.maxOccurrences}
                     onChange={(e) => {
                       const value = Number(e.target.value);
                       setFormData({ ...formData, maxOccurrences: value > 100 ? 100 : value });
                     }}
-                    style={{
-                      padding: '0.375rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '6px',
+                    inputProps={{ min: 2, max: 100 }}
+                    sx={{
                       width: '120px',
-                      fontSize: '0.9rem',
-                      flexShrink: 0,
-                      visibility: formData.appointmentType === 'recurring' ? 'visible' : 'hidden'
+                      '& .MuiOutlinedInput-root': {
+                        height: inputs.default.height,
+                        fontSize: inputs.default.fontSize,
+                        '& fieldset': {
+                          borderColor: inputs.default.borderColor,
+                        },
+                      },
                     }}
                   />
-                </div>
-
-                {/* Opções de recorrência */}
-                {formData.appointmentType === 'recurring' && (
-                  <div style={{ marginTop: '0.5rem' }}>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '0.9rem',
-                      color: '#495057',
-                      marginBottom: '0.25rem',
-                      fontWeight: '500'
-                    }}>Periodicidade</label>
-                    <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'center', flexWrap: 'nowrap' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                        <input
-                          type="radio"
-                          name="recurrenceType"
-                          value="daily"
-                          checked={formData.recurrenceType === 'daily'}
-                          onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
-                          style={{ marginRight: '0.25rem' }}
-                        />
-                        Diário
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                        <input
-                          type="radio"
-                          name="recurrenceType"
-                          value="weekly"
-                          checked={formData.recurrenceType === 'weekly'}
-                          onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
-                          style={{ marginRight: '0.25rem' }}
-                        />
-                        Semanal
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                        <input
-                          type="radio"
-                          name="recurrenceType"
-                          value="biweekly"
-                          checked={formData.recurrenceType === 'biweekly'}
-                          onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
-                          style={{ marginRight: '0.25rem' }}
-                        />
-                        Quinzenal
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
-                        <input
-                          type="radio"
-                          name="recurrenceType"
-                          value="monthly"
-                          checked={formData.recurrenceType === 'monthly'}
-                          onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
-                          style={{ marginRight: '0.25rem' }}
-                        />
-                        Mensal
-                      </label>
-                    </div>
-                  </div>
                 )}
-              </div>
+              </Box>
+            </FormControl>
 
-              {/* Valores calculados em grid 2x2 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                {/* Valor Unitário */}
-                <div className="form-group">
-                  <label>Valor Unitário</label>
-                  <input
-                    type="text"
-                    value={formData.unitValue ? `R$ ${formData.unitValue}` : ''}
-                    readOnly
-                    disabled
-                    style={{
-                      backgroundColor: '#e9ecef',
-                      cursor: 'not-allowed'
-                    }}
+            {/* Periodicidade */}
+            {formData.appointmentType === 'recurring' && (
+              <FormControl>
+                <FormLabel
+                  sx={{
+                    fontSize: '0.9rem',
+                    fontWeight: typography.fontWeight.medium,
+                    color: colors.textPrimary,
+                    marginBottom: '0.25rem',
+                    '&.Mui-focused': {
+                      color: colors.textPrimary,
+                    },
+                  }}
+                >
+                  Periodicidade
+                </FormLabel>
+                <RadioGroup
+                  row
+                  value={formData.recurrenceType}
+                  onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
+                  sx={{ gap: '1rem' }}
+                >
+                  <FormControlLabel
+                    value="daily"
+                    control={<Radio sx={{ color: colors.primary, '&.Mui-checked': { color: colors.primary } }} />}
+                    label="Diário"
+                    sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                   />
-                </div>
-
-                {/* Desconto Unitário */}
-                <div className="form-group">
-                  <label>Desconto Unitário</label>
-                  <input
-                    type="text"
-                    value={formData.discount ? `R$ ${formData.discount}` : ''}
-                    readOnly
-                    disabled
-                    style={{
-                      backgroundColor: '#e9ecef',
-                      cursor: 'not-allowed'
-                    }}
+                  <FormControlLabel
+                    value="weekly"
+                    control={<Radio sx={{ color: colors.primary, '&.Mui-checked': { color: colors.primary } }} />}
+                    label="Semanal"
+                    sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                   />
-                </div>
-
-                {/* Total Unitário */}
-                <div className="form-group">
-                  <label>Total Unitário</label>
-                  <input
-                    type="text"
-                    value={formData.totalUnit ? `R$ ${formData.totalUnit}` : ''}
-                    readOnly
-                    disabled
-                    style={{
-                      backgroundColor: '#e9ecef',
-                      cursor: 'not-allowed'
-                    }}
+                  <FormControlLabel
+                    value="biweekly"
+                    control={<Radio sx={{ color: colors.primary, '&.Mui-checked': { color: colors.primary } }} />}
+                    label="Quinzenal"
+                    sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                   />
-                </div>
-
-                {/* Total Geral */}
-                <div className="form-group">
-                  <label>Total</label>
-                  <input
-                    type="text"
-                    value={formData.totalValue ? `R$ ${formData.totalValue}` : ''}
-                    readOnly
-                    disabled
-                    style={{
-                      backgroundColor: '#e9ecef',
-                      cursor: 'not-allowed',
-                      fontWeight: 'bold'
-                    }}
+                  <FormControlLabel
+                    value="monthly"
+                    control={<Radio sx={{ color: colors.primary, '&.Mui-checked': { color: colors.primary } }} />}
+                    label="Mensal"
+                    sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.9rem' } }}
                   />
-                </div>
-              </div>
-            </div>
-          </div>
+                </RadioGroup>
+              </FormControl>
+            )}
 
-          {/* Botões */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '1rem',
-            paddingTop: '0.75rem',
-            borderTop: '1px solid #e9ecef'
-          }}>
-            <button
-              type="button"
-              onClick={handleClose}
-              style={{
+            {/* Valores calculados - Visível apenas se showPricing for true */}
+            {showPricing && (
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <TextField
+                  label="Valor Unitário"
+                  value={formData.unitValue ? `R$ ${formData.unitValue}` : ''}
+                  disabled
+                  InputLabelProps={{
+                    shrink: true,
+                    sx: {
+                      fontSize: inputs.default.labelFontSize,
+                      color: inputs.default.labelColor,
+                      backgroundColor: inputs.default.labelBackground,
+                      padding: inputs.default.labelPadding,
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      height: inputs.default.height,
+                      fontSize: inputs.default.fontSize,
+                      backgroundColor: colors.backgroundAlt,
+                      '& fieldset': {
+                        borderColor: inputs.default.borderColor,
+                      },
+                    },
+                  }}
+                />
+
+                <TextField
+                  label="Desconto Unitário"
+                  value={formData.discount ? `R$ ${formData.discount}` : ''}
+                  disabled
+                  InputLabelProps={{
+                    shrink: true,
+                    sx: {
+                      fontSize: inputs.default.labelFontSize,
+                      color: inputs.default.labelColor,
+                      backgroundColor: inputs.default.labelBackground,
+                      padding: inputs.default.labelPadding,
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      height: inputs.default.height,
+                      fontSize: inputs.default.fontSize,
+                      backgroundColor: colors.backgroundAlt,
+                      '& fieldset': {
+                        borderColor: inputs.default.borderColor,
+                      },
+                    },
+                  }}
+                />
+
+                <TextField
+                  label="Total Unitário"
+                  value={formData.totalUnit ? `R$ ${formData.totalUnit}` : ''}
+                  disabled
+                  InputLabelProps={{
+                    shrink: true,
+                    sx: {
+                      fontSize: inputs.default.labelFontSize,
+                      color: inputs.default.labelColor,
+                      backgroundColor: inputs.default.labelBackground,
+                      padding: inputs.default.labelPadding,
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      height: inputs.default.height,
+                      fontSize: inputs.default.fontSize,
+                      backgroundColor: colors.backgroundAlt,
+                      '& fieldset': {
+                        borderColor: inputs.default.borderColor,
+                      },
+                    },
+                  }}
+                />
+
+                <TextField
+                  label="Total"
+                  value={formData.totalValue ? `R$ ${formData.totalValue}` : ''}
+                  disabled
+                  InputLabelProps={{
+                    shrink: true,
+                    sx: {
+                      fontSize: inputs.default.labelFontSize,
+                      color: inputs.default.labelColor,
+                      backgroundColor: inputs.default.labelBackground,
+                      padding: inputs.default.labelPadding,
+                    },
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      height: inputs.default.height,
+                      fontSize: inputs.default.fontSize,
+                      backgroundColor: colors.backgroundAlt,
+                      '& fieldset': {
+                        borderColor: inputs.default.borderColor,
+                      },
+                    },
+                    '& input': {
+                      fontWeight: typography.fontWeight.semibold,
+                    },
+                  }}
+                />
+              </Box>
+            )}
+          </Box>
+        </Box>
+      </DialogContent>
+
+      <DialogActions sx={{
+        padding: '1.5rem 2rem',
+        borderTop: `1px solid ${colors.backgroundAlt}`,
+        backgroundColor: colors.background,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '1rem'
+      }}>
+        {/* Dropdowns de Confirmação e Presença */}
+        <Box sx={{ display: 'flex', gap: '1rem', flex: '1 1 auto' }}>
+          <TextField
+            select
+            label="Confirmação"
+            value={formData.confirmationStatus}
+            onChange={(e) => setFormData({ ...formData, confirmationStatus: e.target.value })}
+            InputLabelProps={{
+              shrink: true,
+              sx: {
+                fontSize: inputs.select.labelFontSize,
+                color: inputs.select.labelColor,
+                backgroundColor: inputs.select.labelBackground,
+                padding: inputs.select.labelPadding,
+              },
+            }}
+            sx={{
+              minWidth: '150px',
+              '& .MuiOutlinedInput-root': {
+                height: inputs.select.height,
+                fontSize: inputs.select.fontSize,
+                '& fieldset': {
+                  borderColor: inputs.select.borderColor,
+                },
+              },
+            }}
+          >
+            <MenuItem value="">Selecione</MenuItem>
+            <MenuItem value="Pendente">Pendente</MenuItem>
+            <MenuItem value="Confirmado">Confirmado</MenuItem>
+            <MenuItem value="Cancelado">Cancelado</MenuItem>
+          </TextField>
+
+          <TextField
+            select
+            label="Presença"
+            value={formData.attendanceStatus}
+            onChange={(e) => setFormData({ ...formData, attendanceStatus: e.target.value })}
+            InputLabelProps={{
+              shrink: true,
+              sx: {
+                fontSize: inputs.select.labelFontSize,
+                color: inputs.select.labelColor,
+                backgroundColor: inputs.select.labelBackground,
+                padding: inputs.select.labelPadding,
+              },
+            }}
+            sx={{
+              minWidth: '150px',
+              '& .MuiOutlinedInput-root': {
+                height: inputs.select.height,
+                fontSize: inputs.select.fontSize,
+                '& fieldset': {
+                  borderColor: inputs.select.borderColor,
+                },
+              },
+            }}
+          >
+            <MenuItem value="">Selecione</MenuItem>
+            <MenuItem value="Aguardando">Aguardando</MenuItem>
+            <MenuItem value="Presente">Presente</MenuItem>
+            <MenuItem value="Faltou">Faltou</MenuItem>
+          </TextField>
+        </Box>
+
+        {/* Botões de ação */}
+        <Box sx={{ display: 'flex', gap: '1rem', flexShrink: 0 }}>
+          {mode === 'edit' && (
+            <Button
+              onClick={() => {
+                // Adicionar lógica de exclusão
+                console.log('Excluir agendamento');
+              }}
+              variant="contained"
+              sx={{
                 padding: '0.75rem 1.5rem',
-                border: '1px solid #ced4da',
                 borderRadius: '6px',
-                background: 'white',
-                color: '#6c757d',
+                backgroundColor: colors.error,
+                color: colors.white,
                 fontSize: '1rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8f9fa';
-                e.currentTarget.style.borderColor = '#adb5bd';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
-                e.currentTarget.style.borderColor = '#ced4da';
+                fontWeight: typography.fontWeight.medium,
+                textTransform: 'none',
+                boxShadow: 'none',
+                '&:hover': {
+                  backgroundColor: '#c82333',
+                  boxShadow: 'none',
+                  transform: 'translateY(-1px)',
+                }
               }}
             >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: 'none',
-                borderRadius: '6px',
-                background: '#03B4C6',
-                color: 'white',
-                fontSize: '1rem',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0298a8'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#03B4C6'}
-            >
-              {mode === 'create' ? 'Agendar' : 'Salvar'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              Excluir
+            </Button>
+          )}
+
+          <Button
+            onClick={handleClose}
+            variant="outlined"
+            sx={{
+              padding: '0.75rem 1.5rem',
+              border: `1px solid ${colors.border}`,
+              borderRadius: '6px',
+              backgroundColor: colors.white,
+              color: colors.textSecondary,
+              fontSize: '1rem',
+              fontWeight: typography.fontWeight.medium,
+              textTransform: 'none',
+              '&:hover': {
+                backgroundColor: colors.background,
+                borderColor: '#adb5bd',
+              }
+            }}
+          >
+            Cancelar
+          </Button>
+
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            sx={{
+              padding: '0.75rem 1.5rem',
+              borderRadius: '6px',
+              backgroundColor: colors.primary,
+              color: colors.white,
+              fontSize: '1rem',
+              fontWeight: typography.fontWeight.medium,
+              textTransform: 'none',
+              boxShadow: 'none',
+              '&:hover': {
+                backgroundColor: '#029AAB',
+                boxShadow: 'none',
+                transform: 'translateY(-1px)',
+              }
+            }}
+          >
+            {mode === 'create' ? 'Agendar' : 'Salvar'}
+          </Button>
+        </Box>
+      </DialogActions>
+    </Dialog>
   );
 };
 

@@ -1,11 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+interface MenuItem {
+  id: string;
+  label: string;
+  href: string;
+  icon?: string;
+}
+
 interface UserSession {
   email: string;
   alias: string;
   clinicName: string;
   role: string;
   permissions: string[];
+  menuItems: MenuItem[]; // Funcionalidades habilitadas para o perfil
   loginTime: string;
   loginTimestamp: number;
   sessionDuration: number;
@@ -22,6 +30,7 @@ interface AuthContextType {
   updateProfile: (entity: string, profile: string) => void;
   getTimeRemaining: () => number;
   refreshSession: () => void;
+  refreshPermissions: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,11 +43,98 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Mock de funcionalidades disponíveis por perfil (em produção viria de API)
+  const getMenuItemsForRole = (role: string): MenuItem[] => {
+    const allMenuItems: { [key: string]: MenuItem } = {
+      // Páginas principais
+      dashboard: { id: 'dashboard', label: 'Dashboard', href: '?page=dashboard' },
+      schedule: { id: 'schedule', label: 'Agenda Profissional', href: '?page=schedule' },
+      patients: { id: 'patients', label: 'Lista de Pacientes', href: '?page=patients' },
+      patientRegister: { id: 'patientRegister', label: 'Cadastro de Paciente', href: '?page=patient-register' },
+
+      // Administração
+      adminEntities: { id: 'adminEntities', label: 'Gestão de Entidades', href: '?page=admin-entities' },
+      adminFunctionalities: { id: 'adminFunctionalities', label: 'Gestão de Funcionalidades', href: '?page=admin-functionalities' },
+      adminProfiles: { id: 'adminProfiles', label: 'Gestão de Perfis', href: '?page=admin-profiles' },
+      adminPlans: { id: 'adminPlans', label: 'Gestão de Planos', href: '?page=admin-plans' },
+      adminProfessionalTypes: { id: 'adminProfessionalTypes', label: 'Tipos de Profissionais', href: '?page=admin-professional-types' },
+      adminFaq: { id: 'adminFaq', label: 'Gestão de FAQ', href: '?page=admin-faq' },
+
+      // Usuário
+      faq: { id: 'faq', label: 'FAQ', href: '?page=faq' },
+      userProfile: { id: 'userProfile', label: 'Meu Perfil', href: '?page=user-profile' },
+
+      // Outras páginas disponíveis (não inclusas no menu por padrão)
+      aliasRegister: { id: 'aliasRegister', label: 'Cadastro de Apelido', href: '?page=alias-register' },
+      pageModel: { id: 'pageModel', label: 'Modelo de Página', href: '?page=page-model' },
+    };
+
+    // Definir funcionalidades por perfil
+    const roleMenuItems: { [key: string]: MenuItem[] } = {
+      'Administrator': [
+        // Sistema
+        allMenuItems.dashboard,
+        allMenuItems.schedule,
+        allMenuItems.patients,
+        allMenuItems.patientRegister,
+
+        // Gestão Administrativa (Sistema)
+        allMenuItems.adminEntities,
+        allMenuItems.adminFunctionalities,
+        allMenuItems.adminProfiles,
+        allMenuItems.adminPlans,
+        allMenuItems.adminProfessionalTypes,
+        allMenuItems.adminFaq,
+
+        // Usuário
+        allMenuItems.faq,
+        allMenuItems.userProfile,
+      ],
+      'Cliente admin': [
+        // Operacional
+        allMenuItems.dashboard,
+        allMenuItems.schedule,
+        allMenuItems.patients,
+        allMenuItems.patientRegister,
+
+        // Gestão (Cliente)
+        allMenuItems.adminProfessionalTypes,
+
+        // Usuário
+        allMenuItems.faq,
+        allMenuItems.userProfile,
+      ],
+      'Recepcionista': [
+        // Operacional
+        allMenuItems.dashboard,
+        allMenuItems.schedule,
+        allMenuItems.patients,
+        allMenuItems.patientRegister,
+
+        // Usuário
+        allMenuItems.faq,
+        allMenuItems.userProfile,
+      ],
+      'Profissional': [
+        // Operacional
+        allMenuItems.schedule,
+        allMenuItems.patients,
+
+        // Usuário
+        allMenuItems.faq,
+        allMenuItems.userProfile,
+      ],
+    };
+
+    return roleMenuItems[role] || [allMenuItems.dashboard, allMenuItems.userProfile];
+  };
+
   // Credenciais válidas (simulação - em produção viria de API)
   const validCredentials: { [key: string]: { password: string; role: string; alias: string } } = {
     'admin@clinic4us.com': { password: '123456', role: 'Administrator', alias: 'Admin Demo' },
     'diretoria@ninhoinstituto.com.br': { password: '123456', role: 'Cliente admin', alias: 'Ninho Instituto' },
-    'recepcao@clinic4us.com': { password: '123456', role: 'Recepcionista', alias: 'Recepção' }
+    'recepcao@clinic4us.com': { password: '123456', role: 'Recepcionista', alias: 'Recepção' },
+    'profissional@clinic4us.com': { password: '123456', role: 'Profissional', alias: 'Dr. João Silva' }
   };
 
   // Carregar sessão do localStorage ao inicializar
@@ -96,6 +192,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         clinicName: clinic || 'Clinic4Us',
         role: validUser.role,
         permissions: ['dashboard_access', 'schedule_access', 'patient_access'],
+        menuItems: getMenuItemsForRole(validUser.role), // Carregar funcionalidades do perfil
         loginTime: new Date().toISOString(),
         loginTimestamp,
         sessionDuration: 3600, // 1 hora em segundos
@@ -157,7 +254,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         ...user,
         loginTime: new Date().toISOString(),
         loginTimestamp: newTimestamp,
-        sessionDuration: 3600
+        sessionDuration: 3600,
+        menuItems: user.menuItems || getMenuItemsForRole(user.role) // Garantir que menuItems existe
       };
 
       // Salvar no localStorage
@@ -184,6 +282,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         role: profile,
         clinicName: entity,
         alias: entity,
+        menuItems: getMenuItemsForRole(profile), // Atualizar menu quando perfil muda
         loginTime: new Date().toISOString(),
         loginTimestamp: newTimestamp,
         sessionDuration: 3600
@@ -192,11 +291,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Salvar no localStorage
       localStorage.setItem('clinic4us-user-session', JSON.stringify(updatedSession));
 
-      // Atualizar estado
+      // Atualizar estado (isso vai recarregar o menu automaticamente)
       setUser(updatedSession);
 
-      // Recarregar página para aplicar mudanças
-      window.location.reload();
+      // NÃO recarregar página - deixar o React atualizar
+      // window.location.reload();
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error);
     }
@@ -232,6 +331,62 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Verificar se está autenticado
   const isAuthenticated = !!user && getTimeRemaining() > 0;
 
+  // Função para revalidar permissões do usuário
+  const refreshPermissions = async (): Promise<void> => {
+    try {
+      if (!user) {
+        console.log('Nenhum usuário logado para revalidar permissões');
+        return;
+      }
+
+      console.log('Revalidando permissões do usuário:', user.email);
+
+      // TODO: Em produção, substituir por chamada real à API
+      // const response = await fetch(`/api/users/${user.email}/permissions`);
+      // const data = await response.json();
+      // const newMenuItems = data.menuItems;
+
+      // Mock: buscar permissões atualizadas baseado no role atual
+      const newMenuItems = getMenuItemsForRole(user.role);
+
+      // Atualizar sessão com novas permissões
+      const updatedSession: UserSession = {
+        ...user,
+        menuItems: newMenuItems
+      };
+
+      // Salvar no localStorage
+      localStorage.setItem('clinic4us-user-session', JSON.stringify(updatedSession));
+
+      // Atualizar estado
+      setUser(updatedSession);
+
+      console.log('Permissões revalidadas com sucesso');
+    } catch (error) {
+      console.error('Erro ao revalidar permissões:', error);
+    }
+  };
+
+  // Revalidar permissões automaticamente a cada 5 minutos
+  useEffect(() => {
+    if (!user || !isAuthenticated) {
+      return;
+    }
+
+    // Revalidar imediatamente ao montar (se usuário logado)
+    refreshPermissions();
+
+    // Configurar intervalo de 5 minutos (300000ms)
+    const intervalId = setInterval(() => {
+      refreshPermissions();
+    }, 300000); // 5 minutos
+
+    // Limpar intervalo ao desmontar
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [user?.email, isAuthenticated]); // Executar quando usuário logar/deslogar
+
   const contextValue: AuthContextType = {
     user,
     isAuthenticated,
@@ -241,7 +396,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     renewSession,
     updateProfile,
     getTimeRemaining,
-    refreshSession
+    refreshSession,
+    refreshPermissions
   };
 
   return (

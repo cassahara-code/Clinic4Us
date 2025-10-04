@@ -58,20 +58,7 @@ interface HeaderInternalProps {
 }
 
 const HeaderInternal: React.FC<HeaderInternalProps> = ({
-  menuItems = [
-    { label: "Agenda", href: "?page=schedule" },
-    { label: "Cadastro Paciente", href: "?page=patient-register" },
-    { label: "Dashboard", href: "?page=dashboard" },
-    { label: "Entidades", href: "?page=admin-entities" },
-    { label: "FAQ", href: "?page=faq" },
-    { label: "Funcionalidades", href: "?page=admin-functionalities" },
-    { label: "Gestão FAQ", href: "?page=admin-faq" },
-    { label: "Pacientes", href: "?page=patients" },
-    { label: "Perfis", href: "?page=admin-profiles" },
-    { label: "Planos", href: "?page=admin-plans" },
-    { label: "Meu Perfil", href: "?page=user-profile" },
-    { label: "Tipos de Profissionais", href: "?page=admin-professional-types" },
-  ],
+  menuItems,
   showCTAButton = false,
   ctaButtonText = "Ação",
   onCTAClick,
@@ -86,7 +73,13 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
   onNotificationClick,
   onUserClick,
 }) => {
-  const { renewSession: renewAuthSession, refreshSession, updateProfile } = useAuth();
+  const { user, renewSession: renewAuthSession, refreshSession, updateProfile } = useAuth();
+
+  // Usar dados do contexto se não forem passados por props
+  const actualMenuItems = menuItems || user?.menuItems || [];
+  const actualUserEmail = userEmail || user?.email || '';
+  const actualUserProfile = userProfile || user?.role || '';
+  const actualClinicName = clinicName || user?.clinicName || '';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false);
   const [isChangeProfileModalOpen, setIsChangeProfileModalOpen] = useState(false);
@@ -267,10 +260,10 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
   ];
 
   const availableProfiles = [
+    'Administrator',
     'Cliente admin',
-    'Profissional',
-    'Secretário',
-    'Recepcionista'
+    'Recepcionista',
+    'Profissional'
   ];
 
   return (
@@ -410,13 +403,13 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                 </IconButton>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: '#2D3748' }}>
-                    {truncateEmail(userEmail || '')}
+                    {truncateEmail(actualUserEmail)}
                   </Typography>
                   <Typography variant="caption" sx={{ color: '#6c757d' }}>
-                    {userProfile}
+                    {actualUserProfile}
                   </Typography>
                   <Typography variant="caption" sx={{ display: 'block', color: '#6c757d' }}>
-                    {truncateEmail(clinicName || '', 20)}
+                    {truncateEmail(actualClinicName, 20)}
                   </Typography>
                 </Box>
               </Box>
@@ -463,9 +456,9 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
             </Box>
           )}
 
-          {/* Menu Items */}
+          {/* Menu Items - Carregado dinamicamente do perfil do usuário */}
           <List sx={{ flex: 1, py: 1 }}>
-            {menuItems.map((item, index) => (
+            {actualMenuItems.map((item, index) => (
               <ListItem
                 key={index}
                 component="a"
@@ -575,7 +568,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
           <TextField
             label="E-mail"
             type="email"
-            value={userEmail}
+            value={actualUserEmail}
             disabled
             fullWidth
             sx={{ mb: 2 }}
