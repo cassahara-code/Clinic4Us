@@ -1,4 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Typography,
+  IconButton,
+  Box,
+  Checkbox,
+  FormControlLabel,
+  MenuItem,
+  Autocomplete,
+  Chip
+} from '@mui/material';
+import { Close } from '@mui/icons-material';
+import { colors, typography, inputs } from '../../theme/designSystem';
 
 // Interface para os dados da funcionalidade
 export interface FunctionalityData {
@@ -88,307 +106,366 @@ const FunctionalityModal: React.FC<FunctionalityModalProps> = ({
     handleClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.5)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem'
-      }}
-      onClick={handleClose}
-    >
-      <div
-        style={{
-          background: 'white',
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
           borderRadius: '12px',
-          width: '100%',
-          maxWidth: '600px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
           maxHeight: '90vh',
-          overflow: 'auto',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Cabeçalho do modal */}
-        <div style={{
-          background: '#03B4C6',
-          color: 'white',
+        }
+      }}
+    >
+      <DialogTitle
+        sx={{
+          backgroundColor: colors.primary,
+          color: colors.white,
           padding: '1.5rem',
-          borderRadius: '12px 12px 0 0',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <h3 style={{
-            margin: 0,
-            fontSize: '1.4rem',
-            fontWeight: '600'
-          }}>
-            {title || (mode === 'create' ? 'Cadastrar Funcionalidade' : 'Editar Funcionalidade')}
-          </h3>
-          <button
-            onClick={handleClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              padding: '0.25rem'
+          alignItems: 'center',
+        }}
+      >
+        <Typography variant="h6" component="h3" sx={{ fontSize: '1.4rem', fontWeight: typography.fontWeight.semibold, margin: 0 }}>
+          {title || (mode === 'create' ? 'Cadastrar Funcionalidade' : 'Editar Funcionalidade')}
+        </Typography>
+        <IconButton onClick={handleClose} sx={{ color: colors.white, padding: '0.25rem', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' } }}>
+          <Close />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent sx={{ padding: '1.5rem !important', paddingTop: '2rem !important' }}>
+        <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Categoria */}
+          <TextField
+            select
+            label="Categoria"
+            value={formData.category}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            fullWidth
+            placeholder="Selecione uma categoria"
+            SelectProps={{
+              displayEmpty: true,
+              renderValue: (value: unknown) => {
+                const strValue = value as string;
+                if (!strValue) {
+                  return <span style={{ color: '#999' }}>Selecione uma categoria</span>;
+                }
+                return strValue;
+              }
+            }}
+            InputLabelProps={{
+              shrink: true,
+              sx: {
+                fontSize: inputs.select.labelFontSize,
+                color: inputs.select.labelColor,
+                backgroundColor: inputs.select.labelBackground,
+                padding: inputs.select.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.select.height,
+                fontSize: inputs.select.fontSize,
+                '& fieldset': {
+                  borderColor: inputs.select.borderColor,
+                },
+                '&:hover fieldset': {
+                  borderColor: inputs.select.borderColor,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: colors.primary,
+                }
+              }
             }}
           >
-            ×
-          </button>
-        </div>
-
-        {/* Formulário */}
-        <form style={{ padding: '1.5rem' }}>
-          {/* Categoria */}
-          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-            <label>Categoria</label>
-            <select
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              style={{
-                minWidth: '120px',
-                width: '100%',
-                paddingRight: '2rem'
-              }}
-            >
-              <option value="">Categoria</option>
-              {AVAILABLE_CATEGORIES.map((cat, index) => (
-                <option key={index} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
+            <MenuItem value="">Selecione uma categoria</MenuItem>
+            {AVAILABLE_CATEGORIES.map((cat, index) => (
+              <MenuItem key={index} value={cat}>
+                {cat}
+              </MenuItem>
+            ))}
+          </TextField>
 
           {/* Funcionalidade */}
-          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-            <label>Funcionalidade</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Funcionalidade"
-            />
-          </div>
+          <TextField
+            label="Funcionalidade"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Funcionalidade"
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          />
 
           {/* Descrição */}
-          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-            <label>Descrição</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Descrição"
-              rows={3}
-              style={{ resize: 'vertical' }}
-            />
-          </div>
+          <TextField
+            label="Descrição"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Descrição"
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          />
 
           {/* URL */}
-          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-            <label>URL - Não pode ser igual a outra já cadastrada</label>
-            <input
-              type="text"
-              value={formData.url}
-              onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-              placeholder="URL"
-            />
-          </div>
+          <TextField
+            label="URL - Não pode ser igual a outra já cadastrada"
+            value={formData.url}
+            onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+            placeholder="URL"
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          />
 
           {/* Ordenação */}
-          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-            <label>Ordenação</label>
-            <input
-              type="number"
-              min="1"
-              value={formData.order}
-              onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 1 })}
-              placeholder="Ordenação"
-            />
-          </div>
+          <TextField
+            label="Ordenação"
+            type="number"
+            value={formData.order}
+            onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 1 })}
+            placeholder="Ordenação"
+            inputProps={{ min: 1 }}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          />
 
           {/* Checkboxes de área */}
-          <div style={{ marginBottom: '0.75rem' }}>
-            <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  cursor: 'pointer',
-                  fontSize: '0.95rem',
-                  color: '#2D3748'
-                }}
-              >
-                <input
-                  type="checkbox"
+          <Box sx={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+            <FormControlLabel
+              control={
+                <Checkbox
                   checked={formData.isLoggedArea}
                   onChange={(e) => setFormData({ ...formData, isLoggedArea: e.target.checked })}
-                  style={{
-                    width: '18px',
-                    height: '18px',
-                    cursor: 'pointer',
-                    accentColor: '#03B4C6'
-                  }}
+                  sx={{ color: colors.primary, '&.Mui-checked': { color: colors.primary } }}
                 />
-                Área logada
-              </label>
-
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  cursor: 'pointer',
-                  fontSize: '0.95rem',
-                  color: '#2D3748'
-                }}
-              >
-                <input
-                  type="checkbox"
+              }
+              label="Área logada"
+              sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.95rem', color: colors.textPrimary } }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
                   checked={formData.isPublicArea}
                   onChange={(e) => setFormData({ ...formData, isPublicArea: e.target.checked })}
-                  style={{
-                    width: '18px',
-                    height: '18px',
-                    cursor: 'pointer',
-                    accentColor: '#03B4C6'
-                  }}
+                  sx={{ color: colors.primary, '&.Mui-checked': { color: colors.primary } }}
                 />
-                Área deslogada
-              </label>
-            </div>
-          </div>
-
-          {/* Aparece no Menu */}
-          <div style={{ marginBottom: '0.75rem' }}>
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                cursor: 'pointer',
-                fontSize: '0.95rem',
-                color: '#2D3748'
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={formData.showInMenu}
-                onChange={(e) => setFormData({ ...formData, showInMenu: e.target.checked })}
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  cursor: 'pointer',
-                  accentColor: '#03B4C6'
-                }}
-              />
-              Aparece no Menu
-            </label>
-          </div>
+              }
+              label="Área deslogada"
+              sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.95rem', color: colors.textPrimary } }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.showInMenu}
+                  onChange={(e) => setFormData({ ...formData, showInMenu: e.target.checked })}
+                  sx={{ color: colors.primary, '&.Mui-checked': { color: colors.primary } }}
+                />
+              }
+              label="Aparece no Menu"
+              sx={{ '& .MuiFormControlLabel-label': { fontSize: '0.95rem', color: colors.textPrimary } }}
+            />
+          </Box>
 
           {/* FAQs relacionados */}
-          <div className="form-group" style={{ marginBottom: '2rem' }}>
-            <label>FAQs relacionados</label>
-            <select
-              multiple
-              value={formData.relatedFAQs}
-              onChange={(e) => {
-                const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-                setFormData({ ...formData, relatedFAQs: selectedOptions });
-              }}
-              style={{
-                minWidth: '120px',
-                width: '100%',
-                paddingRight: '2rem',
-                minHeight: '120px',
-                padding: '0.5rem'
-              }}
-            >
-              <option value="">Choose some options...</option>
-              <option value="faq1">Como cadastrar um paciente?</option>
-              <option value="faq2">Como agendar uma consulta?</option>
-              <option value="faq3">Como visualizar relatórios?</option>
-              <option value="faq4">Como gerenciar permissões?</option>
-              <option value="faq5">Como configurar notificações?</option>
-            </select>
-            <small style={{
-              display: 'block',
-              marginTop: '0.5rem',
-              color: '#6c757d',
-              fontSize: '0.85rem'
-            }}>
-              Segure Ctrl (ou Cmd no Mac) para selecionar múltiplas opções
-            </small>
-          </div>
+          <Autocomplete
+            multiple
+            options={[
+              { id: 'faq1', label: 'Como cadastrar um paciente?' },
+              { id: 'faq2', label: 'Como agendar uma consulta?' },
+              { id: 'faq3', label: 'Como visualizar relatórios?' },
+              { id: 'faq4', label: 'Como gerenciar permissões?' },
+              { id: 'faq5', label: 'Como configurar notificações?' }
+            ]}
+            value={formData.relatedFAQs.map(id => ({
+              id,
+              label: {
+                'faq1': 'Como cadastrar um paciente?',
+                'faq2': 'Como agendar uma consulta?',
+                'faq3': 'Como visualizar relatórios?',
+                'faq4': 'Como gerenciar permissões?',
+                'faq5': 'Como configurar notificações?'
+              }[id] || id
+            }))}
+            onChange={(_, newValue) => {
+              setFormData({ ...formData, relatedFAQs: newValue.map(v => v.id) });
+            }}
+            getOptionLabel={(option) => option.label}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  {...getTagProps({ index })}
+                  key={option.id}
+                  label={option.label}
+                  sx={{
+                    backgroundColor: colors.primary,
+                    color: colors.white,
+                    '& .MuiChip-deleteIcon': {
+                      color: colors.white,
+                      '&:hover': {
+                        color: colors.white,
+                        opacity: 0.7
+                      }
+                    }
+                  }}
+                />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="FAQs relacionados"
+                placeholder="Selecione os FAQs"
+                InputLabelProps={{
+                  shrink: true,
+                  sx: {
+                    fontSize: inputs.default.labelFontSize,
+                    color: inputs.default.labelColor,
+                    backgroundColor: inputs.default.labelBackground,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: inputs.default.focus.labelColor,
+                    },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    minHeight: 'calc(3 * 48px)',
+                    alignItems: 'flex-start',
+                    padding: '8px',
+                    fontSize: inputs.default.fontSize,
+                    '& fieldset': {
+                      borderColor: inputs.default.borderColor,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: inputs.default.hover.borderColor,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: inputs.default.focus.borderColor,
+                      boxShadow: inputs.default.focus.boxShadow,
+                    },
+                    '& .MuiAutocomplete-endAdornment': {
+                      top: '16px',
+                      alignSelf: 'flex-start'
+                    }
+                  }
+                }}
+              />
+            )}
+          />
 
-          {/* Botões */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '1rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid #e9ecef'
-          }}>
-            <button
-              type="button"
-              onClick={handleClose}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: '1px solid #ced4da',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#6c757d',
-                fontSize: '1rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8f9fa';
-                e.currentTarget.style.borderColor = '#adb5bd';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
-                e.currentTarget.style.borderColor = '#ced4da';
-              }}
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: 'none',
-                borderRadius: '6px',
-                background: '#03B4C6',
-                color: 'white',
-                fontSize: '1rem',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0298a8'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#03B4C6'}
-            >
-              {mode === 'create' ? 'Criar Funcionalidade' : 'Salvar Alterações'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        </Box>
+      </DialogContent>
+
+      <DialogActions sx={{ padding: '1.5rem 2rem', borderTop: `1px solid ${colors.backgroundAlt}`, backgroundColor: colors.background, gap: '1rem' }}>
+        <Button
+          onClick={handleClose}
+          variant="outlined"
+          sx={{
+            padding: '0.75rem 1.5rem',
+            border: `1px solid ${colors.border}`,
+            borderRadius: '6px',
+            backgroundColor: colors.white,
+            color: colors.textSecondary,
+            fontSize: '1rem',
+            fontWeight: typography.fontWeight.medium,
+            textTransform: 'none',
+            '&:hover': {
+              backgroundColor: colors.background,
+              borderColor: '#adb5bd',
+            }
+          }}
+        >
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleSave}
+          variant="contained"
+          sx={{
+            padding: '0.75rem 1.5rem',
+            borderRadius: '6px',
+            backgroundColor: colors.primary,
+            color: colors.white,
+            fontSize: '1rem',
+            fontWeight: typography.fontWeight.medium,
+            textTransform: 'none',
+            boxShadow: 'none',
+            '&:hover': {
+              backgroundColor: '#029AAB',
+              boxShadow: 'none',
+              transform: 'translateY(-1px)',
+            }
+          }}
+        >
+          Salvar
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
