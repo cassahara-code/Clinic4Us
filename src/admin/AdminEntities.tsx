@@ -216,7 +216,7 @@ const AdminEntities: React.FC = () => {
       sortOrder !== initialFilters.sortOrder;
 
     setHasFilterChanges(hasChanges);
-  }, [searchTerm, sortField, sortOrder]);
+  }, [searchTerm, sortField, sortOrder, initialFilters.searchTerm, initialFilters.sortField, initialFilters.sortOrder]);
 
   const clearFilters = () => {
     setSearchTerm(initialFilters.searchTerm);

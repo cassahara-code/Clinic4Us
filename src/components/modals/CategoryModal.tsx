@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Button,
   TextField,
   Typography,
@@ -70,6 +69,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
     setCategories(categories.filter(cat => cat.id !== categoryId));
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleClose = () => {
     setEditingCategoryId(null);
     setNewCategoryName('');

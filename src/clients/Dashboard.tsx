@@ -5,12 +5,10 @@ import {
   Paper,
   Typography,
   Button,
-  TextField,
   Select,
   MenuItem,
   IconButton,
   FormControl,
-  InputLabel,
   TableContainer,
   Table,
   TableHead,
@@ -18,7 +16,6 @@ import {
   TableRow,
   TableCell,
   Tooltip,
-  Divider,
   Pagination
 } from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
@@ -221,41 +218,6 @@ const Dashboard: React.FC = () => {
     setEndDate(lastDay.toISOString().split('T')[0]);
     setCurrentPage(1); // Reset para primeira página
   };
-
-  // Menu items dinâmicos baseados no perfil do usuário com navegação funcional
-  const loggedMenuItems = userSession?.menuItems?.map(item => ({
-    ...item,
-    onClick: (e: React.MouseEvent) => {
-      e.preventDefault();
-      const clinic = new URLSearchParams(window.location.search).get('clinic') || 'ninho';
-
-      switch (item.label) {
-        case 'Dashboard':
-          window.location.href = `${window.location.origin}/?page=dashboard&clinic=${clinic}`;
-          break;
-        case 'Agenda':
-          window.location.href = `${window.location.origin}/?page=schedule&clinic=${clinic}`;
-          break;
-        case 'Pacientes':
-          alert('Página de Pacientes em desenvolvimento');
-          break;
-        case 'Relatórios':
-          alert('Página de Relatórios em desenvolvimento');
-          break;
-        case 'Financeiro':
-          alert('Página Financeiro em desenvolvimento');
-          break;
-        case 'Usuários':
-          alert('Página de Usuários em desenvolvimento');
-          break;
-        case 'Configurações':
-          alert('Página de Configurações em desenvolvimento');
-          break;
-        default:
-          console.log('Menu item clicked:', item.label);
-      }
-    }
-  })) || [];
 
   if (!userSession) {
     return (

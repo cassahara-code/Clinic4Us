@@ -4,14 +4,10 @@ import { FooterInternal } from "../components/Footer";
 import ContactForm from "../components/ContactForm";
 import { useAuth } from "../contexts/AuthContext";
 import {
-  LocalHospital,
-  CalendarToday,
-  BarChart,
   Visibility,
   VisibilityOff,
   CheckCircle,
-  Info,
-  Assignment
+  Info
 } from '@mui/icons-material';
 import {
   TextField,
@@ -19,7 +15,6 @@ import {
   Checkbox,
   FormControlLabel,
   Box,
-  Container,
   Paper,
   Typography,
   InputAdornment,
@@ -57,7 +52,6 @@ const Login: React.FC = () => {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
   const [clinicError, setClinicError] = useState<string>("");
-  const [isValidClinic, setIsValidClinic] = useState<boolean>(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
 
   React.useEffect(() => {
@@ -69,7 +63,6 @@ const Login: React.FC = () => {
 
     if (!clinicParam || clinicParam.trim() === '') {
       setClinicError("Acesse a plataforma com o link específico de sua clínica. Em caso de dúvida, entre em contato com o administrador do sistema.");
-      setIsValidClinic(false);
       return;
     }
 
@@ -77,11 +70,9 @@ const Login: React.FC = () => {
     const validClinics = ['ninho', 'clinic1', 'clinic2']; // Lista de clínicas válidas (mock)
 
     if (validClinics.includes(clinicParam.toLowerCase())) {
-      setIsValidClinic(true);
       setClinicError("");
     } else {
       setClinicError("Cliente não encontrado. Por favor, entre em contato com o administrador do sistema de sua clínica.");
-      setIsValidClinic(false);
       return;
     }
 

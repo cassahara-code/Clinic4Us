@@ -19,13 +19,7 @@ import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
 import { FaqButton } from "../components/FaqButton";
 import StandardPagination from "../components/Pagination/StandardPagination";
-import { colors, spacing, typography, inputs } from "../theme/designSystem";
-
-interface MenuItemProps {
-  label: string;
-  href?: string;
-  onClick?: (e: React.MouseEvent) => void;
-}
+import { colors, typography, inputs } from "../theme/designSystem";
 
 interface UserSession {
   email: string;

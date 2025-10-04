@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import ContactForm from "../components/ContactForm";
-import { Warning, Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Warning } from '@mui/icons-material';
 import {
   TextField,
   Button,
@@ -168,10 +168,6 @@ const AliasRegister: React.FC = () => {
       confirmPassword: "",
     });
     setErrors({});
-  };
-
-  const handleGoToPlans = () => {
-    window.location.href = window.location.origin + '#planos';
   };
 
   const handleGoHome = () => {

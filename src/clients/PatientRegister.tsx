@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation, useRouter } from "../contexts/RouterContext";
-import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Search } from '@mui/icons-material';
+import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import PhotoUpload from "../components/PhotoUpload";
 import {
@@ -85,7 +85,7 @@ interface PatientFormData {
 }
 
 const PatientRegister: React.FC = () => {
-  const { goToPatients, goToDashboard, goToSchedule } = useNavigation();
+  const { goToPatients, goToDashboard } = useNavigation();
   const { getParam } = useRouter();
   const [userSession, setUserSession] = useState<UserSession | null>(null);
 
@@ -304,14 +304,6 @@ const PatientRegister: React.FC = () => {
     }
   };
 
-  const formatDocument = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 11) {
-      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    }
-    return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-  };
-
   const formatPhone = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     return numbers.replace(/(\d{2})(\d{4,5})(\d{4})/, '($1) $2-$3');
@@ -528,24 +520,6 @@ const PatientRegister: React.FC = () => {
     }
   };
 
-  const handleSearchPatient = () => {
-    // Simular busca por paciente existente
-    const searchName = formData.name.toLowerCase();
-    if (searchName.includes('joão') || searchName.includes('joao')) {
-      // Simular dados de paciente existente
-      setFormData(prev => ({
-        ...prev,
-        id: '12345',
-        name: 'João Silva Santos',
-        phone: '(11) 99999-9999',
-        document: '123.456.789-00',
-        email: 'joao@email.com',
-        birthDate: '1990-05-15',
-        isComplete: true
-      }));
-      setIsEditing(true);
-    }
-  };
 
   if (!userSession) {
     return <div>Carregando...</div>;

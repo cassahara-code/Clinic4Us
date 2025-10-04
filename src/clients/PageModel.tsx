@@ -24,7 +24,7 @@ interface UserSession {
 
 const PageModel: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
-  const { goToDashboard, goToSchedule, goToPatients } = useNavigation();
+  const { goToDashboard } = useNavigation();
 
   useEffect(() => {
     const simulatedUserSession: UserSession = {

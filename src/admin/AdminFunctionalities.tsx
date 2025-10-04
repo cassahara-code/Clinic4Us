@@ -52,7 +52,7 @@ interface Functionality {
 
 const AdminFunctionalities: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
-  const { goToDashboard, goToSchedule, goToPatients } = useNavigation();
+  const { goToDashboard } = useNavigation();
   const { toast, showToast, hideToast } = useToast();
 
   // Estados dos filtros
@@ -225,7 +225,7 @@ const AdminFunctionalities: React.FC = () => {
       sortOrder !== initialFilters.sortOrder;
 
     setHasFilterChanges(hasChanges);
-  }, [searchTerm, categoryFilter, sortField, sortOrder]);
+  }, [searchTerm, categoryFilter, sortField, sortOrder, initialFilters.searchTerm, initialFilters.categoryFilter, initialFilters.sortField, initialFilters.sortOrder]);
 
   const clearFilters = () => {
     setSearchTerm(initialFilters.searchTerm);

@@ -5,7 +5,6 @@ import { useNavigation } from "../contexts/RouterContext";
 import { Delete, Person, WhatsApp, CalendarToday, Warning, Add, Email, Check, Close, Folder, FilterAltOff } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import { TextField, MenuItem, IconButton, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Button, Tooltip, Box, Pagination, FormControl, Select } from '@mui/material';
-import StandardPagination from "../components/Pagination/StandardPagination";
 
 interface MenuItemProps {
   label: string;
@@ -38,7 +37,7 @@ interface Patient {
 
 const PatientsList: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
-  const { goToDashboard, goToSchedule, goToPatients, goToPatientRegister } = useNavigation();
+  const { goToDashboard, goToPatientRegister } = useNavigation();
 
 
   // Estados dos filtros
@@ -259,7 +258,7 @@ const PatientsList: React.FC = () => {
       sortOrder !== initialFilters.sortOrder;
 
     setHasFilterChanges(hasChanges);
-  }, [searchTerm, statusFilter, genderFilter, professionalFilter, sortOrder]);
+  }, [searchTerm, statusFilter, genderFilter, professionalFilter, sortOrder, initialFilters.searchTerm, initialFilters.statusFilter, initialFilters.genderFilter, initialFilters.professionalFilter, initialFilters.sortOrder]);
 
   // Calcular paginação
   const totalPages = Math.ceil(filteredAndSortedPatients.length / itemsPerPage);
