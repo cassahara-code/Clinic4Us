@@ -9,7 +9,7 @@ import CategoryModal from "../components/modals/CategoryModal";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import { FaqButton } from "../components/FaqButton";
-import Pagination from "../components/Pagination";
+import StandardPagination from "../components/Pagination/StandardPagination";
 
 interface MenuItemProps {
   label: string;
@@ -168,12 +168,6 @@ const AdminFunctionalities: React.FC = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedFunctionalities = filteredAndSortedFunctionalities.slice(startIndex, endIndex);
-
-  // Gerar opções para o seletor de itens por página
-  const itemsPerPageOptions = [];
-  for (let i = 50; i <= 200; i += 10) {
-    itemsPerPageOptions.push(i);
-  }
 
   useEffect(() => {
     const simulatedUserSession: UserSession = {
@@ -344,10 +338,9 @@ const AdminFunctionalities: React.FC = () => {
 
       <main style={{
         padding: '1rem',
-        paddingTop: '0.25rem',
         minHeight: 'calc(100vh - 120px)',
         background: '#f8f9fa',
-        marginTop: '20px'
+        marginTop: '85px'
       }}>
         <div style={{
           width: '100%',
@@ -508,20 +501,17 @@ const AdminFunctionalities: React.FC = () => {
 
           {/* Paginação superior */}
           <div style={{
-            background: 'white',
             borderRadius: '12px',
-            padding: '1rem',
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e9ecef',
-            marginBottom: '1rem'
+            marginBottom: '1rem',
+            overflow: 'hidden'
           }}>
-            <Pagination
+            <StandardPagination
               currentPage={currentPage}
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
               totalItems={filteredAndSortedFunctionalities.length}
-              itemLabel="funcionalidades"
               onPageChange={(page) => {
                 setCurrentPage(page);
                 setTimeout(scrollToTop, 100);
@@ -624,20 +614,17 @@ const AdminFunctionalities: React.FC = () => {
 
           {/* Paginação inferior */}
           <div style={{
-            background: 'white',
             borderRadius: '12px',
-            padding: '1rem',
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e9ecef',
-            marginTop: '1rem'
+            marginTop: '1rem',
+            overflow: 'hidden'
           }}>
-            <Pagination
+            <StandardPagination
               currentPage={currentPage}
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
               totalItems={filteredAndSortedFunctionalities.length}
-              itemLabel="funcionalidades"
               onPageChange={(page) => {
                 setCurrentPage(page);
                 setTimeout(scrollToTop, 100);

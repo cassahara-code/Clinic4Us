@@ -5,6 +5,19 @@ import { useNavigation, useRouter } from "../contexts/RouterContext";
 import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Search } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import PhotoUpload from "../components/PhotoUpload";
+import {
+  TextField,
+  MenuItem,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  Checkbox,
+  Typography,
+  Box,
+  CircularProgress
+} from '@mui/material';
 
 interface MenuItemProps {
   label: string;
@@ -72,6 +85,34 @@ const PatientRegister: React.FC = () => {
   const { goToPatients, goToDashboard, goToSchedule } = useNavigation();
   const { getParam } = useRouter();
   const [userSession, setUserSession] = useState<UserSession | null>(null);
+
+  // Reusable styles for form fields
+  const textFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      height: '40px',
+      fontSize: '1rem',
+      backgroundColor: 'white',
+      '& fieldset': {
+        borderColor: '#ced4da',
+        legend: { maxWidth: '100%' },
+      },
+    },
+    '& .MuiSelect-select': {
+      padding: '0.375rem 0.5rem',
+      color: '#495057',
+    },
+    '& .MuiInputLabel-root': {
+      fontSize: '0.95rem',
+      color: '#6c757d',
+      backgroundColor: 'white',
+      paddingLeft: '4px',
+      paddingRight: '4px',
+      '&.Mui-focused': {
+        color: '#03B4C6',
+      },
+    },
+  };
+
   const [formData, setFormData] = useState<PatientFormData>({
     name: "",
     isResponsible: false,
@@ -592,17 +633,17 @@ const PatientRegister: React.FC = () => {
         {/* Título da Página */}
         <div className="page-header-container">
           <div className="page-header-content">
-            <h1 className="page-header-title">
+            <Typography variant="h4" className="page-header-title" sx={{ fontSize: '1.3rem', mb: 1 }}>
               {isNewPatient ? 'Cadastro de Paciente' : formData.name || 'Paciente'}
-            </h1>
+            </Typography>
             {isNewPatient ? (
-              <p className="page-header-description">
+              <Typography variant="body2" className="page-header-description" sx={{ fontSize: '0.875rem', color: '#6c757d' }}>
                 Preencha os dados para cadastrar um novo paciente no sistema.
-              </p>
+              </Typography>
             ) : (
-              <p className="page-header-description">
+              <Typography variant="body2" className="page-header-description" sx={{ fontSize: '0.875rem', color: '#6c757d' }}>
                 ID: {formData.id}
-              </p>
+              </Typography>
             )}
           </div>
           <FaqButton />
@@ -700,59 +741,82 @@ const PatientRegister: React.FC = () => {
                       {/* Primeira linha: Nome, Data de Nascimento + Idade, Gênero */}
                       <div className="form-row">
                         <div className="form-group">
-                          <label htmlFor="name">Nome Completo*</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="name"
                             name="name"
+                            label="Nome Completo*"
                             value={formData.name}
                             onChange={handleInputChange}
                             placeholder="Nome completo do paciente"
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group birth-age-group">
                           <div className="birth-age-container">
                             <div className="form-subgroup">
-                              <label htmlFor="birthDate">Data de Nascimento*</label>
-                              <input
+                              <TextField
+                                fullWidth
+                                size="small"
                                 type="date"
                                 id="birthDate"
                                 name="birthDate"
+                                label="Data de Nascimento*"
                                 value={formData.birthDate}
                                 onChange={handleInputChange}
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                             <div className="form-subgroup">
-                              <label htmlFor="age">Idade</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="age"
                                 name="age"
+                                label="Idade"
                                 value={calculateAge(formData.birthDate)}
-                                readOnly
                                 disabled
                                 placeholder="Calculado automaticamente"
-                                className="age-field"
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                           </div>
                         </div>
                         <div className="form-group">
-                          <label htmlFor="gender">Gênero*</label>
-                          <select
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
                             id="gender"
                             name="gender"
+                            label="Gênero*"
                             value={formData.gender}
                             onChange={handleInputChange}
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            SelectProps={{
+                              MenuProps: {
+                                PaperProps: {
+                                  sx: {
+                                    backgroundColor: 'white',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                  },
+                                },
+                              },
+                            }}
+                            sx={textFieldSx}
                           >
-                            <option value="">Selecione o gênero</option>
-                            <option value="Masculino">Masculino</option>
-                            <option value="Feminino">Feminino</option>
-                            <option value="Outro">Outro</option>
-                          </select>
+                            <MenuItem value="">Selecione o gênero</MenuItem>
+                            <MenuItem value="Masculino">Masculino</MenuItem>
+                            <MenuItem value="Feminino">Feminino</MenuItem>
+                            <MenuItem value="Outro">Outro</MenuItem>
+                          </TextField>
                         </div>
                       </div>
 
@@ -761,79 +825,126 @@ const PatientRegister: React.FC = () => {
                         <div className="form-group document-type-number">
                           <div className="document-container">
                             <div className="form-subgroup">
-                              <label htmlFor="documentType">Tipo de Documento*</label>
-                              <select
+                              <TextField
+                                select
+                                fullWidth
+                                size="small"
                                 id="documentType"
                                 name="documentType"
+                                label="Tipo de Documento*"
                                 value={formData.documentType}
                                 onChange={handleInputChange}
-                                className="document-type-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                SelectProps={{
+                                  MenuProps: {
+                                    PaperProps: {
+                                      sx: {
+                                        backgroundColor: 'white',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                      },
+                                    },
+                                  },
+                                }}
+                                sx={textFieldSx}
                               >
-                                <option value="CPF">CPF</option>
-                                <option value="RG">RG</option>
-                                <option value="CNH">CNH</option>
-                                <option value="Passaporte">Passaporte</option>
-                              </select>
+                                <MenuItem value="CPF">CPF</MenuItem>
+                                <MenuItem value="RG">RG</MenuItem>
+                                <MenuItem value="CNH">CNH</MenuItem>
+                                <MenuItem value="Passaporte">Passaporte</MenuItem>
+                              </TextField>
                             </div>
                             <div className="form-subgroup">
-                              <label htmlFor="document">Documento*</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="document"
                                 name="document"
+                                label="Documento*"
                                 value={formData.document}
                                 onChange={handleInputChange}
                                 placeholder="000.000.000-00"
-                                className="document-number-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                           </div>
                         </div>
                         <div className="form-group">
-                          <label htmlFor="expeditorOrgan">Órgão Expedidor</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="expeditorOrgan"
                             name="expeditorOrgan"
+                            label="Órgão Expedidor"
                             value={formData.expeditorOrgan}
                             onChange={handleInputChange}
                             placeholder="SSP, DETRAN, etc."
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group country-language">
                           <div className="country-language-container">
                             <div className="form-subgroup">
-                              <label htmlFor="originCountry">País de Origem*</label>
-                              <select
+                              <TextField
+                                select
+                                fullWidth
+                                size="small"
                                 id="originCountry"
                                 name="originCountry"
+                                label="País de Origem*"
                                 value={formData.originCountry}
                                 onChange={handleInputChange}
-                                className="country-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                SelectProps={{
+                                  MenuProps: {
+                                    PaperProps: {
+                                      sx: {
+                                        backgroundColor: 'white',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                      },
+                                    },
+                                  },
+                                }}
+                                sx={textFieldSx}
                               >
-                                <option value="Brasil">Brasil</option>
-                                <option value="Argentina">Argentina</option>
-                                <option value="Estados Unidos">Estados Unidos</option>
-                              </select>
+                                <MenuItem value="Brasil">Brasil</MenuItem>
+                                <MenuItem value="Argentina">Argentina</MenuItem>
+                                <MenuItem value="Estados Unidos">Estados Unidos</MenuItem>
+                              </TextField>
                             </div>
                             <div className="form-subgroup">
-                              <label htmlFor="nativeLanguage">Idioma Nativo*</label>
-                              <select
+                              <TextField
+                                select
+                                fullWidth
+                                size="small"
                                 id="nativeLanguage"
                                 name="nativeLanguage"
+                                label="Idioma Nativo*"
                                 value={formData.nativeLanguage}
                                 onChange={handleInputChange}
-                                className="language-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                SelectProps={{
+                                  MenuProps: {
+                                    PaperProps: {
+                                      sx: {
+                                        backgroundColor: 'white',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                      },
+                                    },
+                                  },
+                                }}
+                                sx={textFieldSx}
                               >
-                                <option value="Português">Português</option>
-                                <option value="Inglês">Inglês</option>
-                                <option value="Espanhol">Espanhol</option>
-                              </select>
+                                <MenuItem value="Português">Português</MenuItem>
+                                <MenuItem value="Inglês">Inglês</MenuItem>
+                                <MenuItem value="Espanhol">Espanhol</MenuItem>
+                              </TextField>
                             </div>
                           </div>
                         </div>
@@ -842,72 +953,63 @@ const PatientRegister: React.FC = () => {
                       {/* Terceira linha: Responsabilidade, Telefone + Email */}
                       <div className="form-row">
                         <div className="form-group">
-                          <label>É o próprio responsável?*</label>
-                          <div className="radio-group">
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isResponsible"
-                                value="true"
-                                checked={formData.isResponsible === true}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isResponsible', value: 'true' }
-                                })}
-                              />
-                              <span>Sim</span>
-                            </label>
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isResponsible"
-                                value="false"
-                                checked={formData.isResponsible === false}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isResponsible', value: 'false' }
-                                })}
-                              />
-                              <span>Não</span>
-                            </label>
-                          </div>
-                          {errors.isResponsible && <span className="error-message">{errors.isResponsible}</span>}
+                          <FormControl component="fieldset" error={!!errors.isResponsible}>
+                            <FormLabel component="legend" sx={{ fontSize: '0.95rem', color: '#6c757d', mb: 0.5 }}>
+                              É o próprio responsável?*
+                            </FormLabel>
+                            <RadioGroup
+                              row
+                              name="isResponsible"
+                              value={formData.isResponsible.toString()}
+                              onChange={(e) => handleInputChange({
+                                ...e,
+                                target: { ...e.target, name: 'isResponsible', value: e.target.value }
+                              })}
+                            >
+                              <FormControlLabel value="true" control={<Radio size="small" />} label="Sim" />
+                              <FormControlLabel value="false" control={<Radio size="small" />} label="Não" />
+                            </RadioGroup>
+                            {errors.isResponsible && <Typography variant="caption" color="error">{errors.isResponsible}</Typography>}
+                          </FormControl>
                         </div>
                         <div className="form-group">
-                          <label htmlFor="phone">
-                            Telefone (Whatsapp){formData.isResponsible ? '*' : ''}
-                          </label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="phone"
                             name="phone"
+                            label={`Telefone (Whatsapp)${formData.isResponsible ? '*' : ''}`}
                             value={formatPhone(formData.phone)}
                             onChange={(e) => handleInputChange({
                               ...e,
                               target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
                             })}
                             placeholder="(11) 99999-9999"
-                            maxLength={15}
-                            className={errors.phone ? 'error' : ''}
+                            inputProps={{ maxLength: 15 }}
+                            error={!!errors.phone}
+                            helperText={errors.phone}
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
-                          {errors.phone && <span className="error-message">{errors.phone}</span>}
                         </div>
                         <div className="form-group">
-                          <label htmlFor="email">
-                            E-mail{formData.isResponsible ? '*' : ''}
-                          </label>
-                          <input
+                          <TextField
+                            fullWidth
+                            size="small"
                             type="email"
                             id="email"
                             name="email"
+                            label={`E-mail${formData.isResponsible ? '*' : ''}`}
                             value={formData.email}
                             onChange={handleInputChange}
                             placeholder="email@exemplo.com"
-                            className={errors.email ? 'error' : ''}
+                            error={!!errors.email}
+                            helperText={errors.email}
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
-                          {errors.email && <span className="error-message">{errors.email}</span>}
                         </div>
                       </div>
 
@@ -1077,75 +1179,85 @@ const PatientRegister: React.FC = () => {
                       {/* CEP e Logradouro na primeira linha */}
                       <div className="form-row">
                         <div className="form-group">
-                          <label htmlFor="cep">CEP*</label>
-                          <div className="cep-input-container">
-                            <input
-                              type="text"
-                              id="cep"
-                              name="cep"
-                              value={formatCep(formData.cep)}
-                              onChange={(e) => {
-                                const rawValue = e.target.value;
-                                const cep = rawValue.replace(/\D/g, '');
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="cep"
+                            name="cep"
+                            label="CEP*"
+                            value={formatCep(formData.cep)}
+                            onChange={(e) => {
+                              const rawValue = e.target.value;
+                              const cep = rawValue.replace(/\D/g, '');
 
-                                // Permitir apenas 8 dígitos
-                                if (cep.length <= 8) {
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    cep: cep
-                                  }));
+                              // Permitir apenas 8 dígitos
+                              if (cep.length <= 8) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  cep: cep
+                                }));
 
-                                  // Auto-busca quando CEP completo
-                                  if (cep.length === 8) {
-                                    handleCepSearch(cep);
-                                  }
+                                // Auto-busca quando CEP completo
+                                if (cep.length === 8) {
+                                  handleCepSearch(cep);
                                 }
-                              }}
-                              placeholder="00000-000"
-                              maxLength={9}
-                              disabled={!canEdit}
-                            />
-                            {cepLoading && <span className="cep-loading"><Search fontSize="small" /></span>}
-                          </div>
+                              }
+                            }}
+                            placeholder="00000-000"
+                            inputProps={{ maxLength: 9 }}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            InputProps={{
+                              endAdornment: cepLoading && <CircularProgress size={20} />
+                            }}
+                            sx={textFieldSx}
+                          />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="address">Logradouro*</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="address"
                             name="address"
+                            label="Logradouro*"
                             value={formData.address}
                             onChange={handleInputChange}
                             placeholder="Rua, Avenida, etc."
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group address-number-complement">
                           <div className="number-complement-container">
                             <div className="form-subgroup">
-                              <label htmlFor="number">Número*</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="number"
                                 name="number"
+                                label="Número*"
                                 value={formData.number}
                                 onChange={handleInputChange}
                                 placeholder="123"
-                                className="number-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                             <div className="form-subgroup">
-                              <label htmlFor="complement">Complemento</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="complement"
                                 name="complement"
+                                label="Complemento"
                                 value={formData.complement}
                                 onChange={handleInputChange}
                                 placeholder="Apto, Bloco, etc."
-                                className="complement-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                           </div>
@@ -1155,67 +1267,88 @@ const PatientRegister: React.FC = () => {
                       {/* Bairro, Cidade, UF */}
                       <div className="form-row">
                         <div className="form-group">
-                          <label htmlFor="neighborhood">Bairro*</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="neighborhood"
                             name="neighborhood"
+                            label="Bairro*"
                             value={formData.neighborhood}
                             onChange={handleInputChange}
                             placeholder="Nome do bairro"
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="city">Cidade*</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="city"
                             name="city"
+                            label="Cidade*"
                             value={formData.city}
                             onChange={handleInputChange}
                             placeholder="Nome da cidade"
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="uf">UF*</label>
-                          <select
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
                             id="uf"
                             name="uf"
+                            label="UF*"
                             value={formData.uf}
                             onChange={handleInputChange}
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            SelectProps={{
+                              MenuProps: {
+                                PaperProps: {
+                                  sx: {
+                                    backgroundColor: 'white',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                  },
+                                },
+                              },
+                            }}
+                            sx={textFieldSx}
                           >
-                            <option value="">Selecione</option>
-                            <option value="AC">AC</option>
-                            <option value="AL">AL</option>
-                            <option value="AP">AP</option>
-                            <option value="AM">AM</option>
-                            <option value="BA">BA</option>
-                            <option value="CE">CE</option>
-                            <option value="DF">DF</option>
-                            <option value="ES">ES</option>
-                            <option value="GO">GO</option>
-                            <option value="MA">MA</option>
-                            <option value="MT">MT</option>
-                            <option value="MS">MS</option>
-                            <option value="MG">MG</option>
-                            <option value="PA">PA</option>
-                            <option value="PB">PB</option>
-                            <option value="PR">PR</option>
-                            <option value="PE">PE</option>
-                            <option value="PI">PI</option>
-                            <option value="RJ">RJ</option>
-                            <option value="RN">RN</option>
-                            <option value="RS">RS</option>
-                            <option value="RO">RO</option>
-                            <option value="RR">RR</option>
-                            <option value="SC">SC</option>
-                            <option value="SP">SP</option>
-                            <option value="SE">SE</option>
-                            <option value="TO">TO</option>
-                          </select>
+                            <MenuItem value="">Selecione</MenuItem>
+                            <MenuItem value="AC">AC</MenuItem>
+                            <MenuItem value="AL">AL</MenuItem>
+                            <MenuItem value="AP">AP</MenuItem>
+                            <MenuItem value="AM">AM</MenuItem>
+                            <MenuItem value="BA">BA</MenuItem>
+                            <MenuItem value="CE">CE</MenuItem>
+                            <MenuItem value="DF">DF</MenuItem>
+                            <MenuItem value="ES">ES</MenuItem>
+                            <MenuItem value="GO">GO</MenuItem>
+                            <MenuItem value="MA">MA</MenuItem>
+                            <MenuItem value="MT">MT</MenuItem>
+                            <MenuItem value="MS">MS</MenuItem>
+                            <MenuItem value="MG">MG</MenuItem>
+                            <MenuItem value="PA">PA</MenuItem>
+                            <MenuItem value="PB">PB</MenuItem>
+                            <MenuItem value="PR">PR</MenuItem>
+                            <MenuItem value="PE">PE</MenuItem>
+                            <MenuItem value="PI">PI</MenuItem>
+                            <MenuItem value="RJ">RJ</MenuItem>
+                            <MenuItem value="RN">RN</MenuItem>
+                            <MenuItem value="RS">RS</MenuItem>
+                            <MenuItem value="RO">RO</MenuItem>
+                            <MenuItem value="RR">RR</MenuItem>
+                            <MenuItem value="SC">SC</MenuItem>
+                            <MenuItem value="SP">SP</MenuItem>
+                            <MenuItem value="SE">SE</MenuItem>
+                            <MenuItem value="TO">TO</MenuItem>
+                          </TextField>
                         </div>
                       </div>
 
@@ -1226,16 +1359,19 @@ const PatientRegister: React.FC = () => {
 
                       <div className="form-row">
                         <div className="form-group observations-group">
-                          <label htmlFor="observations">Observações Gerais</label>
-                          <textarea
+                          <TextField
+                            fullWidth
+                            multiline
+                            rows={4}
                             id="observations"
                             name="observations"
+                            label="Observações Gerais"
                             value={formData.observations}
                             onChange={handleInputChange}
-                            rows={4}
                             placeholder="Observações importantes sobre o paciente, medicações, alergias, etc."
-                            className="observations-textarea"
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                       </div>
@@ -1243,66 +1379,72 @@ const PatientRegister: React.FC = () => {
                       {/* Linha com 3 colunas: Canal de entrada, Indicado por e Status + Botões */}
                       <div className="form-row">
                         <div className="form-group">
-                          <label htmlFor="entryChannel">Canal de entrada</label>
-                          <select
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
                             id="entryChannel"
                             name="entryChannel"
+                            label="Canal de entrada"
                             value={formData.entryChannel}
                             onChange={handleInputChange}
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            SelectProps={{
+                              MenuProps: {
+                                PaperProps: {
+                                  sx: {
+                                    backgroundColor: 'white',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                  },
+                                },
+                              },
+                            }}
+                            sx={textFieldSx}
                           >
-                            <option value="">Selecione</option>
-                            <option value="Instagram">Instagram</option>
-                            <option value="Facebook">Facebook</option>
-                            <option value="Google">Google</option>
-                            <option value="Site">Site</option>
-                            <option value="Indicação profissional">Indicação profissional</option>
-                            <option value="Indicação de conhecido">Indicação de conhecido</option>
-                            <option value="Outros">Outros</option>
-                          </select>
+                            <MenuItem value="">Selecione</MenuItem>
+                            <MenuItem value="Instagram">Instagram</MenuItem>
+                            <MenuItem value="Facebook">Facebook</MenuItem>
+                            <MenuItem value="Google">Google</MenuItem>
+                            <MenuItem value="Site">Site</MenuItem>
+                            <MenuItem value="Indicação profissional">Indicação profissional</MenuItem>
+                            <MenuItem value="Indicação de conhecido">Indicação de conhecido</MenuItem>
+                            <MenuItem value="Outros">Outros</MenuItem>
+                          </TextField>
                         </div>
                         <div className="form-group">
-                          <label htmlFor="referredBy">Indicado por</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="referredBy"
                             name="referredBy"
+                            label="Indicado por"
                             value={formData.referredBy || ''}
                             onChange={handleInputChange}
                             placeholder="Nome da pessoa ou instituição que indicou o paciente"
                             disabled={!canEdit || !formData.entryChannel.includes('Indicação')}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group">
-                          <label>Status do Cadastro</label>
-                          <div className="radio-group">
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isComplete"
-                                value="true"
-                                checked={formData.isComplete === true}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isComplete', value: 'true' }
-                                })}
-                              />
-                              <span>Completo</span>
-                            </label>
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isComplete"
-                                value="false"
-                                checked={formData.isComplete === false}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isComplete', value: 'false' }
-                                })}
-                              />
-                              <span>Incompleto</span>
-                            </label>
-                          </div>
+                          <FormControl component="fieldset">
+                            <FormLabel component="legend" sx={{ fontSize: '0.95rem', color: '#6c757d', mb: 0.5 }}>
+                              Status do Cadastro
+                            </FormLabel>
+                            <RadioGroup
+                              row
+                              name="isComplete"
+                              value={formData.isComplete.toString()}
+                              onChange={(e) => handleInputChange({
+                                ...e,
+                                target: { ...e.target, name: 'isComplete', value: e.target.value }
+                              })}
+                            >
+                              <FormControlLabel value="true" control={<Radio size="small" />} label="Completo" />
+                              <FormControlLabel value="false" control={<Radio size="small" />} label="Incompleto" />
+                            </RadioGroup>
+                          </FormControl>
                         </div>
                       </div>
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { TextField } from '@mui/material';
 
 // Interface para os dados do agendamento
 export interface AppointmentData {
@@ -466,19 +467,155 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               {/* Data/Hora Inicial */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <div className="form-group">
-                  <label>Data Inicial</label>
-                  <input
+                  <TextField
+                    label="Data Inicial"
                     type="date"
                     value={formData.startDate}
                     onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    fullWidth
+                    size="small"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        height: '40px',
+                        fontSize: '1rem',
+                        backgroundColor: 'white',
+                        '& fieldset': {
+                          borderColor: '#ced4da',
+                          borderWidth: '1px',
+                          legend: {
+                            maxWidth: '100%',
+                          },
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#ced4da',
+                          borderWidth: '1px',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#03B4C6',
+                          borderWidth: '1px',
+                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                        },
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        padding: '0.375rem 0.5rem',
+                        color: '#495057',
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                        color: '#6c757d',
+                        backgroundColor: 'white',
+                        paddingLeft: '4px',
+                        paddingRight: '4px',
+                        '&.Mui-focused': {
+                          color: '#03B4C6',
+                        },
+                      },
+                    }}
                   />
                 </div>
                 <div className="form-group">
-                  <label>Horário</label>
-                  <input
+                  <TextField
+                    label="Horário"
                     type="time"
                     value={formData.startTime}
                     onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                    fullWidth
+                    size="small"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        height: '40px',
+                        fontSize: '1rem',
+                        backgroundColor: 'white',
+                        '& fieldset': {
+                          borderColor: '#ced4da',
+                          borderWidth: '1px',
+                          legend: {
+                            maxWidth: '100%',
+                          },
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#ced4da',
+                          borderWidth: '1px',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#03B4C6',
+                          borderWidth: '1px',
+                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                        },
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        padding: '0.375rem 0.5rem',
+                        color: '#495057',
+                        '&::-webkit-calendar-picker-indicator': {
+                          filter: 'invert(0.5)',
+                        },
+                        '&::-webkit-datetime-edit-fields-wrapper': {
+                          padding: 0,
+                          border: 'none',
+                          outline: 'none',
+                        },
+                        '&::-webkit-datetime-edit': {
+                          padding: 0,
+                          border: 'none',
+                          outline: 'none',
+                        },
+                        '&::-webkit-datetime-edit-hour-field': {
+                          padding: '2px',
+                          border: 'none',
+                          outline: 'none',
+                          color: '#495057',
+                          backgroundColor: 'transparent',
+                          '&:focus': {
+                            backgroundColor: 'transparent',
+                            outline: 'none',
+                            border: 'none',
+                          },
+                        },
+                        '&::-webkit-datetime-edit-minute-field': {
+                          padding: '2px',
+                          border: 'none',
+                          outline: 'none',
+                          color: '#495057',
+                          backgroundColor: 'transparent',
+                          '&:focus': {
+                            backgroundColor: 'transparent',
+                            outline: 'none',
+                            border: 'none',
+                          },
+                        },
+                        '&::-webkit-datetime-edit-ampm-field': {
+                          padding: '2px',
+                          border: 'none',
+                          outline: 'none',
+                          color: '#495057',
+                          backgroundColor: 'transparent',
+                          '&:focus': {
+                            backgroundColor: 'transparent',
+                            outline: 'none',
+                            border: 'none',
+                          },
+                        },
+                        '&:focus': {
+                          outline: 'none',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                        color: '#6c757d',
+                        backgroundColor: 'white',
+                        paddingLeft: '4px',
+                        paddingRight: '4px',
+                        '&.Mui-focused': {
+                          color: '#03B4C6',
+                        },
+                      },
+                    }}
                   />
                 </div>
               </div>
@@ -486,63 +623,210 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               {/* Data/Hora Final */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <div className="form-group">
-                  <label>Data Final</label>
-                  <input
+                  <TextField
+                    label="Data Final"
                     type="date"
                     value={formData.endDate}
                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    fullWidth
+                    size="small"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        height: '40px',
+                        fontSize: '1rem',
+                        backgroundColor: 'white',
+                        '& fieldset': {
+                          borderColor: '#ced4da',
+                          borderWidth: '1px',
+                          legend: {
+                            maxWidth: '100%',
+                          },
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#ced4da',
+                          borderWidth: '1px',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#03B4C6',
+                          borderWidth: '1px',
+                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                        },
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        padding: '0.375rem 0.5rem',
+                        color: '#495057',
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                        color: '#6c757d',
+                        backgroundColor: 'white',
+                        paddingLeft: '4px',
+                        paddingRight: '4px',
+                        '&.Mui-focused': {
+                          color: '#03B4C6',
+                        },
+                      },
+                    }}
                   />
                 </div>
                 <div className="form-group">
-                  <label>Horário Final</label>
-                  <input
+                  <TextField
+                    label="Horário Final"
                     type="time"
                     value={formData.endTime}
                     onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                    fullWidth
+                    size="small"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        height: '40px',
+                        fontSize: '1rem',
+                        backgroundColor: 'white',
+                        '& fieldset': {
+                          borderColor: '#ced4da',
+                          borderWidth: '1px',
+                          legend: {
+                            maxWidth: '100%',
+                          },
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#ced4da',
+                          borderWidth: '1px',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#03B4C6',
+                          borderWidth: '1px',
+                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                        },
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        padding: '0.375rem 0.5rem',
+                        color: '#495057',
+                        '&::-webkit-calendar-picker-indicator': {
+                          filter: 'invert(0.5)',
+                        },
+                        '&::-webkit-datetime-edit-fields-wrapper': {
+                          padding: 0,
+                          border: 'none',
+                          outline: 'none',
+                        },
+                        '&::-webkit-datetime-edit': {
+                          padding: 0,
+                          border: 'none',
+                          outline: 'none',
+                        },
+                        '&::-webkit-datetime-edit-hour-field': {
+                          padding: '2px',
+                          border: 'none',
+                          outline: 'none',
+                          color: '#495057',
+                          backgroundColor: 'transparent',
+                          '&:focus': {
+                            backgroundColor: 'transparent',
+                            outline: 'none',
+                            border: 'none',
+                          },
+                        },
+                        '&::-webkit-datetime-edit-minute-field': {
+                          padding: '2px',
+                          border: 'none',
+                          outline: 'none',
+                          color: '#495057',
+                          backgroundColor: 'transparent',
+                          '&:focus': {
+                            backgroundColor: 'transparent',
+                            outline: 'none',
+                            border: 'none',
+                          },
+                        },
+                        '&::-webkit-datetime-edit-ampm-field': {
+                          padding: 0,
+                          color: '#495057',
+                          '&:focus': {
+                            backgroundColor: 'transparent',
+                            outline: 'none',
+                          },
+                        },
+                        '&:focus': {
+                          outline: 'none',
+                        },
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                        color: '#6c757d',
+                        backgroundColor: 'white',
+                        paddingLeft: '4px',
+                        paddingRight: '4px',
+                        '&.Mui-focused': {
+                          color: '#03B4C6',
+                        },
+                      },
+                    }}
                   />
                 </div>
               </div>
 
               {/* Tipo de agendamento */}
-              <div className="form-group">
-                <label>Tipo de agendamento</label>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+              <div style={{ marginBottom: '0.875rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, color: '#4A5568', fontSize: '0.8rem' }}>Tipo de agendamento</label>
+                <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'center', flexWrap: 'nowrap' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
                     <input
                       type="radio"
                       name="appointmentType"
                       value="unique"
                       checked={formData.appointmentType === 'unique'}
-                      onChange={(e) => setFormData({ ...formData, appointmentType: e.target.value as 'unique' | 'recurring' })}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        appointmentType: e.target.value as 'unique' | 'recurring',
+                        recurrenceType: '',
+                        maxOccurrences: 0
+                      })}
+                      style={{ marginRight: '0.25rem' }}
                     />
                     Único
                   </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
                     <input
                       type="radio"
                       name="appointmentType"
                       value="recurring"
                       checked={formData.appointmentType === 'recurring'}
-                      onChange={(e) => setFormData({ ...formData, appointmentType: e.target.value as 'unique' | 'recurring' })}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        appointmentType: e.target.value as 'unique' | 'recurring',
+                        maxOccurrences: formData.maxOccurrences < 2 ? 2 : formData.maxOccurrences
+                      })}
+                      style={{ marginRight: '0.25rem' }}
                     />
                     Recorrente
                   </label>
-                  {formData.appointmentType === 'recurring' && (
-                    <input
-                      type="number"
-                      min="1"
-                      placeholder="Qtde máxima"
-                      value={formData.maxOccurrences}
-                      onChange={(e) => setFormData({ ...formData, maxOccurrences: Number(e.target.value) })}
-                      style={{
-                        padding: '0.5rem',
-                        border: '1px solid #ced4da',
-                        borderRadius: '6px',
-                        width: '100px',
-                        fontSize: '1rem'
-                      }}
-                    />
-                  )}
+                  <input
+                    type="number"
+                    min="2"
+                    max="100"
+                    placeholder="Qtde máxima"
+                    value={formData.maxOccurrences}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      setFormData({ ...formData, maxOccurrences: value > 100 ? 100 : value });
+                    }}
+                    style={{
+                      padding: '0.375rem 0.5rem',
+                      border: '1px solid #ced4da',
+                      borderRadius: '6px',
+                      width: '120px',
+                      fontSize: '0.9rem',
+                      flexShrink: 0,
+                      visibility: formData.appointmentType === 'recurring' ? 'visible' : 'hidden'
+                    }}
+                  />
                 </div>
 
                 {/* Opções de recorrência */}
@@ -555,44 +839,48 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                       marginBottom: '0.25rem',
                       fontWeight: '500'
                     }}>Periodicidade</label>
-                    <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'center', flexWrap: 'nowrap' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
                         <input
                           type="radio"
                           name="recurrenceType"
                           value="daily"
                           checked={formData.recurrenceType === 'daily'}
                           onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
+                          style={{ marginRight: '0.25rem' }}
                         />
                         Diário
                       </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
                         <input
                           type="radio"
                           name="recurrenceType"
                           value="weekly"
                           checked={formData.recurrenceType === 'weekly'}
                           onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
+                          style={{ marginRight: '0.25rem' }}
                         />
                         Semanal
                       </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
                         <input
                           type="radio"
                           name="recurrenceType"
                           value="biweekly"
                           checked={formData.recurrenceType === 'biweekly'}
                           onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
+                          style={{ marginRight: '0.25rem' }}
                         />
                         Quinzenal
                       </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.9rem' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
                         <input
                           type="radio"
                           name="recurrenceType"
                           value="monthly"
                           checked={formData.recurrenceType === 'monthly'}
                           onChange={(e) => setFormData({ ...formData, recurrenceType: e.target.value })}
+                          style={{ marginRight: '0.25rem' }}
                         />
                         Mensal
                       </label>

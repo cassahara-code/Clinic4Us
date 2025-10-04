@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add, FilterAltOff, FirstPage, ChevronLeft, ChevronRight, LastPage } from '@mui/icons-material';
+import { Delete, Edit, Add, FilterAltOff } from '@mui/icons-material';
 import ConfirmModal from "../components/modals/ConfirmModal";
 import ProfileModal, { ProfileData } from "../components/modals/ProfileModal";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import { FaqButton } from "../components/FaqButton";
-import Pagination from "../components/Pagination";
+import StandardPagination from "../components/Pagination/StandardPagination";
 
 interface MenuItemProps {
   label: string;
@@ -359,10 +359,9 @@ const AdminProfiles: React.FC = () => {
 
       <main style={{
         padding: '1rem',
-        paddingTop: '0.25rem',
         minHeight: 'calc(100vh - 120px)',
         background: '#f8f9fa',
-        marginTop: '20px'
+        marginTop: '85px'
       }}>
         <div style={{
           width: '100%',
@@ -500,20 +499,17 @@ const AdminProfiles: React.FC = () => {
 
           {/* Paginação superior */}
           <div style={{
-            background: 'white',
             borderRadius: '12px',
-            padding: '1rem',
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e9ecef',
-            marginBottom: '1rem'
+            marginBottom: '1rem',
+            overflow: 'hidden'
           }}>
-            <Pagination
+            <StandardPagination
               currentPage={currentPage}
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
               totalItems={filteredAndSortedProfiles.length}
-              itemLabel="perfis"
               onPageChange={(page) => {
                 setCurrentPage(page);
                 setTimeout(scrollToTop, 100);
@@ -601,20 +597,17 @@ const AdminProfiles: React.FC = () => {
 
           {/* Paginação inferior */}
           <div style={{
-            background: 'white',
             borderRadius: '12px',
-            padding: '1rem',
             boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
             border: '1px solid #e9ecef',
-            marginTop: '1rem'
+            marginTop: '1rem',
+            overflow: 'hidden'
           }}>
-            <Pagination
+            <StandardPagination
               currentPage={currentPage}
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
               totalItems={filteredAndSortedProfiles.length}
-              itemLabel="perfis"
               onPageChange={(page) => {
                 setCurrentPage(page);
                 setTimeout(scrollToTop, 100);

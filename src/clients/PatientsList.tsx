@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Person, WhatsApp, CalendarToday, Edit, Warning, Add, Email, Check, Close, Folder, FilterAltOff, FirstPage, ChevronLeft, ChevronRight, LastPage } from '@mui/icons-material';
+import { Delete, Person, WhatsApp, CalendarToday, Warning, Add, Email, Check, Close, Folder, FilterAltOff } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
-import Pagination from "../components/Pagination";
+import { TextField, MenuItem, IconButton, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Button, Tooltip, Box, Pagination, FormControl, Select } from '@mui/material';
+import StandardPagination from "../components/Pagination/StandardPagination";
 
 interface MenuItemProps {
   label: string;
@@ -48,7 +49,7 @@ const PatientsList: React.FC = () => {
 
   // Estados da paginação
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Estado da ordenação
   const [sortField, setSortField] = useState<'name' | 'document' | 'age'>('name');
@@ -57,6 +58,16 @@ const PatientsList: React.FC = () => {
   // Estados do modal de exclusão
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
+  const [hasFilterChanges, setHasFilterChanges] = useState(false);
+
+  // Valores iniciais dos filtros
+  const initialFilters = {
+    searchTerm: '',
+    statusFilter: 'Ativo' as 'Todos' | 'Ativo' | 'Inativo',
+    genderFilter: 'Todos' as 'Todos' | 'Masculino' | 'Feminino' | 'Outro',
+    professionalFilter: 'Selecione',
+    sortOrder: 'asc' as 'asc' | 'desc'
+  };
 
   // Lista de profissionais para filtro
   const professionalsList = [
@@ -238,6 +249,18 @@ const PatientsList: React.FC = () => {
       return sortOrder === 'asc' ? compareValue : -compareValue;
     });
 
+  // Detectar mudanças nos filtros
+  useEffect(() => {
+    const hasChanges =
+      searchTerm !== initialFilters.searchTerm ||
+      statusFilter !== initialFilters.statusFilter ||
+      genderFilter !== initialFilters.genderFilter ||
+      professionalFilter !== initialFilters.professionalFilter ||
+      sortOrder !== initialFilters.sortOrder;
+
+    setHasFilterChanges(hasChanges);
+  }, [searchTerm, statusFilter, genderFilter, professionalFilter, sortOrder]);
+
   // Calcular paginação
   const totalPages = Math.ceil(filteredAndSortedPatients.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -316,12 +339,13 @@ const PatientsList: React.FC = () => {
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setStatusFilter('Ativo');
-    setGenderFilter('Todos');
-    setProfessionalFilter('Selecione');
-    setSortOrder('asc');
+    setSearchTerm(initialFilters.searchTerm);
+    setStatusFilter(initialFilters.statusFilter);
+    setGenderFilter(initialFilters.genderFilter);
+    setProfessionalFilter(initialFilters.professionalFilter);
+    setSortOrder(initialFilters.sortOrder);
     setCurrentPage(1);
+    setHasFilterChanges(false);
   };
 
   const handleAddPatient = () => {
@@ -444,197 +468,302 @@ const PatientsList: React.FC = () => {
             {/* Título da Lista de Pacientes */}
             <div className="page-header-container">
               <div className="page-header-content">
-                <h1 className="page-header-title">Lista de Pacientes</h1>
-                <p className="page-header-description">
+                <Typography variant="h4" className="page-header-title" sx={{ fontSize: '1.3rem', mb: 1 }}>
+                  Lista de Pacientes
+                </Typography>
+                <Typography variant="body2" className="page-header-description">
                   Visualize, pesquise e gerencie todos os pacientes cadastrados no sistema.
-                </p>
+                </Typography>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <FaqButton />
-                <button
+                <IconButton
                   onClick={handleAddPatient}
                   title="Adicionar novo paciente"
-                  className="btn-add"
+                  sx={{
+                    backgroundColor: '#48bb78',
+                    color: 'white',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '6px',
+                    '&:hover': {
+                      backgroundColor: '#38a169',
+                    }
+                  }}
                 >
                   <Add />
-                </button>
+                </IconButton>
               </div>
+            </div>
           </div>
 
-          {/* Filtros da lista de pacientes */}
-          <div className="schedule-filters" style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginBottom: '1rem'
-          }}>
+          {/* Container principal: Filtros + Paginação + Tabela */}
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: '12px',
+              padding: '1.5rem',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+              border: '1px solid #e9ecef',
+            }}
+          >
+            {/* Filtros da lista de pacientes */}
+            <Box sx={{ mb: 3, borderBottom: 'none' }}>
             <div className="schedule-filters-grid" style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
               gap: '0.75rem',
-              marginBottom: '1rem'
+              marginBottom: '0.5rem'
             }}>
               {/* Busca por nome */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Nome do Paciente</label>
-                <input
-                  type="text"
-                  placeholder="Buscar"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
+              <TextField
+                label="Nome do Paciente"
+                placeholder="Buscar"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                size="small"
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
                     height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-              </div>
+                    '& fieldset': {
+                      borderColor: '#ced4da',
+                      legend: {
+                        maxWidth: '100%',
+                      },
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ced4da',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#03B4C6',
+                      boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: '0.95rem',
+                    color: '#6c757d',
+                    backgroundColor: 'white',
+                    paddingLeft: '4px',
+                    paddingRight: '4px',
+                    '&.Mui-focused': {
+                      color: '#03B4C6',
+                    },
+                  },
+                }}
+              />
 
               {/* Status */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Status</label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
-                  style={{
-                    minWidth: '120px',
-                    width: '100%',
-                    paddingRight: '2rem',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
+              <TextField
+                select
+                label="Status"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                size="small"
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                      },
+                    },
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    },
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
+                    },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
                     height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="Ativo">Ativo</option>
-                  <option value="Todos">Todos</option>
-                  <option value="Inativo">Inativo</option>
-                </select>
-              </div>
+                    fontSize: '1rem',
+                    backgroundColor: 'white',
+                    '& fieldset': {
+                      borderColor: '#ced4da',
+                      legend: {
+                        maxWidth: '100%',
+                      },
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ced4da',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#03B4C6',
+                      boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                    },
+                  },
+                  '& .MuiSelect-select': {
+                    padding: '0.375rem 0.5rem',
+                    color: '#495057',
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: '0.95rem',
+                    color: '#6c757d',
+                    backgroundColor: 'white',
+                    paddingLeft: '4px',
+                    paddingRight: '4px',
+                    '&.Mui-focused': {
+                      color: '#03B4C6',
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="Ativo">Ativo</MenuItem>
+                <MenuItem value="Todos">Todos</MenuItem>
+                <MenuItem value="Inativo">Inativo</MenuItem>
+              </TextField>
 
               {/* Gênero */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Gênero</label>
-                <select
-                  value={genderFilter}
-                  onChange={(e) => setGenderFilter(e.target.value as any)}
-                  style={{
-                    minWidth: '120px',
-                    width: '100%',
-                    paddingRight: '2rem',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
+              <TextField
+                select
+                label="Gênero"
+                value={genderFilter}
+                onChange={(e) => setGenderFilter(e.target.value as any)}
+                size="small"
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                      },
+                    },
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    },
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
+                    },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
                     height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="Todos">Todos</option>
-                  <option value="Masculino">Masculino</option>
-                  <option value="Feminino">Feminino</option>
-                  <option value="Outro">Outro</option>
-                </select>
-              </div>
+                    fontSize: '1rem',
+                    backgroundColor: 'white',
+                    '& fieldset': {
+                      borderColor: '#ced4da',
+                      legend: {
+                        maxWidth: '100%',
+                      },
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ced4da',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#03B4C6',
+                      boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                    },
+                  },
+                  '& .MuiSelect-select': {
+                    padding: '0.375rem 0.5rem',
+                    color: '#495057',
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: '0.95rem',
+                    color: '#6c757d',
+                    backgroundColor: 'white',
+                    paddingLeft: '4px',
+                    paddingRight: '4px',
+                    '&.Mui-focused': {
+                      color: '#03B4C6',
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="Todos">Todos</MenuItem>
+                <MenuItem value="Masculino">Masculino</MenuItem>
+                <MenuItem value="Feminino">Feminino</MenuItem>
+                <MenuItem value="Outro">Outro</MenuItem>
+              </TextField>
 
               {/* Filtro por profissional */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Filtro por profissional</label>
-                <select
-                  value={professionalFilter}
-                  onChange={(e) => setProfessionalFilter(e.target.value)}
-                  style={{
-                    minWidth: '120px',
-                    width: '100%',
-                    paddingRight: '2rem',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
+              <TextField
+                select
+                label="Filtro por profissional"
+                value={professionalFilter}
+                onChange={(e) => setProfessionalFilter(e.target.value)}
+                size="small"
+                fullWidth
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                SelectProps={{
+                  MenuProps: {
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                      },
+                    },
+                    anchorOrigin: {
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    },
+                    transformOrigin: {
+                      vertical: 'top',
+                      horizontal: 'left',
+                    },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
                     height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="Selecione">Selecione</option>
-                  {professionalsList.map((professional, index) => (
-                    <option key={index} value={professional}>
-                      {professional}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                    fontSize: '1rem',
+                    backgroundColor: 'white',
+                    '& fieldset': {
+                      borderColor: '#ced4da',
+                      legend: {
+                        maxWidth: '100%',
+                      },
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#ced4da',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#03B4C6',
+                      boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                    },
+                  },
+                  '& .MuiSelect-select': {
+                    padding: '0.375rem 0.5rem',
+                    color: '#495057',
+                    fontSize: '1rem',
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: '0.95rem',
+                    color: '#6c757d',
+                    backgroundColor: 'white',
+                    paddingLeft: '4px',
+                    paddingRight: '4px',
+                    '&.Mui-focused': {
+                      color: '#03B4C6',
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="Selecione">Selecione</MenuItem>
+                {professionalsList.map((professional, index) => (
+                  <MenuItem key={index} value={professional}>
+                    {professional}
+                  </MenuItem>
+                ))}
+              </TextField>
 
               {/* Botão limpar filtros */}
               <div style={{
@@ -642,181 +771,447 @@ const PatientsList: React.FC = () => {
                 alignItems: 'flex-end',
                 paddingBottom: '2px'
               }}>
-                <button
+                <IconButton
                   onClick={clearFilters}
-                  title="Limpar todos os filtros"
-                  className="btn-clear-filters"
+                  disabled={!hasFilterChanges}
+                  title="Limpar filtros"
+                  sx={{
+                    backgroundColor: '#6c757d',
+                    color: 'white',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '4px',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      backgroundColor: '#5a6268',
+                    },
+                    '&:disabled': {
+                      backgroundColor: '#e9ecef',
+                      color: '#adb5bd',
+                      opacity: 0.6,
+                    },
+                  }}
                 >
                   <FilterAltOff fontSize="small" />
-                </button>
+                </IconButton>
               </div>
             </div>
-          </div>
+          </Box>
 
-          {/* Paginação superior */}
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginBottom: '1rem'
-          }}>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
-              totalItems={filteredAndSortedPatients.length}
-              itemLabel="pacientes"
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
+          {/* Paginação + Tabela */}
+            {/* Navegador de páginas - Superior */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                mb: 2,
+                bgcolor: '#f8f9fa',
+                border: 'none',
+                boxShadow: 'none'
               }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
-          </div>
+            >
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPatients.length)} de{' '}
+                  <strong>{filteredAndSortedPatients.length}</strong> pacientes
+                </Typography>
 
-          {/* Lista de pacientes */}
-          <div className="patients-list-container">
-            <div className="patients-table">
-              <div className="patients-table-header">
-                <div className="patients-header-cell">Foto</div>
-                <div
-                  className="patients-header-cell"
-                  style={{ cursor: 'pointer', userSelect: 'none' }}
-                  onClick={() => handleSort('name')}
-                  title="Ordenar por nome"
-                >
-                  Nome do Paciente {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div
-                  className="patients-header-cell"
-                  style={{ cursor: 'pointer', userSelect: 'none' }}
-                  onClick={() => handleSort('document')}
-                  title="Ordenar por documento"
-                >
-                  Documento {sortField === 'document' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div className="patients-header-cell">Nascimento</div>
-                <div
-                  className="patients-header-cell"
-                  style={{ cursor: 'pointer', userSelect: 'none' }}
-                  onClick={() => handleSort('age')}
-                  title="Ordenar por idade"
-                >
-                  Idade {sortField === 'age' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div className="patients-header-cell">Responsável</div>
-                <div className="patients-header-cell">Celular</div>
-                <div className="patients-header-cell">Completo</div>
-                <div className="patients-header-cell" style={{ justifyContent: 'flex-end' }}>Ações</div>
-              </div>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {/* Seletor de itens por página */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                      Itens por página:
+                    </Typography>
+                    <FormControl size="small">
+                      <Select
+                        value={itemsPerPage}
+                        onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                        sx={{
+                          minWidth: 80,
+                          height: '40px',
+                          fontSize: '1rem',
+                          backgroundColor: 'white',
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#ced4da',
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#ced4da',
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#03B4C6',
+                            boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                          },
+                          '& .MuiSelect-select': {
+                            padding: '0.375rem 0.5rem',
+                            color: '#495057',
+                          },
+                        }}
+                      >
+                        <MenuItem value={5}>5</MenuItem>
+                        <MenuItem value={10}>10</MenuItem>
+                        <MenuItem value={15}>15</MenuItem>
+                        <MenuItem value={20}>20</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
 
-              <div className="patients-table-body">
-                {paginatedPatients.map((patient) => (
-                  <div
-                    key={patient.id}
-                    className="patients-table-row"
-                    onClick={() => handlePatientRowClick(patient.id)}
-                    style={{ cursor: 'pointer' }}
+                  {/* Navegação de páginas com Pagination do MUI */}
+                  <Pagination
+                    count={totalPages}
+                    page={currentPage}
+                    onChange={(event, page) => {
+                      setCurrentPage(page);
+                      setTimeout(scrollToTop, 100);
+                    }}
+                    color="primary"
+                    showFirstButton
+                    showLastButton
+                    size="small"
+                    sx={{
+                      '& .MuiPaginationItem-root': {
+                        color: '#495057',
+                        '&.Mui-selected': {
+                          backgroundColor: '#03B4C6',
+                          color: 'white',
+                          '&:hover': {
+                            backgroundColor: '#029AAB',
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Paper>
+
+            {/* Lista de pacientes */}
+            <TableContainer
+              component={Paper}
+              elevation={0}
+              sx={{
+                boxShadow: 'none',
+                border: 0
+              }}
+            >
+            <Table
+              sx={{
+                tableLayout: 'fixed',
+              }}
+            >
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#e9ecef' }}>
+                  <TableCell sx={{ width: '60px', fontWeight: 600, fontSize: '0.875rem', color: '#495057', padding: '12px 16px' }}>
+                    Foto
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      width: 'auto',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      color: '#495057',
+                      padding: '12px 16px',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      '&:hover': {
+                        backgroundColor: '#e9ecef',
+                      }
+                    }}
+                    onClick={() => handleSort('name')}
+                    title="Ordenar por nome"
                   >
-                    <div className="patients-cell patients-photo">
-                      <div className="patient-avatar">
+                    Nome do Paciente {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      width: '130px',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      color: '#495057',
+                      padding: '12px 16px',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      '&:hover': {
+                        backgroundColor: '#e9ecef',
+                      }
+                    }}
+                    onClick={() => handleSort('document')}
+                    title="Ordenar por documento"
+                  >
+                    Documento {sortField === 'document' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                  </TableCell>
+                  <TableCell sx={{ width: '120px', fontWeight: 600, fontSize: '0.875rem', color: '#495057', padding: '12px 16px' }}>
+                    Nascimento
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      width: '80px',
+                      fontWeight: 600,
+                      fontSize: '0.875rem',
+                      color: '#495057',
+                      padding: '12px 16px',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      '&:hover': {
+                        backgroundColor: '#e9ecef',
+                      }
+                    }}
+                    onClick={() => handleSort('age')}
+                    title="Ordenar por idade"
+                  >
+                    Idade {sortField === 'age' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                  </TableCell>
+                  <TableCell sx={{ width: 'auto', fontWeight: 600, fontSize: '0.875rem', color: '#495057', padding: '12px 16px' }}>
+                    Responsável
+                  </TableCell>
+                  <TableCell sx={{ width: '130px', fontWeight: 600, fontSize: '0.875rem', color: '#495057', padding: '12px 16px' }}>
+                    Celular
+                  </TableCell>
+                  <TableCell sx={{ width: '100px', fontWeight: 600, fontSize: '0.875rem', color: '#495057', padding: '12px 16px', textAlign: 'center' }}>
+                    Completo
+                  </TableCell>
+                  <TableCell sx={{ width: '240px', fontWeight: 600, fontSize: '0.875rem', color: '#495057', padding: '12px 16px', textAlign: 'right' }}>
+                    Ações
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedPatients.map((patient, index) => (
+                  <TableRow
+                    key={patient.id}
+                    onClick={() => handlePatientRowClick(patient.id)}
+                    sx={{
+                      cursor: 'pointer',
+                      backgroundColor: index % 2 === 0 ? 'white' : '#fafbfc',
+                      '&:hover': {
+                        backgroundColor: '#f0f9fa',
+                      }
+                    }}
+                  >
+                    <TableCell sx={{ padding: '12px 16px', borderBottom: '1px solid #e9ecef' }}>
+                      <Avatar
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          backgroundColor: '#03B4C6',
+                        }}
+                      >
                         <Person />
-                      </div>
-                    </div>
-                    <div className="patients-cell patients-name" data-label="Nome">
+                      </Avatar>
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem', color: '#495057', padding: '12px 16px', borderBottom: '1px solid #e9ecef' }}>
                       {patient.name}
-                    </div>
-                    <div className="patients-cell patients-document" data-label="Documento">
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem', color: '#495057', padding: '12px 16px', borderBottom: '1px solid #e9ecef' }}>
                       {patient.document}
-                    </div>
-                    <div className="patients-cell patients-birth" data-label="Nascimento">
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem', color: '#495057', padding: '12px 16px', borderBottom: '1px solid #e9ecef' }}>
                       {formatBirthDate(patient.birthDate)}
-                    </div>
-                    <div className="patients-cell patients-age" data-label="Idade">
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem', color: '#495057', padding: '12px 16px', borderBottom: '1px solid #e9ecef' }}>
                       {calculateAge(patient.birthDate)}
-                    </div>
-                    <div className="patients-cell patients-responsible" data-label="Responsável">
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem', color: '#495057', padding: '12px 16px', borderBottom: '1px solid #e9ecef' }}>
                       {patient.responsible}
-                    </div>
-                    <div className="patients-cell patients-phone" data-label="Telefone">
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '0.875rem', color: '#495057', padding: '12px 16px', borderBottom: '1px solid #e9ecef' }}>
                       {patient.phone}
-                    </div>
-                    <div className="patients-cell patients-complete" data-label="Status">
-                      <span className={`status-indicator ${patient.isComplete ? 'complete' : 'incomplete'}`}>
-                        {patient.isComplete ? <Check fontSize="small" /> : <Close fontSize="small" />}
-                      </span>
-                    </div>
-                    <div className="patients-cell patients-actions" data-label="Ações">
-                      <button
-                        className="btn-action-email"
-                        onClick={(e) => { e.stopPropagation(); handlePatientAction('email', patient.id); }}
-                        title="Enviar email"
-                      >
-                        <Email fontSize="small" />
-                      </button>
-                      <button
-                        className="btn-action-whatsapp"
-                        onClick={(e) => { e.stopPropagation(); handlePatientAction('whatsapp', patient.id); }}
-                        title="WhatsApp"
-                      >
-                        <WhatsApp fontSize="small" />
-                      </button>
-                      <button
-                        className="btn-action-schedule"
-                        onClick={(e) => { e.stopPropagation(); handlePatientAction('calendar', patient.id); }}
-                        title="Agendar consulta"
-                      >
-                        <CalendarToday fontSize="small" />
-                      </button>
-                      <button
-                        className="btn-action-manage"
-                        onClick={(e) => { e.stopPropagation(); handlePatientAction('cadastro', patient.id); }}
-                        title="Gerenciar cadastro"
-                      >
-                        <Folder fontSize="small" />
-                      </button>
-                      <button
-                        className="btn-action-delete"
-                        onClick={(e) => { e.stopPropagation(); handlePatientAction('delete', patient.id); }}
-                        title="Excluir paciente"
-                      >
-                        <Delete fontSize="small" />
-                      </button>
-                    </div>
-                  </div>
+                    </TableCell>
+                    <TableCell sx={{ padding: '12px 16px', borderBottom: '1px solid #e9ecef', textAlign: 'center' }}>
+                      <Chip
+                        icon={patient.isComplete ? <Check fontSize="small" /> : <Close fontSize="small" />}
+                        label={patient.isComplete ? 'Sim' : 'Não'}
+                        size="small"
+                        sx={{
+                          backgroundColor: patient.isComplete ? '#28a745' : '#dc3545',
+                          color: 'white',
+                          fontWeight: 500,
+                          '& .MuiChip-icon': {
+                            color: 'white',
+                          }
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ padding: '12px 16px', borderBottom: '1px solid #e9ecef' }}>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        <Tooltip title="Enviar email" arrow>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => { e.stopPropagation(); handlePatientAction('email', patient.id); }}
+                            sx={{
+                              backgroundColor: '#ff9800',
+                              color: 'white',
+                              width: '32px',
+                              height: '32px',
+                              '&:hover': {
+                                backgroundColor: '#f57c00',
+                              }
+                            }}
+                          >
+                            <Email sx={{ fontSize: '1rem' }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="WhatsApp" arrow>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => { e.stopPropagation(); handlePatientAction('whatsapp', patient.id); }}
+                            sx={{
+                              backgroundColor: '#25D366',
+                              color: 'white',
+                              width: '32px',
+                              height: '32px',
+                              '&:hover': {
+                                backgroundColor: '#1da851',
+                              }
+                            }}
+                          >
+                            <WhatsApp sx={{ fontSize: '1rem' }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Agendar consulta" arrow>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => { e.stopPropagation(); handlePatientAction('calendar', patient.id); }}
+                            sx={{
+                              backgroundColor: '#2196f3',
+                              color: 'white',
+                              width: '32px',
+                              height: '32px',
+                              '&:hover': {
+                                backgroundColor: '#1976d2',
+                              }
+                            }}
+                          >
+                            <CalendarToday sx={{ fontSize: '1rem' }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Gerenciar cadastro" arrow>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => { e.stopPropagation(); handlePatientAction('cadastro', patient.id); }}
+                            sx={{
+                              backgroundColor: '#03a9f4',
+                              color: 'white',
+                              width: '32px',
+                              height: '32px',
+                              '&:hover': {
+                                backgroundColor: '#0288d1',
+                              }
+                            }}
+                          >
+                            <Folder sx={{ fontSize: '1rem' }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Excluir paciente" arrow>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => { e.stopPropagation(); handlePatientAction('delete', patient.id); }}
+                            sx={{
+                              backgroundColor: '#dc3545',
+                              color: 'white',
+                              width: '32px',
+                              height: '32px',
+                              '&:hover': {
+                                backgroundColor: '#c82333',
+                              }
+                            }}
+                          >
+                            <Delete sx={{ fontSize: '1rem' }} />
+                          </IconButton>
+                        </Tooltip>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </div>
-            </div>
-          </div>
+              </TableBody>
+            </Table>
+            </TableContainer>
 
-          {/* Paginação inferior */}
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginTop: '1rem'
-          }}>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
-              totalItems={filteredAndSortedPatients.length}
-              itemLabel="pacientes"
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
+            {/* Navegador de páginas - Inferior */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                mt: 2,
+                bgcolor: '#f8f9fa',
+                border: 'none',
+                boxShadow: 'none'
               }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
-          </div>
+            >
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPatients.length)} de{' '}
+                  <strong>{filteredAndSortedPatients.length}</strong> pacientes
+                </Typography>
+
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {/* Seletor de itens por página */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                      Itens por página:
+                    </Typography>
+                    <FormControl size="small">
+                      <Select
+                        value={itemsPerPage}
+                        onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                        sx={{
+                          minWidth: 80,
+                          height: '40px',
+                          fontSize: '1rem',
+                          backgroundColor: 'white',
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#ced4da',
+                          },
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#ced4da',
+                          },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#03B4C6',
+                            boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                          },
+                          '& .MuiSelect-select': {
+                            padding: '0.375rem 0.5rem',
+                            color: '#495057',
+                          },
+                        }}
+                      >
+                        <MenuItem value={5}>5</MenuItem>
+                        <MenuItem value={10}>10</MenuItem>
+                        <MenuItem value={15}>15</MenuItem>
+                        <MenuItem value={20}>20</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+
+                  {/* Navegação de páginas com Pagination do MUI */}
+                  <Pagination
+                    count={totalPages}
+                    page={currentPage}
+                    onChange={(event, page) => {
+                      setCurrentPage(page);
+                      setTimeout(scrollToTop, 100);
+                    }}
+                    color="primary"
+                    showFirstButton
+                    showLastButton
+                    size="small"
+                    sx={{
+                      '& .MuiPaginationItem-root': {
+                        color: '#495057',
+                        '&.Mui-selected': {
+                          backgroundColor: '#03B4C6',
+                          color: 'white',
+                          '&:hover': {
+                            backgroundColor: '#029AAB',
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Paper>
+          </Paper>
         </div>
-      </div>
       </main>
 
       <FooterInternal
@@ -825,38 +1220,82 @@ const PatientsList: React.FC = () => {
       />
 
       {/* Modal de confirmação de exclusão */}
-      {isDeleteModalOpen && patientToDelete && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Confirmar Exclusão</h3>
-            </div>
-            <div className="modal-body">
-              <p>
-                Tem certeza que deseja excluir o paciente <strong>{patientToDelete.name}</strong>?
-              </p>
-              <p className="warning-text">
-                <Warning fontSize="small" style={{ marginRight: '0.5rem' }} />
-                Esta ação não poderá ser desfeita e não será possível recuperar o cadastro.
-              </p>
-            </div>
-            <div className="modal-actions">
-              <button
-                className="btn-cancel"
-                onClick={handleDeleteCancel}
-              >
-                Cancelar
-              </button>
-              <button
-                className="btn-delete"
-                onClick={handleDeleteConfirm}
-              >
-                Excluir Paciente
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog
+        open={isDeleteModalOpen && patientToDelete !== null}
+        onClose={handleDeleteCancel}
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            padding: '1rem',
+            maxWidth: '500px',
+          }
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontSize: '1.5rem',
+            fontWeight: 600,
+            color: '#495057',
+            padding: '1rem 1.5rem',
+          }}
+        >
+          Confirmar Exclusão
+        </DialogTitle>
+        <DialogContent sx={{ padding: '1rem 1.5rem' }}>
+          <Typography variant="body1" sx={{ marginBottom: '1rem', color: '#495057' }}>
+            Tem certeza que deseja excluir o paciente <strong>{patientToDelete?.name}</strong>?
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.75rem',
+              backgroundColor: '#fff3cd',
+              color: '#856404',
+              borderRadius: '4px',
+              border: '1px solid #ffeaa7',
+            }}
+          >
+            <Warning fontSize="small" />
+            Esta ação não poderá ser desfeita e não será possível recuperar o cadastro.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ padding: '1rem 1.5rem', gap: '0.5rem' }}>
+          <Button
+            onClick={handleDeleteCancel}
+            variant="outlined"
+            sx={{
+              color: '#6c757d',
+              borderColor: '#6c757d',
+              textTransform: 'none',
+              padding: '0.5rem 1.5rem',
+              '&:hover': {
+                borderColor: '#5a6268',
+                backgroundColor: '#f8f9fa',
+              }
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            sx={{
+              backgroundColor: '#dc3545',
+              color: 'white',
+              textTransform: 'none',
+              padding: '0.5rem 1.5rem',
+              '&:hover': {
+                backgroundColor: '#c82333',
+              }
+            }}
+          >
+            Excluir Paciente
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

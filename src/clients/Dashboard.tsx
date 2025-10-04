@@ -1,8 +1,31 @@
 import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  IconButton,
+  FormControl,
+  InputLabel,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Tooltip,
+  Divider,
+  Pagination
+} from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { FaqButton } from "../components/FaqButton";
-import { CalendarToday, CheckCircle, Assignment, Cake, FirstPage, LastPage, ChevronLeft, ChevronRight, Delete, WhatsApp, Email, Folder } from '@mui/icons-material';
+import DateRangeFilter from "../components/DateRangeFilter";
+import { CalendarToday, CheckCircle, Assignment, Cake, WhatsApp, Email, Folder } from '@mui/icons-material';
 
 interface MenuItemProps {
   label: string;
@@ -27,18 +50,25 @@ const Dashboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Estados para filtro de data
-  const [startDate, setStartDate] = useState(() => {
+  // Valores iniciais dos filtros
+  const getInitialStartDate = () => {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
     return firstDay.toISOString().split('T')[0];
-  });
+  };
 
-  const [endDate, setEndDate] = useState(() => {
+  const getInitialEndDate = () => {
     const now = new Date();
     const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     return lastDay.toISOString().split('T')[0];
-  });
+  };
+
+  const initialStartDate = getInitialStartDate();
+  const initialEndDate = getInitialEndDate();
+
+  // Estados para filtro de data
+  const [startDate, setStartDate] = useState(initialStartDate);
+  const [endDate, setEndDate] = useState(initialEndDate);
 
   // Função para verificar se um aniversário está na semana atual
   const isCurrentWeekBirthday = (birthDate: string): boolean => {
@@ -63,7 +93,7 @@ const Dashboard: React.FC = () => {
   };
 
   // Dados mock dos aniversariantes
-  const birthdayPeople = [
+  const allBirthdayPeople = [
     { birth: '01/09/2023', age: 2, name: 'Eloah Silveira Siqueira Prado Nascimento', phone: '11987654321', email: 'eloah@email.com', patient_id: '1' },
     { birth: '01/09/2024', age: 1, name: 'Antonella Di Franco Kitallah', phone: '11987654322', email: 'antonella@email.com', patient_id: '2' },
     { birth: '03/09/2022', age: 3, name: 'João Silva Santos', phone: '11987654323', email: 'joao@email.com', patient_id: '3' },
@@ -83,6 +113,23 @@ const Dashboard: React.FC = () => {
     { birth: '02/09/2008', age: 17, name: 'Enzo Gabriel Santos', phone: '11987654337', email: 'enzo@email.com', patient_id: '17' },
     { birth: '04/09/2007', age: 18, name: 'Valentina Sofia Oliveira', phone: '11987654338', email: 'valentina@email.com', patient_id: '18' }
   ];
+
+  // Filtrar aniversariantes por data
+  const birthdayPeople = allBirthdayPeople.filter((person) => {
+    const [day, month] = person.birth.split('/').map(Number);
+    const currentYear = new Date().getFullYear();
+    const birthdayThisYear = new Date(currentYear, month - 1, day);
+
+    const filterStartDate = new Date(startDate);
+    const filterEndDate = new Date(endDate);
+
+    // Ajustar para comparar apenas dia e mês
+    const birthdayMonthDay = new Date(currentYear, birthdayThisYear.getMonth(), birthdayThisYear.getDate());
+    const startMonthDay = new Date(currentYear, filterStartDate.getMonth(), filterStartDate.getDate());
+    const endMonthDay = new Date(currentYear, filterEndDate.getMonth(), filterEndDate.getDate());
+
+    return birthdayMonthDay >= startMonthDay && birthdayMonthDay <= endMonthDay;
+  });
 
   // Cálculos de paginação
   const totalPages = Math.ceil(birthdayPeople.length / itemsPerPage);
@@ -109,6 +156,11 @@ const Dashboard: React.FC = () => {
       window.location.href = window.location.origin + '/?page=login&clinic=ninho';
     }
   }, []);
+
+  // Resetar para primeira página quando os filtros mudarem
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [startDate, endDate]);
 
   const handleRevalidateLogin = () => {
     // Limpar sessão
@@ -140,6 +192,12 @@ const Dashboard: React.FC = () => {
     window.location.href = scheduleUrl;
   };
 
+  const handleViewPatients = () => {
+    // Redirecionar para página de Lista de Pacientes
+    const patientsUrl = `${window.location.origin}/?page=patients`;
+    window.location.href = patientsUrl;
+  };
+
   const handleViewBirthdays = () => {
     // Scroll para a seção de aniversários
     const birthdaysSection = document.querySelector('.dashboard-birthdays-section');
@@ -148,23 +206,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Funções de paginação para aniversários
-  const goToFirstPage = () => {
-    setCurrentPage(1);
-  };
-
-  const goToLastPage = () => {
-    setCurrentPage(totalPages);
-  };
-
-  const goToPreviousPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-  };
-
-  const goToNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-  };
-
+  // Função para mudar itens por página
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1); // Reset para primeira página
@@ -217,16 +259,16 @@ const Dashboard: React.FC = () => {
 
   if (!userSession) {
     return (
-      <div className="login-page">
-        <div className="dashboard-loading">
+      <Box className="login-page">
+        <Box className="dashboard-loading">
           Carregando...
-        </div>
-      </div>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <div className="login-page">
+    <Box className="login-page">
       <HeaderInternal
         showCTAButton={false}
         className="login-header"
@@ -241,43 +283,44 @@ const Dashboard: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main className="dashboard-main">
-        <div className="dashboard-container">
-          <div className="dashboard-content">
+      <Box className="dashboard-main">
+        <Container className="dashboard-container" maxWidth={false} disableGutters>
+          <Box className="dashboard-content">
 
             {/* Título da Página */}
-            <div className="page-header-container">
-              <div className="page-header-content">
-                <h1 className="page-header-title">Dashboard</h1>
-                <p className="page-header-description">Visão geral dos principais indicadores e estatísticas da clínica.</p>
-              </div>
+            <Box className="page-header-container">
+              <Box className="page-header-content">
+                <Typography variant="h4" className="page-header-title" sx={{ fontSize: '1.3rem', mb: 1 }}>Dashboard</Typography>
+                <Typography variant="body2" className="page-header-description">
+                  Visão geral dos principais indicadores e estatísticas da clínica.
+                </Typography>
+              </Box>
               <FaqButton />
-            </div>
+            </Box>
 
-              {/* Cards de Estatísticas */}
-              <div className="dashboard-stats-grid">
-                {/* Card Compromissos */}
-                <div className="dashboard-card">
-                  <div className="dashboard-card-header">
-                    <div className="dashboard-card-icon blue">
+            {/* Cards de Estatísticas */}
+            <Box className="dashboard-stats-grid">
+              {/* Card Compromissos */}
+              <Box>
+                <Paper
+                  className="dashboard-card"
+                  elevation={0}
+                  sx={{
+                    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08) !important',
+                  }}
+                >
+                  <Box className="dashboard-card-header">
+                    <Box className="dashboard-card-icon blue">
                       <CalendarToday />
-                    </div>
-                    <h3 className="dashboard-card-title">Compromissos 19/09/2025</h3>
-                  </div>
-                  <div className="dashboard-card-content">
-                    <div style={{
-                      display: 'flex',
-                      gap: '1rem',
-                      alignItems: 'center',
-                      marginBottom: '1rem'
-                    }}>
+                    </Box>
+                    <Typography variant="h6" className="dashboard-card-title" sx={{ fontSize: '1.125rem' }}>
+                      Compromissos 19/09
+                    </Typography>
+                  </Box>
+                  <Box className="dashboard-card-content">
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
                       {/* Gráfico de pizza animado para compromissos */}
-                      <div style={{
-                        position: 'relative',
-                        width: '120px',
-                        height: '120px',
-                        flexShrink: 0
-                      }}>
+                      <Box sx={{ position: 'relative', width: '120px', height: '120px', flexShrink: 0 }}>
                         <svg width="120" height="120" viewBox="0 0 42 42" style={{ transform: 'rotate(-90deg)' }}>
                           {/* Background circle */}
                           <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e9ecef" strokeWidth="3"/>
@@ -305,122 +348,97 @@ const Dashboard: React.FC = () => {
                         </svg>
 
                         {/* Total no centro */}
-                        <div style={{
+                        <Box sx={{
                           position: 'absolute',
                           top: '50%',
                           left: '50%',
                           transform: 'translate(-50%, -50%)',
                           textAlign: 'center'
                         }}>
-                          <div style={{
-                            fontSize: '1.5rem',
-                            fontWeight: 'bold',
-                            color: '#2196f3'
-                          }}>
+                          <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#2196f3' }}>
                             16
-                          </div>
-                          <div style={{
-                            fontSize: '0.7rem',
-                            color: '#6c757d'
-                          }}>
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             Total
-                          </div>
-                        </div>
-                      </div>
+                          </Typography>
+                        </Box>
+                      </Box>
 
                       {/* Lista de estatísticas */}
-                      <div style={{
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.5rem'
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.9rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{
-                              width: '12px',
-                              height: '12px',
-                              backgroundColor: '#28a745',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Confirmados</span>
-                          </div>
-                          <strong style={{ color: '#28a745' }}>6</strong>
-                        </div>
+                      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ width: 12, height: 12, bgcolor: '#28a745', borderRadius: '50%' }}></Box>
+                            <Typography variant="body2">Confirmados</Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#28a745' }}>6</Typography>
+                        </Box>
 
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.9rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{
-                              width: '12px',
-                              height: '12px',
-                              backgroundColor: '#dc3545',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Cancelados</span>
-                          </div>
-                          <strong style={{ color: '#dc3545' }}>4</strong>
-                        </div>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ width: 12, height: 12, bgcolor: '#dc3545', borderRadius: '50%' }}></Box>
+                            <Typography variant="body2">Cancelados</Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#dc3545' }}>4</Typography>
+                        </Box>
 
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.9rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{
-                              width: '12px',
-                              height: '12px',
-                              backgroundColor: '#ffc107',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Pendentes</span>
-                          </div>
-                          <strong style={{ color: '#ffc107' }}>6</strong>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <button
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ width: 12, height: 12, bgcolor: '#ffc107', borderRadius: '50%' }}></Box>
+                            <Typography variant="body2">Pendentes</Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#ffc107' }}>6</Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Button
                     onClick={handleViewSchedule}
                     className="dashboard-card-button"
+                    variant="contained"
+                    fullWidth
+                    color="primary"
+                    sx={{
+                      backgroundColor: '#03B4C6',
+                      color: 'white',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        backgroundColor: '#029AAB',
+                        boxShadow: 'none',
+                      },
+                    }}
                   >
                     VER AGENDA
-                  </button>
-                </div>
+                  </Button>
+                </Paper>
+              </Box>
 
-                {/* Card Atendimentos */}
-                <div className="dashboard-card">
-                  <div className="dashboard-card-header">
-                    <div className="dashboard-card-icon green">
+              {/* Card Atendimentos */}
+              <Box>
+                <Paper
+                  className="dashboard-card"
+                  elevation={0}
+                  sx={{
+                    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08) !important',
+                  }}
+                >
+                  <Box className="dashboard-card-header">
+                    <Box className="dashboard-card-icon green">
                       <CheckCircle />
-                    </div>
-                    <h3 className="dashboard-card-title">Atendimentos (30 dias)</h3>
-                  </div>
-                  <div className="dashboard-card-content">
-                    <div style={{
-                      display: 'flex',
-                      gap: '1rem',
-                      alignItems: 'center',
-                      marginBottom: '1rem'
-                    }}>
+                    </Box>
+                    <Typography variant="h6" className="dashboard-card-title" sx={{ fontSize: '1.125rem' }}>
+                      Atendimentos (30d)
+                    </Typography>
+                  </Box>
+                  <Box className="dashboard-card-content">
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
                       {/* Gráfico de pizza animado para atendimentos */}
-                      <div style={{
-                        position: 'relative',
-                        width: '120px',
-                        height: '120px',
-                        flexShrink: 0
-                      }}>
+                      <Box sx={{ position: 'relative', width: '120px', height: '120px', flexShrink: 0 }}>
                         <svg width="120" height="120" viewBox="0 0 42 42" style={{ transform: 'rotate(-90deg)' }}>
                           {/* Background circle */}
                           <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e9ecef" strokeWidth="3"/>
@@ -448,119 +466,96 @@ const Dashboard: React.FC = () => {
                         </svg>
 
                         {/* Total no centro */}
-                        <div style={{
+                        <Box sx={{
                           position: 'absolute',
                           top: '50%',
                           left: '50%',
                           transform: 'translate(-50%, -50%)',
                           textAlign: 'center'
                         }}>
-                          <div style={{
-                            fontSize: '1.5rem',
-                            fontWeight: 'bold',
-                            color: '#2196f3'
-                          }}>
+                          <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#2196f3' }}>
                             100
-                          </div>
-                          <div style={{
-                            fontSize: '0.7rem',
-                            color: '#6c757d'
-                          }}>
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             Total
-                          </div>
-                        </div>
-                      </div>
+                          </Typography>
+                        </Box>
+                      </Box>
 
                       {/* Lista de estatísticas */}
-                      <div style={{
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.5rem'
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.9rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{
-                              width: '12px',
-                              height: '12px',
-                              backgroundColor: '#03B4C6',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Com atendimento</span>
-                          </div>
-                          <strong style={{ color: '#03B4C6' }}>60</strong>
-                        </div>
+                      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ width: 12, height: 12, bgcolor: '#03B4C6', borderRadius: '50%' }}></Box>
+                            <Typography variant="body2">Com atendimento</Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#03B4C6' }}>60</Typography>
+                        </Box>
 
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.9rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{
-                              width: '12px',
-                              height: '12px',
-                              backgroundColor: '#dc3545',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Pendentes</span>
-                          </div>
-                          <strong style={{ color: '#dc3545' }}>25</strong>
-                        </div>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ width: 12, height: 12, bgcolor: '#dc3545', borderRadius: '50%' }}></Box>
+                            <Typography variant="body2">Pendentes</Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#dc3545' }}>25</Typography>
+                        </Box>
 
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.9rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{
-                              width: '12px',
-                              height: '12px',
-                              backgroundColor: '#ffc107',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Sem atendimento</span>
-                          </div>
-                          <strong style={{ color: '#ffc107' }}>15</strong>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <button className="dashboard-card-button">
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ width: 12, height: 12, bgcolor: '#ffc107', borderRadius: '50%' }}></Box>
+                            <Typography variant="body2">Sem atendimento</Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#ffc107' }}>15</Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Button
+                    className="dashboard-card-button"
+                    variant="contained"
+                    fullWidth
+                    color="primary"
+                    sx={{
+                      backgroundColor: '#03B4C6',
+                      color: 'white',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        backgroundColor: '#029AAB',
+                        boxShadow: 'none',
+                      },
+                    }}
+                  >
                     VER DADOS
-                  </button>
-                </div>
+                  </Button>
+                </Paper>
+              </Box>
 
-                {/* Card Registros de Pacientes */}
-                <div className="dashboard-card">
-                  <div className="dashboard-card-header">
-                    <div className="dashboard-card-icon orange">
+              {/* Card Registros de Pacientes */}
+              <Box>
+                <Paper
+                  className="dashboard-card"
+                  elevation={0}
+                  sx={{
+                    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08) !important',
+                  }}
+                >
+                  <Box className="dashboard-card-header">
+                    <Box className="dashboard-card-icon orange">
                       <Assignment />
-                    </div>
-                    <h3 className="dashboard-card-title">Registros de pacientes</h3>
-                  </div>
-                  <div className="dashboard-card-content">
-                    <div style={{
-                      display: 'flex',
-                      gap: '1rem',
-                      alignItems: 'center',
-                      marginBottom: '1rem'
-                    }}>
+                    </Box>
+                    <Typography variant="h6" className="dashboard-card-title" sx={{ fontSize: '1.125rem' }}>
+                      Registros de pacientes
+                    </Typography>
+                  </Box>
+                  <Box className="dashboard-card-content">
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
                       {/* Gráfico de pizza animado para registros */}
-                      <div style={{
-                        position: 'relative',
-                        width: '120px',
-                        height: '120px',
-                        flexShrink: 0
-                      }}>
+                      <Box sx={{ position: 'relative', width: '120px', height: '120px', flexShrink: 0 }}>
                         <svg width="120" height="120" viewBox="0 0 42 42" style={{ transform: 'rotate(-90deg)' }}>
                           {/* Background circle */}
                           <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e9ecef" strokeWidth="3"/>
@@ -595,156 +590,114 @@ const Dashboard: React.FC = () => {
                         </svg>
 
                         {/* Total no centro */}
-                        <div style={{
+                        <Box sx={{
                           position: 'absolute',
                           top: '50%',
                           left: '50%',
                           transform: 'translate(-50%, -50%)',
                           textAlign: 'center'
                         }}>
-                          <div style={{
-                            fontSize: '1.5rem',
-                            fontWeight: 'bold',
-                            color: '#2196f3'
-                          }}>
+                          <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#2196f3' }}>
                             371
-                          </div>
-                          <div style={{
-                            fontSize: '0.7rem',
-                            color: '#6c757d'
-                          }}>
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             Total
-                          </div>
-                        </div>
-                      </div>
+                          </Typography>
+                        </Box>
+                      </Box>
 
                       {/* Lista de estatísticas */}
-                      <div style={{
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.25rem'
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.8rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                            <div style={{
-                              width: '8px',
-                              height: '8px',
-                              backgroundColor: '#17a2b8',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Com evolução</span>
-                          </div>
-                          <strong style={{ color: '#17a2b8' }}>155</strong>
-                        </div>
+                      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
+                            <Box sx={{ width: 8, height: 8, bgcolor: '#17a2b8', borderRadius: '50%' }}></Box>
+                            <Typography variant="caption">Com evolução</Typography>
+                          </Box>
+                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#17a2b8' }}>155</Typography>
+                        </Box>
 
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.8rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                            <div style={{
-                              width: '8px',
-                              height: '8px',
-                              backgroundColor: '#28a745',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Com agendamentos</span>
-                          </div>
-                          <strong style={{ color: '#28a745' }}>82</strong>
-                        </div>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
+                            <Box sx={{ width: 8, height: 8, bgcolor: '#28a745', borderRadius: '50%' }}></Box>
+                            <Typography variant="caption">Com agendamentos</Typography>
+                          </Box>
+                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#28a745' }}>82</Typography>
+                        </Box>
 
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.8rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                            <div style={{
-                              width: '8px',
-                              height: '8px',
-                              backgroundColor: '#ffc107',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Cadastro completo</span>
-                          </div>
-                          <strong style={{ color: '#ffc107' }}>77</strong>
-                        </div>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
+                            <Box sx={{ width: 8, height: 8, bgcolor: '#ffc107', borderRadius: '50%' }}></Box>
+                            <Typography variant="caption">Cadastro completo</Typography>
+                          </Box>
+                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#ffc107' }}>77</Typography>
+                        </Box>
 
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.8rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                            <div style={{
-                              width: '8px',
-                              height: '8px',
-                              backgroundColor: '#fd7e14',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Com plano de ação</span>
-                          </div>
-                          <strong style={{ color: '#fd7e14' }}>14</strong>
-                        </div>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
+                            <Box sx={{ width: 8, height: 8, bgcolor: '#fd7e14', borderRadius: '50%' }}></Box>
+                            <Typography variant="caption">Com plano de ação</Typography>
+                          </Box>
+                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#fd7e14' }}>14</Typography>
+                        </Box>
 
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.8rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                            <div style={{
-                              width: '8px',
-                              height: '8px',
-                              backgroundColor: '#e83e8c',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Com CID</span>
-                          </div>
-                          <strong style={{ color: '#e83e8c' }}>12</strong>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <button className="dashboard-card-button">
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
+                            <Box sx={{ width: 8, height: 8, bgcolor: '#e83e8c', borderRadius: '50%' }}></Box>
+                            <Typography variant="caption">Com CID</Typography>
+                          </Box>
+                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#e83e8c' }}>12</Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Button
+                    onClick={handleViewPatients}
+                    className="dashboard-card-button"
+                    variant="contained"
+                    fullWidth
+                    color="primary"
+                    sx={{
+                      backgroundColor: '#03B4C6',
+                      color: 'white',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        backgroundColor: '#029AAB',
+                        boxShadow: 'none',
+                      },
+                    }}
+                  >
                     VER PACIENTES
-                  </button>
-                </div>
+                  </Button>
+                </Paper>
+              </Box>
 
-                {/* Card Resumo de Aniversários */}
-                <div className="dashboard-card">
-                  <div className="dashboard-card-header">
-                    <div className="dashboard-card-icon pink">
+              {/* Card Resumo de Aniversários */}
+              <Box>
+                <Paper
+                  className="dashboard-card"
+                  elevation={0}
+                  sx={{
+                    boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08) !important',
+                  }}
+                >
+                  <Box className="dashboard-card-header">
+                    <Box className="dashboard-card-icon pink">
                       <Cake />
-                    </div>
-                    <h3 className="dashboard-card-title">Resumo de Aniversários</h3>
-                  </div>
+                    </Box>
+                    <Typography variant="h6" className="dashboard-card-title" sx={{ fontSize: '1.125rem' }}>
+                      Aniversários
+                    </Typography>
+                  </Box>
 
-                  <div className="dashboard-card-content">
-                    <div style={{
-                      display: 'flex',
-                      gap: '1rem',
-                      alignItems: 'center',
-                      marginBottom: '1rem'
-                    }}>
+                  <Box className="dashboard-card-content">
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
                       {/* Gráfico de pizza animado para aniversários */}
-                      <div style={{
-                        position: 'relative',
-                        width: '120px',
-                        height: '120px',
-                        flexShrink: 0
-                      }}>
+                      <Box sx={{ position: 'relative', width: '120px', height: '120px', flexShrink: 0 }}>
                         <svg width="120" height="120" viewBox="0 0 42 42" style={{ transform: 'rotate(-90deg)' }}>
                           {/* Background circle */}
                           <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e9ecef" strokeWidth="3"/>
@@ -772,611 +725,386 @@ const Dashboard: React.FC = () => {
                         </svg>
 
                         {/* Total no centro */}
-                        <div style={{
+                        <Box sx={{
                           position: 'absolute',
                           top: '50%',
                           left: '50%',
                           transform: 'translate(-50%, -50%)',
                           textAlign: 'center'
                         }}>
-                          <div style={{
-                            fontSize: '1.5rem',
-                            fontWeight: 'bold',
-                            color: '#2196f3'
-                          }}>
+                          <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#2196f3' }}>
                             23
-                          </div>
-                          <div style={{
-                            fontSize: '0.7rem',
-                            color: '#6c757d'
-                          }}>
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                             Total
-                          </div>
-                        </div>
-                      </div>
+                          </Typography>
+                        </Box>
+                      </Box>
 
                       {/* Lista de estatísticas */}
-                      <div style={{
-                        flex: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '0.5rem'
-                      }}>
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.9rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{
-                              width: '12px',
-                              height: '12px',
-                              backgroundColor: '#2196f3',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Mês</span>
-                          </div>
-                          <strong style={{ color: '#2196f3' }}>18</strong>
-                        </div>
+                      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ width: 12, height: 12, bgcolor: '#2196f3', borderRadius: '50%' }}></Box>
+                            <Typography variant="body2">Mês</Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#2196f3' }}>18</Typography>
+                        </Box>
 
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.9rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{
-                              width: '12px',
-                              height: '12px',
-                              backgroundColor: '#4caf50',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Semana</span>
-                          </div>
-                          <strong style={{ color: '#4caf50' }}>5</strong>
-                        </div>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ width: 12, height: 12, bgcolor: '#4caf50', borderRadius: '50%' }}></Box>
+                            <Typography variant="body2">Semana</Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#4caf50' }}>5</Typography>
+                        </Box>
 
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          fontSize: '0.9rem'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <div style={{
-                              width: '12px',
-                              height: '12px',
-                              backgroundColor: '#ff9800',
-                              borderRadius: '50%'
-                            }}></div>
-                            <span>Hoje</span>
-                          </div>
-                          <strong style={{ color: '#ff9800' }}>0</strong>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.9rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ width: 12, height: 12, bgcolor: '#ff9800', borderRadius: '50%' }}></Box>
+                            <Typography variant="body2">Hoje</Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#ff9800' }}>0</Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
 
-                  <button
+                  <Button
                     onClick={handleViewBirthdays}
                     className="dashboard-card-button"
+                    variant="contained"
+                    fullWidth
+                    color="primary"
+                    sx={{
+                      backgroundColor: '#03B4C6',
+                      color: 'white',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      borderRadius: '8px',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        backgroundColor: '#029AAB',
+                        boxShadow: 'none',
+                      },
+                    }}
                   >
                     VER ANIVERSÁRIOS
-                  </button>
-                </div>
-              </div>
+                  </Button>
+                </Paper>
+              </Box>
+            </Box>
 
-              {/* Seção de Aniversários */}
-              <div className="dashboard-birthdays-section">
-                <div className="dashboard-birthdays-header">
-                  <div className="dashboard-birthdays-title-section">
-                    <div className="dashboard-card-icon pink">
-                      <Cake />
-                    </div>
-                    <div>
-                      <h3 className="dashboard-birthdays-title">Aniversários - Data: {new Date().toLocaleDateString('pt-BR')}</h3>
-                    </div>
-                  </div>
+            {/* Seção de Aniversários */}
+            <Box className="dashboard-birthdays-section" sx={{ mt: 4 }}>
+              <Box className="dashboard-birthdays-header" sx={{ mb: 3 }}>
+                <Box className="dashboard-birthdays-title-section" sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                  <Box className="dashboard-card-icon pink">
+                    <Cake />
+                  </Box>
+                  <Box>
+                    <Typography variant="h5" className="dashboard-birthdays-title" sx={{ fontSize: '1.25rem' }}>
+                      Aniversários - Data: {new Date().toLocaleDateString('pt-BR')}
+                    </Typography>
+                  </Box>
+                </Box>
 
-                  <div className="dashboard-date-filter">
-                    <div className="dashboard-date-input-group">
-                      <label style={{
-                        display: 'block',
-                        fontSize: '0.95rem',
-                        color: '#6c757d',
-                        marginBottom: '0.5rem'
-                      }}>
-                        Data Inicial
-                      </label>
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.375rem 0.5rem',
-                          border: '1px solid #ced4da',
-                          borderRadius: '4px',
-                          fontSize: '1rem',
-                          color: '#495057',
-                          height: '40px',
-                          boxSizing: 'border-box',
-                          outline: 'none',
-                          transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = '#03B4C6';
-                          e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = '#ced4da';
-                          e.target.style.boxShadow = 'none';
-                        }}
-                      />
-                    </div>
+                <DateRangeFilter
+                  startDate={startDate}
+                  endDate={endDate}
+                  onStartDateChange={setStartDate}
+                  onEndDateChange={setEndDate}
+                  onClear={handleClearFilters}
+                  initialStartDate={initialStartDate}
+                  initialEndDate={initialEndDate}
+                />
+              </Box>
 
-                    <div className="dashboard-date-input-group">
-                      <label style={{
-                        display: 'block',
-                        fontSize: '0.95rem',
-                        color: '#6c757d',
-                        marginBottom: '0.5rem'
-                      }}>
-                        Data Final
-                      </label>
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.375rem 0.5rem',
-                          border: '1px solid #ced4da',
-                          borderRadius: '4px',
-                          fontSize: '1rem',
-                          color: '#495057',
-                          height: '40px',
-                          boxSizing: 'border-box',
-                          outline: 'none',
-                          transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                        }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = '#03B4C6';
-                          e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = '#ced4da';
-                          e.target.style.boxShadow = 'none';
-                        }}
-                      />
-                    </div>
+              {/* Navegador de páginas - Superior */}
+              <Paper
+                className="birthday-pagination-container"
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  bgcolor: '#f8f9fa',
+                  border: 'none',
+                  boxShadow: 'none'
+                }}
+              >
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" className="birthday-pagination-info" sx={{ color: 'text.secondary' }}>
+                    Mostrando {startIndex + 1}-{Math.min(endIndex, birthdayPeople.length)} de{' '}
+                    <strong>{birthdayPeople.length}</strong> aniversariantes
+                  </Typography>
 
-                    <div className="dashboard-clear-filter">
-                      <button
-                        onClick={handleClearFilters}
-                        style={{
-                          padding: '0.4rem',
-                          background: '#6c757d',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          transition: 'background 0.2s',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: '40px',
-                          height: '40px'
-                        }}
-                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = '#5a6268'}
-                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.background = '#6c757d'}
-                        title="Limpar filtros"
-                      >
-                        <Delete fontSize="small" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-
-                {/* Navegador de páginas - Superior */}
-                <div className="birthday-pagination-container" style={{
-                  display: 'flex',
-                  gap: '1rem',
-                  flexWrap: 'wrap',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '1rem',
-                  padding: '1rem',
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '8px'
-                }}>
-                  <div className="birthday-pagination-info" style={{
-                    color: '#4a5568',
-                    fontSize: '0.9rem'
-                  }}>
-                    Mostrando {startIndex + 1}-{Math.min(endIndex, birthdayPeople.length)} de <strong style={{
-                      color: '#2d3748',
-                      fontWeight: '600'
-                    }}>{birthdayPeople.length}</strong> aniversariantes
-                  </div>
-
-                  <div className="birthday-pagination-controls" style={{
-                    display: 'flex',
-                    gap: '1rem',
-                    alignItems: 'center',
-                    flexWrap: 'wrap'
-                  }}>
+                  <Box className="birthday-pagination-controls" sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                     {/* Seletor de itens por página */}
-                    <div className="birthday-pagination-selector" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <label style={{
-                        fontSize: '0.85rem',
-                        color: '#6c757d',
-                        whiteSpace: 'nowrap'
-                      }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
                         Itens por página:
-                      </label>
-                      <select
-                        value={itemsPerPage}
-                        onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                        style={{
-                          padding: '0.25rem 0.5rem',
-                          border: '1px solid #ced4da',
-                          borderRadius: '4px',
-                          fontSize: '0.85rem',
+                      </Typography>
+                      <FormControl size="small">
+                        <Select
+                          value={itemsPerPage}
+                          onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                          sx={{
+                            minWidth: 80,
+                            height: '40px',
+                            fontSize: '1rem',
+                            backgroundColor: 'white',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#ced4da',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#ced4da',
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#03B4C6',
+                              boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                            },
+                            '& .MuiSelect-select': {
+                              padding: '0.375rem 0.5rem',
+                              color: '#495057',
+                            },
+                          }}
+                        >
+                          <MenuItem value={5}>5</MenuItem>
+                          <MenuItem value={10}>10</MenuItem>
+                          <MenuItem value={15}>15</MenuItem>
+                          <MenuItem value={20}>20</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+
+                    {/* Navegação de páginas com Pagination do MUI */}
+                    <Pagination
+                      count={totalPages}
+                      page={currentPage}
+                      onChange={(event, page) => setCurrentPage(page)}
+                      color="primary"
+                      showFirstButton
+                      showLastButton
+                      size="small"
+                      sx={{
+                        '& .MuiPaginationItem-root': {
                           color: '#495057',
-                          background: 'white'
-                        }}
-                      >
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={15}>15</option>
-                        <option value={20}>20</option>
-                      </select>
-                    </div>
-
-                    {/* Navegação de páginas */}
-                    <div className="birthday-pagination-buttons" style={{
-                      display: 'flex',
-                      gap: '0.5rem',
-                      alignItems: 'center'
-                    }}>
-                      <button
-                        onClick={goToFirstPage}
-                        disabled={currentPage === 1}
-                        title="Primeira página"
-                        style={{
-                          padding: '0.4rem 0.6rem',
-                          background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                          color: currentPage === 1 ? '#6c757d' : 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          fontSize: '0.8rem',
-                          cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                      >
-                        <FirstPage />
-                      </button>
-
-                      <button
-                        onClick={goToPreviousPage}
-                        disabled={currentPage === 1}
-                        title="Página anterior"
-                        style={{
-                          padding: '0.4rem 0.6rem',
-                          background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                          color: currentPage === 1 ? '#6c757d' : 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          fontSize: '0.8rem',
-                          cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                      >
-                        <ChevronLeft />
-                      </button>
-
-                      <span style={{
-                        padding: '0.4rem 0.8rem',
-                        fontSize: '0.85rem',
-                        color: '#495057',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {currentPage} de {totalPages}
-                      </span>
-
-                      <button
-                        onClick={goToNextPage}
-                        disabled={currentPage === totalPages}
-                        title="Próxima página"
-                        style={{
-                          padding: '0.4rem 0.6rem',
-                          background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                          color: currentPage === totalPages ? '#6c757d' : 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          fontSize: '0.8rem',
-                          cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                      >
-                        <ChevronRight />
-                      </button>
-
-                      <button
-                        onClick={goToLastPage}
-                        disabled={currentPage === totalPages}
-                        title="Última página"
-                        style={{
-                          padding: '0.4rem 0.6rem',
-                          background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                          color: currentPage === totalPages ? '#6c757d' : 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          fontSize: '0.8rem',
-                          cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                      >
-                        <LastPage />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="dashboard-table-container">
-                  <div className="dashboard-table-header">
-                    <div>Nascimento</div>
-                    <div>Idade</div>
-                    <div>Nome</div>
-                    <div>Ações</div>
-                  </div>
-                  {currentBirthdays.map((person, index) => {
-                    const isCurrentWeek = isCurrentWeekBirthday(person.birth);
-                    return (
-                    <div key={index} className="dashboard-table-row" style={{
-                      fontWeight: isCurrentWeek ? 'bold' : 'normal',
-                      backgroundColor: isCurrentWeek ? '#fff3cd' : 'transparent'
-                    }}>
-                      <div>{person.birth}</div>
-                      <div>{person.age}</div>
-                      <div>{person.name}</div>
-                      <div style={{
-                        display: 'flex',
-                        gap: '0.5rem',
-                        alignItems: 'center'
-                      }}>
-                        <a
-                          href={`https://wa.me/55${person.phone.replace(/\D/g, '')}?text=Olá ${person.name}! Feliz aniversário! 🎉`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Enviar mensagem no WhatsApp"
-                          className="action-btn whatsapp-btn"
-                          style={{
-                            textDecoration: 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <WhatsApp fontSize="small" />
-                        </a>
-
-                        <a
-                          href={`mailto:${person.email}?subject=Feliz Aniversário!&body=Olá ${person.name}! Feliz aniversário! Desejamos um dia maravilhoso e cheio de alegrias! 🎂`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Enviar email"
-                          className="action-btn email-btn"
-                          style={{
-                            textDecoration: 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <Email fontSize="small" />
-                        </a>
-
-                        <button
-                          onClick={() => {
-                            // Open patient registration page in new window
-                            window.open(`/cadastro-paciente?id=${person.patient_id}`, '_blank');
-                          }}
-                          title="Gerenciar cadastro"
-                          className="action-btn"
-                          style={{
-                            background: '#4CAF50',
+                          '&.Mui-selected': {
+                            backgroundColor: '#03B4C6',
                             color: 'white',
-                            border: 'none',
-                            borderRadius: '6px',
-                            padding: '6px 8px',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.2s ease',
-                            boxShadow: '0 2px 4px rgba(255, 193, 7, 0.3)',
-                            minWidth: '32px',
-                            height: '32px'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#e0a800';
-                            e.currentTarget.style.transform = 'translateY(-1px)';
-                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(255, 193, 7, 0.4)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = '#ffc107';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(255, 193, 7, 0.3)';
+                            '&:hover': {
+                              backgroundColor: '#029AAB',
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Paper>
+
+              <TableContainer
+                component={Paper}
+                className="dashboard-table-container"
+                elevation={0}
+                sx={{
+                  border: 'none',
+                  boxShadow: 'none'
+                }}
+              >
+                <Table sx={{ tableLayout: 'fixed' }}>
+                  <colgroup>
+                    <col style={{ width: '120px' }} />
+                    <col style={{ width: '80px' }} />
+                    <col style={{ width: 'auto' }} />
+                    <col style={{ width: '180px' }} />
+                  </colgroup>
+                  <TableHead>
+                    <TableRow className="dashboard-table-header">
+                      <TableCell>Nascimento</TableCell>
+                      <TableCell>Idade</TableCell>
+                      <TableCell>Nome</TableCell>
+                      <TableCell align="right">Ações</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {currentBirthdays.map((person, index) => {
+                      const isCurrentWeek = isCurrentWeekBirthday(person.birth);
+                      return (
+                        <TableRow
+                          key={index}
+                          className="dashboard-table-row"
+                          sx={{
+                            fontWeight: isCurrentWeek ? 'bold' : 'normal',
+                            bgcolor: isCurrentWeek ? '#fff3cd' : 'transparent',
                           }}
                         >
-                          <Folder fontSize="small" />
-                        </button>
-                      </div>
-                    </div>
-                    );
-                  })}
-                </div>
+                          <TableCell>{person.birth}</TableCell>
+                          <TableCell>{person.age}</TableCell>
+                          <TableCell>{person.name}</TableCell>
+                          <TableCell align="right">
+                            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', justifyContent: 'flex-end' }}>
+                              <Tooltip title="Enviar email">
+                                <IconButton
+                                  component="a"
+                                  href={`mailto:${person.email}?subject=Feliz Aniversário!&body=Olá ${person.name}! Feliz aniversário! Desejamos um dia maravilhoso e cheio de alegrias! 🎂`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="action-btn email-btn"
+                                  size="small"
+                                  sx={{
+                                    bgcolor: '#ff9800',
+                                    color: 'white',
+                                    '&:hover': {
+                                      bgcolor: '#f57c00',
+                                    },
+                                  }}
+                                >
+                                  <Email fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
 
-                {/* Navegador de páginas - Inferior */}
-                <div className="birthday-pagination-container" style={{
-                  display: 'flex',
-                  gap: '1rem',
-                  flexWrap: 'wrap',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginTop: '1rem',
-                  padding: '1rem',
-                  backgroundColor: '#f8f9fa',
-                  borderRadius: '8px'
-                }}>
-                  <div className="birthday-pagination-info" style={{
-                    color: '#4a5568',
-                    fontSize: '0.9rem'
-                  }}>
-                    Mostrando {startIndex + 1}-{Math.min(endIndex, birthdayPeople.length)} de <strong style={{
-                      color: '#2d3748',
-                      fontWeight: '600'
-                    }}>{birthdayPeople.length}</strong> aniversariantes
-                  </div>
+                              <Tooltip title="Enviar mensagem no WhatsApp">
+                                <IconButton
+                                  component="a"
+                                  href={`https://wa.me/55${person.phone.replace(/\D/g, '')}?text=Olá ${person.name}! Feliz aniversário! 🎉`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="action-btn whatsapp-btn"
+                                  size="small"
+                                  sx={{
+                                    bgcolor: '#25D366',
+                                    color: 'white',
+                                    '&:hover': {
+                                      bgcolor: '#1da851',
+                                    },
+                                  }}
+                                >
+                                  <WhatsApp fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
 
-                  <div className="birthday-pagination-controls" style={{
-                    display: 'flex',
-                    gap: '1rem',
-                    alignItems: 'center',
-                    flexWrap: 'wrap'
-                  }}>
+                              <Tooltip title="Gerenciar cadastro">
+                                <IconButton
+                                  onClick={() => {
+                                    window.open(`/cadastro-paciente?id=${person.patient_id}`, '_blank');
+                                  }}
+                                  className="action-btn"
+                                  size="small"
+                                  sx={{
+                                    bgcolor: '#03a9f4',
+                                    color: 'white',
+                                    '&:hover': {
+                                      bgcolor: '#0288d1',
+                                    },
+                                  }}
+                                >
+                                  <Folder fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {/* Navegador de páginas - Inferior */}
+              <Paper
+                className="birthday-pagination-container"
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mt: 2,
+                  bgcolor: '#f8f9fa',
+                  border: 'none',
+                  boxShadow: 'none'
+                }}
+              >
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" className="birthday-pagination-info" sx={{ color: 'text.secondary' }}>
+                    Mostrando {startIndex + 1}-{Math.min(endIndex, birthdayPeople.length)} de{' '}
+                    <strong>{birthdayPeople.length}</strong> aniversariantes
+                  </Typography>
+
+                  <Box className="birthday-pagination-controls" sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                     {/* Seletor de itens por página */}
-                    <div className="birthday-pagination-selector" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <label style={{
-                        fontSize: '0.85rem',
-                        color: '#6c757d',
-                        whiteSpace: 'nowrap'
-                      }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
                         Itens por página:
-                      </label>
-                      <select
-                        value={itemsPerPage}
-                        onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                        style={{
-                          padding: '0.25rem 0.5rem',
-                          border: '1px solid #ced4da',
-                          borderRadius: '4px',
-                          fontSize: '0.85rem',
+                      </Typography>
+                      <FormControl size="small">
+                        <Select
+                          value={itemsPerPage}
+                          onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                          sx={{
+                            minWidth: 80,
+                            height: '40px',
+                            fontSize: '1rem',
+                            backgroundColor: 'white',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#ced4da',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#ced4da',
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#03B4C6',
+                              boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                            },
+                            '& .MuiSelect-select': {
+                              padding: '0.375rem 0.5rem',
+                              color: '#495057',
+                            },
+                          }}
+                        >
+                          <MenuItem value={5}>5</MenuItem>
+                          <MenuItem value={10}>10</MenuItem>
+                          <MenuItem value={15}>15</MenuItem>
+                          <MenuItem value={20}>20</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+
+                    {/* Navegação de páginas com Pagination do MUI */}
+                    <Pagination
+                      count={totalPages}
+                      page={currentPage}
+                      onChange={(event, page) => setCurrentPage(page)}
+                      color="primary"
+                      showFirstButton
+                      showLastButton
+                      size="small"
+                      sx={{
+                        '& .MuiPaginationItem-root': {
                           color: '#495057',
-                          background: 'white'
-                        }}
-                      >
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={15}>15</option>
-                        <option value={20}>20</option>
-                      </select>
-                    </div>
-
-                    {/* Navegação de páginas */}
-                    <div className="birthday-pagination-buttons" style={{
-                      display: 'flex',
-                      gap: '0.5rem',
-                      alignItems: 'center'
-                    }}>
-                      <button
-                        onClick={goToFirstPage}
-                        disabled={currentPage === 1}
-                        title="Primeira página"
-                        style={{
-                          padding: '0.4rem 0.6rem',
-                          background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                          color: currentPage === 1 ? '#6c757d' : 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          fontSize: '0.8rem',
-                          cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                      >
-                        <FirstPage />
-                      </button>
-
-                      <button
-                        onClick={goToPreviousPage}
-                        disabled={currentPage === 1}
-                        title="Página anterior"
-                        style={{
-                          padding: '0.4rem 0.6rem',
-                          background: currentPage === 1 ? '#e9ecef' : '#007bff',
-                          color: currentPage === 1 ? '#6c757d' : 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          fontSize: '0.8rem',
-                          cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                      >
-                        <ChevronLeft />
-                      </button>
-
-                      <span style={{
-                        padding: '0.4rem 0.8rem',
-                        fontSize: '0.85rem',
-                        color: '#495057',
-                        whiteSpace: 'nowrap'
-                      }}>
-                        {currentPage} de {totalPages}
-                      </span>
-
-                      <button
-                        onClick={goToNextPage}
-                        disabled={currentPage === totalPages}
-                        title="Próxima página"
-                        style={{
-                          padding: '0.4rem 0.6rem',
-                          background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                          color: currentPage === totalPages ? '#6c757d' : 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          fontSize: '0.8rem',
-                          cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                      >
-                        <ChevronRight />
-                      </button>
-
-                      <button
-                        onClick={goToLastPage}
-                        disabled={currentPage === totalPages}
-                        title="Última página"
-                        style={{
-                          padding: '0.4rem 0.6rem',
-                          background: currentPage === totalPages ? '#e9ecef' : '#007bff',
-                          color: currentPage === totalPages ? '#6c757d' : 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          fontSize: '0.8rem',
-                          cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                      >
-                        <LastPage />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-        </div>
-      </main>
+                          '&.Mui-selected': {
+                            backgroundColor: '#03B4C6',
+                            color: 'white',
+                            '&:hover': {
+                              backgroundColor: '#029AAB',
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Paper>
+            </Box>
+          </Box>
+        </Container>
+      </Box>
 
       <FooterInternal
         simplified={true}
         className="login-footer-component"
       />
-    </div>
+    </Box>
   );
 };
 

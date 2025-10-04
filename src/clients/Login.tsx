@@ -3,7 +3,33 @@ import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import ContactForm from "../components/ContactForm";
 import { useAuth } from "../contexts/AuthContext";
-import { LocalHospital, CalendarToday, BarChart, Visibility, VisibilityOff, CheckCircle, Info, Assignment } from '@mui/icons-material';
+import {
+  LocalHospital,
+  CalendarToday,
+  BarChart,
+  Visibility,
+  VisibilityOff,
+  CheckCircle,
+  Info,
+  Assignment
+} from '@mui/icons-material';
+import {
+  TextField,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Box,
+  Container,
+  Paper,
+  Typography,
+  InputAdornment,
+  IconButton,
+  Alert,
+  CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle
+} from '@mui/material';
 
 interface LoginFormData {
   email: string;
@@ -257,187 +283,368 @@ const Login: React.FC = () => {
       />
 
       <main className="login-main">
-        <div className="login-container">
-          <div className="login-content">
-            <div className="login-card" style={{ opacity: clinicError ? 0.3 : 1, pointerEvents: clinicError ? 'none' : 'auto' }}>
-              <div className="login-card-inner">
-                <div className="login-image-section">
-                </div>
+        <Box className="login-container">
+          <Box className="login-content">
+            <Paper
+              className="login-card"
+              elevation={0}
+              sx={{
+                opacity: clinicError ? 0.3 : 1,
+                pointerEvents: clinicError ? 'none' : 'auto',
+                borderRadius: '12px',
+                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+                border: '1px solid #e9ecef',
+              }}
+            >
+              <Box className="login-card-inner">
+                <Box className="login-image-section">
+                </Box>
 
-                <div className="login-form-section">
-                  <div className="login-header-content">
-                    <p>{showForgotPassword ? "Recuperar senha" : "Acesse sua conta para gerenciar sua clínica"}</p>
-                  </div>
+                <Box className="login-form-section">
+                  <Box className="login-header-content">
+                    <Typography variant="body1">
+                      {showForgotPassword ? "Recuperar senha" : "Acesse sua conta para gerenciar sua clínica"}
+                    </Typography>
+                  </Box>
 
                   {!showForgotPassword ? (
                     <>
-                      <form onSubmit={handleSubmit} className="login-form">
+                      <Box component="form" onSubmit={handleSubmit} className="login-form">
                         {errors.general && (
-                          <div className="error-message general-error">
+                          <Alert severity="error" sx={{ mb: 2 }}>
                             {errors.general}
-                          </div>
+                          </Alert>
                         )}
 
-                        <div className="form-group">
-                          <label htmlFor="email">Email</label>
-                          <input
+                        <Box sx={{ mb: 2 }}>
+                          <TextField
                             type="email"
                             id="email"
                             name="email"
+                            label="Email"
                             value={formData.email}
                             onChange={handleInputChange}
                             placeholder="seu@email.com"
-                            className={errors.email ? "error" : ""}
+                            error={!!errors.email}
+                            helperText={errors.email}
                             disabled={isLoading}
+                            fullWidth
+                            variant="outlined"
+                            InputLabelProps={{ shrink: true }}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                height: '45px',
+                                fontSize: '1rem',
+                                backgroundColor: 'white',
+                                '& fieldset': {
+                                  borderColor: '#ced4da',
+                                },
+                                '&:hover fieldset': {
+                                  borderColor: '#ced4da',
+                                },
+                                '&.Mui-focused fieldset': {
+                                  borderColor: '#03B4C6',
+                                  boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                                },
+                              },
+                              '& .MuiOutlinedInput-input': {
+                                padding: '10.5px 14px',
+                                color: '#495057',
+                                '&::placeholder': {
+                                  color: '#6c757d',
+                                  opacity: 1,
+                                },
+                              },
+                            }}
                           />
-                          {errors.email && (
-                            <span className="error-text">{errors.email}</span>
-                          )}
-                        </div>
+                        </Box>
 
-                        <div className="form-group">
-                          <label htmlFor="password">Senha</label>
-                          <div className="password-input-container">
-                            <input
-                              type={showPassword ? "text" : "password"}
-                              id="password"
-                              name="password"
-                              value={formData.password}
-                              onChange={handleInputChange}
-                              placeholder="Digite sua senha"
-                              className={errors.password ? "error" : ""}
-                              disabled={isLoading}
-                            />
-                            <button
-                              type="button"
-                              className="password-toggle"
-                              onClick={() => setShowPassword(!showPassword)}
-                              disabled={isLoading}
-                            >
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </button>
-                          </div>
-                          {errors.password && (
-                            <span className="error-text">{errors.password}</span>
-                          )}
-                        </div>
+                        <Box sx={{ mb: 2 }}>
+                          <TextField
+                            type={showPassword ? "text" : "password"}
+                            id="password"
+                            name="password"
+                            label="Senha"
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            placeholder="Digite sua senha"
+                            error={!!errors.password}
+                            helperText={errors.password}
+                            disabled={isLoading}
+                            fullWidth
+                            variant="outlined"
+                            InputLabelProps={{ shrink: true }}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                height: '45px',
+                                fontSize: '1rem',
+                                backgroundColor: 'white',
+                                '& fieldset': {
+                                  borderColor: '#ced4da',
+                                },
+                                '&:hover fieldset': {
+                                  borderColor: '#ced4da',
+                                },
+                                '&.Mui-focused fieldset': {
+                                  borderColor: '#03B4C6',
+                                  boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                                },
+                              },
+                              '& .MuiOutlinedInput-input': {
+                                padding: '10.5px 14px',
+                                paddingRight: '3rem',
+                                color: '#495057',
+                                '&::placeholder': {
+                                  color: '#6c757d',
+                                  opacity: 1,
+                                },
+                              },
+                            }}
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    disabled={isLoading}
+                                    edge="end"
+                                    sx={{ color: '#6c757d' }}
+                                  >
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                        </Box>
 
-                        <div className="form-options">
-                          <label className="checkbox-container">
-                            <input
-                              type="checkbox"
-                              name="rememberMe"
-                              checked={formData.rememberMe}
-                              onChange={handleInputChange}
-                              disabled={isLoading}
-                            />
-                            <span className="checkmark"></span>
-                            Lembrar de mim
-                          </label>
+                        <Box className="form-options" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                name="rememberMe"
+                                checked={formData.rememberMe}
+                                onChange={handleInputChange}
+                                disabled={isLoading}
+                                sx={{
+                                  color: '#2EAAA1',
+                                  '&.Mui-checked': {
+                                    color: '#2EAAA1',
+                                  },
+                                  padding: '0 9px',
+                                }}
+                              />
+                            }
+                            label="Lembrar de mim"
+                            sx={{
+                              '& .MuiFormControlLabel-label': {
+                                fontSize: '1rem',
+                                color: '#212529',
+                              },
+                            }}
+                          />
 
-                          <button
+                          <Button
                             type="button"
-                            className="forgot-password-link"
+                            variant="text"
                             onClick={handleForgotPassword}
                             disabled={isLoading}
+                            sx={{
+                              textTransform: 'none',
+                              color: '#03B4C6',
+                              fontSize: '1rem',
+                              '&:hover': {
+                                backgroundColor: 'rgba(3, 180, 198, 0.04)',
+                              },
+                            }}
                           >
                             Esqueceu a senha?
-                          </button>
-                        </div>
+                          </Button>
+                        </Box>
 
-                        <button
+                        <Button
                           type="submit"
-                          className={`login-button ${isLoading ? "loading" : ""}`}
+                          variant="contained"
+                          color="primary"
+                          fullWidth
                           disabled={isLoading}
+                          sx={{
+                            py: 1.5,
+                            mb: 2,
+                            backgroundColor: '#03B4C6',
+                            fontSize: '1rem',
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            borderRadius: '8px',
+                            boxShadow: 'none',
+                            '&:hover': {
+                              backgroundColor: '#029AAB',
+                              boxShadow: 'none',
+                            },
+                            '&:disabled': {
+                              backgroundColor: '#6c757d',
+                              color: 'white',
+                            },
+                          }}
                         >
                           {isLoading ? (
                             <>
-                              <span className="spinner"></span>
+                              <CircularProgress size={20} sx={{ mr: 1 }} color="inherit" />
                               Entrando...
                             </>
                           ) : (
                             "Entrar"
                           )}
-                        </button>
-                      </form>
+                        </Button>
+                      </Box>
 
-                      <div className="login-footer">
-                        <p>
+                      <Box className="login-footer" sx={{ textAlign: 'center', mt: 2 }}>
+                        <Typography variant="body2" sx={{ fontSize: '1rem', color: '#6c757d' }}>
                           Não tem uma conta?{" "}
-                          <button
-                            className="register-link"
+                          <Button
+                            variant="text"
                             onClick={handleGoToPlans}
                             disabled={isLoading}
+                            sx={{
+                              textTransform: 'none',
+                              p: 0,
+                              minWidth: 'auto',
+                              fontSize: '1rem',
+                              color: '#03B4C6',
+                              fontWeight: 600,
+                              '&:hover': {
+                                backgroundColor: 'transparent',
+                                textDecoration: 'underline',
+                              },
+                            }}
                           >
                             Assinar
-                          </button>
-                        </p>
-                      </div>
+                          </Button>
+                        </Typography>
+                      </Box>
 
-                      <div className="demo-credentials">
-                        <p><strong>Demo:</strong></p>
-                        <p>Email: admin@clinic4us.com</p>
-                        <p>Senha: 123456</p>
-                      </div>
                     </>
                   ) : (
                     // Formulário de Esqueci a Senha
-                    <div className="forgot-password-form">
-                {!forgotPasswordSent ? (
-                  <form onSubmit={handleForgotPasswordSubmit} className="login-form">
-                    <div className="form-group">
-                      <label htmlFor="forgotEmail">Email</label>
-                      <input
-                        type="email"
-                        id="forgotEmail"
-                        name="forgotEmail"
-                        value={forgotPasswordEmail}
-                        onChange={handleForgotPasswordEmailChange}
-                        placeholder="Digite seu email"
-                        className={errors.email ? "error" : ""}
-                        required
-                      />
-                      {errors.email && (
-                        <span className="error-text">{errors.email}</span>
-                      )}
-                    </div>
+                    <Box className="forgot-password-form">
+                      {!forgotPasswordSent ? (
+                        <Box component="form" onSubmit={handleForgotPasswordSubmit} className="login-form">
+                          <Box sx={{ mb: 3 }}>
+                            <TextField
+                              type="email"
+                              id="forgotEmail"
+                              name="forgotEmail"
+                              label="Email"
+                              value={forgotPasswordEmail}
+                              onChange={handleForgotPasswordEmailChange}
+                              placeholder="Digite seu email"
+                              error={!!errors.email}
+                              helperText={errors.email}
+                              required
+                              fullWidth
+                              variant="outlined"
+                              InputLabelProps={{ shrink: true }}
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  height: '45px',
+                                  fontSize: '1rem',
+                                  backgroundColor: 'white',
+                                  '& fieldset': {
+                                    borderColor: '#ced4da',
+                                  },
+                                  '&:hover fieldset': {
+                                    borderColor: '#ced4da',
+                                  },
+                                  '&.Mui-focused fieldset': {
+                                    borderColor: '#03B4C6',
+                                    boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                                  },
+                                },
+                                '& .MuiOutlinedInput-input': {
+                                  padding: '10.5px 14px',
+                                  color: '#495057',
+                                  '&::placeholder': {
+                                    color: '#6c757d',
+                                    opacity: 1,
+                                  },
+                                },
+                              }}
+                            />
+                          </Box>
 
-                    <div className="form-actions">
-                      <button type="submit" className="login-button">
-                        Enviar Link de Recuperação
-                      </button>
-                      <button
-                        type="button"
-                        className="back-button"
-                        onClick={handleBackToLogin}
-                      >
-                        ← Voltar ao Login
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="success-message">
-                    <div className="success-icon"><CheckCircle /></div>
-                    <h3>Email enviado!</h3>
-                    <p>
-                      Enviamos um link de recuperação para <strong>{forgotPasswordEmail}</strong>.
-                      Verifique sua caixa de entrada e spam.
-                    </p>
-                    <button
-                      className="back-button"
-                      onClick={handleBackToLogin}
-                    >
-                      ← Voltar ao Login
-                    </button>
-                  </div>
-                )}
-                    </div>
+                          <Box className="form-actions" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Button
+                              type="submit"
+                              variant="contained"
+                              color="primary"
+                              fullWidth
+                              sx={{
+                                py: 1.5,
+                                backgroundColor: '#03B4C6',
+                                fontSize: '1rem',
+                                fontWeight: 600,
+                                textTransform: 'none',
+                                borderRadius: '8px',
+                                boxShadow: 'none',
+                                '&:hover': {
+                                  backgroundColor: '#029AAB',
+                                  boxShadow: 'none',
+                                },
+                              }}
+                            >
+                              Enviar Link de Recuperação
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="text"
+                              onClick={handleBackToLogin}
+                              fullWidth
+                              sx={{
+                                textTransform: 'none',
+                                color: '#03B4C6',
+                                fontSize: '1rem',
+                                '&:hover': {
+                                  backgroundColor: 'rgba(3, 180, 198, 0.04)',
+                                },
+                              }}
+                            >
+                              ← Voltar ao Login
+                            </Button>
+                          </Box>
+                        </Box>
+                      ) : (
+                        <Box className="success-message" sx={{ textAlign: 'center', py: 3 }}>
+                          <Box className="success-icon" sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
+                            <CheckCircle sx={{ fontSize: 60, color: 'success.main' }} />
+                          </Box>
+                          <Typography variant="h6" sx={{ mb: 2, fontSize: '1.25rem', fontWeight: 600, color: '#212529' }}>Email enviado!</Typography>
+                          <Typography variant="body1" sx={{ mb: 3, fontSize: '1rem', color: '#6c757d' }}>
+                            Enviamos um link de recuperação para <strong style={{ color: '#212529' }}>{forgotPasswordEmail}</strong>.
+                            Verifique sua caixa de entrada e spam.
+                          </Typography>
+                          <Button
+                            variant="text"
+                            onClick={handleBackToLogin}
+                            fullWidth
+                            sx={{
+                              textTransform: 'none',
+                              color: '#03B4C6',
+                              fontSize: '1rem',
+                              '&:hover': {
+                                backgroundColor: 'rgba(3, 180, 198, 0.04)',
+                              },
+                            }}
+                          >
+                            ← Voltar ao Login
+                          </Button>
+                        </Box>
+                      )}
+                    </Box>
                   )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                </Box>
+              </Box>
+            </Paper>
+          </Box>
+        </Box>
       </main>
 
       {/* Modal de Contato */}
@@ -448,19 +655,22 @@ const Login: React.FC = () => {
       />
 
       {/* Modal de Erro da Clínica */}
-      {clinicError && (
-        <div className="clinic-error-modal-overlay">
-          <div className="clinic-error-modal">
-            <div className="clinic-error-header">
-              <div className="clinic-error-icon"><Info /></div>
-              <h3>Informação de Acesso</h3>
-            </div>
-            <div className="clinic-error-content">
-              <p>{clinicError}</p>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog
+        open={!!clinicError}
+        disableEscapeKeyDown
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Info color="primary" />
+            <Typography variant="h6">Informação de Acesso</Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">{clinicError}</Typography>
+        </DialogContent>
+      </Dialog>
 
       <FooterInternal
         simplified={true}
