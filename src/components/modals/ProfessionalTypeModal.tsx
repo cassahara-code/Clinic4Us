@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Typography,
+  IconButton,
+  Checkbox,
+  FormControlLabel
+} from '@mui/material';
+import { Close } from '@mui/icons-material';
+import { colors, typography, inputs } from '../../theme/designSystem';
 
-// Interface para os dados do tipo de profissional
 export interface ProfessionalTypeData {
   name: string;
   description: string;
   active: boolean;
 }
 
-// Props do componente
 interface ProfessionalTypeModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,7 +37,6 @@ const ProfessionalTypeModal: React.FC<ProfessionalTypeModalProps> = ({
   initialData = {},
   title
 }) => {
-  // Estado do formulário
   const [formData, setFormData] = useState<ProfessionalTypeData>({
     name: '',
     description: '',
@@ -33,7 +44,6 @@ const ProfessionalTypeModal: React.FC<ProfessionalTypeModalProps> = ({
     ...initialData
   });
 
-  // Atualizar form quando initialData mudar
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
       setFormData(prev => ({
@@ -43,7 +53,6 @@ const ProfessionalTypeModal: React.FC<ProfessionalTypeModalProps> = ({
     }
   }, [initialData]);
 
-  // Limpar formulário ao fechar
   const handleClose = () => {
     setFormData({
       name: '',
@@ -53,181 +62,166 @@ const ProfessionalTypeModal: React.FC<ProfessionalTypeModalProps> = ({
     onClose();
   };
 
-  // Salvar dados
   const handleSave = () => {
     onSave(formData);
     handleClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.5)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem'
-      }}
-      onClick={handleClose}
-    >
-      <div
-        style={{
-          background: 'white',
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
           borderRadius: '12px',
-          width: '100%',
-          maxWidth: '600px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
           maxHeight: '90vh',
-          overflow: 'auto',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Cabeçalho do modal */}
-        <div style={{
-          background: '#03B4C6',
-          color: 'white',
+        }
+      }}
+    >
+      <DialogTitle
+        sx={{
+          backgroundColor: colors.primary,
+          color: colors.white,
           padding: '1.5rem',
-          borderRadius: '12px 12px 0 0',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <h3 style={{
-            margin: 0,
-            fontSize: '1.4rem',
-            fontWeight: '600'
-          }}>
-            {title || (mode === 'create' ? 'Novo Tipo de Profissional' : 'Editar Tipo de Profissional')}
-          </h3>
-          <button
-            onClick={handleClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              padding: '0.25rem'
-            }}
-          >
-            ×
-          </button>
-        </div>
+          alignItems: 'center',
+        }}
+      >
+        <Typography variant="h6" component="h3" sx={{ fontSize: '1.4rem', fontWeight: typography.fontWeight.semibold, margin: 0 }}>
+          {title || (mode === 'create' ? 'Novo Tipo de Profissional' : 'Editar Tipo de Profissional')}
+        </Typography>
+        <IconButton onClick={handleClose} sx={{ color: colors.white, padding: '0.25rem', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' } }}>
+          <Close />
+        </IconButton>
+      </DialogTitle>
 
-        {/* Formulário */}
-        <form style={{ padding: '1.5rem' }}>
-          {/* Nome do Tipo de Profissional */}
-          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-            <label>Nome do Tipo de Profissional</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Ex: Psicólogo(a), Fonoaudiólogo(a)"
+      <DialogContent sx={{ padding: '1.5rem !important', paddingTop: '2rem !important' }}>
+        <TextField
+          label="Nome do Tipo de Profissional"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          placeholder="Ex: Psicólogo(a), Fonoaudiólogo(a)"
+          fullWidth
+          margin="dense"
+          InputLabelProps={{ shrink: true }}
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiOutlinedInput-root': {
+              height: inputs.default.height,
+              '& fieldset': { borderColor: colors.border },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary }
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: inputs.default.labelFontSize,
+              color: colors.textSecondary,
+              backgroundColor: colors.white,
+              padding: inputs.default.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
+        />
+
+        <TextField
+          label="Descrição"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          placeholder="Descreva as características deste tipo de profissional..."
+          fullWidth
+          multiline
+          rows={4}
+          margin="dense"
+          InputLabelProps={{
+            shrink: inputs.multiline.labelShrink,
+            sx: {
+              fontSize: inputs.multiline.labelFontSize,
+              color: inputs.multiline.labelColor,
+              backgroundColor: inputs.multiline.labelBackground,
+              padding: inputs.multiline.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiOutlinedInput-root': {
+              position: inputs.multiline.position,
+              opacity: inputs.multiline.opacity,
+              alignItems: inputs.multiline.alignItems,
+              fontSize: inputs.multiline.fontSize,
+              minHeight: inputs.multiline.minHeight,
+              maxHeight: inputs.multiline.maxHeight,
+              overflow: inputs.multiline.overflow,
+              padding: 0,
+              '& fieldset': {
+                borderColor: inputs.multiline.borderColor,
+              },
+              '&:hover fieldset': {
+                borderColor: inputs.multiline.borderColor,
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: colors.primary,
+              },
+              '& textarea': {
+                wordWrap: inputs.multiline.wordWrap,
+                whiteSpace: inputs.multiline.whiteSpace,
+                padding: inputs.multiline.inputPadding,
+                height: inputs.multiline.textareaHeight,
+                maxHeight: inputs.multiline.textareaMaxHeight,
+                overflow: `${inputs.multiline.textareaOverflow} !important`,
+                boxSizing: inputs.multiline.textareaBoxSizing,
+                '&::-webkit-scrollbar': {
+                  width: inputs.multiline.scrollbarWidth,
+                },
+                '&::-webkit-scrollbar-track': {
+                  backgroundColor: inputs.multiline.scrollbarTrackColor,
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: inputs.multiline.scrollbarThumbColor,
+                  borderRadius: '4px',
+                  '&:hover': {
+                    backgroundColor: inputs.multiline.scrollbarThumbHoverColor,
+                  },
+                },
+              },
+            },
+          }}
+        />
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formData.active}
+              onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+              sx={{
+                color: colors.primary,
+                '&.Mui-checked': { color: colors.primary }
+              }}
             />
-          </div>
+          }
+          label="Ativo"
+          sx={{
+            marginBottom: '2rem',
+            '& .MuiFormControlLabel-label': {
+              fontSize: '0.95rem',
+              color: colors.text
+            }
+          }}
+        />
+      </DialogContent>
 
-          {/* Descrição */}
-          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-            <label>Descrição</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Descreva as características deste tipo de profissional..."
-              rows={4}
-              style={{ resize: 'vertical' }}
-            />
-          </div>
-
-          {/* Status Ativo */}
-          <div style={{ marginBottom: '2rem' }}>
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                cursor: 'pointer',
-                fontSize: '0.95rem',
-                color: '#2D3748'
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={formData.active}
-                onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  cursor: 'pointer',
-                  accentColor: '#03B4C6'
-                }}
-              />
-              Ativo
-            </label>
-          </div>
-
-          {/* Botões */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '1rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid #e9ecef'
-          }}>
-            <button
-              type="button"
-              onClick={handleClose}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: '1px solid #ced4da',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#6c757d',
-                fontSize: '1rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8f9fa';
-                e.currentTarget.style.borderColor = '#adb5bd';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
-                e.currentTarget.style.borderColor = '#ced4da';
-              }}
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: 'none',
-                borderRadius: '6px',
-                background: '#03B4C6',
-                color: 'white',
-                fontSize: '1rem',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0298a8'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#03B4C6'}
-            >
-              {mode === 'create' ? 'Criar Tipo de Profissional' : 'Salvar Alterações'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      <DialogActions sx={{ padding: '1.5rem 2rem', borderTop: `1px solid ${colors.backgroundAlt}`, backgroundColor: colors.background, gap: '1rem' }}>
+        <Button onClick={handleClose} variant="outlined" sx={{ padding: '0.75rem 1.5rem', border: `1px solid ${colors.border}`, borderRadius: '6px', backgroundColor: colors.white, color: colors.textSecondary, fontSize: '1rem', fontWeight: typography.fontWeight.medium, textTransform: 'none', '&:hover': { backgroundColor: colors.background, borderColor: '#adb5bd' } }}>
+          Cancelar
+        </Button>
+        <Button onClick={handleSave} variant="contained" sx={{ padding: '0.75rem 1.5rem', borderRadius: '6px', backgroundColor: colors.primary, color: colors.white, fontSize: '1rem', fontWeight: typography.fontWeight.medium, textTransform: 'none', boxShadow: 'none', '&:hover': { backgroundColor: '#029AAB', boxShadow: 'none', transform: 'translateY(-1px)' } }}>
+          {mode === 'create' ? 'Criar Tipo de Profissional' : 'Salvar Alterações'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

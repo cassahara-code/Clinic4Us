@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  MenuItem,
+  IconButton,
+  Paper
+} from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add, FilterAltOff, FirstPage, ChevronLeft, ChevronRight, LastPage } from '@mui/icons-material';
+import { Delete, Edit } from '@mui/icons-material';
 import ConfirmModal from "../components/modals/ConfirmModal";
 import ProfileModal, { ProfileData } from "../components/modals/ProfileModal";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import { FaqButton } from "../components/FaqButton";
-import Pagination from "../components/Pagination";
+import StandardPagination from "../components/Pagination/StandardPagination";
+import AddButton from "../components/AddButton";
+import ClearFiltersButton from "../components/ClearFiltersButton";
+import { colors, typography, inputs } from "../theme/designSystem";
 
 interface MenuItemProps {
   label: string;
@@ -61,6 +73,15 @@ const AdminProfiles: React.FC = () => {
   // Estados do modal de perfil
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileModalMode, setProfileModalMode] = useState<'create' | 'edit'>('create');
+  const [hasFilterChanges, setHasFilterChanges] = useState(false);
+
+  // Valores iniciais dos filtros
+  const initialFilters = {
+    searchTerm: '',
+    typeFilter: 'Todos' as 'Todos' | 'Nativo Cliente' | 'Paciente' | 'Sistema' | 'Nativo Sistema',
+    sortField: 'name' as 'name' | 'type',
+    sortOrder: 'asc' as 'asc' | 'desc'
+  };
 
   // Dados de exemplo dos perfis
   const [profiles] = useState<Profile[]>(() => {
@@ -239,12 +260,24 @@ const AdminProfiles: React.FC = () => {
     setCurrentPage(1);
   }, [searchTerm, typeFilter, sortOrder]);
 
+  // Verificar se há mudanças nos filtros
+  useEffect(() => {
+    const hasChanges =
+      searchTerm !== initialFilters.searchTerm ||
+      typeFilter !== initialFilters.typeFilter ||
+      sortField !== initialFilters.sortField ||
+      sortOrder !== initialFilters.sortOrder;
+
+    setHasFilterChanges(hasChanges);
+  }, [searchTerm, typeFilter, sortField, sortOrder]);
+
   const clearFilters = () => {
-    setSearchTerm('');
-    setTypeFilter('Todos');
-    setSortField('name');
-    setSortOrder('asc');
+    setSearchTerm(initialFilters.searchTerm);
+    setTypeFilter(initialFilters.typeFilter);
+    setSortField(initialFilters.sortField);
+    setSortOrder(initialFilters.sortOrder);
     setCurrentPage(1);
+    setHasFilterChanges(false);
   };
 
   const handleAddProfile = () => {
@@ -318,7 +351,11 @@ const AdminProfiles: React.FC = () => {
   };
 
   if (!userSession) {
-    return <div>Carregando...</div>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Typography>Carregando...</Typography>
+      </Box>
+    );
   }
 
 
@@ -342,7 +379,7 @@ const AdminProfiles: React.FC = () => {
   };
 
   return (
-    <div className="professional-schedule">
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <HeaderInternal
         showCTAButton={false}
         className="login-header"
@@ -357,212 +394,198 @@ const AdminProfiles: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main style={{
-        padding: '1rem',
-        paddingTop: '0.25rem',
-        minHeight: 'calc(100vh - 120px)',
-        background: '#f8f9fa',
-        marginTop: '20px'
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '100%',
-          margin: '0',
-          padding: '0'
-        }}>
-          {/* Título da Lista de Perfis */}
-          <div className="page-header-container">
-            <div className="page-header-content">
-              <h1 className="page-header-title">Gestão de Perfis</h1>
-              <p className="page-header-description">Gestão de perfis de acesso e permissões do sistema.</p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <FaqButton />
-              <button
-                onClick={handleAddProfile}
-                title="Adicionar novo perfil"
-                className="btn-add"
+      <Box
+        component="main"
+        sx={{
+          padding: '1rem',
+          minHeight: 'calc(100vh - 120px)',
+          background: colors.background,
+          marginTop: '85px',
+          flex: 1
+        }}
+      >
+        <Container maxWidth={false} disableGutters>
+          {/* Título da Página */}
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            mb: 3,
+            gap: 2
+          }}>
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontSize: '1.3rem',
+                  mb: 1,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: colors.textPrimary
+                }}
               >
-                <Add />
-              </button>
-            </div>
-          </div>
+                Gestão de Perfis
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary
+                }}
+              >
+                Gestão de perfis de acesso e permissões do sistema.
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <FaqButton />
+              <AddButton onClick={handleAddProfile} title="Adicionar novo perfil" />
+            </Box>
+          </Box>
 
-          {/* Filtros da lista de perfis */}
-          <div className="schedule-filters" style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginBottom: '1rem'
-          }}>
-            <div className="schedule-filters-grid" style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '0.75rem',
-              marginBottom: '1rem'
-            }}>
-              {/* Busca por nome */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Nome do Perfil</label>
-                <input
-                  type="text"
-                  placeholder="Buscar perfil"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-              </div>
+          {/* Filtros, Paginação e Lista */}
+          <Paper
+            elevation={0}
+            sx={{
+              padding: '1.5rem',
+              mb: 2,
+              borderRadius: '12px',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${colors.backgroundAlt}`,
+            }}
+          >
+            {/* Filtros */}
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <TextField
+                label="Nome do Perfil"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar perfil"
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  flex: '2 1 300px',
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.primary,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: colors.primary,
+                    },
+                  },
+                }}
+              />
 
-              {/* Tipo de Perfil */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Tipo de Perfil</label>
-                <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value as any)}
-                  style={{
-                    minWidth: '120px',
-                    width: '100%',
-                    paddingRight: '2rem',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="Todos">Todos</option>
-                  <option value="Nativo Cliente">Nativo Cliente</option>
-                  <option value="Paciente">Paciente</option>
-                  <option value="Sistema">Sistema</option>
-                  <option value="Nativo Sistema">Nativo Sistema</option>
-                </select>
-              </div>
+              <TextField
+                select
+                label="Tipo de Perfil"
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value as any)}
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  minWidth: '150px',
+                  flex: '1 1 150px',
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.primary,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: colors.primary,
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="Todos">Todos</MenuItem>
+                <MenuItem value="Nativo Cliente">Nativo Cliente</MenuItem>
+                <MenuItem value="Paciente">Paciente</MenuItem>
+                <MenuItem value="Sistema">Sistema</MenuItem>
+                <MenuItem value="Nativo Sistema">Nativo Sistema</MenuItem>
+              </TextField>
 
-              {/* Botão limpar filtros */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'flex-end',
-                paddingBottom: '2px'
-              }}>
-                <button
-                  onClick={clearFilters}
-                  title="Limpar filtros"
-                  className="btn-clear-filters"
-                >
-                  <FilterAltOff fontSize="small" />
-                </button>
-              </div>
-            </div>
-          </div>
+              <Box sx={{ opacity: hasFilterChanges ? 1 : 0.5, pointerEvents: hasFilterChanges ? 'auto' : 'none' }}>
+                <ClearFiltersButton onClick={clearFilters} />
+              </Box>
+              </Box>
+            </Box>
 
-          {/* Paginação superior */}
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginBottom: '1rem'
-          }}>
-            <Pagination
+            {/* Paginação */}
+            <StandardPagination
               currentPage={currentPage}
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
               totalItems={filteredAndSortedProfiles.length}
-              itemLabel="perfis"
               onPageChange={(page) => {
                 setCurrentPage(page);
                 setTimeout(scrollToTop, 100);
               }}
               onItemsPerPageChange={handleItemsPerPageChange}
             />
-          </div>
 
-          {/* Lista de perfis */}
-          <div className="admin-plans-list-container">
-            <div className="admin-plans-table" style={{ display: 'block' }}>
-              <div className="admin-plans-table-header" style={{
+            {/* Lista de Perfis */}
+            <Box className="admin-plans-list-container" sx={{ mt: 2 }}>
+            <Box className="admin-plans-table" style={{ display: 'block' }}>
+              <Box className="admin-plans-table-header" style={{
                 display: 'flex',
                 gridTemplateColumns: 'unset'
               }}>
-                <div
+                <Box
                   className="admin-plans-header-cell"
                   style={{ textAlign: 'left', flex: '0 0 200px', cursor: 'pointer', userSelect: 'none' }}
                   onClick={() => handleSort('name')}
                   title="Ordenar por perfil"
                 >
                   Perfil {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div
+                </Box>
+                <Box
                   className="admin-plans-header-cell"
                   style={{ textAlign: 'left', flex: '0 0 200px', cursor: 'pointer', userSelect: 'none' }}
                   onClick={() => handleSort('type')}
                   title="Ordenar por tipo"
                 >
                   Tipo {sortField === 'type' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '1 1 auto' }}>Funcionalidades</div>
-                <div className="admin-plans-header-cell" style={{ justifyContent: 'flex-end', flex: '0 0 140px' }}>Ações</div>
-              </div>
+                </Box>
+                <Box className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '1 1 auto' }}>Funcionalidades</Box>
+                <Box className="admin-plans-header-cell" style={{ justifyContent: 'flex-end', flex: '0 0 140px' }}>Ações</Box>
+              </Box>
 
-              <div className="admin-plans-table-body">
+              <Box className="admin-plans-table-body">
                 {paginatedProfiles.map((profile) => (
-                  <div
+                  <Box
                     key={profile.id}
                     className="admin-plans-table-row"
                     style={{ cursor: 'default', display: 'flex', gridTemplateColumns: 'unset' }}
                   >
-                    <div className="admin-plans-cell admin-plans-name" data-label="Perfil" style={{ textAlign: 'left', flex: '0 0 200px' }}>
+                    <Box className="admin-plans-cell admin-plans-name" data-label="Perfil" style={{ textAlign: 'left', flex: '0 0 200px' }}>
                       {profile.name}
-                    </div>
-                    <div className="admin-plans-cell admin-plans-description" data-label="Tipo" style={{ textAlign: 'left', flex: '0 0 200px' }}>
+                    </Box>
+                    <Box className="admin-plans-cell admin-plans-description" data-label="Tipo" style={{ textAlign: 'left', flex: '0 0 200px' }}>
                       {profile.type}
-                    </div>
-                    <div className="admin-plans-cell admin-plans-description" data-label="Funcionalidades" style={{
+                    </Box>
+                    <Box className="admin-plans-cell admin-plans-description" data-label="Funcionalidades" style={{
                       textAlign: 'left',
                       flex: '1 1 auto',
                       overflow: 'hidden',
@@ -571,59 +594,71 @@ const AdminProfiles: React.FC = () => {
                       wordBreak: 'break-word'
                     }}>
                       {profile.functionalities.join(', ')}
-                    </div>
-                    <div className="admin-plans-cell admin-plans-actions" data-label="Ações" style={{
+                    </Box>
+                    <Box className="admin-plans-cell admin-plans-actions" data-label="Ações" style={{
                       textAlign: 'right',
                       flex: '0 0 140px',
                       justifyContent: 'flex-end',
                       display: 'flex'
                     }}>
-                      <button
-                        className="btn-action-edit"
-                        onClick={(e) => { e.stopPropagation(); handleProfileAction('edit', profile.id); }}
-                        title="Editar perfil"
-                      >
-                        <Edit fontSize="small" />
-                      </button>
-                      <button
-                        className="btn-action-delete"
-                        onClick={(e) => { e.stopPropagation(); handleProfileAction('delete', profile.id); }}
-                        title="Excluir perfil"
-                      >
-                        <Delete fontSize="small" />
-                      </button>
-                    </div>
-                  </div>
+                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); handleProfileAction('edit', profile.id); }}
+                          title="Editar perfil"
+                          sx={{
+                            backgroundColor: '#03B4C6',
+                            color: 'white',
+                            width: '32px',
+                            height: '32px',
+                            '&:hover': {
+                              backgroundColor: '#029AAB',
+                            }
+                          }}
+                        >
+                          <Edit sx={{ fontSize: '1rem' }} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); handleProfileAction('delete', profile.id); }}
+                          title="Excluir perfil"
+                          sx={{
+                            backgroundColor: '#dc3545',
+                            color: 'white',
+                            width: '32px',
+                            height: '32px',
+                            '&:hover': {
+                              backgroundColor: '#c82333',
+                            }
+                          }}
+                        >
+                          <Delete sx={{ fontSize: '1rem' }} />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  </Box>
                 ))}
-              </div>
-            </div>
-          </div>
+              </Box>
+            </Box>
+            </Box>
 
-          {/* Paginação inferior */}
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginTop: '1rem'
-          }}>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
-              totalItems={filteredAndSortedProfiles.length}
-              itemLabel="perfis"
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
-          </div>
-        </div>
-      </main>
+            {/* Paginação Inferior */}
+            <Box sx={{ mt: 2 }}>
+              <StandardPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredAndSortedProfiles.length}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  setTimeout(scrollToTop, 100);
+                }}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
 
       <FooterInternal
         simplified={true}
@@ -660,14 +695,13 @@ const AdminProfiles: React.FC = () => {
         type="danger"
       />
 
-      {/* Toast de notificação */}
       <Toast
         message={toast.message}
         type={toast.type}
         isVisible={toast.isVisible}
         onClose={hideToast}
       />
-    </div>
+    </Box>
   );
 };
 

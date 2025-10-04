@@ -1,5 +1,6 @@
 import React from "react";
 import logo from "../../images/logo_clinic4us.png";
+import { Box, Container, Typography, Link } from '@mui/material';
 
 interface FooterLinkProps {
   label: string;
@@ -85,59 +86,113 @@ const FooterInternal: React.FC<FooterInternalProps> = ({
 
   if (simplified) {
     return (
-      <footer className={`footer-internal simplified ${className}`}>
-        <div className="container">
-          <div className="footer-bottom">
-            <p>{copyrightText}</p>
-            <p style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.5rem' }}>
-              Imagens by <a href="http://www.freepik.com" target="_blank" rel="noopener noreferrer" style={{ color: '#03B4C6', textDecoration: 'none' }}>Freepik</a>
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Box
+        component="footer"
+        className={`footer-internal simplified ${className}`}
+        sx={{
+          backgroundColor: '#2D3748',
+          color: 'white',
+          py: 3,
+          mt: 'auto'
+        }}
+      >
+        <Container>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="body2">{copyrightText}</Typography>
+            <Typography variant="caption" sx={{ color: '#999', mt: 0.5, display: 'block' }}>
+              Imagens by{' '}
+              <Link
+                href="http://www.freepik.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: '#03B4C6', textDecoration: 'none' }}
+              >
+                Freepik
+              </Link>
+            </Typography>
+          </Box>
+        </Container>
+      </Box>
     );
   }
 
   return (
-    <footer className={`footer-internal ${className}`}>
-      <div className="container">
-        <div className="footer-content">
+    <Box
+      component="footer"
+      className={`footer-internal ${className}`}
+      sx={{
+        backgroundColor: '#2D3748',
+        color: 'white',
+        py: 6,
+        mt: 'auto'
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, mb: 4 }}>
           {showLogo && (
-            <div className="footer-section logo-section">
-              <img
+            <Box sx={{ flex: '1 1 300px', minWidth: '250px' }}>
+              <Box
+                component="img"
                 src={logo}
                 alt="CLINIC4US"
-                className="footer-logo"
                 onClick={handleLogoClick}
-                style={{ cursor: "pointer" }}
+                sx={{
+                  height: '40px',
+                  cursor: 'pointer',
+                  mb: 2,
+                  objectFit: 'contain'
+                }}
               />
-              <p>{logoText}</p>
-            </div>
+              <Typography variant="body2" sx={{ color: '#CBD5E0', lineHeight: 1.7 }}>
+                {logoText}
+              </Typography>
+            </Box>
           )}
 
           {sections.map((section, index) => (
-            <div key={index} className="footer-section">
-              <h4>{section.title}</h4>
-              <ul>
+            <Box key={index} sx={{ flex: '1 1 200px', minWidth: '150px' }}>
+              <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600, mb: 2 }}>
+                {section.title}
+              </Typography>
+              <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
                 {section.links.map((link, linkIndex) => (
-                  <li key={linkIndex}>
-                    <a
+                  <Box component="li" key={linkIndex} sx={{ mb: 1 }}>
+                    <Link
                       href={link.href || "#"}
                       onClick={(e) => handleLinkClick(link, e)}
+                      sx={{
+                        color: '#CBD5E0',
+                        textDecoration: 'none',
+                        fontSize: '0.875rem',
+                        '&:hover': {
+                          color: '#03B4C6',
+                          textDecoration: 'underline'
+                        }
+                      }}
                     >
                       {link.label}
-                    </a>
-                  </li>
+                    </Link>
+                  </Box>
                 ))}
-              </ul>
-            </div>
+              </Box>
+            </Box>
           ))}
-        </div>
-        <div className="footer-bottom">
-          <p>{copyrightText}</p>
-        </div>
-      </div>
-    </footer>
+        </Box>
+
+        <Box
+          sx={{
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            mt: 4,
+            pt: 3,
+            textAlign: 'center'
+          }}
+        >
+          <Typography variant="body2" sx={{ color: '#CBD5E0' }}>
+            {copyrightText}
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

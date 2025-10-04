@@ -1,7 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
 import logo from "../../images/logo_clinic4us.png";
-import { NotificationsOutlined, Person, Refresh, Logout, Settings, Schedule, Visibility, VisibilityOff } from '@mui/icons-material';
+import {
+  NotificationsOutlined,
+  Person,
+  Refresh,
+  Logout,
+  Settings,
+  Schedule,
+  Visibility,
+  VisibilityOff,
+  Menu as MenuIcon,
+  Close as CloseIcon
+} from '@mui/icons-material';
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Badge,
+  Button,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Box,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  InputAdornment,
+  MenuItem
+} from '@mui/material';
 import SessionTimer from "../SessionTimer";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -29,20 +58,7 @@ interface HeaderInternalProps {
 }
 
 const HeaderInternal: React.FC<HeaderInternalProps> = ({
-  menuItems = [
-    { label: "Agenda", href: "?page=schedule" },
-    { label: "Cadastro Paciente", href: "?page=patient-register" },
-    { label: "Dashboard", href: "?page=dashboard" },
-    { label: "Entidades", href: "?page=admin-entities" },
-    { label: "FAQ", href: "?page=faq" },
-    { label: "Funcionalidades", href: "?page=admin-functionalities" },
-    { label: "Gestão FAQ", href: "?page=admin-faq" },
-    { label: "Pacientes", href: "?page=patients" },
-    { label: "Perfis", href: "?page=admin-profiles" },
-    { label: "Planos", href: "?page=admin-plans" },
-    { label: "Meu Perfil", href: "?page=user-profile" },
-    { label: "Tipos de Profissionais", href: "?page=admin-professional-types" },
-  ],
+  menuItems,
   showCTAButton = false,
   ctaButtonText = "Ação",
   onCTAClick,
@@ -57,7 +73,13 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
   onNotificationClick,
   onUserClick,
 }) => {
-  const { renewSession: renewAuthSession, refreshSession, updateProfile } = useAuth();
+  const { user, renewSession: renewAuthSession, refreshSession, updateProfile } = useAuth();
+
+  // Usar dados do contexto se não forem passados por props
+  const actualMenuItems = menuItems || user?.menuItems || [];
+  const actualUserEmail = userEmail || user?.email || '';
+  const actualUserProfile = userProfile || user?.role || '';
+  const actualClinicName = clinicName || user?.clinicName || '';
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSessionExpiredModalOpen, setIsSessionExpiredModalOpen] = useState(false);
   const [isChangeProfileModalOpen, setIsChangeProfileModalOpen] = useState(false);
@@ -238,571 +260,453 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
   ];
 
   const availableProfiles = [
+    'Administrator',
     'Cliente admin',
-    'Profissional',
-    'Secretário',
-    'Recepcionista'
+    'Recepcionista',
+    'Profissional'
   ];
 
   return (
-    <header className={`header-internal ${className} ${isLoggedIn ? 'logged-in' : ''}`}>
-      <nav className="navbar">
-        <div className="nav-brand">
+    <AppBar
+      position="fixed"
+      className={`header-internal ${className} ${isLoggedIn ? 'logged-in' : ''}`}
+      elevation={0}
+      sx={{
+        backgroundColor: isLoggedIn ? '#fff' : 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(226, 232, 240, 0.8)',
+        height: '85px',
+        zIndex: 1000,
+        boxShadow: isLoggedIn ? '0 2px 10px rgba(0, 0, 0, 0.1)' : 'none',
+      }}
+    >
+      <Toolbar sx={{ height: '85px', px: { xs: 1, sm: 2 }, justifyContent: 'space-between' }}>
+        {/* Logo e Menu Mobile */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {isLoggedIn && (
-            <button
-              className={`hamburger hamburger-left ${isMobileMenuOpen ? "active" : ""}`}
+            <IconButton
               onClick={toggleMobileMenu}
               aria-label="Toggle menu"
+              sx={{
+                color: '#03B4C6',
+                display: { xs: 'flex', md: 'flex' }
+              }}
             >
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
+              <MenuIcon sx={{ fontSize: '2.5rem' }} />
+            </IconButton>
           )}
 
-          <img
+          <Box
+            component="img"
             src={logo}
             alt="CLINIC4US"
-            className="logo"
             onClick={handleLogoClick}
-            style={{ cursor: "pointer" }}
+            sx={{
+              height: { xs: '28px', sm: '32px' },
+              cursor: 'pointer',
+              objectFit: 'contain'
+            }}
           />
-        </div>
+        </Box>
 
-        <div className="nav-actions">
+        {/* Ações do Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
           {isLoggedIn ? (
-            <div className="logged-actions">
-              <div className="timer-section">
+            <>
+              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                 <SessionTimer onSessionExpired={handleSessionExpiredFromTimer} />
-              </div>
+              </Box>
 
-              <button
-                className="notification-button"
+              <IconButton
                 onClick={onNotificationClick}
                 aria-label="Ver notificações"
+                sx={{ color: '#2D3748' }}
               >
-                <NotificationsOutlined className="notification-icon" />
-                {notificationCount > 0 && (
-                  <span className="notification-badge">{notificationCount}</span>
-                )}
-              </button>
+                <Badge badgeContent={notificationCount} color="error">
+                  <NotificationsOutlined />
+                </Badge>
+              </IconButton>
 
-              <button
-                className="user-avatar"
+              <IconButton
                 onClick={() => window.location.href = '?page=user-profile'}
                 aria-label="Meu perfil"
                 title="Meu perfil"
+                sx={{ color: '#2D3748' }}
               >
-                <Person className="avatar-icon" />
-              </button>
-            </div>
+                <Person />
+              </IconButton>
+            </>
           ) : (
             <>
               {showCTAButton && (
-                <button className="cta-button desktop-cta" onClick={onCTAClick}>
-                  {ctaButtonText}
-                </button>
-              )}
-
-              <button
-                className={`hamburger ${isMobileMenuOpen ? "active" : ""}`}
-                onClick={toggleMobileMenu}
-                aria-label="Toggle menu"
-              >
-                <span></span>
-                <span></span>
-                <span></span>
-              </button>
-            </>
-          )}
-        </div>
-
-        {isMobileMenuOpen && (
-          <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
-            <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
-              {isLoggedIn && (
-                <div className="mobile-menu-header">
-                  <div className="mobile-user-info">
-                    <div className="mobile-user-email">{truncateEmail(userEmail || '')}</div>
-                    <div className="mobile-user-details-row">
-                      <button
-                        className="mobile-user-avatar"
-                        onClick={() => {
-                          window.location.href = '?page=user-profile';
-                          closeMobileMenu();
-                        }}
-                        aria-label="Meu perfil"
-                        title="Meu perfil"
-                      >
-                        <Person className="avatar-icon" />
-                      </button>
-                      <div className="mobile-user-details">
-                        <div className="mobile-user-role">{userProfile}</div>
-                        <div className="mobile-clinic-name">{truncateEmail(clinicName || '', 20)}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="profile-actions-row">
-                    <button
-                      className="mobile-action-button change-profile-button"
-                      onClick={handleOpenChangeProfileModal}
-                      aria-label="Mudar perfil do usuário"
-                    >
-                      <Refresh /> Mudar perfil
-                    </button>
-                    <button
-                      className="mobile-action-button logout-button"
-                      onClick={() => {
-                        localStorage.removeItem('clinic4us-user-session');
-                        localStorage.removeItem('clinic4us-remember-me');
-                        window.location.href = `${window.location.origin}/?page=login&clinic=ninho`;
-                      }}
-                      aria-label="Sair do sistema"
-                    >
-                      <Logout /> Sair
-                    </button>
-                  </div>
-                </div>
-              )}
-              <ul className="mobile-nav-menu">
-                {menuItems.map((item, index) => (
-                  <li key={index}>
-                    <a
-                      href={item.href || "#"}
-                      onClick={(e) => handleMenuItemClick(item, e)}
-                    >
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-
-              {isLoggedIn && (
-                <div className="mobile-logged-actions">
-                  <button
-                    className="mobile-action-button"
-                    onClick={() => {
-                      if (onNotificationClick) onNotificationClick();
-                      closeMobileMenu();
-                    }}
-                    aria-label="Ver notificações"
-                  >
-                    <NotificationsOutlined /> Notificações {notificationCount > 0 && `(${notificationCount})`}
-                  </button>
-                  <button
-                    className="mobile-action-button"
-                    onClick={() => {
-                      if (onUserClick) onUserClick();
-                      closeMobileMenu();
-                    }}
-                    aria-label="Acessar configurações"
-                  >
-                    <Settings /> Configurações
-                  </button>
-                </div>
-              )}
-
-              {!isLoggedIn && showCTAButton && (
-                <button
-                  className="cta-button mobile-cta"
-                  onClick={(e) => {
-                    if (onCTAClick) onCTAClick(e);
-                    closeMobileMenu();
+                <Button
+                  onClick={onCTAClick}
+                  variant="contained"
+                  sx={{
+                    display: { xs: 'none', sm: 'inline-flex' },
+                    backgroundColor: '#03B4C6',
+                    color: 'white',
+                    textTransform: 'none',
+                    px: 3,
+                    '&:hover': {
+                      backgroundColor: '#029AAB',
+                    }
                   }}
                 >
                   {ctaButtonText}
-                </button>
+                </Button>
               )}
-            </div>
-          </div>
-        )}
 
-      </nav>
+              <IconButton
+                onClick={toggleMobileMenu}
+                aria-label="Toggle menu"
+                sx={{ color: '#2D3748' }}
+              >
+                <MenuIcon />
+              </IconButton>
+            </>
+          )}
+        </Box>
+
+      </Toolbar>
+
+      {/* Menu Mobile usando Drawer */}
+      <Drawer
+        anchor="left"
+        open={isMobileMenuOpen}
+        onClose={closeMobileMenu}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: isLoggedIn ? '320px' : '280px',
+            backgroundColor: '#fff',
+          }
+        }}
+      >
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Header do Menu Mobile */}
+          {isLoggedIn && (
+            <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderBottom: '1px solid #e9ecef' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                <IconButton
+                  onClick={() => {
+                    window.location.href = '?page=user-profile';
+                    closeMobileMenu();
+                  }}
+                  aria-label="Meu perfil"
+                  sx={{
+                    backgroundColor: '#03B4C6',
+                    color: 'white',
+                    '&:hover': { backgroundColor: '#029AAB' }
+                  }}
+                >
+                  <Person />
+                </IconButton>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#2D3748' }}>
+                    {truncateEmail(actualUserEmail)}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#6c757d' }}>
+                    {actualUserProfile}
+                  </Typography>
+                  <Typography variant="caption" sx={{ display: 'block', color: '#6c757d' }}>
+                    {truncateEmail(actualClinicName, 20)}
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  startIcon={<Refresh />}
+                  onClick={handleOpenChangeProfileModal}
+                  size="small"
+                  fullWidth
+                  variant="outlined"
+                  sx={{
+                    textTransform: 'none',
+                    fontSize: '0.75rem',
+                    borderColor: '#03B4C6',
+                    color: '#03B4C6',
+                    '&:hover': {
+                      borderColor: '#029AAB',
+                      backgroundColor: 'rgba(3, 180, 198, 0.04)',
+                    }
+                  }}
+                >
+                  Mudar perfil
+                </Button>
+                <Button
+                  startIcon={<Logout />}
+                  onClick={() => {
+                    localStorage.removeItem('clinic4us-user-session');
+                    localStorage.removeItem('clinic4us-remember-me');
+                    window.location.href = `${window.location.origin}/?page=login&clinic=ninho`;
+                  }}
+                  size="small"
+                  fullWidth
+                  variant="outlined"
+                  color="error"
+                  sx={{
+                    textTransform: 'none',
+                    fontSize: '0.75rem',
+                  }}
+                >
+                  Sair
+                </Button>
+              </Box>
+            </Box>
+          )}
+
+          {/* Menu Items - Carregado dinamicamente do perfil do usuário */}
+          <List sx={{ flex: 1, py: 1 }}>
+            {actualMenuItems.map((item, index) => (
+              <ListItem
+                key={index}
+                component="a"
+                href={item.href || "#"}
+                onClick={(e) => handleMenuItemClick(item, e)}
+                sx={{
+                  cursor: 'pointer',
+                  color: '#2D3748',
+                  '&:hover': {
+                    backgroundColor: 'rgba(3, 180, 198, 0.08)',
+                  }
+                }}
+              >
+                <ListItemText primary={item.label} />
+              </ListItem>
+            ))}
+          </List>
+
+          {/* Mobile Actions for Logged Users */}
+          {isLoggedIn && (
+            <Box sx={{ p: 2, borderTop: '1px solid #e9ecef' }}>
+              <Button
+                startIcon={<NotificationsOutlined />}
+                onClick={() => {
+                  if (onNotificationClick) onNotificationClick();
+                  closeMobileMenu();
+                }}
+                fullWidth
+                sx={{
+                  justifyContent: 'flex-start',
+                  textTransform: 'none',
+                  color: '#2D3748',
+                  mb: 1
+                }}
+              >
+                Notificações {notificationCount > 0 && `(${notificationCount})`}
+              </Button>
+              <Button
+                startIcon={<Settings />}
+                onClick={() => {
+                  if (onUserClick) onUserClick();
+                  closeMobileMenu();
+                }}
+                fullWidth
+                sx={{
+                  justifyContent: 'flex-start',
+                  textTransform: 'none',
+                  color: '#2D3748',
+                }}
+              >
+                Configurações
+              </Button>
+            </Box>
+          )}
+
+          {/* CTA Button for Non-Logged Users */}
+          {!isLoggedIn && showCTAButton && (
+            <Box sx={{ p: 2, borderTop: '1px solid #e9ecef' }}>
+              <Button
+                onClick={(e) => {
+                  if (onCTAClick) onCTAClick(e);
+                  closeMobileMenu();
+                }}
+                variant="contained"
+                fullWidth
+                sx={{
+                  backgroundColor: '#03B4C6',
+                  color: 'white',
+                  textTransform: 'none',
+                  '&:hover': {
+                    backgroundColor: '#029AAB',
+                  }
+                }}
+              >
+                {ctaButtonText}
+              </Button>
+            </Box>
+          )}
+        </Box>
+      </Drawer>
 
 
       {/* Modal de Sessão Expirada */}
-      {isSessionExpiredModalOpen && createPortal(
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 99999
-        }}>
-          <div style={{
-            backgroundColor: 'white',
+      <Dialog
+        open={isSessionExpiredModalOpen}
+        disableEscapeKeyDown
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
             borderRadius: '12px',
-            padding: '2rem',
-            minWidth: '400px',
-            maxWidth: '90vw',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
             border: '3px solid #dc3545'
-          }}>
-            <div style={{
-              textAlign: 'center',
-              marginBottom: '1.5rem'
-            }}>
-              <div style={{
-                fontSize: '3rem',
-                color: '#dc3545',
-                marginBottom: '0.5rem',
-                display: 'flex',
-                justifyContent: 'center'
-              }}>
-                <Schedule style={{ fontSize: '3rem' }} />
-              </div>
-              <h3 style={{
-                margin: '0 0 0.5rem 0',
-                color: '#dc3545',
-                fontSize: '1.25rem',
-                fontWeight: '600'
-              }}>
-                Sessão Expirada
-              </h3>
-              <p style={{
-                margin: '0',
-                color: '#6c757d',
-                fontSize: '0.9rem'
-              }}>
-                Sua sessão de 1 hora expirou. Revalide seu login para continuar ou saia do sistema.
-              </p>
-            </div>
+          }
+        }}
+      >
+        <DialogContent sx={{ p: 3 }}>
+          <Box sx={{ textAlign: 'center', mb: 3 }}>
+            <Schedule sx={{ fontSize: '3rem', color: '#dc3545', mb: 1 }} />
+            <Typography variant="h6" sx={{ color: '#dc3545', fontWeight: 600, mb: 0.5 }}>
+              Sessão Expirada
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#6c757d' }}>
+              Sua sessão de 1 hora expirou. Revalide seu login para continuar ou saia do sistema.
+            </Typography>
+          </Box>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                color: '#495057',
-                fontSize: '0.9rem',
-                fontWeight: '500'
-              }}>
-                E-mail:
-              </label>
-              <input
-                type="email"
-                value={userEmail}
-                readOnly
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
-                  backgroundColor: '#f8f9fa',
-                  color: '#6c757d',
-                  fontSize: '0.9rem',
-                  cursor: 'not-allowed'
-                }}
-              />
-            </div>
+          <TextField
+            label="E-mail"
+            type="email"
+            value={actualUserEmail}
+            disabled
+            fullWidth
+            sx={{ mb: 2 }}
+            InputProps={{
+              readOnly: true,
+              sx: { backgroundColor: '#f8f9fa', color: '#6c757d' }
+            }}
+          />
 
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                color: '#495057',
-                fontSize: '0.9rem',
-                fontWeight: '500'
-              }}>
-                Senha:
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={showRevalidatePassword ? "text" : "password"}
-                  value={revalidatePassword}
-                  onChange={(e) => setRevalidatePassword(e.target.value)}
-                  placeholder="Digite sua senha para continuar"
-                  autoComplete="off"
-                  autoFocus
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSessionExpiredRevalidate();
-                    }
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    paddingRight: '3rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '6px',
-                    fontSize: '0.9rem',
-                    outline: 'none',
-                    transition: 'border-color 0.2s',
-                    borderColor: revalidateError ? '#dc3545' : '#ced4da'
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowRevalidatePassword(!showRevalidatePassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '0.75rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#6c757d',
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '0',
-                    fontSize: '1.1rem'
-                  }}
-                  aria-label={showRevalidatePassword ? "Ocultar senha" : "Mostrar senha"}
-                >
-                  {showRevalidatePassword ? <VisibilityOff /> : <Visibility />}
-                </button>
-              </div>
-              {revalidateError && (
-                <div style={{
-                  color: '#dc3545',
-                  fontSize: '0.8rem',
-                  marginTop: '0.25rem'
-                }}>
-                  {revalidateError}
-                </div>
-              )}
-            </div>
+          <TextField
+            label="Senha"
+            type={showRevalidatePassword ? "text" : "password"}
+            value={revalidatePassword}
+            onChange={(e) => setRevalidatePassword(e.target.value)}
+            placeholder="Digite sua senha para continuar"
+            autoComplete="off"
+            autoFocus
+            fullWidth
+            error={!!revalidateError}
+            helperText={revalidateError}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleSessionExpiredRevalidate();
+              }
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowRevalidatePassword(!showRevalidatePassword)}
+                    edge="end"
+                  >
+                    {showRevalidatePassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
 
-            <div style={{
-              display: 'flex',
-              gap: '1rem',
-              justifyContent: 'flex-end'
-            }}>
-              <button
-                onClick={handleSessionExpiredLogout}
-                aria-label="Sair do sistema"
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  border: '1px solid #dc3545',
-                  borderRadius: '6px',
-                  backgroundColor: 'transparent',
-                  color: '#dc3545',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  fontWeight: '500',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#dc3545';
-                  e.currentTarget.style.color = 'white';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = '#dc3545';
-                }}
-              >
-                <Logout /> Sair
-              </button>
-              <button
-                onClick={handleSessionExpiredRevalidate}
-                aria-label="Revalidar login do usuário"
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  border: 'none',
-                  borderRadius: '6px',
-                  backgroundColor: '#03B4C6',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#029AAB'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#03B4C6'}
-              >
-                <Refresh /> Revalidar Login
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 3 }}>
+            <Button
+              onClick={handleSessionExpiredLogout}
+              variant="outlined"
+              color="error"
+              startIcon={<Logout />}
+              sx={{ textTransform: 'none' }}
+            >
+              Sair
+            </Button>
+            <Button
+              onClick={handleSessionExpiredRevalidate}
+              variant="contained"
+              startIcon={<Refresh />}
+              sx={{
+                textTransform: 'none',
+                backgroundColor: '#03B4C6',
+                '&:hover': { backgroundColor: '#029AAB' }
+              }}
+            >
+              Revalidar Login
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal de Mudança de Perfil */}
-      {isChangeProfileModalOpen && createPortal(
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 99999
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '2rem',
-            minWidth: '450px',
-            maxWidth: '90vw',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
-          }}>
-            <div style={{
-              textAlign: 'center',
-              marginBottom: '1.5rem'
-            }}>
-              <div style={{
-                fontSize: '3rem',
-                color: '#03B4C6',
-                marginBottom: '0.5rem',
-                display: 'flex',
-                justifyContent: 'center'
-              }}>
-                <Refresh style={{ fontSize: '3rem' }} />
-              </div>
-              <h3 style={{
-                margin: '0 0 0.5rem 0',
-                color: '#2D3748',
-                fontSize: '1.25rem',
-                fontWeight: '600'
-              }}>
+      <Dialog
+        open={isChangeProfileModalOpen}
+        onClose={handleCloseChangeProfileModal}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: '12px' }
+        }}
+      >
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Refresh sx={{ color: '#03B4C6', fontSize: '2rem' }} />
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 Mudar Perfil
-              </h3>
-              <p style={{
-                margin: '0',
-                color: '#6c757d',
-                fontSize: '0.9rem'
-              }}>
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#6c757d' }}>
                 Selecione a entidade e o perfil para o qual deseja alterar.
-              </p>
-            </div>
+              </Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <TextField
+            select
+            label="Entidade"
+            value={selectedEntity}
+            onChange={(e) => setSelectedEntity(e.target.value)}
+            fullWidth
+            sx={{ mb: 2 }}
+          >
+            <MenuItem value="">Selecione uma entidade</MenuItem>
+            {availableEntities.map((entity, index) => (
+              <MenuItem key={index} value={entity}>{entity}</MenuItem>
+            ))}
+          </TextField>
 
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                color: '#495057',
-                fontSize: '0.9rem',
-                fontWeight: '500'
-              }}>
-                Entidade:
-              </label>
-              <select
-                value={selectedEntity}
-                onChange={(e) => setSelectedEntity(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="">Selecione uma entidade</option>
-                {availableEntities.map((entity, index) => (
-                  <option key={index} value={entity}>{entity}</option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                color: '#495057',
-                fontSize: '0.9rem',
-                fontWeight: '500'
-              }}>
-                Perfil:
-              </label>
-              <select
-                value={selectedProfile}
-                onChange={(e) => setSelectedProfile(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  cursor: 'pointer'
-                }}
-              >
-                <option value="">Selecione um perfil</option>
-                {availableProfiles.map((profile, index) => (
-                  <option key={index} value={profile}>{profile}</option>
-                ))}
-              </select>
-            </div>
-
-            <div style={{
-              display: 'flex',
-              gap: '1rem',
-              justifyContent: 'flex-end'
-            }}>
-              <button
-                onClick={handleCloseChangeProfileModal}
-                aria-label="Cancelar mudança de perfil"
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
-                  backgroundColor: 'transparent',
-                  color: '#6c757d',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  fontWeight: '500'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#e9ecef';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleConfirmChangeProfile}
-                aria-label="Confirmar mudança de perfil"
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  border: 'none',
-                  borderRadius: '6px',
-                  backgroundColor: '#03B4C6',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#029AAB'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#03B4C6'}
-              >
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-    </header>
+          <TextField
+            select
+            label="Perfil"
+            value={selectedProfile}
+            onChange={(e) => setSelectedProfile(e.target.value)}
+            fullWidth
+          >
+            <MenuItem value="">Selecione um perfil</MenuItem>
+            {availableProfiles.map((profile, index) => (
+              <MenuItem key={index} value={profile}>{profile}</MenuItem>
+            ))}
+          </TextField>
+        </DialogContent>
+        <Box sx={{ p: 2, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+          <Button
+            onClick={handleCloseChangeProfileModal}
+            variant="outlined"
+            sx={{ textTransform: 'none' }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirmChangeProfile}
+            variant="contained"
+            sx={{
+              textTransform: 'none',
+              backgroundColor: '#03B4C6',
+              '&:hover': { backgroundColor: '#029AAB' }
+            }}
+          >
+            Confirmar
+          </Button>
+        </Box>
+      </Dialog>
+    </AppBar>
   );
 };
 

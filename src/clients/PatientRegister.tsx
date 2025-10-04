@@ -5,6 +5,22 @@ import { useNavigation, useRouter } from "../contexts/RouterContext";
 import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Search } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import PhotoUpload from "../components/PhotoUpload";
+import {
+  TextField,
+  MenuItem,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  Checkbox,
+  Typography,
+  Box,
+  CircularProgress,
+  Button,
+  Tabs,
+  Tab
+} from '@mui/material';
 
 interface MenuItemProps {
   label: string;
@@ -72,6 +88,34 @@ const PatientRegister: React.FC = () => {
   const { goToPatients, goToDashboard, goToSchedule } = useNavigation();
   const { getParam } = useRouter();
   const [userSession, setUserSession] = useState<UserSession | null>(null);
+
+  // Reusable styles for form fields
+  const textFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      height: '40px',
+      fontSize: '1rem',
+      backgroundColor: 'white',
+      '& fieldset': {
+        borderColor: '#ced4da',
+        legend: { maxWidth: '100%' },
+      },
+    },
+    '& .MuiSelect-select': {
+      padding: '0.375rem 0.5rem',
+      color: '#495057',
+    },
+    '& .MuiInputLabel-root': {
+      fontSize: '0.95rem',
+      color: '#6c757d',
+      backgroundColor: 'white',
+      paddingLeft: '4px',
+      paddingRight: '4px',
+      '&.Mui-focused': {
+        color: '#03B4C6',
+      },
+    },
+  };
+
   const [formData, setFormData] = useState<PatientFormData>({
     name: "",
     isResponsible: false,
@@ -592,42 +636,62 @@ const PatientRegister: React.FC = () => {
         {/* Título da Página */}
         <div className="page-header-container">
           <div className="page-header-content">
-            <h1 className="page-header-title">
+            <Typography variant="h4" className="page-header-title" sx={{ fontSize: '1.3rem', mb: 1 }}>
               {isNewPatient ? 'Cadastro de Paciente' : formData.name || 'Paciente'}
-            </h1>
+            </Typography>
             {isNewPatient ? (
-              <p className="page-header-description">
+              <Typography variant="body2" className="page-header-description" sx={{ fontSize: '0.875rem', color: '#6c757d' }}>
                 Preencha os dados para cadastrar um novo paciente no sistema.
-              </p>
+              </Typography>
             ) : (
-              <p className="page-header-description">
+              <Typography variant="body2" className="page-header-description" sx={{ fontSize: '0.875rem', color: '#6c757d' }}>
                 ID: {formData.id}
-              </p>
+              </Typography>
             )}
           </div>
           <FaqButton />
         </div>
 
         {/* Tabs de navegação */}
-        <div className="patient-tabs-container">
-          <div className="patient-tabs">
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', backgroundColor: '#ffffff', marginBottom: '1.5rem' }}>
+          <Tabs
+            value={activeTab}
+            onChange={(e, newValue) => handleTabChange(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                minHeight: '48px',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                color: '#6c757d',
+                '&.Mui-selected': {
+                  color: '#03B4C6',
+                  fontWeight: 600,
+                },
+              },
+              '& .MuiTabs-indicator': {
+                backgroundColor: '#03B4C6',
+                height: '3px',
+              },
+            }}
+          >
             {getAvailableTabs().map(tab => {
               const IconComponent = tab.icon;
               return (
-                <button
+                <Tab
                   key={tab.id}
-                  className={`tab-button ${activeTab === tab.id ? 'active' : ''} ${!tab.enabled ? 'disabled' : ''}`}
-                  data-tab={tab.id}
-                  onClick={() => handleTabChange(tab.id)}
+                  value={tab.id}
+                  label={tab.label}
+                  icon={<IconComponent sx={{ fontSize: '1rem' }} />}
+                  iconPosition="start"
                   disabled={!tab.enabled}
-                >
-                  <IconComponent sx={{ fontSize: '0.95rem', marginRight: '0.35rem', verticalAlign: 'middle' }} />
-                  {tab.label}
-                </button>
+                />
               );
             })}
-          </div>
-        </div>
+          </Tabs>
+        </Box>
 
         <div className="patient-register-container">
           {/* Conteúdo da aba ativa */}
@@ -700,59 +764,82 @@ const PatientRegister: React.FC = () => {
                       {/* Primeira linha: Nome, Data de Nascimento + Idade, Gênero */}
                       <div className="form-row">
                         <div className="form-group">
-                          <label htmlFor="name">Nome Completo*</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="name"
                             name="name"
+                            label="Nome Completo*"
                             value={formData.name}
                             onChange={handleInputChange}
                             placeholder="Nome completo do paciente"
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group birth-age-group">
                           <div className="birth-age-container">
                             <div className="form-subgroup">
-                              <label htmlFor="birthDate">Data de Nascimento*</label>
-                              <input
+                              <TextField
+                                fullWidth
+                                size="small"
                                 type="date"
                                 id="birthDate"
                                 name="birthDate"
+                                label="Data de Nascimento*"
                                 value={formData.birthDate}
                                 onChange={handleInputChange}
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                             <div className="form-subgroup">
-                              <label htmlFor="age">Idade</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="age"
                                 name="age"
+                                label="Idade"
                                 value={calculateAge(formData.birthDate)}
-                                readOnly
                                 disabled
                                 placeholder="Calculado automaticamente"
-                                className="age-field"
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                           </div>
                         </div>
                         <div className="form-group">
-                          <label htmlFor="gender">Gênero*</label>
-                          <select
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
                             id="gender"
                             name="gender"
+                            label="Gênero*"
                             value={formData.gender}
                             onChange={handleInputChange}
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            SelectProps={{
+                              MenuProps: {
+                                PaperProps: {
+                                  sx: {
+                                    backgroundColor: 'white',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                  },
+                                },
+                              },
+                            }}
+                            sx={textFieldSx}
                           >
-                            <option value="">Selecione o gênero</option>
-                            <option value="Masculino">Masculino</option>
-                            <option value="Feminino">Feminino</option>
-                            <option value="Outro">Outro</option>
-                          </select>
+                            <MenuItem value="">Selecione o gênero</MenuItem>
+                            <MenuItem value="Masculino">Masculino</MenuItem>
+                            <MenuItem value="Feminino">Feminino</MenuItem>
+                            <MenuItem value="Outro">Outro</MenuItem>
+                          </TextField>
                         </div>
                       </div>
 
@@ -761,79 +848,126 @@ const PatientRegister: React.FC = () => {
                         <div className="form-group document-type-number">
                           <div className="document-container">
                             <div className="form-subgroup">
-                              <label htmlFor="documentType">Tipo de Documento*</label>
-                              <select
+                              <TextField
+                                select
+                                fullWidth
+                                size="small"
                                 id="documentType"
                                 name="documentType"
+                                label="Tipo de Documento*"
                                 value={formData.documentType}
                                 onChange={handleInputChange}
-                                className="document-type-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                SelectProps={{
+                                  MenuProps: {
+                                    PaperProps: {
+                                      sx: {
+                                        backgroundColor: 'white',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                      },
+                                    },
+                                  },
+                                }}
+                                sx={textFieldSx}
                               >
-                                <option value="CPF">CPF</option>
-                                <option value="RG">RG</option>
-                                <option value="CNH">CNH</option>
-                                <option value="Passaporte">Passaporte</option>
-                              </select>
+                                <MenuItem value="CPF">CPF</MenuItem>
+                                <MenuItem value="RG">RG</MenuItem>
+                                <MenuItem value="CNH">CNH</MenuItem>
+                                <MenuItem value="Passaporte">Passaporte</MenuItem>
+                              </TextField>
                             </div>
                             <div className="form-subgroup">
-                              <label htmlFor="document">Documento*</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="document"
                                 name="document"
+                                label="Documento*"
                                 value={formData.document}
                                 onChange={handleInputChange}
                                 placeholder="000.000.000-00"
-                                className="document-number-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                           </div>
                         </div>
                         <div className="form-group">
-                          <label htmlFor="expeditorOrgan">Órgão Expedidor</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="expeditorOrgan"
                             name="expeditorOrgan"
+                            label="Órgão Expedidor"
                             value={formData.expeditorOrgan}
                             onChange={handleInputChange}
                             placeholder="SSP, DETRAN, etc."
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group country-language">
                           <div className="country-language-container">
                             <div className="form-subgroup">
-                              <label htmlFor="originCountry">País de Origem*</label>
-                              <select
+                              <TextField
+                                select
+                                fullWidth
+                                size="small"
                                 id="originCountry"
                                 name="originCountry"
+                                label="País de Origem*"
                                 value={formData.originCountry}
                                 onChange={handleInputChange}
-                                className="country-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                SelectProps={{
+                                  MenuProps: {
+                                    PaperProps: {
+                                      sx: {
+                                        backgroundColor: 'white',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                      },
+                                    },
+                                  },
+                                }}
+                                sx={textFieldSx}
                               >
-                                <option value="Brasil">Brasil</option>
-                                <option value="Argentina">Argentina</option>
-                                <option value="Estados Unidos">Estados Unidos</option>
-                              </select>
+                                <MenuItem value="Brasil">Brasil</MenuItem>
+                                <MenuItem value="Argentina">Argentina</MenuItem>
+                                <MenuItem value="Estados Unidos">Estados Unidos</MenuItem>
+                              </TextField>
                             </div>
                             <div className="form-subgroup">
-                              <label htmlFor="nativeLanguage">Idioma Nativo*</label>
-                              <select
+                              <TextField
+                                select
+                                fullWidth
+                                size="small"
                                 id="nativeLanguage"
                                 name="nativeLanguage"
+                                label="Idioma Nativo*"
                                 value={formData.nativeLanguage}
                                 onChange={handleInputChange}
-                                className="language-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                SelectProps={{
+                                  MenuProps: {
+                                    PaperProps: {
+                                      sx: {
+                                        backgroundColor: 'white',
+                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                      },
+                                    },
+                                  },
+                                }}
+                                sx={textFieldSx}
                               >
-                                <option value="Português">Português</option>
-                                <option value="Inglês">Inglês</option>
-                                <option value="Espanhol">Espanhol</option>
-                              </select>
+                                <MenuItem value="Português">Português</MenuItem>
+                                <MenuItem value="Inglês">Inglês</MenuItem>
+                                <MenuItem value="Espanhol">Espanhol</MenuItem>
+                              </TextField>
                             </div>
                           </div>
                         </div>
@@ -842,72 +976,63 @@ const PatientRegister: React.FC = () => {
                       {/* Terceira linha: Responsabilidade, Telefone + Email */}
                       <div className="form-row">
                         <div className="form-group">
-                          <label>É o próprio responsável?*</label>
-                          <div className="radio-group">
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isResponsible"
-                                value="true"
-                                checked={formData.isResponsible === true}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isResponsible', value: 'true' }
-                                })}
-                              />
-                              <span>Sim</span>
-                            </label>
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isResponsible"
-                                value="false"
-                                checked={formData.isResponsible === false}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isResponsible', value: 'false' }
-                                })}
-                              />
-                              <span>Não</span>
-                            </label>
-                          </div>
-                          {errors.isResponsible && <span className="error-message">{errors.isResponsible}</span>}
+                          <FormControl component="fieldset" error={!!errors.isResponsible}>
+                            <FormLabel component="legend" sx={{ fontSize: '0.95rem', color: '#6c757d', mb: 0.5 }}>
+                              É o próprio responsável?*
+                            </FormLabel>
+                            <RadioGroup
+                              row
+                              name="isResponsible"
+                              value={formData.isResponsible.toString()}
+                              onChange={(e) => handleInputChange({
+                                ...e,
+                                target: { ...e.target, name: 'isResponsible', value: e.target.value }
+                              })}
+                            >
+                              <FormControlLabel value="true" control={<Radio size="small" />} label="Sim" />
+                              <FormControlLabel value="false" control={<Radio size="small" />} label="Não" />
+                            </RadioGroup>
+                            {errors.isResponsible && <Typography variant="caption" color="error">{errors.isResponsible}</Typography>}
+                          </FormControl>
                         </div>
                         <div className="form-group">
-                          <label htmlFor="phone">
-                            Telefone (Whatsapp){formData.isResponsible ? '*' : ''}
-                          </label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="phone"
                             name="phone"
+                            label={`Telefone (Whatsapp)${formData.isResponsible ? '*' : ''}`}
                             value={formatPhone(formData.phone)}
                             onChange={(e) => handleInputChange({
                               ...e,
                               target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
                             })}
                             placeholder="(11) 99999-9999"
-                            maxLength={15}
-                            className={errors.phone ? 'error' : ''}
+                            inputProps={{ maxLength: 15 }}
+                            error={!!errors.phone}
+                            helperText={errors.phone}
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
-                          {errors.phone && <span className="error-message">{errors.phone}</span>}
                         </div>
                         <div className="form-group">
-                          <label htmlFor="email">
-                            E-mail{formData.isResponsible ? '*' : ''}
-                          </label>
-                          <input
+                          <TextField
+                            fullWidth
+                            size="small"
                             type="email"
                             id="email"
                             name="email"
+                            label={`E-mail${formData.isResponsible ? '*' : ''}`}
                             value={formData.email}
                             onChange={handleInputChange}
                             placeholder="email@exemplo.com"
-                            className={errors.email ? 'error' : ''}
+                            error={!!errors.email}
+                            helperText={errors.email}
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
-                          {errors.email && <span className="error-message">{errors.email}</span>}
                         </div>
                       </div>
 
@@ -920,72 +1045,88 @@ const PatientRegister: React.FC = () => {
                           {/* 1º Responsável */}
                           <div className="form-row">
                             <div className="form-group">
-                              <label htmlFor="responsibleName">Nome Completo (1º Resp)*</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="responsibleName"
                                 name="responsibleName"
+                                label="Nome Completo (1º Resp)*"
                                 value={formData.responsibleName}
                                 onChange={handleInputChange}
                                 placeholder="Nome completo do responsável"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                             <div className="form-group cpf-financial-group">
                               <div className="cpf-financial-container">
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsibleDocument">CPF</label>
-                                  <input
-                                    type="text"
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     id="responsibleDocument"
                                     name="responsibleDocument"
+                                    label="CPF"
                                     value={formData.responsibleDocument}
                                     onChange={handleInputChange}
                                     placeholder="000.000.000-00"
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                                 <div className="form-subgroup checkbox-subgroup">
-                                  <label className="checkbox-label">
-                                    <input
-                                      type="checkbox"
-                                      name="responsibleFinancial"
-                                      checked={formData.responsibleFinancial}
-                                      onChange={handleInputChange}
-                                    />
-                                    Resp. Financeiro
-                                  </label>
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        name="responsibleFinancial"
+                                        checked={formData.responsibleFinancial}
+                                        onChange={handleInputChange}
+                                        size="small"
+                                        disabled={!canEdit}
+                                      />
+                                    }
+                                    label="Resp. Financeiro"
+                                  />
                                 </div>
                               </div>
                             </div>
                             <div className="form-group phone-email">
                               <div className="phone-email-container">
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsiblePhone">Telefone (Whatsapp)</label>
-                                  <input
-                                    type="text"
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     id="responsiblePhone"
                                     name="responsiblePhone"
+                                    label="Telefone (Whatsapp)"
                                     value={formatPhone(formData.responsiblePhone)}
                                     onChange={(e) => handleInputChange({
                                       ...e,
                                       target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
                                     })}
                                     placeholder="(11) 99999-9999"
-                                    maxLength={15}
+                                    inputProps={{ maxLength: 15 }}
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsibleEmail">E-mail</label>
-                                  <input
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     type="email"
                                     id="responsibleEmail"
                                     name="responsibleEmail"
+                                    label="E-mail"
                                     value={formData.responsibleEmail}
                                     onChange={handleInputChange}
                                     placeholder="email@exemplo.com"
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                               </div>
@@ -995,72 +1136,88 @@ const PatientRegister: React.FC = () => {
                           {/* 2º Responsável */}
                           <div className="form-row">
                             <div className="form-group">
-                              <label htmlFor="responsible2Name">Nome Completo (2º Resp)</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="responsible2Name"
                                 name="responsible2Name"
+                                label="Nome Completo (2º Resp)"
                                 value={formData.responsible2Name}
                                 onChange={handleInputChange}
                                 placeholder="Nome completo do 2º responsável"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                             <div className="form-group cpf-financial-group">
                               <div className="cpf-financial-container">
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsible2Document">CPF</label>
-                                  <input
-                                    type="text"
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     id="responsible2Document"
                                     name="responsible2Document"
+                                    label="CPF"
                                     value={formData.responsible2Document}
                                     onChange={handleInputChange}
                                     placeholder="000.000.000-00"
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                                 <div className="form-subgroup checkbox-subgroup">
-                                  <label className="checkbox-label">
-                                    <input
-                                      type="checkbox"
-                                      name="responsible2Financial"
-                                      checked={formData.responsible2Financial}
-                                      onChange={handleInputChange}
-                                    />
-                                    Resp. Financeiro
-                                  </label>
+                                  <FormControlLabel
+                                    control={
+                                      <Checkbox
+                                        name="responsible2Financial"
+                                        checked={formData.responsible2Financial}
+                                        onChange={handleInputChange}
+                                        size="small"
+                                        disabled={!canEdit}
+                                      />
+                                    }
+                                    label="Resp. Financeiro"
+                                  />
                                 </div>
                               </div>
                             </div>
                             <div className="form-group phone-email">
                               <div className="phone-email-container">
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsible2Phone">Telefone (Whatsapp)</label>
-                                  <input
-                                    type="text"
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     id="responsible2Phone"
                                     name="responsible2Phone"
+                                    label="Telefone (Whatsapp)"
                                     value={formatPhone(formData.responsible2Phone)}
                                     onChange={(e) => handleInputChange({
                                       ...e,
                                       target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
                                     })}
                                     placeholder="(11) 99999-9999"
-                                    maxLength={15}
+                                    inputProps={{ maxLength: 15 }}
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                                 <div className="form-subgroup">
-                                  <label htmlFor="responsible2Email">E-mail</label>
-                                  <input
+                                  <TextField
+                                    fullWidth
+                                    size="small"
                                     type="email"
                                     id="responsible2Email"
                                     name="responsible2Email"
+                                    label="E-mail"
                                     value={formData.responsible2Email}
                                     onChange={handleInputChange}
                                     placeholder="email@exemplo.com"
                                     disabled={!canEdit}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={textFieldSx}
                                   />
                                 </div>
                               </div>
@@ -1077,75 +1234,85 @@ const PatientRegister: React.FC = () => {
                       {/* CEP e Logradouro na primeira linha */}
                       <div className="form-row">
                         <div className="form-group">
-                          <label htmlFor="cep">CEP*</label>
-                          <div className="cep-input-container">
-                            <input
-                              type="text"
-                              id="cep"
-                              name="cep"
-                              value={formatCep(formData.cep)}
-                              onChange={(e) => {
-                                const rawValue = e.target.value;
-                                const cep = rawValue.replace(/\D/g, '');
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="cep"
+                            name="cep"
+                            label="CEP*"
+                            value={formatCep(formData.cep)}
+                            onChange={(e) => {
+                              const rawValue = e.target.value;
+                              const cep = rawValue.replace(/\D/g, '');
 
-                                // Permitir apenas 8 dígitos
-                                if (cep.length <= 8) {
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    cep: cep
-                                  }));
+                              // Permitir apenas 8 dígitos
+                              if (cep.length <= 8) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  cep: cep
+                                }));
 
-                                  // Auto-busca quando CEP completo
-                                  if (cep.length === 8) {
-                                    handleCepSearch(cep);
-                                  }
+                                // Auto-busca quando CEP completo
+                                if (cep.length === 8) {
+                                  handleCepSearch(cep);
                                 }
-                              }}
-                              placeholder="00000-000"
-                              maxLength={9}
-                              disabled={!canEdit}
-                            />
-                            {cepLoading && <span className="cep-loading"><Search fontSize="small" /></span>}
-                          </div>
+                              }
+                            }}
+                            placeholder="00000-000"
+                            inputProps={{ maxLength: 9 }}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            InputProps={{
+                              endAdornment: cepLoading && <CircularProgress size={20} />
+                            }}
+                            sx={textFieldSx}
+                          />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="address">Logradouro*</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="address"
                             name="address"
+                            label="Logradouro*"
                             value={formData.address}
                             onChange={handleInputChange}
                             placeholder="Rua, Avenida, etc."
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group address-number-complement">
                           <div className="number-complement-container">
                             <div className="form-subgroup">
-                              <label htmlFor="number">Número*</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="number"
                                 name="number"
+                                label="Número*"
                                 value={formData.number}
                                 onChange={handleInputChange}
                                 placeholder="123"
-                                className="number-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                             <div className="form-subgroup">
-                              <label htmlFor="complement">Complemento</label>
-                              <input
-                                type="text"
+                              <TextField
+                                fullWidth
+                                size="small"
                                 id="complement"
                                 name="complement"
+                                label="Complemento"
                                 value={formData.complement}
                                 onChange={handleInputChange}
                                 placeholder="Apto, Bloco, etc."
-                                className="complement-input"
                                 disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                                sx={textFieldSx}
                               />
                             </div>
                           </div>
@@ -1155,67 +1322,88 @@ const PatientRegister: React.FC = () => {
                       {/* Bairro, Cidade, UF */}
                       <div className="form-row">
                         <div className="form-group">
-                          <label htmlFor="neighborhood">Bairro*</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="neighborhood"
                             name="neighborhood"
+                            label="Bairro*"
                             value={formData.neighborhood}
                             onChange={handleInputChange}
                             placeholder="Nome do bairro"
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="city">Cidade*</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="city"
                             name="city"
+                            label="Cidade*"
                             value={formData.city}
                             onChange={handleInputChange}
                             placeholder="Nome da cidade"
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="uf">UF*</label>
-                          <select
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
                             id="uf"
                             name="uf"
+                            label="UF*"
                             value={formData.uf}
                             onChange={handleInputChange}
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            SelectProps={{
+                              MenuProps: {
+                                PaperProps: {
+                                  sx: {
+                                    backgroundColor: 'white',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                  },
+                                },
+                              },
+                            }}
+                            sx={textFieldSx}
                           >
-                            <option value="">Selecione</option>
-                            <option value="AC">AC</option>
-                            <option value="AL">AL</option>
-                            <option value="AP">AP</option>
-                            <option value="AM">AM</option>
-                            <option value="BA">BA</option>
-                            <option value="CE">CE</option>
-                            <option value="DF">DF</option>
-                            <option value="ES">ES</option>
-                            <option value="GO">GO</option>
-                            <option value="MA">MA</option>
-                            <option value="MT">MT</option>
-                            <option value="MS">MS</option>
-                            <option value="MG">MG</option>
-                            <option value="PA">PA</option>
-                            <option value="PB">PB</option>
-                            <option value="PR">PR</option>
-                            <option value="PE">PE</option>
-                            <option value="PI">PI</option>
-                            <option value="RJ">RJ</option>
-                            <option value="RN">RN</option>
-                            <option value="RS">RS</option>
-                            <option value="RO">RO</option>
-                            <option value="RR">RR</option>
-                            <option value="SC">SC</option>
-                            <option value="SP">SP</option>
-                            <option value="SE">SE</option>
-                            <option value="TO">TO</option>
-                          </select>
+                            <MenuItem value="">Selecione</MenuItem>
+                            <MenuItem value="AC">AC</MenuItem>
+                            <MenuItem value="AL">AL</MenuItem>
+                            <MenuItem value="AP">AP</MenuItem>
+                            <MenuItem value="AM">AM</MenuItem>
+                            <MenuItem value="BA">BA</MenuItem>
+                            <MenuItem value="CE">CE</MenuItem>
+                            <MenuItem value="DF">DF</MenuItem>
+                            <MenuItem value="ES">ES</MenuItem>
+                            <MenuItem value="GO">GO</MenuItem>
+                            <MenuItem value="MA">MA</MenuItem>
+                            <MenuItem value="MT">MT</MenuItem>
+                            <MenuItem value="MS">MS</MenuItem>
+                            <MenuItem value="MG">MG</MenuItem>
+                            <MenuItem value="PA">PA</MenuItem>
+                            <MenuItem value="PB">PB</MenuItem>
+                            <MenuItem value="PR">PR</MenuItem>
+                            <MenuItem value="PE">PE</MenuItem>
+                            <MenuItem value="PI">PI</MenuItem>
+                            <MenuItem value="RJ">RJ</MenuItem>
+                            <MenuItem value="RN">RN</MenuItem>
+                            <MenuItem value="RS">RS</MenuItem>
+                            <MenuItem value="RO">RO</MenuItem>
+                            <MenuItem value="RR">RR</MenuItem>
+                            <MenuItem value="SC">SC</MenuItem>
+                            <MenuItem value="SP">SP</MenuItem>
+                            <MenuItem value="SE">SE</MenuItem>
+                            <MenuItem value="TO">TO</MenuItem>
+                          </TextField>
                         </div>
                       </div>
 
@@ -1226,16 +1414,19 @@ const PatientRegister: React.FC = () => {
 
                       <div className="form-row">
                         <div className="form-group observations-group">
-                          <label htmlFor="observations">Observações Gerais</label>
-                          <textarea
+                          <TextField
+                            fullWidth
+                            multiline
+                            rows={4}
                             id="observations"
                             name="observations"
+                            label="Observações Gerais"
                             value={formData.observations}
                             onChange={handleInputChange}
-                            rows={4}
                             placeholder="Observações importantes sobre o paciente, medicações, alergias, etc."
-                            className="observations-textarea"
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                       </div>
@@ -1243,66 +1434,72 @@ const PatientRegister: React.FC = () => {
                       {/* Linha com 3 colunas: Canal de entrada, Indicado por e Status + Botões */}
                       <div className="form-row">
                         <div className="form-group">
-                          <label htmlFor="entryChannel">Canal de entrada</label>
-                          <select
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
                             id="entryChannel"
                             name="entryChannel"
+                            label="Canal de entrada"
                             value={formData.entryChannel}
                             onChange={handleInputChange}
                             disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            SelectProps={{
+                              MenuProps: {
+                                PaperProps: {
+                                  sx: {
+                                    backgroundColor: 'white',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                  },
+                                },
+                              },
+                            }}
+                            sx={textFieldSx}
                           >
-                            <option value="">Selecione</option>
-                            <option value="Instagram">Instagram</option>
-                            <option value="Facebook">Facebook</option>
-                            <option value="Google">Google</option>
-                            <option value="Site">Site</option>
-                            <option value="Indicação profissional">Indicação profissional</option>
-                            <option value="Indicação de conhecido">Indicação de conhecido</option>
-                            <option value="Outros">Outros</option>
-                          </select>
+                            <MenuItem value="">Selecione</MenuItem>
+                            <MenuItem value="Instagram">Instagram</MenuItem>
+                            <MenuItem value="Facebook">Facebook</MenuItem>
+                            <MenuItem value="Google">Google</MenuItem>
+                            <MenuItem value="Site">Site</MenuItem>
+                            <MenuItem value="Indicação profissional">Indicação profissional</MenuItem>
+                            <MenuItem value="Indicação de conhecido">Indicação de conhecido</MenuItem>
+                            <MenuItem value="Outros">Outros</MenuItem>
+                          </TextField>
                         </div>
                         <div className="form-group">
-                          <label htmlFor="referredBy">Indicado por</label>
-                          <input
-                            type="text"
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="referredBy"
                             name="referredBy"
+                            label="Indicado por"
                             value={formData.referredBy || ''}
                             onChange={handleInputChange}
                             placeholder="Nome da pessoa ou instituição que indicou o paciente"
                             disabled={!canEdit || !formData.entryChannel.includes('Indicação')}
+                            InputLabelProps={{ shrink: true }}
+                            sx={textFieldSx}
                           />
                         </div>
                         <div className="form-group">
-                          <label>Status do Cadastro</label>
-                          <div className="radio-group">
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isComplete"
-                                value="true"
-                                checked={formData.isComplete === true}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isComplete', value: 'true' }
-                                })}
-                              />
-                              <span>Completo</span>
-                            </label>
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isComplete"
-                                value="false"
-                                checked={formData.isComplete === false}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isComplete', value: 'false' }
-                                })}
-                              />
-                              <span>Incompleto</span>
-                            </label>
-                          </div>
+                          <FormControl component="fieldset">
+                            <FormLabel component="legend" sx={{ fontSize: '0.95rem', color: '#6c757d', mb: 0.5 }}>
+                              Status do Cadastro
+                            </FormLabel>
+                            <RadioGroup
+                              row
+                              name="isComplete"
+                              value={formData.isComplete.toString()}
+                              onChange={(e) => handleInputChange({
+                                ...e,
+                                target: { ...e.target, name: 'isComplete', value: e.target.value }
+                              })}
+                            >
+                              <FormControlLabel value="true" control={<Radio size="small" />} label="Completo" />
+                              <FormControlLabel value="false" control={<Radio size="small" />} label="Incompleto" />
+                            </RadioGroup>
+                          </FormControl>
                         </div>
                       </div>
 
@@ -1318,34 +1515,74 @@ const PatientRegister: React.FC = () => {
                           {/* Segunda coluna vazia */}
                         </div>
                         <div className="form-group">
-                          <div className="form-actions-inline">
+                          <Box sx={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
                             {isNewPatient || isEditing ? (
                               <>
-                                <button
-                                  type="button"
-                                  className="btn-cancel-form-small"
+                                <Button
+                                  variant="outlined"
                                   onClick={handleCancel}
+                                  sx={{
+                                    color: '#6c757d',
+                                    borderColor: '#6c757d',
+                                    textTransform: 'none',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    padding: '0.5rem 1.5rem',
+                                    '&:hover': {
+                                      borderColor: '#5a6268',
+                                      backgroundColor: 'rgba(108, 117, 125, 0.04)',
+                                    },
+                                  }}
                                 >
                                   Cancelar
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   type="submit"
-                                  className="btn-save-small"
+                                  variant="contained"
                                   disabled={isLoading}
+                                  sx={{
+                                    backgroundColor: '#03B4C6',
+                                    color: '#ffffff',
+                                    textTransform: 'none',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    padding: '0.5rem 1.5rem',
+                                    boxShadow: 'none',
+                                    '&:hover': {
+                                      backgroundColor: '#029AAB',
+                                      boxShadow: 'none',
+                                    },
+                                    '&:disabled': {
+                                      backgroundColor: '#ced4da',
+                                      color: '#ffffff',
+                                    },
+                                  }}
                                 >
                                   {isLoading ? "Salvando..." : "Salvar"}
-                                </button>
+                                </Button>
                               </>
                             ) : (
-                              <button
-                                type="button"
-                                className="btn-save-small"
+                              <Button
+                                variant="contained"
                                 onClick={handleEdit}
+                                sx={{
+                                  backgroundColor: '#03B4C6',
+                                  color: '#ffffff',
+                                  textTransform: 'none',
+                                  fontSize: '0.875rem',
+                                  fontWeight: 600,
+                                  padding: '0.5rem 1.5rem',
+                                  boxShadow: 'none',
+                                  '&:hover': {
+                                    backgroundColor: '#029AAB',
+                                    boxShadow: 'none',
+                                  },
+                                }}
                               >
                                 Editar
-                              </button>
+                              </Button>
                             )}
-                          </div>
+                          </Box>
                         </div>
                       </div>
                     </div>
@@ -1383,17 +1620,46 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Anotações */}
             {activeTab === 'anotacoes' && (
               <div className="tab-content-section">
-                <h3>Anotações do Paciente</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Anotações do Paciente
+                </Typography>
                 <div className="notes-section">
-                  <div className="notes-toolbar">
-                    <button className="btn-add-note">+ Nova Anotação</button>
-                    <select className="notes-filter">
-                      <option>Todas as anotações</option>
-                      <option>Consultas</option>
-                      <option>Observações</option>
-                      <option>Exames</option>
-                    </select>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Anotação
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="all"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">Todas as anotações</MenuItem>
+                      <MenuItem value="consultas">Consultas</MenuItem>
+                      <MenuItem value="observacoes">Observações</MenuItem>
+                      <MenuItem value="exames">Exames</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="notes-list">
                     <div className="note-item">
                       <div className="note-header">
@@ -1423,18 +1689,45 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Agenda */}
             {activeTab === 'agenda' && (
               <div className="tab-content-section">
-                <h3>Agenda do Paciente</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Agenda do Paciente
+                </Typography>
                 <div className="agenda-section">
-                  <div className="agenda-toolbar">
-                    <button className="btn-schedule">+ Agendar Consulta</button>
-                    <div className="agenda-filters">
-                      <select>
-                        <option>Próximos 30 dias</option>
-                        <option>Próximos 7 dias</option>
-                        <option>Histórico</option>
-                      </select>
-                    </div>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Agendar Consulta
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="30days"
+                      sx={{
+                        minWidth: '180px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="30days">Próximos 30 dias</MenuItem>
+                      <MenuItem value="7days">Próximos 7 dias</MenuItem>
+                      <MenuItem value="history">Histórico</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="appointments-list">
                     <div className="appointment-item future">
                       <div className="appointment-time">
@@ -1446,10 +1739,40 @@ const PatientRegister: React.FC = () => {
                         <p>Dr. João Silva - Cardiologia</p>
                         <span className="status confirmed">Confirmada</span>
                       </div>
-                      <div className="appointment-actions">
-                        <button className="btn-edit">Editar</button>
-                        <button className="btn-cancel">Cancelar</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#dc3545',
+                            color: '#dc3545',
+                            '&:hover': {
+                              borderColor: '#c82333',
+                              backgroundColor: 'rgba(220, 53, 69, 0.04)',
+                            },
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                      </Box>
                     </div>
                     <div className="appointment-item past">
                       <div className="appointment-time">
@@ -1461,9 +1784,24 @@ const PatientRegister: React.FC = () => {
                         <p>Dr. João Silva - Cardiologia</p>
                         <span className="status completed">Realizada</span>
                       </div>
-                      <div className="appointment-actions">
-                        <button className="btn-view">Ver Detalhes</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Ver Detalhes
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>
@@ -1473,11 +1811,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Diagnóstico */}
             {activeTab === 'diagnostico' && (
               <div className="tab-content-section">
-                <h3>Diagnósticos</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Diagnósticos
+                </Typography>
                 <div className="diagnosis-section">
-                  <div className="diagnosis-toolbar">
-                    <button className="btn-add-diagnosis">+ Novo Diagnóstico</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Novo Diagnóstico
+                    </Button>
+                  </Box>
                   <div className="diagnosis-list">
                     <div className="diagnosis-item">
                       <div className="diagnosis-header">
@@ -1499,17 +1855,46 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Avaliações */}
             {activeTab === 'avaliacoes' && (
               <div className="tab-content-section">
-                <h3>Avaliações</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Avaliações
+                </Typography>
                 <div className="evaluations-section">
-                  <div className="evaluations-toolbar">
-                    <button className="btn-new-evaluation">+ Nova Avaliação</button>
-                    <select className="evaluation-type-filter">
-                      <option>Todos os tipos</option>
-                      <option>Avaliação Inicial</option>
-                      <option>Reavaliação</option>
-                      <option>Avaliação Especializada</option>
-                    </select>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Avaliação
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="all"
+                      sx={{
+                        minWidth: '220px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">Todos os tipos</MenuItem>
+                      <MenuItem value="inicial">Avaliação Inicial</MenuItem>
+                      <MenuItem value="reavaliacao">Reavaliação</MenuItem>
+                      <MenuItem value="especializada">Avaliação Especializada</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="evaluations-list">
                     <div className="evaluation-item">
                       <div className="evaluation-header">
@@ -1517,10 +1902,25 @@ const PatientRegister: React.FC = () => {
                         <span className="evaluation-date">15/03/2024</span>
                       </div>
                       <p className="evaluation-summary">Avaliação inicial completa com ECG e ecocardiograma.</p>
-                      <div className="evaluation-footer">
+                      <Box sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
                         <span className="evaluation-status completed">Concluída</span>
-                        <button className="btn-view-evaluation">Ver Detalhes</button>
-                      </div>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Ver Detalhes
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>
@@ -1530,11 +1930,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Plano Terapêutico */}
             {activeTab === 'plano-terap' && (
               <div className="tab-content-section">
-                <h3>Plano Terapêutico</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Plano Terapêutico
+                </Typography>
                 <div className="therapy-plan-section">
-                  <div className="therapy-toolbar">
-                    <button className="btn-new-plan">+ Novo Plano</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Novo Plano
+                    </Button>
+                  </Box>
                   <div className="therapy-plans">
                     <div className="therapy-plan-item">
                       <div className="plan-header">
@@ -1569,11 +1987,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Evoluções */}
             {activeTab === 'evolucoes' && (
               <div className="tab-content-section">
-                <h3>Evoluções</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Evoluções
+                </Typography>
                 <div className="evolution-section">
-                  <div className="evolution-toolbar">
-                    <button className="btn-new-evolution">+ Nova Evolução</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Evolução
+                    </Button>
+                  </Box>
                   <div className="evolution-timeline">
                     <div className="evolution-item">
                       <div className="evolution-date">22/03/2024</div>
@@ -1633,11 +2069,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Receituário */}
             {activeTab === 'receituario' && (
               <div className="tab-content-section">
-                <h3>Receituário</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Receituário
+                </Typography>
                 <div className="prescription-section">
-                  <div className="prescription-toolbar">
-                    <button className="btn-new-prescription">+ Nova Receita</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Receita
+                    </Button>
+                  </Box>
                   <div className="prescriptions-list">
                     <div className="prescription-item">
                       <div className="prescription-header">
@@ -1652,10 +2106,25 @@ const PatientRegister: React.FC = () => {
                           <strong>Hidroclorotiazida 25mg</strong> - 1 comprimido ao dia, pela manhã
                         </div>
                       </div>
-                      <div className="prescription-footer">
+                      <Box sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
                         <span className="prescription-doctor">Dr. João Silva - CRM 12345</span>
-                        <button className="btn-print">Imprimir</button>
-                      </div>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Imprimir
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>
@@ -1665,17 +2134,46 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Arquivos */}
             {activeTab === 'arquivos' && (
               <div className="tab-content-section">
-                <h3>Arquivos</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Arquivos
+                </Typography>
                 <div className="files-section">
-                  <div className="files-toolbar">
-                    <button className="btn-upload">+ Upload Arquivo</button>
-                    <select className="file-type-filter">
-                      <option>Todos os tipos</option>
-                      <option>Exames</option>
-                      <option>Documentos</option>
-                      <option>Imagens</option>
-                    </select>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Upload Arquivo
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="all"
+                      sx={{
+                        minWidth: '180px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">Todos os tipos</MenuItem>
+                      <MenuItem value="exames">Exames</MenuItem>
+                      <MenuItem value="documentos">Documentos</MenuItem>
+                      <MenuItem value="imagens">Imagens</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="files-grid">
                     <div className="file-item">
                       <div className="file-icon"><InsertDriveFile fontSize="large" /></div>
@@ -1684,10 +2182,40 @@ const PatientRegister: React.FC = () => {
                         <p>Eletrocardiograma</p>
                         <span className="file-date">15/03/2024</span>
                       </div>
-                      <div className="file-actions">
-                        <button className="btn-download">Download</button>
-                        <button className="btn-view">Visualizar</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Download
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#03B4C6',
+                            color: '#03B4C6',
+                            '&:hover': {
+                              borderColor: '#029AAB',
+                              backgroundColor: 'rgba(3, 180, 198, 0.04)',
+                            },
+                          }}
+                        >
+                          Visualizar
+                        </Button>
+                      </Box>
                     </div>
                     <div className="file-item">
                       <div className="file-icon">🖼️</div>
@@ -1696,10 +2224,40 @@ const PatientRegister: React.FC = () => {
                         <p>Raio-X de Tórax</p>
                         <span className="file-date">15/03/2024</span>
                       </div>
-                      <div className="file-actions">
-                        <button className="btn-download">Download</button>
-                        <button className="btn-view">Visualizar</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Download
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#03B4C6',
+                            color: '#03B4C6',
+                            '&:hover': {
+                              borderColor: '#029AAB',
+                              backgroundColor: 'rgba(3, 180, 198, 0.04)',
+                            },
+                          }}
+                        >
+                          Visualizar
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>
