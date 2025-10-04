@@ -26,6 +26,7 @@ interface MenuItemProps {
   label: string;
   href?: string;
   onClick?: (e: React.MouseEvent) => void;
+  icon?: string;
 }
 
 interface UserSession {
@@ -165,8 +166,6 @@ const AdminFaq: React.FC = () => {
   const endIndex = startIndex + itemsPerPage;
   const currentFaqs = filteredAndSortedFaqs.slice(startIndex, endIndex);
 
-  const itemsPerPageOptions = [10, 25, 50, 100];
-
   useEffect(() => {
     const sessionData = localStorage.getItem('clinic4us-user-session');
     if (sessionData) {
@@ -191,7 +190,7 @@ const AdminFaq: React.FC = () => {
       sortOrder !== initialFilters.sortOrder;
 
     setHasFilterChanges(hasChanges);
-  }, [searchTerm, categoryFilter, sortField, sortOrder]);
+  }, [searchTerm, categoryFilter, sortField, sortOrder, initialFilters.searchTerm, initialFilters.categoryFilter, initialFilters.sortField, initialFilters.sortOrder]);
 
   const scrollToTop = () => {
     const listContainer = document.querySelector('.admin-plans-list-container');

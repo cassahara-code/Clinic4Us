@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Box,
   Container,
@@ -9,20 +9,15 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Button,
   IconButton,
-  Tooltip,
   Checkbox,
-  FormControlLabel,
-  Chip,
   ListItemText,
   OutlinedInput,
 } from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
-import { useNavigation } from "../contexts/RouterContext";
-import { CalendarToday, Delete, FilterAltOff, EventNote, PersonAdd, List, Folder } from '@mui/icons-material';
+import { CalendarToday, FilterAltOff, EventNote, PersonAdd, List, Folder } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 
 interface MenuItemProps {
@@ -61,9 +56,7 @@ interface LayoutEvent extends ScheduleEvent {
 
 const ProfessionalSchedule: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
-  const { goToPatientRegister, goToPatients } = useNavigation();
-
-  const professionalsList = [
+  const professionalsList = useMemo(() => [
     'Dr. João Silva - Cardiologista',
     'Dra. Maria Santos - Pediatra',
     'Dr. Pedro Oliveira - Ortopedista',
@@ -76,16 +69,16 @@ const ProfessionalSchedule: React.FC = () => {
     'Dra. Patricia Mendes - Endocrinologista',
     'Dr. André Castro - Urologista',
     'Dra. Beatriz Rocha - Reumatologista'
-  ];
+  ], []);
 
   // Valores iniciais dos filtros
-  const getInitialFilters = () => ({
+  const getInitialFilters = useCallback(() => ({
     team: '',
     startDate: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01`,
     endDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0],
     professionals: professionalsList,
     patients: []
-  });
+  }), [professionalsList]);
 
   const [selectedProfessionals, setSelectedProfessionals] = useState<string[]>(professionalsList);
   const [selectedPatients, setSelectedPatients] = useState<string[]>([]);
@@ -103,6 +96,7 @@ const ProfessionalSchedule: React.FC = () => {
   const [selectedDayDate, setSelectedDayDate] = useState<Date | null>(null);
 
   // Estado do evento selecionado para edição
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
 
   // Estados do modal unificado de agendamento
@@ -306,7 +300,7 @@ const ProfessionalSchedule: React.FC = () => {
       patientSearchTerm !== '';
 
     setHasFilterChanges(hasChanges);
-  }, [filters, selectedProfessionals, selectedPatients, patientSearchTerm]);
+  }, [filters, selectedProfessionals, selectedPatients, patientSearchTerm, getInitialFilters]);
 
   const handleRevalidateLogin = () => {
     // Limpar sessão
@@ -335,15 +329,6 @@ const ProfessionalSchedule: React.FC = () => {
     // Abrir página de cadastro de novo paciente em nova aba
     const registerUrl = `${window.location.origin}${window.location.pathname}?page=patient-register`;
     window.open(registerUrl, '_blank');
-  };
-
-  const handleProfessionalToggle = (professional: string) => {
-    const newSelectedProfessionals = selectedProfessionals.includes(professional)
-      ? selectedProfessionals.filter(p => p !== professional)
-      : [...selectedProfessionals, professional];
-
-    setSelectedProfessionals(newSelectedProfessionals);
-    handleFilterChange('professionals', newSelectedProfessionals);
   };
 
   const handleSelectAllProfessionals = () => {
@@ -593,12 +578,6 @@ const ProfessionalSchedule: React.FC = () => {
     return `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
   };
 
-  const getMinDate = () => {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    return thirtyDaysAgo.toISOString().split('T')[0];
-  };
-
   // Função para consultar a API da agenda (preparada para implementação futura)
   const fetchAgendaData = async (filterParams: any) => {
     setIsLoading(true);
@@ -783,19 +762,6 @@ const ProfessionalSchedule: React.FC = () => {
     return { top: `${top}px`, height: `${height}px` };
   };
 
-  const getOverlappingEvents = (events: ScheduleEvent[], targetEvent: ScheduleEvent) => {
-    const targetStart = timeToMinutes(targetEvent.time);
-    const targetEnd = targetStart + targetEvent.duration;
-
-    return events.filter(event => {
-      if (event === targetEvent) return false;
-      const eventStart = timeToMinutes(event.time);
-      const eventEnd = eventStart + event.duration;
-
-      return (eventStart < targetEnd && eventEnd > targetStart);
-    });
-  };
-
   const calculateEventLayout = (events: ScheduleEvent[]) => {
     // Primeiro, vamos criar grupos de eventos que realmente se sobrepõem no mesmo tempo
     const processed = new Set<number>();
@@ -917,41 +883,6 @@ const ProfessionalSchedule: React.FC = () => {
 
     return result;
   };
-
-  // Menu items dinâmicos baseados no perfil do usuário com navegação funcional
-  const loggedMenuItems = userSession?.menuItems?.map(item => ({
-    ...item,
-    onClick: (e: React.MouseEvent) => {
-      e.preventDefault();
-      const clinic = new URLSearchParams(window.location.search).get('clinic') || 'ninho';
-
-      switch (item.label) {
-        case 'Dashboard':
-          window.location.href = `${window.location.origin}/?page=dashboard&clinic=${clinic}`;
-          break;
-        case 'Agenda':
-          window.location.href = `${window.location.origin}/?page=schedule&clinic=${clinic}`;
-          break;
-        case 'Pacientes':
-          alert('Página de Pacientes em desenvolvimento');
-          break;
-        case 'Relatórios':
-          alert('Página de Relatórios em desenvolvimento');
-          break;
-        case 'Financeiro':
-          alert('Página Financeiro em desenvolvimento');
-          break;
-        case 'Usuários':
-          alert('Página de Usuários em desenvolvimento');
-          break;
-        case 'Configurações':
-          alert('Página de Configurações em desenvolvimento');
-          break;
-        default:
-          console.log('Menu item clicked:', item.label);
-      }
-    }
-  })) || [];
 
   if (!userSession) {
     return (

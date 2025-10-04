@@ -116,17 +116,17 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
     }
   }, [formData.startTime]);
 
-  // Tabela de preços por tipo de serviço
-  const servicePrices: { [key: string]: { unitValue: number; discount: number } } = {
-    'Consulta': { unitValue: 150.00, discount: 10.00 },
-    'Exame': { unitValue: 200.00, discount: 15.00 },
-    'Procedimento': { unitValue: 300.00, discount: 20.00 },
-    'Retorno': { unitValue: 80.00, discount: 5.00 },
-    'Avaliação': { unitValue: 120.00, discount: 8.00 }
-  };
-
   // Calcular valores automaticamente
   useEffect(() => {
+    // Tabela de preços por tipo de serviço
+    const servicePrices: { [key: string]: { unitValue: number; discount: number } } = {
+      'Consulta': { unitValue: 150.00, discount: 10.00 },
+      'Exame': { unitValue: 200.00, discount: 15.00 },
+      'Procedimento': { unitValue: 300.00, discount: 20.00 },
+      'Retorno': { unitValue: 80.00, discount: 5.00 },
+      'Avaliação': { unitValue: 120.00, discount: 8.00 }
+    };
+
     if (formData.serviceType && servicePrices[formData.serviceType]) {
       const { unitValue, discount } = servicePrices[formData.serviceType];
       const totalUnit = unitValue - discount;

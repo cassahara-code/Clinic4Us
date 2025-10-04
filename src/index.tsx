@@ -31,24 +31,24 @@ const AppContent = () => {
   const { currentPage, navigateTo } = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
 
-  // Lista de páginas que requerem autenticação (admin e clients)
-  const protectedPages: string[] = [
-    'dashboard',
-    'schedule',
-    'patients',
-    'patient-register',
-    'page-model',
-    'admin-plans',
-    'admin-profiles',
-    'admin-functionalities',
-    'admin-entities',
-    'admin-faq',
-    'admin-professional-types',
-    'user-profile'
-  ];
-
   // Verificar se a página atual requer autenticação
   React.useEffect(() => {
+    // Lista de páginas que requerem autenticação (admin e clients)
+    const protectedPages: string[] = [
+      'dashboard',
+      'schedule',
+      'patients',
+      'patient-register',
+      'page-model',
+      'admin-plans',
+      'admin-profiles',
+      'admin-functionalities',
+      'admin-entities',
+      'admin-faq',
+      'admin-professional-types',
+      'user-profile'
+    ];
+
     if (!isLoading && protectedPages.includes(currentPage) && !isAuthenticated) {
       // Obter parâmetro clinic da URL se existir
       const urlParams = new URLSearchParams(window.location.search);
@@ -57,7 +57,7 @@ const AppContent = () => {
       // Redirecionar para login
       navigateTo('login', { clinic });
     }
-  }, [currentPage, isAuthenticated, isLoading]);
+  }, [currentPage, isAuthenticated, isLoading, navigateTo]);
 
   // Mostrar loading enquanto verifica autenticação
   if (isLoading) {

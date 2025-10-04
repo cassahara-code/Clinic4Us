@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Box, TextField, IconButton, Tooltip, Typography } from '@mui/material';
+import { Box, TextField, IconButton, Tooltip } from '@mui/material';
 import { FilterAltOff } from '@mui/icons-material';
 
 interface DateRangeFilterProps {

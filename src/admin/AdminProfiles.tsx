@@ -26,6 +26,7 @@ interface MenuItemProps {
   label: string;
   href?: string;
   onClick?: (e: React.MouseEvent) => void;
+  icon?: string;
 }
 
 interface UserSession {
@@ -50,7 +51,7 @@ interface Profile {
 
 const AdminProfiles: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
-  const { goToDashboard, goToSchedule, goToPatients } = useNavigation();
+  const { goToDashboard } = useNavigation();
   const { toast, showToast, hideToast } = useToast();
 
   // Estados dos filtros
@@ -269,7 +270,7 @@ const AdminProfiles: React.FC = () => {
       sortOrder !== initialFilters.sortOrder;
 
     setHasFilterChanges(hasChanges);
-  }, [searchTerm, typeFilter, sortField, sortOrder]);
+  }, [searchTerm, typeFilter, sortField, sortOrder, initialFilters.searchTerm, initialFilters.typeFilter, initialFilters.sortField, initialFilters.sortOrder]);
 
   const clearFilters = () => {
     setSearchTerm(initialFilters.searchTerm);

@@ -267,7 +267,7 @@ const AdminPlans: React.FC = () => {
       sortOrder !== initialFilters.sortOrder;
 
     setHasFilterChanges(hasChanges);
-  }, [searchTerm, statusFilter, sortField, sortOrder]);
+  }, [searchTerm, statusFilter, sortField, sortOrder, initialFilters.searchTerm, initialFilters.statusFilter, initialFilters.sortField, initialFilters.sortOrder]);
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
