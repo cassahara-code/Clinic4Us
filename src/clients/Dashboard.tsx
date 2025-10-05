@@ -26,6 +26,7 @@ import { FooterInternal } from "../components/Footer";
 import { FaqButton } from "../components/FaqButton";
 import DateRangeFilter from "../components/DateRangeFilter";
 import { CalendarToday, CheckCircle, Assignment, Cake, WhatsApp, Email, Folder } from '@mui/icons-material';
+import { colors, typography } from '../theme/designSystem';
 
 interface MenuItemProps {
   label: string;
@@ -290,8 +291,27 @@ const Dashboard: React.FC = () => {
             {/* Título da Página */}
             <Box className="page-header-container">
               <Box className="page-header-content">
-                <Typography variant="h4" className="page-header-title" sx={{ fontSize: '1.3rem', mb: 1 }}>Dashboard</Typography>
-                <Typography variant="body2" className="page-header-description">
+                <Typography
+                  variant="h4"
+                  className="page-header-title"
+                  sx={{
+                    fontSize: '1.3rem',
+                    mb: 1,
+                    fontWeight: typography.fontWeight.semibold,
+                    color: colors.textPrimary
+                  }}
+                >
+                  Dashboard
+                </Typography>
+                <Typography
+                  variant="body2"
+                  className="page-header-description"
+                  sx={{
+                    fontSize: typography.fontSize.sm,
+                    color: colors.textSecondary,
+                    pb: '15px'
+                  }}
+                >
                   Visão geral dos principais indicadores e estatísticas da clínica.
                 </Typography>
               </Box>

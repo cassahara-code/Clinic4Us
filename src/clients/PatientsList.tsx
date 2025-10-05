@@ -6,6 +6,7 @@ import { Delete, Person, WhatsApp, CalendarToday, Warning, Add, Email, Check, Cl
 import { FaqButton } from "../components/FaqButton";
 import { TextField, MenuItem, IconButton, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Avatar, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Button, Tooltip, Box, Pagination, FormControl, Select } from '@mui/material';
 import StandardPagination from "../components/Pagination/StandardPagination";
+import { colors, typography } from '../theme/designSystem';
 
 interface MenuItemProps {
   label: string;
@@ -468,10 +469,27 @@ const PatientsList: React.FC = () => {
             {/* Título da Lista de Pacientes */}
             <div className="page-header-container">
               <div className="page-header-content">
-                <Typography variant="h4" className="page-header-title" sx={{ fontSize: '1.3rem', mb: 1 }}>
+                <Typography
+                  variant="h4"
+                  className="page-header-title"
+                  sx={{
+                    fontSize: '1.3rem',
+                    mb: 1,
+                    fontWeight: typography.fontWeight.semibold,
+                    color: colors.textPrimary
+                  }}
+                >
                   Lista de Pacientes
                 </Typography>
-                <Typography variant="body2" className="page-header-description">
+                <Typography
+                  variant="body2"
+                  className="page-header-description"
+                  sx={{
+                    fontSize: typography.fontSize.sm,
+                    color: colors.textSecondary,
+                    pb: '15px'
+                  }}
+                >
                   Visualize, pesquise e gerencie todos os pacientes cadastrados no sistema.
                 </Typography>
               </div>
@@ -508,7 +526,7 @@ const PatientsList: React.FC = () => {
             }}
           >
             {/* Filtros da lista de pacientes */}
-            <Box sx={{ mb: 3, borderBottom: 'none' }}>
+            <Box sx={{ mb: 1, borderBottom: 'none' }}>
             <div className="schedule-filters-grid" style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',

@@ -346,7 +346,7 @@ const AdminFaq: React.FC = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-start',
-            mb: 3,
+            mb: 1,
             gap: 2
           }}>
             <Box>
@@ -365,7 +365,8 @@ const AdminFaq: React.FC = () => {
                 variant="body2"
                 sx={{
                   fontSize: typography.fontSize.sm,
-                  color: colors.textSecondary
+                  color: colors.textSecondary,
+                  pb: '15px'
                 }}
               >
                 Gestão de perguntas frequentes e respostas do sistema.

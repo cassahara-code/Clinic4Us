@@ -451,7 +451,7 @@ const AdminPlans: React.FC = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-start',
-            mb: 3,
+            mb: 1,
             gap: 2
           }}>
             <Box>
@@ -470,7 +470,8 @@ const AdminPlans: React.FC = () => {
                 variant="body2"
                 sx={{
                   fontSize: typography.fontSize.sm,
-                  color: colors.textSecondary
+                  color: colors.textSecondary,
+                  pb: '15px'
                 }}
               >
                 Gestão de planos e serviços oferecidos pela clínica.
