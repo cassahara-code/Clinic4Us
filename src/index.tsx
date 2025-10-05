@@ -5,6 +5,8 @@ import "./global.css";
 import reportWebVitals from "./reportWebVitals";
 import { RouterProvider, useRouter } from "./contexts/RouterContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ThemeProvider, createTheme } from "@mui/material";
+import { inputs } from "./theme/designSystem";
 import LandingPage from "./components/LandingPage";
 import Login from "./clients/Login";
 import AliasRegister from "./clients/AliasRegister";
@@ -22,6 +24,74 @@ import AdminProfessionalTypes from "./admin/AdminProfessionalTypes";
 import UserProfile from "./clients/UserProfile";
 import Faq from "./clients/Faq";
 
+// Tema global do Material-UI
+const globalTheme = createTheme({
+  components: {
+    MuiInputBase: {
+      styleOverrides: {
+        input: {
+          color: inputs.default.textColor,
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          '&:not(.MuiInputBase-multiline)': {
+            height: inputs.default.height,
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: inputs.default.focus.borderColor,
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: inputs.default.focus.borderColor,
+            boxShadow: inputs.default.focus.boxShadow,
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          '&.Mui-focused': {
+            color: inputs.default.focus.labelColor,
+          },
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        select: {
+          '&:focus': {
+            backgroundColor: 'transparent',
+          },
+          '&.Mui-disabled': {
+            WebkitTextFillColor: inputs.default.textColor,
+            opacity: 0.6,
+            '& + .MuiSelect-nativeInput': {
+              display: 'none',
+            },
+          },
+        },
+        nativeInput: {
+          '&:disabled': {
+            display: 'none',
+          },
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          '&.Mui-selected.Mui-disabled': {
+            opacity: 1,
+          },
+        },
+      },
+    },
+  },
+});
+
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
@@ -30,6 +100,7 @@ const root = ReactDOM.createRoot(
 const AppContent = () => {
   const { currentPage, navigateTo } = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
+  const [isInitializing, setIsInitializing] = React.useState(true);
 
   // Lista de páginas que requerem autenticação (admin e clients)
   const protectedPages: string[] = [
@@ -57,10 +128,15 @@ const AppContent = () => {
       // Redirecionar para login
       navigateTo('login', { clinic });
     }
+
+    // Marcar inicialização como completa após processar a primeira vez
+    if (!isLoading) {
+      setIsInitializing(false);
+    }
   }, [currentPage, isAuthenticated, isLoading]);
 
-  // Mostrar loading enquanto verifica autenticação
-  if (isLoading) {
+  // Mostrar loading enquanto verifica autenticação ou inicializa
+  if (isLoading || isInitializing) {
     return (
       <div style={{
         display: 'flex',
@@ -115,11 +191,13 @@ const AppContent = () => {
 // Root component with providers
 const App = () => {
   return (
-    <AuthProvider>
-      <RouterProvider>
-        <AppContent />
-      </RouterProvider>
-    </AuthProvider>
+    <ThemeProvider theme={globalTheme}>
+      <AuthProvider>
+        <RouterProvider>
+          <AppContent />
+        </RouterProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

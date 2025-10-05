@@ -189,7 +189,7 @@ export const inputs = {
     borderColor: colors.border,
     borderRadius: '4px',
     padding: '0.375rem 0.5rem',
-    textColor: colors.textPrimary,
+    textColor: '#2d3436',
     placeholderColor: colors.textSecondary,
 
     // Label sempre visível
@@ -225,7 +225,7 @@ export const inputs = {
     backgroundColor: colors.white,
     borderColor: colors.border,
     padding: '0.375rem 0.5rem',
-    textColor: colors.textPrimary,
+    textColor: '#2d3436',
 
     // Label sempre visível (mesmo padrão do TextField)
     labelShrink: true,

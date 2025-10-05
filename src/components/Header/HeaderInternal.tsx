@@ -280,7 +280,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
         boxShadow: isLoggedIn ? '0 2px 10px rgba(0, 0, 0, 0.1)' : 'none',
       }}
     >
-      <Toolbar sx={{ height: '85px', px: { xs: 1, sm: 2 }, justifyContent: 'space-between' }}>
+      <Toolbar sx={{ height: '85px', px: { xs: '6px', sm: '6px' }, justifyContent: 'space-between' }}>
         {/* Logo e Menu Mobile */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {isLoggedIn && (

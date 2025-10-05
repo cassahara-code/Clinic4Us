@@ -24,6 +24,7 @@ import AppointmentModal, { AppointmentData } from "../components/modals/Appointm
 import { useNavigation } from "../contexts/RouterContext";
 import { CalendarToday, Delete, FilterAltOff, EventNote, PersonAdd, List, Folder } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
+import { colors, typography } from '../theme/designSystem';
 
 interface MenuItemProps {
   label: string;
@@ -1001,10 +1002,27 @@ const ProfessionalSchedule: React.FC = () => {
             {/* Título da Página */}
             <Box className="page-header-container">
               <Box className="page-header-content">
-                <Typography variant="h4" className="page-header-title" sx={{ fontSize: '1.3rem', mb: 1 }}>
+                <Typography
+                  variant="h4"
+                  className="page-header-title"
+                  sx={{
+                    fontSize: '1.3rem',
+                    mb: 1,
+                    fontWeight: typography.fontWeight.semibold,
+                    color: colors.textPrimary
+                  }}
+                >
                   Agenda Profissional
                 </Typography>
-                <Typography variant="body2" className="page-header-description">
+                <Typography
+                  variant="body2"
+                  className="page-header-description"
+                  sx={{
+                    fontSize: typography.fontSize.sm,
+                    color: colors.textSecondary,
+                    pb: '15px'
+                  }}
+                >
                   Gerencie sua agenda, visualize compromissos e organize horários de atendimento.
                 </Typography>
               </Box>
@@ -1030,7 +1048,7 @@ const ProfessionalSchedule: React.FC = () => {
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
                   gap: '0.75rem',
-                  mb: 3
+                  mb: 1
                 }}
               >
                 {/* Equipe */}

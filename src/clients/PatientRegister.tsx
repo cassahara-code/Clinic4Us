@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation, useRouter } from "../contexts/RouterContext";
-import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Search } from '@mui/icons-material';
+import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import PhotoUpload from "../components/PhotoUpload";
 import {
@@ -21,6 +21,7 @@ import {
   Tabs,
   Tab
 } from '@mui/material';
+import { colors, typography, inputs } from '../theme/designSystem';
 
 interface MenuItemProps {
   label: string;
@@ -323,6 +324,11 @@ const PatientRegister: React.FC = () => {
     const birth = new Date(birthDate);
     const today = new Date();
 
+    // Validação: data de nascimento não pode ser maior que hoje
+    if (birth > today) {
+      return 'Data inválida';
+    }
+
     let years = today.getFullYear() - birth.getFullYear();
     let months = today.getMonth() - birth.getMonth();
     let days = today.getDate() - birth.getDate();
@@ -496,17 +502,17 @@ const PatientRegister: React.FC = () => {
 
   const getAvailableTabs = () => {
     const allTabs = [
-      { id: 'cadastro', label: 'Cadastro', enabled: true, icon: Person },
-      { id: 'resumo', label: 'Resumo', enabled: true, icon: Assessment },
-      { id: 'anotacoes', label: 'Anotações', enabled: true, icon: Note },
-      { id: 'agenda', label: 'Agenda', enabled: true, icon: Event },
-      { id: 'diagnostico', label: 'Diagnóstico', enabled: true, icon: LocalHospital },
-      { id: 'avaliacoes', label: 'Avaliações', enabled: true, icon: Assignment },
-      { id: 'plano-terap', label: 'Plano Terap', enabled: true, icon: Psychology },
-      { id: 'evolucoes', label: 'Evoluções', enabled: true, icon: Timeline },
-      { id: 'financeiro', label: 'Financeiro', enabled: true, icon: AttachMoney },
-      { id: 'receituario', label: 'Receituário', enabled: true, icon: LocalPharmacy },
-      { id: 'arquivos', label: 'Arquivos', enabled: true, icon: Folder }
+      { id: 'cadastro', label: 'Cadastro', enabled: true, icon: Person, color: '#03B4C6' },
+      { id: 'resumo', label: 'Resumo', enabled: true, icon: Assessment, color: '#2196f3' },
+      { id: 'anotacoes', label: 'Anotações', enabled: true, icon: Note, color: '#ff9800' },
+      { id: 'agenda', label: 'Agenda', enabled: true, icon: Event, color: '#9c27b0' },
+      { id: 'diagnostico', label: 'Diagnóstico', enabled: true, icon: LocalHospital, color: '#f44336' },
+      { id: 'avaliacoes', label: 'Avaliações', enabled: true, icon: Assignment, color: '#4caf50' },
+      { id: 'plano-terap', label: 'Plano Terap', enabled: true, icon: Psychology, color: '#e91e63' },
+      { id: 'evolucoes', label: 'Evoluções', enabled: true, icon: Timeline, color: '#00bcd4' },
+      { id: 'financeiro', label: 'Financeiro', enabled: true, icon: AttachMoney, color: '#4caf50' },
+      { id: 'receituario', label: 'Receituário', enabled: true, icon: LocalPharmacy, color: '#009688' },
+      { id: 'arquivos', label: 'Arquivos', enabled: true, icon: Folder, color: '#795548' }
     ];
 
     // Filter tabs based on user permissions
@@ -634,66 +640,103 @@ const PatientRegister: React.FC = () => {
 
       <main className="patient-register-main">
         {/* Título da Página */}
-        <div className="page-header-container">
-          <div className="page-header-content">
-            <Typography variant="h4" className="page-header-title" sx={{ fontSize: '1.3rem', mb: 1 }}>
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          mb: 1,
+          gap: 2
+        }}>
+          <Box>
+            <Typography
+              variant="h4"
+              sx={{
+                fontSize: '1.3rem',
+                mb: 1,
+                fontWeight: typography.fontWeight.semibold,
+                color: colors.textPrimary
+              }}
+            >
               {isNewPatient ? 'Cadastro de Paciente' : formData.name || 'Paciente'}
             </Typography>
             {isNewPatient ? (
-              <Typography variant="body2" className="page-header-description" sx={{ fontSize: '0.875rem', color: '#6c757d' }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary,
+                  pb: '15px'
+                }}
+              >
                 Preencha os dados para cadastrar um novo paciente no sistema.
               </Typography>
             ) : (
-              <Typography variant="body2" className="page-header-description" sx={{ fontSize: '0.875rem', color: '#6c757d' }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary,
+                  pb: '15px'
+                }}
+              >
                 ID: {formData.id}
               </Typography>
             )}
-          </div>
-          <FaqButton />
-        </div>
-
-        {/* Tabs de navegação */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', backgroundColor: '#ffffff', marginBottom: '1.5rem' }}>
-          <Tabs
-            value={activeTab}
-            onChange={(e, newValue) => handleTabChange(newValue)}
-            variant="scrollable"
-            scrollButtons="auto"
-            sx={{
-              '& .MuiTab-root': {
-                textTransform: 'none',
-                minHeight: '48px',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                color: '#6c757d',
-                '&.Mui-selected': {
-                  color: '#03B4C6',
-                  fontWeight: 600,
-                },
-              },
-              '& .MuiTabs-indicator': {
-                backgroundColor: '#03B4C6',
-                height: '3px',
-              },
-            }}
-          >
-            {getAvailableTabs().map(tab => {
-              const IconComponent = tab.icon;
-              return (
-                <Tab
-                  key={tab.id}
-                  value={tab.id}
-                  label={tab.label}
-                  icon={<IconComponent sx={{ fontSize: '1rem' }} />}
-                  iconPosition="start"
-                  disabled={!tab.enabled}
-                />
-              );
-            })}
-          </Tabs>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FaqButton />
+          </Box>
         </Box>
 
         <div className="patient-register-container">
+          {/* Tabs de navegação */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2, mt: '-5px', mx: '-1.5rem' }}>
+            <Tabs
+              value={activeTab}
+              onChange={(e, newValue) => handleTabChange(newValue)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                px: '1.5rem',
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  minHeight: '48px',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  color: '#6c757d',
+                  padding: '12px 12px',
+                  minWidth: 'auto',
+                  '&.Mui-selected': {
+                    color: '#03B4C6',
+                    fontWeight: 600,
+                  },
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#03B4C6',
+                  height: '3px',
+                },
+                '& .MuiTabScrollButton-root': {
+                  width: '30px',
+                  padding: '0',
+                },
+              }}
+            >
+              {getAvailableTabs().map(tab => {
+                const IconComponent = tab.icon;
+                return (
+                  <Tab
+                    key={tab.id}
+                    value={tab.id}
+                    label={tab.label}
+                    icon={<IconComponent sx={{ fontSize: '1rem', color: tab.color }} />}
+                    iconPosition="start"
+                    disabled={!tab.enabled}
+                  />
+                );
+              })}
+            </Tabs>
+          </Box>
+
           {/* Conteúdo da aba ativa */}
           <div className="tab-content">
             {activeTab === 'cadastro' && (
@@ -761,9 +804,22 @@ const PatientRegister: React.FC = () => {
 
                     {/* Seção de Campos */}
                     <div className="personal-data-fields">
-                      {/* Primeira linha: Nome, Data de Nascimento + Idade, Gênero */}
-                      <div className="form-row">
-                        <div className="form-group">
+                      {/* Grid de migração - 3 colunas com bordas */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '10px',
+                          px: 0,
+                          pb: '5px'
+                        }
+                      }}>
+                        <Box>
                           <TextField
                             fullWidth
                             size="small"
@@ -774,44 +830,44 @@ const PatientRegister: React.FC = () => {
                             onChange={handleInputChange}
                             placeholder="Nome completo do paciente"
                             disabled={!canEdit}
+                            error={!!errors.name}
+                            helperText={errors.name}
                             InputLabelProps={{ shrink: true }}
-                            sx={textFieldSx}
                           />
-                        </div>
-                        <div className="form-group birth-age-group">
-                          <div className="birth-age-container">
-                            <div className="form-subgroup">
-                              <TextField
-                                fullWidth
-                                size="small"
-                                type="date"
-                                id="birthDate"
-                                name="birthDate"
-                                label="Data de Nascimento*"
-                                value={formData.birthDate}
-                                onChange={handleInputChange}
-                                disabled={!canEdit}
-                                InputLabelProps={{ shrink: true }}
-                                sx={textFieldSx}
-                              />
-                            </div>
-                            <div className="form-subgroup">
-                              <TextField
-                                fullWidth
-                                size="small"
-                                id="age"
-                                name="age"
-                                label="Idade"
-                                value={calculateAge(formData.birthDate)}
-                                disabled
-                                placeholder="Calculado automaticamente"
-                                InputLabelProps={{ shrink: true }}
-                                sx={textFieldSx}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="form-group">
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            type="date"
+                            id="birthDate"
+                            name="birthDate"
+                            label="Data de Nascimento*"
+                            value={formData.birthDate}
+                            onChange={handleInputChange}
+                            disabled={!canEdit}
+                            error={!!errors.birthDate}
+                            helperText={errors.birthDate}
+                            InputLabelProps={{ shrink: true }}
+                          />
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="age"
+                            name="age"
+                            label="Idade"
+                            value={calculateAge(formData.birthDate)}
+                            disabled
+                            placeholder="Calculado automaticamente"
+                            InputLabelProps={{ shrink: true }}
+                            sx={{
+                              '& .MuiInputBase-input': {
+                                fontSize: '12px'
+                              }
+                            }}
+                          />
+                        </Box>
+                        <Box>
                           <TextField
                             select
                             fullWidth
@@ -823,82 +879,68 @@ const PatientRegister: React.FC = () => {
                             onChange={handleInputChange}
                             disabled={!canEdit}
                             InputLabelProps={{ shrink: true }}
-                            SelectProps={{
-                              MenuProps: {
-                                PaperProps: {
-                                  sx: {
-                                    backgroundColor: 'white',
-                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                                  },
-                                },
-                              },
-                            }}
-                            sx={textFieldSx}
                           >
-                            <MenuItem value="">Selecione o gênero</MenuItem>
+                            <MenuItem value="" disabled>Selecione</MenuItem>
                             <MenuItem value="Masculino">Masculino</MenuItem>
                             <MenuItem value="Feminino">Feminino</MenuItem>
                             <MenuItem value="Outro">Outro</MenuItem>
                           </TextField>
-                        </div>
-                      </div>
+                        </Box>
+                      </Box>
 
-                      {/* Segunda linha: Documento (Tipo + Número), Órgão Expedidor */}
-                      <div className="form-row">
-                        <div className="form-group document-type-number">
-                          <div className="document-container">
-                            <div className="form-subgroup">
-                              <TextField
-                                select
-                                fullWidth
-                                size="small"
-                                id="documentType"
-                                name="documentType"
-                                label="Tipo de Documento*"
-                                value={formData.documentType}
-                                onChange={handleInputChange}
-                                disabled={!canEdit}
-                                InputLabelProps={{ shrink: true }}
-                                SelectProps={{
-                                  MenuProps: {
-                                    PaperProps: {
-                                      sx: {
-                                        backgroundColor: 'white',
-                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                                      },
-                                    },
-                                  },
-                                }}
-                                sx={textFieldSx}
-                              >
-                                <MenuItem value="CPF">CPF</MenuItem>
-                                <MenuItem value="RG">RG</MenuItem>
-                                <MenuItem value="CNH">CNH</MenuItem>
-                                <MenuItem value="Passaporte">Passaporte</MenuItem>
-                              </TextField>
-                            </div>
-                            <div className="form-subgroup">
-                              <TextField
-                                fullWidth
-                                size="small"
-                                id="document"
-                                name="document"
-                                label="Documento*"
-                                value={formData.document}
-                                onChange={handleInputChange}
-                                placeholder="000.000.000-00"
-                                disabled={!canEdit}
-                                InputLabelProps={{ shrink: true }}
-                                sx={textFieldSx}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="form-group">
+                      {/* Segunda linha do grid de migração */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '10px',
+                          px: 0,
+                          pb: '5px'
+                        }
+                      }}>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
+                            id="documentType-new"
+                            name="documentType"
+                            label="Tipo de Documento*"
+                            value={formData.documentType}
+                            onChange={handleInputChange}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                          >
+                            <MenuItem value="CPF">CPF</MenuItem>
+                            <MenuItem value="RG">RG</MenuItem>
+                            <MenuItem value="CNH">CNH</MenuItem>
+                            <MenuItem value="Passaporte">Passaporte</MenuItem>
+                          </TextField>
                           <TextField
                             fullWidth
                             size="small"
-                            id="expeditorOrgan"
+                            id="document-new"
+                            name="document"
+                            label="Documento*"
+                            value={formData.document}
+                            onChange={handleInputChange}
+                            placeholder="000.000.000-00"
+                            disabled={!canEdit}
+                            error={!!errors.document}
+                            helperText={errors.document}
+                            InputLabelProps={{ shrink: true }}
+                          />
+                        </Box>
+                        <Box>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="expeditorOrgan-new"
                             name="expeditorOrgan"
                             label="Órgão Expedidor"
                             value={formData.expeditorOrgan}
@@ -906,78 +948,65 @@ const PatientRegister: React.FC = () => {
                             placeholder="SSP, DETRAN, etc."
                             disabled={!canEdit}
                             InputLabelProps={{ shrink: true }}
-                            sx={textFieldSx}
                           />
-                        </div>
-                        <div className="form-group country-language">
-                          <div className="country-language-container">
-                            <div className="form-subgroup">
-                              <TextField
-                                select
-                                fullWidth
-                                size="small"
-                                id="originCountry"
-                                name="originCountry"
-                                label="País de Origem*"
-                                value={formData.originCountry}
-                                onChange={handleInputChange}
-                                disabled={!canEdit}
-                                InputLabelProps={{ shrink: true }}
-                                SelectProps={{
-                                  MenuProps: {
-                                    PaperProps: {
-                                      sx: {
-                                        backgroundColor: 'white',
-                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                                      },
-                                    },
-                                  },
-                                }}
-                                sx={textFieldSx}
-                              >
-                                <MenuItem value="Brasil">Brasil</MenuItem>
-                                <MenuItem value="Argentina">Argentina</MenuItem>
-                                <MenuItem value="Estados Unidos">Estados Unidos</MenuItem>
-                              </TextField>
-                            </div>
-                            <div className="form-subgroup">
-                              <TextField
-                                select
-                                fullWidth
-                                size="small"
-                                id="nativeLanguage"
-                                name="nativeLanguage"
-                                label="Idioma Nativo*"
-                                value={formData.nativeLanguage}
-                                onChange={handleInputChange}
-                                disabled={!canEdit}
-                                InputLabelProps={{ shrink: true }}
-                                SelectProps={{
-                                  MenuProps: {
-                                    PaperProps: {
-                                      sx: {
-                                        backgroundColor: 'white',
-                                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                                      },
-                                    },
-                                  },
-                                }}
-                                sx={textFieldSx}
-                              >
-                                <MenuItem value="Português">Português</MenuItem>
-                                <MenuItem value="Inglês">Inglês</MenuItem>
-                                <MenuItem value="Espanhol">Espanhol</MenuItem>
-                              </TextField>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
+                            id="originCountry-new"
+                            name="originCountry"
+                            label="País de Origem*"
+                            value={formData.originCountry}
+                            onChange={handleInputChange}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                          >
+                            <MenuItem value="Brasil">Brasil</MenuItem>
+                            <MenuItem value="Argentina">Argentina</MenuItem>
+                            <MenuItem value="Estados Unidos">Estados Unidos</MenuItem>
+                          </TextField>
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
+                            id="nativeLanguage-new"
+                            name="nativeLanguage"
+                            label="Idioma Nativo*"
+                            value={formData.nativeLanguage}
+                            onChange={handleInputChange}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                          >
+                            <MenuItem value="Português">Português</MenuItem>
+                            <MenuItem value="Inglês">Inglês</MenuItem>
+                            <MenuItem value="Espanhol">Espanhol</MenuItem>
+                          </TextField>
+                        </Box>
+                      </Box>
 
-                      {/* Terceira linha: Responsabilidade, Telefone + Email */}
-                      <div className="form-row">
-                        <div className="form-group">
+                      {/* Terceira linha do grid de migração */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '2px',
+                          px: 0,
+                          pb: '5px'
+                        },
+                        '& > div:nth-child(2), & > div:nth-child(3)': {
+                          pt: '10px'
+                        }
+                      }}>
+                        <Box>
                           <FormControl component="fieldset" error={!!errors.isResponsible}>
-                            <FormLabel component="legend" sx={{ fontSize: '0.95rem', color: '#6c757d', mb: 0.5 }}>
+                            <FormLabel component="legend" sx={{ fontSize: '11px', color: '#6c757d', mb: 0.5, pt: 0 }}>
                               É o próprio responsável?*
                             </FormLabel>
                             <RadioGroup
@@ -989,17 +1018,17 @@ const PatientRegister: React.FC = () => {
                                 target: { ...e.target, name: 'isResponsible', value: e.target.value }
                               })}
                             >
-                              <FormControlLabel value="true" control={<Radio size="small" />} label="Sim" />
-                              <FormControlLabel value="false" control={<Radio size="small" />} label="Não" />
+                              <FormControlLabel value="true" control={<Radio size="small" />} label="Sim" disabled={!canEdit} />
+                              <FormControlLabel value="false" control={<Radio size="small" />} label="Não" disabled={!canEdit} />
                             </RadioGroup>
                             {errors.isResponsible && <Typography variant="caption" color="error">{errors.isResponsible}</Typography>}
                           </FormControl>
-                        </div>
-                        <div className="form-group">
+                        </Box>
+                        <Box>
                           <TextField
                             fullWidth
                             size="small"
-                            id="phone"
+                            id="phone-new"
                             name="phone"
                             label={`Telefone (Whatsapp)${formData.isResponsible ? '*' : ''}`}
                             value={formatPhone(formData.phone)}
@@ -1013,15 +1042,14 @@ const PatientRegister: React.FC = () => {
                             helperText={errors.phone}
                             disabled={!canEdit}
                             InputLabelProps={{ shrink: true }}
-                            sx={textFieldSx}
                           />
-                        </div>
-                        <div className="form-group">
+                        </Box>
+                        <Box>
                           <TextField
                             fullWidth
                             size="small"
                             type="email"
-                            id="email"
+                            id="email-new"
                             name="email"
                             label={`E-mail${formData.isResponsible ? '*' : ''}`}
                             value={formData.email}
@@ -1031,10 +1059,10 @@ const PatientRegister: React.FC = () => {
                             helperText={errors.email}
                             disabled={!canEdit}
                             InputLabelProps={{ shrink: true }}
-                            sx={textFieldSx}
                           />
-                        </div>
-                      </div>
+                        </Box>
+                      </Box>
+
 
                       {/* Responsáveis (condicional) */}
                       {!formData.isResponsible && (
@@ -1042,13 +1070,27 @@ const PatientRegister: React.FC = () => {
                           <div className="responsible-divider">
                             <h4>Responsáveis</h4>
                           </div>
-                          {/* 1º Responsável */}
-                          <div className="form-row">
-                            <div className="form-group">
+
+                          {/* 1º Responsável - Grid de 3 colunas */}
+                          <Box sx={{
+                            display: 'grid',
+                            gridTemplateColumns: {
+                              xs: '1fr',
+                              md: 'repeat(3, 1fr)'
+                            },
+                            gap: 2,
+                            mb: '15px',
+                            '& > div': {
+                              pt: '10px',
+                              px: 0,
+                              pb: '5px'
+                            }
+                          }}>
+                            <Box>
                               <TextField
                                 fullWidth
                                 size="small"
-                                id="responsibleName"
+                                id="responsibleName-new"
                                 name="responsibleName"
                                 label="Nome Completo (1º Resp)*"
                                 value={formData.responsibleName}
@@ -1056,90 +1098,88 @@ const PatientRegister: React.FC = () => {
                                 placeholder="Nome completo do responsável"
                                 disabled={!canEdit}
                                 InputLabelProps={{ shrink: true }}
-                                sx={textFieldSx}
                               />
-                            </div>
-                            <div className="form-group cpf-financial-group">
-                              <div className="cpf-financial-container">
-                                <div className="form-subgroup">
-                                  <TextField
-                                    fullWidth
-                                    size="small"
-                                    id="responsibleDocument"
-                                    name="responsibleDocument"
-                                    label="CPF"
-                                    value={formData.responsibleDocument}
-                                    onChange={handleInputChange}
-                                    placeholder="000.000.000-00"
-                                    disabled={!canEdit}
-                                    InputLabelProps={{ shrink: true }}
-                                    sx={textFieldSx}
-                                  />
-                                </div>
-                                <div className="form-subgroup checkbox-subgroup">
-                                  <FormControlLabel
-                                    control={
-                                      <Checkbox
-                                        name="responsibleFinancial"
-                                        checked={formData.responsibleFinancial}
-                                        onChange={handleInputChange}
-                                        size="small"
-                                        disabled={!canEdit}
-                                      />
-                                    }
-                                    label="Resp. Financeiro"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="form-group phone-email">
-                              <div className="phone-email-container">
-                                <div className="form-subgroup">
-                                  <TextField
-                                    fullWidth
-                                    size="small"
-                                    id="responsiblePhone"
-                                    name="responsiblePhone"
-                                    label="Telefone (Whatsapp)"
-                                    value={formatPhone(formData.responsiblePhone)}
-                                    onChange={(e) => handleInputChange({
-                                      ...e,
-                                      target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
-                                    })}
-                                    placeholder="(11) 99999-9999"
-                                    inputProps={{ maxLength: 15 }}
-                                    disabled={!canEdit}
-                                    InputLabelProps={{ shrink: true }}
-                                    sx={textFieldSx}
-                                  />
-                                </div>
-                                <div className="form-subgroup">
-                                  <TextField
-                                    fullWidth
-                                    size="small"
-                                    type="email"
-                                    id="responsibleEmail"
-                                    name="responsibleEmail"
-                                    label="E-mail"
-                                    value={formData.responsibleEmail}
-                                    onChange={handleInputChange}
-                                    placeholder="email@exemplo.com"
-                                    disabled={!canEdit}
-                                    InputLabelProps={{ shrink: true }}
-                                    sx={textFieldSx}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* 2º Responsável */}
-                          <div className="form-row">
-                            <div className="form-group">
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
                               <TextField
                                 fullWidth
                                 size="small"
-                                id="responsible2Name"
+                                id="responsibleDocument-new"
+                                name="responsibleDocument"
+                                label="CPF"
+                                value={formData.responsibleDocument}
+                                onChange={handleInputChange}
+                                placeholder="000.000.000-00"
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    name="responsibleFinancial"
+                                    checked={formData.responsibleFinancial}
+                                    onChange={handleInputChange}
+                                    size="small"
+                                    disabled={!canEdit}
+                                  />
+                                }
+                                label="Resp. Financeiro"
+                                sx={{ whiteSpace: 'nowrap' }}
+                              />
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                id="responsiblePhone-new"
+                                name="responsiblePhone"
+                                label="Telefone (Whatsapp)"
+                                value={formatPhone(formData.responsiblePhone)}
+                                onChange={(e) => handleInputChange({
+                                  ...e,
+                                  target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
+                                })}
+                                placeholder="(11) 99999-9999"
+                                inputProps={{ maxLength: 15 }}
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                              <TextField
+                                fullWidth
+                                size="small"
+                                type="email"
+                                id="responsibleEmail-new"
+                                name="responsibleEmail"
+                                label="E-mail"
+                                value={formData.responsibleEmail}
+                                onChange={handleInputChange}
+                                placeholder="email@exemplo.com"
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                            </Box>
+                          </Box>
+
+                          {/* 2º Responsável - Grid de 3 colunas */}
+                          <Box sx={{
+                            display: 'grid',
+                            gridTemplateColumns: {
+                              xs: '1fr',
+                              md: 'repeat(3, 1fr)'
+                            },
+                            gap: 2,
+                            mb: '15px',
+                            '& > div': {
+                              pt: '10px',
+                              px: 0,
+                              pb: '5px'
+                            }
+                          }}>
+                            <Box>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                id="responsible2Name-new"
                                 name="responsible2Name"
                                 label="Nome Completo (2º Resp)"
                                 value={formData.responsible2Name}
@@ -1147,82 +1187,67 @@ const PatientRegister: React.FC = () => {
                                 placeholder="Nome completo do 2º responsável"
                                 disabled={!canEdit}
                                 InputLabelProps={{ shrink: true }}
-                                sx={textFieldSx}
                               />
-                            </div>
-                            <div className="form-group cpf-financial-group">
-                              <div className="cpf-financial-container">
-                                <div className="form-subgroup">
-                                  <TextField
-                                    fullWidth
-                                    size="small"
-                                    id="responsible2Document"
-                                    name="responsible2Document"
-                                    label="CPF"
-                                    value={formData.responsible2Document}
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                id="responsible2Document-new"
+                                name="responsible2Document"
+                                label="CPF"
+                                value={formData.responsible2Document}
+                                onChange={handleInputChange}
+                                placeholder="000.000.000-00"
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    name="responsible2Financial"
+                                    checked={formData.responsible2Financial}
                                     onChange={handleInputChange}
-                                    placeholder="000.000.000-00"
-                                    disabled={!canEdit}
-                                    InputLabelProps={{ shrink: true }}
-                                    sx={textFieldSx}
-                                  />
-                                </div>
-                                <div className="form-subgroup checkbox-subgroup">
-                                  <FormControlLabel
-                                    control={
-                                      <Checkbox
-                                        name="responsible2Financial"
-                                        checked={formData.responsible2Financial}
-                                        onChange={handleInputChange}
-                                        size="small"
-                                        disabled={!canEdit}
-                                      />
-                                    }
-                                    label="Resp. Financeiro"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="form-group phone-email">
-                              <div className="phone-email-container">
-                                <div className="form-subgroup">
-                                  <TextField
-                                    fullWidth
                                     size="small"
-                                    id="responsible2Phone"
-                                    name="responsible2Phone"
-                                    label="Telefone (Whatsapp)"
-                                    value={formatPhone(formData.responsible2Phone)}
-                                    onChange={(e) => handleInputChange({
-                                      ...e,
-                                      target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
-                                    })}
-                                    placeholder="(11) 99999-9999"
-                                    inputProps={{ maxLength: 15 }}
                                     disabled={!canEdit}
-                                    InputLabelProps={{ shrink: true }}
-                                    sx={textFieldSx}
                                   />
-                                </div>
-                                <div className="form-subgroup">
-                                  <TextField
-                                    fullWidth
-                                    size="small"
-                                    type="email"
-                                    id="responsible2Email"
-                                    name="responsible2Email"
-                                    label="E-mail"
-                                    value={formData.responsible2Email}
-                                    onChange={handleInputChange}
-                                    placeholder="email@exemplo.com"
-                                    disabled={!canEdit}
-                                    InputLabelProps={{ shrink: true }}
-                                    sx={textFieldSx}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                                }
+                                label="Resp. Financeiro"
+                                sx={{ whiteSpace: 'nowrap' }}
+                              />
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                id="responsible2Phone-new"
+                                name="responsible2Phone"
+                                label="Telefone (Whatsapp)"
+                                value={formatPhone(formData.responsible2Phone)}
+                                onChange={(e) => handleInputChange({
+                                  ...e,
+                                  target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
+                                })}
+                                placeholder="(11) 99999-9999"
+                                inputProps={{ maxLength: 15 }}
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                              <TextField
+                                fullWidth
+                                size="small"
+                                type="email"
+                                id="responsible2Email-new"
+                                name="responsible2Email"
+                                label="E-mail"
+                                value={formData.responsible2Email}
+                                onChange={handleInputChange}
+                                placeholder="email@exemplo.com"
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                            </Box>
+                          </Box>
                         </>
                       )}
 
@@ -1231,13 +1256,26 @@ const PatientRegister: React.FC = () => {
                         <h4>Endereço</h4>
                       </div>
 
-                      {/* CEP e Logradouro na primeira linha */}
-                      <div className="form-row">
-                        <div className="form-group">
+                      {/* Primeira linha de Endereço - Grid de 3 colunas */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '10px',
+                          px: 0,
+                          pb: '5px'
+                        }
+                      }}>
+                        <Box>
                           <TextField
                             fullWidth
                             size="small"
-                            id="cep"
+                            id="cep-new"
                             name="cep"
                             label="CEP*"
                             value={formatCep(formData.cep)}
@@ -1265,14 +1303,13 @@ const PatientRegister: React.FC = () => {
                             InputProps={{
                               endAdornment: cepLoading && <CircularProgress size={20} />
                             }}
-                            sx={textFieldSx}
                           />
-                        </div>
-                        <div className="form-group">
+                        </Box>
+                        <Box>
                           <TextField
                             fullWidth
                             size="small"
-                            id="address"
+                            id="address-new"
                             name="address"
                             label="Logradouro*"
                             value={formData.address}
@@ -1280,52 +1317,56 @@ const PatientRegister: React.FC = () => {
                             placeholder="Rua, Avenida, etc."
                             disabled={!canEdit}
                             InputLabelProps={{ shrink: true }}
-                            sx={textFieldSx}
                           />
-                        </div>
-                        <div className="form-group address-number-complement">
-                          <div className="number-complement-container">
-                            <div className="form-subgroup">
-                              <TextField
-                                fullWidth
-                                size="small"
-                                id="number"
-                                name="number"
-                                label="Número*"
-                                value={formData.number}
-                                onChange={handleInputChange}
-                                placeholder="123"
-                                disabled={!canEdit}
-                                InputLabelProps={{ shrink: true }}
-                                sx={textFieldSx}
-                              />
-                            </div>
-                            <div className="form-subgroup">
-                              <TextField
-                                fullWidth
-                                size="small"
-                                id="complement"
-                                name="complement"
-                                label="Complemento"
-                                value={formData.complement}
-                                onChange={handleInputChange}
-                                placeholder="Apto, Bloco, etc."
-                                disabled={!canEdit}
-                                InputLabelProps={{ shrink: true }}
-                                sx={textFieldSx}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Bairro, Cidade, UF */}
-                      <div className="form-row">
-                        <div className="form-group">
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
                           <TextField
                             fullWidth
                             size="small"
-                            id="neighborhood"
+                            id="number-new"
+                            name="number"
+                            label="Número*"
+                            value={formData.number}
+                            onChange={handleInputChange}
+                            placeholder="123"
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                          />
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="complement-new"
+                            name="complement"
+                            label="Complemento"
+                            value={formData.complement}
+                            onChange={handleInputChange}
+                            placeholder="Apto, Bloco, etc."
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                          />
+                        </Box>
+                      </Box>
+
+                      {/* Segunda linha de Endereço - Grid de 3 colunas */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '10px',
+                          px: 0,
+                          pb: '5px'
+                        }
+                      }}>
+                        <Box>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="neighborhood-new"
                             name="neighborhood"
                             label="Bairro*"
                             value={formData.neighborhood}
@@ -1333,14 +1374,13 @@ const PatientRegister: React.FC = () => {
                             placeholder="Nome do bairro"
                             disabled={!canEdit}
                             InputLabelProps={{ shrink: true }}
-                            sx={textFieldSx}
                           />
-                        </div>
-                        <div className="form-group">
+                        </Box>
+                        <Box>
                           <TextField
                             fullWidth
                             size="small"
-                            id="city"
+                            id="city-new"
                             name="city"
                             label="Cidade*"
                             value={formData.city}
@@ -1348,34 +1388,22 @@ const PatientRegister: React.FC = () => {
                             placeholder="Nome da cidade"
                             disabled={!canEdit}
                             InputLabelProps={{ shrink: true }}
-                            sx={textFieldSx}
                           />
-                        </div>
-                        <div className="form-group">
+                        </Box>
+                        <Box>
                           <TextField
                             select
                             fullWidth
                             size="small"
-                            id="uf"
+                            id="uf-new"
                             name="uf"
                             label="UF*"
                             value={formData.uf}
                             onChange={handleInputChange}
                             disabled={!canEdit}
                             InputLabelProps={{ shrink: true }}
-                            SelectProps={{
-                              MenuProps: {
-                                PaperProps: {
-                                  sx: {
-                                    backgroundColor: 'white',
-                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                                  },
-                                },
-                              },
-                            }}
-                            sx={textFieldSx}
                           >
-                            <MenuItem value="">Selecione</MenuItem>
+                            <MenuItem value="" disabled>Selecione</MenuItem>
                             <MenuItem value="AC">AC</MenuItem>
                             <MenuItem value="AL">AL</MenuItem>
                             <MenuItem value="AP">AP</MenuItem>
@@ -1404,36 +1432,115 @@ const PatientRegister: React.FC = () => {
                             <MenuItem value="SE">SE</MenuItem>
                             <MenuItem value="TO">TO</MenuItem>
                           </TextField>
-                        </div>
-                      </div>
+                        </Box>
+                      </Box>
 
                       {/* Observações ocupando 3 colunas dentro da seção de endereço */}
                       <div className="responsible-divider">
                         <h4>Observações</h4>
                       </div>
 
-                      <div className="form-row">
-                        <div className="form-group observations-group">
+                      {/* Grid de Observações - 1 coluna ocupando o tamanho de 3 colunas */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '10px',
+                          px: 0,
+                          pb: '5px'
+                        }
+                      }}>
+                        <Box sx={{ gridColumn: 'span 3' }}>
                           <TextField
+                            label="Observações Gerais"
                             fullWidth
                             multiline
-                            rows={4}
-                            id="observations"
+                            rows={3}
                             name="observations"
-                            label="Observações Gerais"
                             value={formData.observations}
                             onChange={handleInputChange}
-                            placeholder="Observações importantes sobre o paciente, medicações, alergias, etc."
+                            placeholder="Observações sobre o paciente"
                             disabled={!canEdit}
-                            InputLabelProps={{ shrink: true }}
-                            sx={textFieldSx}
+                            InputLabelProps={{
+                              shrink: inputs.multiline.labelShrink,
+                              sx: {
+                                fontSize: inputs.multiline.labelFontSize,
+                                color: inputs.multiline.labelColor,
+                                backgroundColor: inputs.multiline.labelBackground,
+                                padding: inputs.multiline.labelPadding,
+                                '&.Mui-focused': {
+                                  color: colors.primary,
+                                },
+                              },
+                            }}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                position: inputs.multiline.position,
+                                opacity: inputs.multiline.opacity,
+                                alignItems: inputs.multiline.alignItems,
+                                fontSize: inputs.multiline.fontSize,
+                                minHeight: inputs.multiline.minHeight,
+                                maxHeight: inputs.multiline.maxHeight,
+                                overflow: inputs.multiline.overflow,
+                                padding: 0,
+                                '& fieldset': {
+                                  borderColor: inputs.multiline.borderColor,
+                                },
+                                '&:hover fieldset': {
+                                  borderColor: inputs.multiline.borderColor,
+                                },
+                                '& textarea': {
+                                  wordWrap: inputs.multiline.wordWrap,
+                                  whiteSpace: inputs.multiline.whiteSpace,
+                                  padding: inputs.multiline.inputPadding,
+                                  height: inputs.multiline.textareaHeight,
+                                  maxHeight: inputs.multiline.textareaMaxHeight,
+                                  overflow: `${inputs.multiline.textareaOverflow} !important`,
+                                  boxSizing: inputs.multiline.textareaBoxSizing,
+                                  '&::-webkit-scrollbar': {
+                                    width: inputs.multiline.scrollbarWidth,
+                                  },
+                                  '&::-webkit-scrollbar-track': {
+                                    backgroundColor: inputs.multiline.scrollbarTrackColor,
+                                  },
+                                  '&::-webkit-scrollbar-thumb': {
+                                    backgroundColor: inputs.multiline.scrollbarThumbColor,
+                                    borderRadius: '4px',
+                                    '&:hover': {
+                                      backgroundColor: inputs.multiline.scrollbarThumbHoverColor,
+                                    },
+                                  },
+                                },
+                              },
+                            }}
                           />
-                        </div>
-                      </div>
+                        </Box>
+                      </Box>
 
-                      {/* Linha com 3 colunas: Canal de entrada, Indicado por e Status + Botões */}
-                      <div className="form-row">
-                        <div className="form-group">
+                      {/* Grid: Canal de entrada, Indicado por e Status */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '2px',
+                          px: 0,
+                          pb: '5px'
+                        },
+                        '& > div:nth-child(1), & > div:nth-child(2)': {
+                          pt: '10px'
+                        }
+                      }}>
+                        <Box>
                           <TextField
                             select
                             fullWidth
@@ -1455,7 +1562,6 @@ const PatientRegister: React.FC = () => {
                                 },
                               },
                             }}
-                            sx={textFieldSx}
                           >
                             <MenuItem value="">Selecione</MenuItem>
                             <MenuItem value="Instagram">Instagram</MenuItem>
@@ -1466,8 +1572,9 @@ const PatientRegister: React.FC = () => {
                             <MenuItem value="Indicação de conhecido">Indicação de conhecido</MenuItem>
                             <MenuItem value="Outros">Outros</MenuItem>
                           </TextField>
-                        </div>
-                        <div className="form-group">
+                        </Box>
+
+                        <Box>
                           <TextField
                             fullWidth
                             size="small"
@@ -1479,12 +1586,12 @@ const PatientRegister: React.FC = () => {
                             placeholder="Nome da pessoa ou instituição que indicou o paciente"
                             disabled={!canEdit || !formData.entryChannel.includes('Indicação')}
                             InputLabelProps={{ shrink: true }}
-                            sx={textFieldSx}
                           />
-                        </div>
-                        <div className="form-group">
+                        </Box>
+
+                        <Box>
                           <FormControl component="fieldset">
-                            <FormLabel component="legend" sx={{ fontSize: '0.95rem', color: '#6c757d', mb: 0.5 }}>
+                            <FormLabel component="legend" sx={{ fontSize: '11px', color: '#6c757d', mb: 0.5, pt: 0 }}>
                               Status do Cadastro
                             </FormLabel>
                             <RadioGroup
@@ -1500,8 +1607,8 @@ const PatientRegister: React.FC = () => {
                               <FormControlLabel value="false" control={<Radio size="small" />} label="Incompleto" />
                             </RadioGroup>
                           </FormControl>
-                        </div>
-                      </div>
+                        </Box>
+                      </Box>
 
                       {/* Linha demarcatória turquesa entre observações e botões */}
                       <div className="form-divider-line"></div>
