@@ -1,5 +1,17 @@
 import React from 'react';
-import { Warning } from '@mui/icons-material';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  IconButton,
+  Box,
+  Alert
+} from '@mui/material';
+import { Warning, Close } from '@mui/icons-material';
+import { colors, typography } from '../../theme/designSystem';
 
 export interface ConfirmModalProps {
   isOpen: boolean;
@@ -24,8 +36,6 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onCancel,
   type = 'danger'
 }) => {
-  if (!isOpen) return null;
-
   const getConfirmButtonColor = () => {
     switch (type) {
       case 'danger':
@@ -33,161 +43,152 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
       case 'warning':
         return '#ffc107';
       case 'info':
-        return '#17a2b8';
+        return colors.primary;
       default:
         return '#dc3545';
     }
   };
 
+  const getConfirmButtonHoverColor = () => {
+    switch (type) {
+      case 'danger':
+        return '#c82333';
+      case 'warning':
+        return '#e0a800';
+      case 'info':
+        return '#029AAB';
+      default:
+        return '#c82333';
+    }
+  };
+
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.5)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem'
-      }}
-      onClick={onCancel}
-    >
-      <div
-        style={{
-          background: 'white',
+    <Dialog
+      open={isOpen}
+      onClose={onCancel}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
           borderRadius: '12px',
-          width: '100%',
-          maxWidth: '500px',
           boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-          overflow: 'hidden'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Cabeçalho */}
-        <div style={{
-          background: '#03B4C6',
-          color: 'white',
+        }
+      }}
+    >
+      <DialogTitle
+        sx={{
+          backgroundColor: colors.primary,
+          color: colors.white,
           padding: '1.5rem',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <h3 style={{
-            margin: 0,
+          alignItems: 'center',
+        }}
+      >
+        <Typography
+          variant="h6"
+          component="h3"
+          sx={{
             fontSize: '1.4rem',
-            fontWeight: '600'
-          }}>
-            {title}
-          </h3>
-          <button
-            onClick={onCancel}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              padding: '0.25rem'
-            }}
-          >
-            ×
-          </button>
-        </div>
+            fontWeight: typography.fontWeight.semibold,
+            margin: 0,
+          }}
+        >
+          {title}
+        </Typography>
+        <IconButton
+          onClick={onCancel}
+          sx={{
+            color: colors.white,
+            padding: '0.25rem',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            }
+          }}
+        >
+          <Close />
+        </IconButton>
+      </DialogTitle>
 
-        {/* Corpo */}
-        <div style={{ padding: '2rem' }}>
-          <p style={{
+      <DialogContent sx={{ padding: '2rem' }}>
+        <Typography
+          sx={{
             fontSize: '1rem',
-            color: '#2D3748',
-            marginBottom: warningMessage ? '1rem' : '0',
-            lineHeight: '1.5'
-          }}>
-            {message}
-          </p>
+            color: colors.text,
+            marginBottom: warningMessage ? '1rem' : 0,
+            lineHeight: 1.5,
+          }}
+        >
+          {message}
+        </Typography>
 
-          {warningMessage && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '0.5rem',
-              padding: '1rem',
-              background: '#fff3cd',
-              border: '1px solid #ffeaa7',
-              borderRadius: '8px',
-              color: '#856404'
-            }}>
-              <Warning fontSize="small" style={{ marginTop: '0.1rem', flexShrink: 0 }} />
-              <span style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>
-                {warningMessage}
-              </span>
-            </div>
-          )}
-        </div>
+        {warningMessage && (
+          <Alert
+            severity="warning"
+            icon={<Warning fontSize="small" />}
+            sx={{
+              marginTop: '1rem',
+              '& .MuiAlert-icon': {
+                marginTop: '0.1rem',
+              }
+            }}
+          >
+            {warningMessage}
+          </Alert>
+        )}
+      </DialogContent>
 
-        {/* Rodapé com botões */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: '1rem',
+      <DialogActions
+        sx={{
           padding: '1.5rem 2rem',
-          borderTop: '1px solid #e9ecef',
-          background: '#f8f9fa'
-        }}>
-          <button
-            onClick={onCancel}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: '1px solid #ced4da',
-              borderRadius: '6px',
-              background: 'white',
-              color: '#6c757d',
-              fontSize: '1rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              fontWeight: '500'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f8f9fa';
-              e.currentTarget.style.borderColor = '#adb5bd';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'white';
-              e.currentTarget.style.borderColor = '#ced4da';
-            }}
-          >
-            {cancelButtonText}
-          </button>
-          <button
-            onClick={onConfirm}
-            style={{
-              padding: '0.75rem 1.5rem',
-              border: 'none',
-              borderRadius: '6px',
-              background: getConfirmButtonColor(),
-              color: 'white',
-              fontSize: '1rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              fontWeight: '500'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '0.9';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '1';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            {confirmButtonText}
-          </button>
-        </div>
-      </div>
-    </div>
+          borderTop: `1px solid ${colors.backgroundAlt}`,
+          backgroundColor: colors.background,
+          gap: '1rem',
+        }}
+      >
+        <Button
+          onClick={onCancel}
+          variant="outlined"
+          sx={{
+            padding: '0.75rem 1.5rem',
+            border: `1px solid ${colors.border}`,
+            borderRadius: '6px',
+            backgroundColor: colors.white,
+            color: colors.textSecondary,
+            fontSize: '1rem',
+            fontWeight: typography.fontWeight.medium,
+            textTransform: 'none',
+            '&:hover': {
+              backgroundColor: colors.background,
+              borderColor: '#adb5bd',
+            }
+          }}
+        >
+          {cancelButtonText}
+        </Button>
+        <Button
+          onClick={onConfirm}
+          variant="contained"
+          sx={{
+            padding: '0.75rem 1.5rem',
+            borderRadius: '6px',
+            backgroundColor: getConfirmButtonColor(),
+            color: colors.white,
+            fontSize: '1rem',
+            fontWeight: typography.fontWeight.medium,
+            textTransform: 'none',
+            boxShadow: 'none',
+            '&:hover': {
+              backgroundColor: getConfirmButtonHoverColor(),
+              boxShadow: 'none',
+              transform: 'translateY(-1px)',
+            }
+          }}
+        >
+          {confirmButtonText}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

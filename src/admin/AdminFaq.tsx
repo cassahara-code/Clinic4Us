@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  MenuItem,
+  IconButton,
+  Paper
+} from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add, FilterAltOff } from '@mui/icons-material';
+import { Delete, Edit } from '@mui/icons-material';
 import ConfirmModal from "../components/modals/ConfirmModal";
 import FaqModal, { FaqData } from "../components/modals/FaqModal";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import { FaqButton } from "../components/FaqButton";
-import Pagination from "../components/Pagination";
+import StandardPagination from "../components/Pagination/StandardPagination";
+import AddButton from "../components/AddButton";
+import ClearFiltersButton from "../components/ClearFiltersButton";
+import { colors, typography, inputs } from "../theme/designSystem";
 
 interface MenuItemProps {
   label: string;
@@ -57,6 +69,17 @@ const AdminFaq: React.FC = () => {
   // Estados do modal de FAQ
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
   const [faqModalMode, setFaqModalMode] = useState<'create' | 'edit'>('create');
+
+  // Estado de mudanças nos filtros
+  const [hasFilterChanges, setHasFilterChanges] = useState(false);
+
+  // Valores iniciais dos filtros
+  const initialFilters = {
+    searchTerm: '',
+    categoryFilter: 'Todos',
+    sortField: 'question' as 'question' | 'category',
+    sortOrder: 'asc' as 'asc' | 'desc'
+  };
 
   // Dados de exemplo dos FAQs
   const [faqs, setFaqs] = useState<FaqItem[]>([
@@ -159,6 +182,17 @@ const AdminFaq: React.FC = () => {
     }
   }, []);
 
+  // Verificar se há mudanças nos filtros
+  useEffect(() => {
+    const hasChanges =
+      searchTerm !== initialFilters.searchTerm ||
+      categoryFilter !== initialFilters.categoryFilter ||
+      sortField !== initialFilters.sortField ||
+      sortOrder !== initialFilters.sortOrder;
+
+    setHasFilterChanges(hasChanges);
+  }, [searchTerm, categoryFilter, sortField, sortOrder]);
+
   const scrollToTop = () => {
     const listContainer = document.querySelector('.admin-plans-list-container');
     if (listContainer) {
@@ -182,9 +216,12 @@ const AdminFaq: React.FC = () => {
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setCategoryFilter('Todos');
+    setSearchTerm(initialFilters.searchTerm);
+    setCategoryFilter(initialFilters.categoryFilter);
+    setSortField(initialFilters.sortField);
+    setSortOrder(initialFilters.sortOrder);
     setCurrentPage(1);
+    setHasFilterChanges(false);
   };
 
   const handleSort = (field: 'question' | 'category') => {
@@ -270,11 +307,15 @@ const AdminFaq: React.FC = () => {
   };
 
   if (!userSession) {
-    return <div>Carregando...</div>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Typography>Carregando...</Typography>
+      </Box>
+    );
   }
 
   return (
-    <div className="admin-plans-page">
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <HeaderInternal
         showCTAButton={false}
         className="login-header"
@@ -289,258 +330,278 @@ const AdminFaq: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main className="dashboard-main">
-        <div className="dashboard-container">
-          <div className="dashboard-content">
-            {/* Título da Página */}
-            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h1 className="page-title">Gestão de FAQ</h1>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <FaqButton />
-                <button
-                  onClick={handleOpenCreateModal}
-                  title="Adicionar novo item FAQ"
-                  className="btn-add"
-                >
-                  <Add />
-                </button>
-              </div>
-            </div>
-
-            {/* Filtros e Ações */}
-            <div style={{
-              background: 'white',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-              border: '1px solid #e9ecef',
-              marginBottom: '1rem'
-            }}>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem',
-                alignItems: 'end'
-              }}>
-                {/* Busca */}
-                <div style={{ gridColumn: 'span 2' }}>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '0.95rem',
-                    fontWeight: '500',
-                    color: '#6c757d',
-                    marginBottom: '0.5rem'
-                  }}>Buscar</label>
-                  <input
-                    type="text"
-                    placeholder="Pesquisar por pergunta, resposta ou categoria"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '1rem',
-                      color: '#495057',
-                      outline: 'none',
-                      transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#03B4C6';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#ced4da';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </div>
-
-                {/* Filtro por Categoria */}
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '0.95rem',
-                    fontWeight: '500',
-                    color: '#6c757d',
-                    marginBottom: '0.5rem'
-                  }}>Categoria</label>
-                  <select
-                    value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '1rem',
-                      color: '#495057',
-                      background: 'white',
-                      outline: 'none',
-                      transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#03B4C6';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#ced4da';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  >
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Botão limpar filtros */}
-                <div>
-                  <button
-                    onClick={clearFilters}
-                    title="Limpar filtros"
-                    className="btn-clear-filters"
-                  >
-                    <FilterAltOff fontSize="small" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Paginação superior */}
-            <div style={{
-              background: 'white',
-              borderRadius: '12px',
-              padding: '1rem',
-              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-              border: '1px solid #e9ecef',
-              marginBottom: '1rem'
-            }}>
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                itemsPerPage={itemsPerPage}
-                itemsPerPageOptions={itemsPerPageOptions}
-                totalItems={filteredAndSortedFaqs.length}
-                itemLabel="itens"
-                onPageChange={(page) => {
-                  setCurrentPage(page);
-                  setTimeout(scrollToTop, 100);
+      <Box
+        component="main"
+        sx={{
+          padding: '1rem',
+          minHeight: 'calc(100vh - 120px)',
+          background: colors.background,
+          marginTop: '85px',
+          flex: 1
+        }}
+      >
+        <Container maxWidth={false} disableGutters>
+          {/* Título da Página */}
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            mb: 1,
+            gap: 2
+          }}>
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontSize: '1.3rem',
+                  mb: 1,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: colors.textPrimary
                 }}
-                onItemsPerPageChange={handleItemsPerPageChange}
+              >
+                Gestão de FAQ
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary,
+                  pb: '15px'
+                }}
+              >
+                Gestão de perguntas frequentes e respostas do sistema.
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <FaqButton />
+              <AddButton onClick={handleOpenCreateModal} title="Adicionar novo item FAQ" />
+            </Box>
+          </Box>
+
+          {/* Filtros, Paginação e Lista */}
+          <Paper
+            elevation={0}
+            sx={{
+              padding: '1.5rem',
+              mb: 2,
+              borderRadius: '12px',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${colors.backgroundAlt}`,
+            }}
+          >
+            {/* Filtros */}
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <TextField
+                label="Buscar"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Pesquisar por pergunta, resposta ou categoria"
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  flex: '2 1 300px',
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.primary,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: colors.primary,
+                    },
+                  },
+                }}
               />
-            </div>
 
-            {/* Tabela de FAQs */}
-            <div className="admin-plans-list-container">
-              <div className="admin-plans-table">
-                {/* Header */}
-                <div className="admin-plans-table-header" style={{ display: 'flex' }}>
-                  <div
-                    className="admin-plans-header-cell"
-                    style={{ flex: '0 0 250px', cursor: 'pointer', userSelect: 'none' }}
-                    onClick={() => handleSort('question')}
-                    title="Ordenar por pergunta"
-                  >
-                    Pergunta {sortField === 'question' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                  </div>
-                  <div
-                    className="admin-plans-header-cell"
-                    style={{ flex: '0 0 150px', cursor: 'pointer', userSelect: 'none' }}
-                    onClick={() => handleSort('category')}
-                    title="Ordenar por categoria"
-                  >
-                    Categoria {sortField === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                  </div>
-                  <div className="admin-plans-header-cell" style={{ flex: '1 1 auto' }}>Resposta (Prévia)</div>
-                  <div className="admin-plans-header-cell" style={{ flex: '0 0 80px' }}>Vídeo</div>
-                  <div className="admin-plans-header-cell" style={{ flex: '0 0 80px' }}>Links</div>
-                  <div className="admin-plans-header-cell" style={{ flex: '0 0 150px', justifyContent: 'flex-end' }}>Ações</div>
-                </div>
+              <TextField
+                select
+                label="Categoria"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  minWidth: '150px',
+                  flex: '1 1 150px',
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.primary,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: colors.primary,
+                    },
+                  },
+                }}
+              >
+                {categories.map(category => (
+                  <MenuItem key={category} value={category}>{category}</MenuItem>
+                ))}
+              </TextField>
 
-                {/* Linhas */}
+              <Box sx={{ opacity: hasFilterChanges ? 1 : 0.5, pointerEvents: hasFilterChanges ? 'auto' : 'none' }}>
+                <ClearFiltersButton onClick={clearFilters} />
+              </Box>
+              </Box>
+            </Box>
+
+            {/* Paginação */}
+            <StandardPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredAndSortedFaqs.length}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
+
+            {/* Lista de FAQs */}
+            <Box className="admin-plans-list-container" sx={{ mt: 2 }}>
+            <Box className="admin-plans-table">
+              <Box className="admin-plans-table-header" sx={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 3fr 0.8fr 0.8fr 1.5fr', width: '100%' }}>
+                <Box
+                  className="admin-plans-header-cell"
+                  sx={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('question')}
+                  title="Ordenar por pergunta"
+                >
+                  Pergunta {sortField === 'question' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </Box>
+                <Box
+                  className="admin-plans-header-cell"
+                  sx={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  onClick={() => handleSort('category')}
+                  title="Ordenar por categoria"
+                >
+                  Categoria {sortField === 'category' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                </Box>
+                <Box className="admin-plans-header-cell" sx={{ textAlign: 'left' }}>Resposta (Prévia)</Box>
+                <Box className="admin-plans-header-cell" sx={{ textAlign: 'center' }}>Vídeo</Box>
+                <Box className="admin-plans-header-cell" sx={{ textAlign: 'center' }}>Links</Box>
+                <Box className="admin-plans-header-cell" sx={{ justifyContent: 'flex-end' }}>Ações</Box>
+              </Box>
+
+              <Box className="admin-plans-table-body">
                 {currentFaqs.length === 0 ? (
-                  <div style={{
+                  <Box sx={{
                     padding: '3rem',
                     textAlign: 'center',
-                    color: '#6c757d',
-                    background: 'white',
+                    color: colors.textSecondary,
+                    background: colors.white,
                     borderRadius: '8px',
                     marginTop: '1rem'
                   }}>
                     Nenhum item FAQ encontrado.
-                  </div>
+                  </Box>
                 ) : (
                   currentFaqs.map((faq) => (
-                    <div key={faq.id} className="admin-plans-table-row" style={{ display: 'flex' }}>
-                      <div className="admin-plans-cell" style={{ flex: '0 0 250px' }}>
+                    <Box key={faq.id} className="admin-plans-table-row" sx={{ display: 'grid', gridTemplateColumns: '2fr 1.5fr 3fr 0.8fr 0.8fr 1.5fr', width: '100%' }}>
+                      <Box className="admin-plans-cell" data-label="Pergunta" sx={{ textAlign: 'left' }}>
                         <strong>{faq.question}</strong>
-                      </div>
-                      <div className="admin-plans-cell" style={{ flex: '0 0 150px' }}>
+                      </Box>
+                      <Box className="admin-plans-cell" data-label="Categoria" sx={{ textAlign: 'left' }}>
                         <span className="badge badge-info">{faq.category}</span>
-                      </div>
-                      <div className="admin-plans-cell" style={{ flex: '1 1 auto', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                      </Box>
+                      <Box className="admin-plans-cell" data-label="Resposta" sx={{ textAlign: 'left', whiteSpace: 'normal', wordBreak: 'break-word' }}>
                         {faq.answer.substring(0, 150)}...
-                      </div>
-                      <div className="admin-plans-cell" style={{ flex: '0 0 80px', textAlign: 'center' }}>
+                      </Box>
+                      <Box className="admin-plans-cell" data-label="Vídeo" sx={{ textAlign: 'center' }}>
                         {faq.videoUrl ? 'Sim' : 'Não'}
-                      </div>
-                      <div className="admin-plans-cell" style={{ flex: '0 0 80px', textAlign: 'center' }}>
+                      </Box>
+                      <Box className="admin-plans-cell" data-label="Links" sx={{ textAlign: 'center' }}>
                         {faq.links?.length || 0}
-                      </div>
-                      <div className="admin-plans-actions" style={{ flex: '0 0 150px' }}>
-                        <button
-                          className="btn-action-edit"
-                          onClick={() => handleOpenEditModal(faq)}
-                          title="Editar FAQ"
-                        >
-                          <Edit fontSize="small" />
-                        </button>
-                        <button
-                          className="btn-action-delete"
-                          onClick={() => handleOpenDeleteModal(faq)}
-                          title="Excluir FAQ"
-                        >
-                          <Delete fontSize="small" />
-                        </button>
-                      </div>
-                    </div>
+                      </Box>
+                      <Box className="admin-plans-cell admin-plans-actions" data-label="Ações" sx={{ textAlign: 'right' }}>
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleOpenEditModal(faq)}
+                            title="Editar FAQ"
+                            sx={{
+                              backgroundColor: '#03B4C6',
+                              color: 'white',
+                              width: '32px',
+                              height: '32px',
+                              '&:hover': {
+                                backgroundColor: '#029AAB',
+                              }
+                            }}
+                          >
+                            <Edit sx={{ fontSize: '1rem' }} />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleOpenDeleteModal(faq)}
+                            title="Excluir FAQ"
+                            sx={{
+                              backgroundColor: '#dc3545',
+                              color: 'white',
+                              width: '32px',
+                              height: '32px',
+                              '&:hover': {
+                                backgroundColor: '#c82333',
+                              }
+                            }}
+                          >
+                            <Delete sx={{ fontSize: '1rem' }} />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                    </Box>
                   ))
                 )}
-              </div>
-            </div>
+              </Box>
+            </Box>
+            </Box>
 
-            {/* Paginação inferior */}
-            <div style={{
-              background: 'white',
-              borderRadius: '12px',
-              padding: '1rem',
-              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-              border: '1px solid #e9ecef',
-              marginTop: '1rem'
-            }}>
-              <Pagination
+            {/* Paginação Inferior */}
+            <Box sx={{ mt: 2 }}>
+              <StandardPagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 itemsPerPage={itemsPerPage}
-                itemsPerPageOptions={itemsPerPageOptions}
                 totalItems={filteredAndSortedFaqs.length}
-                itemLabel="itens"
                 onPageChange={(page) => {
                   setCurrentPage(page);
                   setTimeout(scrollToTop, 100);
                 }}
                 onItemsPerPageChange={handleItemsPerPageChange}
               />
-            </div>
-          </div>
-        </div>
-      </main>
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
 
-      <FooterInternal />
+      <FooterInternal
+        simplified={true}
+        className="login-footer-component"
+      />
 
-      {/* Modais */}
       <FaqModal
         isOpen={isFaqModalOpen}
         onClose={handleCloseFaqModal}
@@ -565,7 +626,7 @@ const AdminFaq: React.FC = () => {
         isVisible={toast.isVisible}
         onClose={hideToast}
       />
-    </div>
+    </Box>
   );
 };
 

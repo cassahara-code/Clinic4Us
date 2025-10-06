@@ -2,7 +2,18 @@ import React, { useState } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import ContactForm from "../components/ContactForm";
-import { LocalHospital, CalendarToday, BarChart, Visibility, VisibilityOff, Assignment, Warning } from '@mui/icons-material';
+import { Warning, Visibility, VisibilityOff } from '@mui/icons-material';
+import {
+  TextField,
+  Button,
+  Box,
+  Paper,
+  Typography,
+  InputAdornment,
+  IconButton,
+  Alert
+} from '@mui/material';
+import { colors, typography, inputs } from "../theme/designSystem";
 
 interface RegistroFormData {
   email: string;
@@ -77,7 +88,6 @@ const AliasRegister: React.FC = () => {
       [name]: value,
     }));
 
-    // Clear errors when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({
         ...prev,
@@ -135,13 +145,11 @@ const AliasRegister: React.FC = () => {
     setErrors({});
 
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       alert("Cadastro realizado com sucesso!");
       console.log("AliasRegister successful:", formData);
 
-      // Redirect to login page with clinic parameter
       window.location.href = window.location.origin + '/?page=login&clinic=ninho';
     } catch (error) {
       setErrors({
@@ -163,16 +171,13 @@ const AliasRegister: React.FC = () => {
   };
 
   const handleGoToPlans = () => {
-    // Redirect to landing page plans section
     window.location.href = window.location.origin + '#planos';
   };
 
   const handleGoHome = () => {
-    // Redirect to landing page
     window.location.href = window.location.origin;
   };
 
-  // Contact modal functions
   const openContactModal = (e: React.MouseEvent, preSelectedSubject?: string) => {
     e.preventDefault();
     setContactPreSelectedSubject(preSelectedSubject);
@@ -184,7 +189,6 @@ const AliasRegister: React.FC = () => {
     setContactPreSelectedSubject(undefined);
   };
 
-  // Header menu items for alias register page
   const aliasRegisterMenuItems = [
     { label: "Início", onClick: handleGoHome },
     { label: "Contato", onClick: openContactModal },
@@ -199,191 +203,378 @@ const AliasRegister: React.FC = () => {
       />
 
       <main className="login-main">
-        <div className="login-container">
-          <div className="login-content">
-            <div className="login-card">
-              <div className="login-card-inner">
-                <div className="login-image-section">
-                </div>
+        <Box className="login-container">
+          <Box className="login-content">
+            <Paper
+              className="login-card"
+              elevation={0}
+              sx={{
+                borderRadius: '12px',
+                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+                border: `1px solid ${colors.backgroundAlt}`,
+              }}
+            >
+              <Box className="login-card-inner">
+                <Box className="login-image-section">
+                </Box>
 
-                <div className="login-form-section">
-                  <div className="login-header-content">
-                    <p style={{ textAlign: 'left', fontWeight: 'bold' }}>Preencha os dados para criar sua conta</p>
-                  </div>
+                <Box className="login-form-section">
+                  <Box className="login-header-content">
+                    <Typography variant="body1" sx={{ textAlign: 'left', fontWeight: typography.fontWeight.semibold }}>
+                      Preencha os dados para criar sua conta
+                    </Typography>
+                  </Box>
 
-                  <form onSubmit={handleSubmit} className="login-form">
+                  <Box component="form" onSubmit={handleSubmit} className="login-form">
                     {errors.general && (
-                      <div className="error-message general-error">
+                      <Alert severity="error" sx={{ mb: 2 }}>
                         {errors.general}
-                      </div>
+                      </Alert>
                     )}
 
-                    <div className="form-group">
-                      <label htmlFor="email">Email (o mesmo da assinatura do Clinic4Us)</label>
-                      <input
+                    <Box sx={{ mb: 2 }}>
+                      <TextField
                         type="email"
                         id="email"
                         name="email"
+                        label="Email (o mesmo da assinatura do Clinic4Us)"
                         value={formData.email}
                         onChange={handleInputChange}
                         placeholder="seu@email.com"
-                        className={errors.email ? "error" : ""}
+                        error={!!errors.email}
+                        helperText={errors.email}
                         disabled={isLoading}
+                        fullWidth
+                        variant="outlined"
+                        InputLabelProps={{ shrink: true }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            height: inputs.default.height,
+                            fontSize: typography.fontSize.base,
+                            backgroundColor: colors.white,
+                            '& fieldset': {
+                              borderColor: colors.border,
+                            },
+                            '&:hover fieldset': {
+                              borderColor: colors.border,
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: colors.primary,
+                              boxShadow: `0 0 0 3px ${colors.primaryLight}`,
+                            },
+                          },
+                          '& .MuiOutlinedInput-input': {
+                            padding: '10.5px 14px',
+                            color: colors.textPrimary,
+                            '&::placeholder': {
+                              color: colors.textSecondary,
+                              opacity: 1,
+                            },
+                          },
+                          '& .MuiInputLabel-root': {
+                            fontSize: inputs.default.labelFontSize,
+                            color: colors.textSecondary,
+                            backgroundColor: colors.white,
+                            padding: inputs.default.labelPadding,
+                            '&.Mui-focused': {
+                              color: colors.primary,
+                            },
+                          },
+                        }}
                       />
-                      {errors.email && (
-                        <span className="error-text">{errors.email}</span>
-                      )}
-                    </div>
+                    </Box>
 
-                    <div className="form-group">
-                      <label htmlFor="alias">Identificador da Clínica</label>
-                      <input
+                    <Box sx={{ mb: 2 }}>
+                      <TextField
                         type="text"
                         id="alias"
                         name="alias"
+                        label="Identificador da Clínica"
                         value={formData.alias}
                         onChange={handleInputChange}
                         placeholder="Identificador"
-                        className={errors.alias ? "error" : ""}
+                        error={!!errors.alias}
+                        helperText={errors.alias}
                         disabled={isLoading}
+                        fullWidth
+                        variant="outlined"
+                        InputLabelProps={{ shrink: true }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            height: inputs.default.height,
+                            fontSize: typography.fontSize.base,
+                            backgroundColor: colors.white,
+                            '& fieldset': {
+                              borderColor: colors.border,
+                            },
+                            '&:hover fieldset': {
+                              borderColor: colors.border,
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: colors.primary,
+                              boxShadow: `0 0 0 3px ${colors.primaryLight}`,
+                            },
+                          },
+                          '& .MuiOutlinedInput-input': {
+                            padding: '10.5px 14px',
+                            color: colors.textPrimary,
+                            '&::placeholder': {
+                              color: colors.textSecondary,
+                              opacity: 1,
+                            },
+                          },
+                          '& .MuiInputLabel-root': {
+                            fontSize: inputs.default.labelFontSize,
+                            color: colors.textSecondary,
+                            backgroundColor: colors.white,
+                            padding: inputs.default.labelPadding,
+                            '&.Mui-focused': {
+                              color: colors.primary,
+                            },
+                          },
+                        }}
                       />
-                      {errors.alias && (
-                        <span className="error-text">{errors.alias}</span>
-                      )}
-                      <div style={{
+                      <Box sx={{
                         marginTop: '0.5rem',
                         padding: '0.75rem',
                         backgroundColor: '#FEF2F2',
                         border: '1px solid #FECACA',
                         borderRadius: '6px',
-                        fontSize: '0.75rem',
+                        fontSize: typography.fontSize.xs,
                         color: '#B91C1C',
-                        lineHeight: '1.4'
+                        lineHeight: 1.4
                       }}>
-                        <strong><Warning sx={{ fontSize: '1rem', verticalAlign: 'middle', marginRight: '0.25rem', color: '#FFA726' }} />Importante:</strong> Informe o identificador de sua clínica, para que seja criado um link personalizado.
+                        <Box component="strong" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Warning sx={{ fontSize: '1rem', color: '#FFA726' }} />
+                          Importante:
+                        </Box>
+                        Informe o identificador de sua clínica, para que seja criado um link personalizado.
                         <br/>
                         <strong>Exemplo:</strong> ClinicaSucesso → www.clinic4us.com/ClinicaSucesso
                         <br/>
                         <em>Este identificador não poderá ser alterado após o cadastro.</em>
-                      </div>
-                    </div>
+                      </Box>
+                    </Box>
 
-                    <div className="form-group">
-                      <label htmlFor="password">Senha</label>
-                      <div className="password-input-container">
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          id="password"
-                          name="password"
-                          value={formData.password}
-                          onChange={handleInputChange}
-                          placeholder="Digite sua senha"
-                          className={errors.password ? "error" : ""}
-                          disabled={isLoading}
-                        />
-                        <button
-                          type="button"
-                          className="password-toggle"
-                          onClick={() => setShowPassword(!showPassword)}
-                          disabled={isLoading}
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </button>
-                      </div>
+                    <Box sx={{ mb: 2 }}>
+                      <TextField
+                        type={showPassword ? "text" : "password"}
+                        id="password"
+                        name="password"
+                        label="Senha"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        placeholder="Digite sua senha"
+                        error={!!errors.password}
+                        helperText={errors.password}
+                        disabled={isLoading}
+                        fullWidth
+                        variant="outlined"
+                        InputLabelProps={{ shrink: true }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            height: inputs.default.height,
+                            fontSize: typography.fontSize.base,
+                            backgroundColor: colors.white,
+                            '& fieldset': {
+                              borderColor: colors.border,
+                            },
+                            '&:hover fieldset': {
+                              borderColor: colors.border,
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: colors.primary,
+                              boxShadow: `0 0 0 3px ${colors.primaryLight}`,
+                            },
+                          },
+                          '& .MuiOutlinedInput-input': {
+                            padding: '10.5px 14px',
+                            paddingRight: '3rem',
+                            color: colors.textPrimary,
+                            '&::placeholder': {
+                              color: colors.textSecondary,
+                              opacity: 1,
+                            },
+                          },
+                          '& .MuiInputLabel-root': {
+                            fontSize: inputs.default.labelFontSize,
+                            color: colors.textSecondary,
+                            backgroundColor: colors.white,
+                            padding: inputs.default.labelPadding,
+                            '&.Mui-focused': {
+                              color: colors.primary,
+                            },
+                          },
+                        }}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={() => setShowPassword(!showPassword)}
+                                disabled={isLoading}
+                                edge="end"
+                                sx={{ color: colors.textSecondary }}
+                              >
+                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
                       {formData.password && (
-                        <div style={{ marginTop: '0.5rem' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '0.85rem', color: '#718096' }}>Força da senha:</span>
-                            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: passwordStrength.color }}>
+                        <Box sx={{ marginTop: '0.5rem' }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Typography sx={{ fontSize: typography.fontSize.sm, color: colors.textSecondary }}>
+                              Força da senha:
+                            </Typography>
+                            <Typography sx={{ fontSize: typography.fontSize.sm, fontWeight: typography.fontWeight.semibold, color: passwordStrength.color }}>
                               {passwordStrength.label}
-                            </span>
-                          </div>
-                          <div style={{
+                            </Typography>
+                          </Box>
+                          <Box sx={{
                             width: '100%',
                             height: '4px',
-                            backgroundColor: '#E2E8F0',
+                            backgroundColor: colors.backgroundAlt,
                             borderRadius: '2px',
                             marginTop: '0.25rem'
                           }}>
-                            <div style={{
+                            <Box sx={{
                               width: `${(passwordStrength.score / 5) * 100}%`,
                               height: '100%',
                               backgroundColor: passwordStrength.color,
                               borderRadius: '2px',
                               transition: 'all 0.3s ease'
-                            }}></div>
-                          </div>
-                        </div>
+                            }}></Box>
+                          </Box>
+                        </Box>
                       )}
-                      {errors.password && (
-                        <span className="error-text">{errors.password}</span>
-                      )}
-                    </div>
+                    </Box>
 
-                    <div className="form-group">
-                      <label htmlFor="confirmPassword">Repetir Senha</label>
-                      <div className="password-input-container">
-                        <input
-                          type={showConfirmPassword ? "text" : "password"}
-                          id="confirmPassword"
-                          name="confirmPassword"
-                          value={formData.confirmPassword}
-                          onChange={handleInputChange}
-                          placeholder="Repita sua senha"
-                          className={errors.confirmPassword ? "error" : ""}
-                          disabled={isLoading}
-                        />
-                        <button
-                          type="button"
-                          className="password-toggle"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          disabled={isLoading}
-                        >
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                        </button>
-                      </div>
-                      {errors.confirmPassword && (
-                        <span className="error-text">{errors.confirmPassword}</span>
-                      )}
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
-                      <button
-                        type="submit"
-                        className={`login-button ${isLoading ? "loading" : ""}`}
+                    <Box sx={{ mb: 3 }}>
+                      <TextField
+                        type={showConfirmPassword ? "text" : "password"}
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        label="Repetir Senha"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        placeholder="Repita sua senha"
+                        error={!!errors.confirmPassword}
+                        helperText={errors.confirmPassword}
                         disabled={isLoading}
-                        style={{ flex: 1 }}
-                      >
-                        {isLoading ? (
-                          <>
-                            <span className="spinner"></span>
-                            Enviando...
-                          </>
-                        ) : (
-                          "Enviar"
-                        )}
-                      </button>
+                        fullWidth
+                        variant="outlined"
+                        InputLabelProps={{ shrink: true }}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            height: inputs.default.height,
+                            fontSize: typography.fontSize.base,
+                            backgroundColor: colors.white,
+                            '& fieldset': {
+                              borderColor: colors.border,
+                            },
+                            '&:hover fieldset': {
+                              borderColor: colors.border,
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: colors.primary,
+                              boxShadow: `0 0 0 3px ${colors.primaryLight}`,
+                            },
+                          },
+                          '& .MuiOutlinedInput-input': {
+                            padding: '10.5px 14px',
+                            paddingRight: '3rem',
+                            color: colors.textPrimary,
+                            '&::placeholder': {
+                              color: colors.textSecondary,
+                              opacity: 1,
+                            },
+                          },
+                          '& .MuiInputLabel-root': {
+                            fontSize: inputs.default.labelFontSize,
+                            color: colors.textSecondary,
+                            backgroundColor: colors.white,
+                            padding: inputs.default.labelPadding,
+                            '&.Mui-focused': {
+                              color: colors.primary,
+                            },
+                          },
+                        }}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                disabled={isLoading}
+                                edge="end"
+                                sx={{ color: colors.textSecondary }}
+                              >
+                                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Box>
 
-                      <button
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        fullWidth
+                        disabled={isLoading}
+                        sx={{
+                          py: 1.5,
+                          backgroundColor: colors.primary,
+                          fontSize: typography.fontSize.base,
+                          fontWeight: typography.fontWeight.semibold,
+                          textTransform: 'none',
+                          borderRadius: '8px',
+                          boxShadow: 'none',
+                          '&:hover': {
+                            backgroundColor: colors.primaryHover,
+                            boxShadow: 'none',
+                          },
+                          '&:disabled': {
+                            backgroundColor: colors.textSecondary,
+                            color: colors.white,
+                          },
+                        }}
+                      >
+                        {isLoading ? "Enviando..." : "Enviar"}
+                      </Button>
+
+                      <Button
                         type="button"
-                        className="back-button"
+                        variant="outlined"
                         onClick={handleClear}
                         disabled={isLoading}
-                        style={{ flex: 1 }}
+                        fullWidth
+                        sx={{
+                          py: 1.5,
+                          fontSize: typography.fontSize.base,
+                          fontWeight: typography.fontWeight.semibold,
+                          textTransform: 'none',
+                          borderRadius: '8px',
+                          borderColor: colors.border,
+                          color: colors.textPrimary,
+                          '&:hover': {
+                            borderColor: colors.borderHover,
+                            backgroundColor: colors.background,
+                          },
+                        }}
                       >
                         Limpar
-                      </button>
-                    </div>
-                  </form>
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                      </Button>
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+            </Paper>
+          </Box>
+        </Box>
       </main>
 
-      {/* Modal de Contato */}
       <ContactForm
         isOpen={isContactModalOpen}
         onClose={closeContactModal}

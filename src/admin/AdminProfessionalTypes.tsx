@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  MenuItem,
+  IconButton,
+  Paper
+} from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add, FilterAltOff } from '@mui/icons-material';
+import { Delete, Edit } from '@mui/icons-material';
 import ConfirmModal from "../components/modals/ConfirmModal";
 import ProfessionalTypeModal from "../components/modals/ProfessionalTypeModal";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import { FaqButton } from "../components/FaqButton";
-import Pagination from "../components/Pagination";
+import StandardPagination from "../components/Pagination/StandardPagination";
+import AddButton from "../components/AddButton";
+import ClearFiltersButton from "../components/ClearFiltersButton";
+import { colors, typography, inputs } from "../theme/designSystem";
 
 interface MenuItemProps {
   label: string;
@@ -61,6 +73,17 @@ const AdminProfessionalTypes: React.FC = () => {
   // Estados do modal de tipo profissional
   const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
   const [typeModalMode, setTypeModalMode] = useState<'create' | 'edit'>('create');
+
+  // Estado de mudanças nos filtros
+  const [hasFilterChanges, setHasFilterChanges] = useState(false);
+
+  // Valores iniciais dos filtros
+  const initialFilters = {
+    searchTerm: '',
+    statusFilter: 'Todos' as 'Todos' | 'Ativo' | 'Inativo',
+    sortField: 'name' as 'name' | 'status',
+    sortOrder: 'asc' as 'asc' | 'desc'
+  };
 
   // Dados de exemplo dos tipos profissionais
   const [professionalTypes] = useState<ProfessionalType[]>(() => {
@@ -175,12 +198,6 @@ const AdminProfessionalTypes: React.FC = () => {
     setCurrentPage(1);
   };
 
-  // Gerar opções para o seletor de itens por página
-  const itemsPerPageOptions = [];
-  for (let i = 50; i <= 200; i += 10) {
-    itemsPerPageOptions.push(i);
-  }
-
   useEffect(() => {
     const simulatedUserSession: UserSession = {
       email: "admin@clinic4us.com",
@@ -206,12 +223,24 @@ const AdminProfessionalTypes: React.FC = () => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, sortOrder]);
 
+  // Verificar se há mudanças nos filtros
+  useEffect(() => {
+    const hasChanges =
+      searchTerm !== initialFilters.searchTerm ||
+      statusFilter !== initialFilters.statusFilter ||
+      sortField !== initialFilters.sortField ||
+      sortOrder !== initialFilters.sortOrder;
+
+    setHasFilterChanges(hasChanges);
+  }, [searchTerm, statusFilter, sortField, sortOrder]);
+
   const clearFilters = () => {
-    setSearchTerm('');
-    setStatusFilter('Todos');
-    setSortField('name');
-    setSortOrder('asc');
+    setSearchTerm(initialFilters.searchTerm);
+    setStatusFilter(initialFilters.statusFilter);
+    setSortField(initialFilters.sortField);
+    setSortOrder(initialFilters.sortOrder);
     setCurrentPage(1);
+    setHasFilterChanges(false);
   };
 
   const handleAddType = () => {
@@ -278,7 +307,11 @@ const AdminProfessionalTypes: React.FC = () => {
   };
 
   if (!userSession) {
-    return <div>Carregando...</div>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Typography>Carregando...</Typography>
+      </Box>
+    );
   }
 
   const handleRevalidateLogin = () => {
@@ -301,7 +334,7 @@ const AdminProfessionalTypes: React.FC = () => {
   };
 
   return (
-    <div className="professional-schedule">
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <HeaderInternal
         showCTAButton={false}
         className="login-header"
@@ -316,307 +349,269 @@ const AdminProfessionalTypes: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main style={{
-        padding: '1rem',
-        paddingTop: '0.25rem',
-        minHeight: 'calc(100vh - 120px)',
-        background: '#f8f9fa',
-        marginTop: '20px'
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '100%',
-          margin: '0',
-          padding: '0'
-        }}>
-          {/* Título da Lista de Tipos de Profissionais */}
-          <div style={{
+      <Box
+        component="main"
+        sx={{
+          padding: '1rem',
+          minHeight: 'calc(100vh - 120px)',
+          background: colors.background,
+          marginTop: '85px',
+          flex: 1
+        }}
+      >
+        <Container maxWidth={false} disableGutters>
+          {/* Título da Página */}
+          <Box sx={{
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '1.5rem'
+            alignItems: 'flex-start',
+            mb: 1,
+            gap: 2
           }}>
-            <h1 style={{
-              margin: '0',
-              fontSize: '1.3rem',
-              fontWeight: '600',
-              color: '#6c757d'
-            }}>
-              Gestão de Tipos de Profissionais
-            </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <FaqButton />
-              <button
-                onClick={handleAddType}
-                title="Adicionar novo tipo de profissional"
-                className="btn-add"
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontSize: '1.3rem',
+                  mb: 1,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: colors.textPrimary
+                }}
               >
-                <Add />
-              </button>
-            </div>
-          </div>
+                Gestão de Tipos de Profissionais
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary,
+                  pb: '15px'
+                }}
+              >
+                Gestão dos tipos de profissionais que atuam na clínica.
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <FaqButton />
+              <AddButton onClick={handleAddType} title="Adicionar novo tipo de profissional" />
+            </Box>
+          </Box>
 
-          {/* Filtros da lista de tipos */}
-          <div className="schedule-filters" style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginBottom: '1rem'
-          }}>
-            <div className="schedule-filters-grid" style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '0.75rem',
-              marginBottom: '1rem'
-            }}>
-              {/* Busca por nome */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Nome do Tipo</label>
-                <input
-                  type="text"
-                  placeholder="Buscar tipo de profissional"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-              </div>
+          {/* Filtros, Paginação e Lista */}
+          <Paper
+            elevation={0}
+            sx={{
+              padding: '1.5rem',
+              mb: 2,
+              borderRadius: '12px',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${colors.backgroundAlt}`,
+            }}
+          >
+            {/* Filtros */}
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <TextField
+                label="Nome do Tipo"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar tipo de profissional"
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  flex: '2 1 300px',
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.primary,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: colors.primary,
+                    },
+                  },
+                }}
+              />
 
-              {/* Status */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Status</label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                >
-                  <option value="Todos">Todos</option>
-                  <option value="Ativo">Ativo</option>
-                  <option value="Inativo">Inativo</option>
-                </select>
-              </div>
+              <TextField
+                select
+                label="Status"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  minWidth: '150px',
+                  flex: '1 1 150px',
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.primary,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: colors.primary,
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="Todos">Todos</MenuItem>
+                <MenuItem value="Ativo">Ativo</MenuItem>
+                <MenuItem value="Inativo">Inativo</MenuItem>
+              </TextField>
 
-              {/* Botão limpar filtros */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'flex-end',
-                paddingBottom: '2px'
-              }}>
-                <button
-                  onClick={clearFilters}
-                  title="Limpar filtros"
-                  className="btn-clear-filters"
-                >
-                  <FilterAltOff fontSize="small" />
-                </button>
-              </div>
-            </div>
-          </div>
+              <Box sx={{ opacity: hasFilterChanges ? 1 : 0.5, pointerEvents: hasFilterChanges ? 'auto' : 'none' }}>
+                <ClearFiltersButton onClick={clearFilters} />
+              </Box>
+              </Box>
+            </Box>
 
-          {/* Paginação superior */}
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginBottom: '1rem'
-          }}>
-            <Pagination
+            {/* Paginação */}
+            <StandardPagination
               currentPage={currentPage}
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
               totalItems={filteredAndSortedTypes.length}
-              itemLabel="tipos"
               onPageChange={(page) => {
                 setCurrentPage(page);
                 setTimeout(scrollToTop, 100);
               }}
               onItemsPerPageChange={handleItemsPerPageChange}
             />
-          </div>
 
-          {/* Lista de tipos */}
-          <div className="admin-plans-list-container">
-            <div className="admin-plans-table" style={{ display: 'block' }}>
-              <div className="admin-plans-table-header" style={{
-                display: 'flex',
-                gridTemplateColumns: 'unset'
-              }}>
-                <div
+            {/* Lista de Tipos */}
+            <Box className="admin-plans-list-container" sx={{ mt: 2 }}>
+            <Box className="admin-plans-table">
+              <Box className="admin-plans-table-header" sx={{ display: 'grid', gridTemplateColumns: '2fr 3fr 1fr 1.5fr', width: '100%' }}>
+                <Box
                   className="admin-plans-header-cell"
-                  style={{ textAlign: 'left', flex: '0 0 250px', cursor: 'pointer', userSelect: 'none' }}
+                  sx={{ textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
                   onClick={() => handleSort('name')}
                   title="Ordenar por tipo de profissional"
                 >
                   Tipo de Profissional {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div className="admin-plans-header-cell" style={{ textAlign: 'left', flex: '1 1 auto' }}>Descrição</div>
-                <div
+                </Box>
+                <Box className="admin-plans-header-cell" sx={{ textAlign: 'left' }}>Descrição</Box>
+                <Box
                   className="admin-plans-header-cell"
-                  style={{ textAlign: 'center', flex: '0 0 100px', cursor: 'pointer', userSelect: 'none' }}
+                  sx={{ textAlign: 'center', cursor: 'pointer', userSelect: 'none' }}
                   onClick={() => handleSort('status')}
                   title="Ordenar por status"
                 >
                   Status {sortField === 'status' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div className="admin-plans-header-cell" style={{ justifyContent: 'flex-end', flex: '0 0 140px' }}>Ações</div>
-              </div>
+                </Box>
+                <Box className="admin-plans-header-cell" sx={{ justifyContent: 'flex-end' }}>Ações</Box>
+              </Box>
 
-              <div className="admin-plans-table-body">
+              <Box className="admin-plans-table-body">
                 {paginatedTypes.map((type) => (
-                  <div
+                  <Box
                     key={type.id}
                     className="admin-plans-table-row"
-                    style={{ cursor: 'default', display: 'flex', gridTemplateColumns: 'unset' }}
+                    sx={{ display: 'grid', gridTemplateColumns: '2fr 3fr 1fr 1.5fr', width: '100%', cursor: 'default' }}
                   >
-                    <div className="admin-plans-cell admin-plans-name" data-label="Tipo de Profissional" style={{ textAlign: 'left', flex: '0 0 250px' }}>
+                    <Box className="admin-plans-cell admin-plans-name" data-label="Tipo de Profissional" sx={{ textAlign: 'left' }}>
                       {type.name}
-                    </div>
-                    <div className="admin-plans-cell admin-plans-description" data-label="Descrição" style={{
+                    </Box>
+                    <Box className="admin-plans-cell admin-plans-description" data-label="Descrição" sx={{
                       textAlign: 'left',
-                      flex: '1 1 auto',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'normal',
                       wordBreak: 'break-word'
                     }}>
                       {type.description || '-'}
-                    </div>
-                    <div className="admin-plans-cell" data-label="Status" style={{ textAlign: 'center', flex: '0 0 100px' }}>
-                      <span style={{
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '12px',
-                        fontSize: '0.85rem',
-                        fontWeight: '500',
-                        background: type.active ? '#d4edda' : '#f8d7da',
-                        color: type.active ? '#155724' : '#721c24'
-                      }}>
+                    </Box>
+                    <Box className="admin-plans-cell" data-label="Status" sx={{ textAlign: 'center' }}>
+                      <span className={`plan-status-indicator ${type.active ? 'active' : 'inactive'}`}>
                         {type.active ? 'Ativo' : 'Inativo'}
                       </span>
-                    </div>
-                    <div className="admin-plans-cell admin-plans-actions" data-label="Ações" style={{
-                      textAlign: 'right',
-                      flex: '0 0 140px',
-                      justifyContent: 'flex-end',
-                      display: 'flex'
-                    }}>
-                      <button
-                        className="btn-action-edit"
-                        onClick={(e) => { e.stopPropagation(); handleTypeAction('edit', type.id); }}
-                        title="Editar tipo"
-                      >
-                        <Edit fontSize="small" />
-                      </button>
-                      <button
-                        className="btn-action-delete"
-                        onClick={(e) => { e.stopPropagation(); handleTypeAction('delete', type.id); }}
-                        title="Excluir tipo"
-                      >
-                        <Delete fontSize="small" />
-                      </button>
-                    </div>
-                  </div>
+                    </Box>
+                    <Box className="admin-plans-cell admin-plans-actions" data-label="Ações" sx={{ textAlign: 'right' }}>
+                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); handleTypeAction('edit', type.id); }}
+                          title="Editar tipo"
+                          sx={{
+                            backgroundColor: '#03B4C6',
+                            color: 'white',
+                            width: '32px',
+                            height: '32px',
+                            '&:hover': {
+                              backgroundColor: '#029AAB',
+                            }
+                          }}
+                        >
+                          <Edit sx={{ fontSize: '1rem' }} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); handleTypeAction('delete', type.id); }}
+                          title="Excluir tipo"
+                          sx={{
+                            backgroundColor: '#dc3545',
+                            color: 'white',
+                            width: '32px',
+                            height: '32px',
+                            '&:hover': {
+                              backgroundColor: '#c82333',
+                            }
+                          }}
+                        >
+                          <Delete sx={{ fontSize: '1rem' }} />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  </Box>
                 ))}
-              </div>
-            </div>
-          </div>
+              </Box>
+            </Box>
+            </Box>
 
-          {/* Paginação inferior */}
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginTop: '1rem'
-          }}>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
-              totalItems={filteredAndSortedTypes.length}
-              itemLabel="tipos"
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
-          </div>
-        </div>
-      </main>
+            {/* Paginação Inferior */}
+            <Box sx={{ mt: 2 }}>
+              <StandardPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredAndSortedTypes.length}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  setTimeout(scrollToTop, 100);
+                }}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
 
       <FooterInternal
         simplified={true}
         className="login-footer-component"
       />
 
-      {/* Modal de criar/editar tipo */}
-      <ProfessionalTypeModal
-        isOpen={isTypeModalOpen}
-        onClose={() => setIsTypeModalOpen(false)}
-        onSave={handleSaveType}
-        mode={typeModalMode}
-        initialData={typeToEdit ? {
-          name: typeToEdit.name,
-          description: typeToEdit.description || '',
-          active: typeToEdit.active
-        } : undefined}
-      />
-
-      {/* Modal de confirmação de exclusão */}
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         title="Confirmar Exclusão"
@@ -629,14 +624,25 @@ const AdminProfessionalTypes: React.FC = () => {
         type="danger"
       />
 
-      {/* Toast de notificação */}
+      <ProfessionalTypeModal
+        isOpen={isTypeModalOpen}
+        onClose={() => setIsTypeModalOpen(false)}
+        onSave={handleSaveType}
+        mode={typeModalMode}
+        initialData={typeToEdit ? {
+          name: typeToEdit.name,
+          description: typeToEdit.description || '',
+          active: typeToEdit.active
+        } : undefined}
+      />
+
       <Toast
         message={toast.message}
         type={toast.type}
         isVisible={toast.isVisible}
         onClose={hideToast}
       />
-    </div>
+    </Box>
   );
 };
 

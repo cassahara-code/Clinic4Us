@@ -45,7 +45,9 @@
       "Bash(do echo \"=== Removing from $file ===\")",
       "Bash(for file in admin/AdminFunctionalities.tsx admin/AdminProfiles.tsx admin/AdminPlans.tsx clients/ProfessionalSchedule.tsx clients/PageModel.tsx clients/PatientsList.tsx)",
       "Bash(do sed -i '/menuItems={\\[\\]}/d' \"$file\")",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(for file in src/admin/AdminEntities.tsx src/admin/AdminFaq.tsx src/admin/AdminFunctionalities.tsx src/admin/AdminPlans.tsx src/admin/AdminProfiles.tsx src/admin/AdminProfessionalTypes.tsx)",
+      "Bash(git fsck:*)"
     ],
     "deny": [],
     "ask": []

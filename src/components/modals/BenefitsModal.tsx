@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Button,
   TextField,
   Typography,
@@ -13,66 +12,71 @@ import {
 import { Close, Delete, Edit } from '@mui/icons-material';
 import { colors, typography, inputs } from '../../theme/designSystem';
 
-interface Category {
+interface Benefit {
   id: string;
   name: string;
 }
 
-interface CategoryModalProps {
+interface BenefitsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (categories: Category[]) => void;
+  onSave: (benefits: Benefit[]) => void;
 }
 
-const CategoryModal: React.FC<CategoryModalProps> = ({
+const BenefitsModal: React.FC<BenefitsModalProps> = ({
   isOpen,
   onClose,
   onSave
 }) => {
-  const [categories, setCategories] = useState<Category[]>([
-    { id: '1', name: 'Cliente - Usuários Cliente' },
-    { id: '2', name: 'Cursos' },
-    { id: '3', name: 'Minha Conta - Todos os usuários' },
-    { id: '4', name: 'Navegação - Todos os usuários' },
-    { id: '5', name: 'Pacientes' },
-    { id: '6', name: 'Sistema - Adm. Owner F4Us' }
+  const [benefits, setBenefits] = useState<Benefit[]>([
+    { id: '1', name: 'Agenda básica' },
+    { id: '2', name: 'Cadastro de pacientes' },
+    { id: '3', name: 'Relatórios simples' },
+    { id: '4', name: 'Agenda avançada' },
+    { id: '5', name: 'Múltiplos profissionais' },
+    { id: '6', name: 'Relatórios completos' },
+    { id: '7', name: 'Integração WhatsApp' },
+    { id: '8', name: 'Recursos ilimitados' },
+    { id: '9', name: 'API personalizada' },
+    { id: '10', name: 'Suporte 24/7' },
+    { id: '11', name: 'Customizações' }
   ]);
 
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [newBenefitName, setNewBenefitName] = useState('');
+  const [editingBenefitId, setEditingBenefitId] = useState<string | null>(null);
 
-  const handleAddCategory = () => {
-    if (newCategoryName.trim()) {
-      if (editingCategoryId) {
-        setCategories(categories.map(cat =>
-          cat.id === editingCategoryId
-            ? { ...cat, name: newCategoryName.trim() }
-            : cat
+  const handleAddBenefit = () => {
+    if (newBenefitName.trim()) {
+      if (editingBenefitId) {
+        setBenefits(benefits.map(ben =>
+          ben.id === editingBenefitId
+            ? { ...ben, name: newBenefitName.trim() }
+            : ben
         ));
-        setEditingCategoryId(null);
+        setEditingBenefitId(null);
       } else {
-        const newCategory: Category = {
-          id: `cat-${Date.now()}`,
-          name: newCategoryName.trim()
+        const newBenefit: Benefit = {
+          id: `ben-${Date.now()}`,
+          name: newBenefitName.trim()
         };
-        setCategories([...categories, newCategory]);
+        setBenefits([...benefits, newBenefit]);
       }
-      setNewCategoryName('');
+      setNewBenefitName('');
     }
   };
 
-  const handleEditCategory = (category: Category) => {
-    setNewCategoryName(category.name);
-    setEditingCategoryId(category.id);
+  const handleEditBenefit = (benefit: Benefit) => {
+    setNewBenefitName(benefit.name);
+    setEditingBenefitId(benefit.id);
   };
 
-  const handleDeleteCategory = (categoryId: string) => {
-    setCategories(categories.filter(cat => cat.id !== categoryId));
+  const handleDeleteBenefit = (benefitId: string) => {
+    setBenefits(benefits.filter(ben => ben.id !== benefitId));
   };
 
   const handleClose = () => {
-    setEditingCategoryId(null);
-    setNewCategoryName('');
+    setEditingBenefitId(null);
+    setNewBenefitName('');
     onClose();
   };
 
@@ -101,7 +105,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
         }}
       >
         <Typography variant="h6" component="h3" sx={{ fontSize: '1.4rem', fontWeight: typography.fontWeight.semibold, margin: 0 }}>
-          Categorias de Funcionalidades
+          Benefícios dos Planos
         </Typography>
         <IconButton onClick={handleClose} sx={{ color: colors.white, padding: '0.25rem', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' } }}>
           <Close />
@@ -110,20 +114,20 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
 
       <DialogContent sx={{ padding: '1.5rem !important', paddingTop: '2rem !important' }}>
         <Typography sx={{ margin: '0 0 1.5rem 0', fontSize: '0.95rem', color: colors.textSecondary }}>
-          Categorias tem a função de organizar os menus.
+          Benefícios são as funcionalidades e recursos incluídos em cada plano.
         </Typography>
 
         <Box sx={{ marginBottom: '1.5rem' }}>
           <TextField
-            label={editingCategoryId ? 'Editar Categoria' : 'Categoria'}
-            value={newCategoryName}
-            onChange={(e) => setNewCategoryName(e.target.value)}
+            label={editingBenefitId ? 'Editar Benefício' : 'Benefício'}
+            value={newBenefitName}
+            onChange={(e) => setNewBenefitName(e.target.value)}
             onKeyPress={(e) => {
               if (e.key === 'Enter') {
-                handleAddCategory();
+                handleAddBenefit();
               }
             }}
-            placeholder="Categoria"
+            placeholder="Benefício"
             fullWidth
             InputLabelProps={{ shrink: true }}
             sx={{
@@ -143,11 +147,11 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
             }}
           />
           <Box sx={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-            {editingCategoryId && (
+            {editingBenefitId && (
               <Button
                 onClick={() => {
-                  setEditingCategoryId(null);
-                  setNewCategoryName('');
+                  setEditingBenefitId(null);
+                  setNewBenefitName('');
                 }}
                 variant="outlined"
                 sx={{
@@ -169,7 +173,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
               </Button>
             )}
             <Button
-              onClick={handleAddCategory}
+              onClick={handleAddBenefit}
               variant="contained"
               sx={{
                 flex: '1 1 auto',
@@ -188,20 +192,20 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                 }
               }}
             >
-              {editingCategoryId ? 'Salvar' : 'Cadastrar'}
+              {editingBenefitId ? 'Salvar' : 'Cadastrar'}
             </Button>
           </Box>
         </Box>
 
         <Box sx={{ maxHeight: '400px', overflowY: 'auto' }}>
           <Box sx={{ display: 'flex', padding: '0.75rem', backgroundColor: colors.backgroundAlt, borderBottom: `2px solid ${colors.border}`, fontWeight: typography.fontWeight.semibold, fontSize: typography.fontSize.sm }}>
-            <Box sx={{ flex: '1 1 auto', textAlign: 'left' }}>Categoria</Box>
+            <Box sx={{ flex: '1 1 auto', textAlign: 'left' }}>Benefício</Box>
             <Box sx={{ flex: '0 0 140px', textAlign: 'right' }}>Ações</Box>
           </Box>
 
-          {categories.map((category) => (
+          {benefits.map((benefit) => (
             <Box
-              key={category.id}
+              key={benefit.id}
               sx={{
                 display: 'flex',
                 padding: '1rem 0.75rem',
@@ -209,11 +213,11 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                 '&:hover': { backgroundColor: colors.background }
               }}
             >
-              <Box sx={{ flex: '1 1 auto', textAlign: 'left', color: colors.text }}>{category.name}</Box>
+              <Box sx={{ flex: '1 1 auto', textAlign: 'left', color: colors.text }}>{benefit.name}</Box>
               <Box sx={{ flex: '0 0 140px', textAlign: 'left', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                 <IconButton
-                  onClick={() => handleEditCategory(category)}
-                  title="Editar categoria"
+                  onClick={() => handleEditBenefit(benefit)}
+                  title="Editar benefício"
                   sx={{
                     backgroundColor: '#f0f0f0',
                     color: colors.textSecondary,
@@ -224,8 +228,8 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                   <Edit fontSize="small" />
                 </IconButton>
                 <IconButton
-                  onClick={() => handleDeleteCategory(category.id)}
-                  title="Excluir categoria"
+                  onClick={() => handleDeleteBenefit(benefit.id)}
+                  title="Excluir benefício"
                   sx={{
                     backgroundColor: '#f0f0f0',
                     color: colors.textSecondary,
@@ -244,4 +248,4 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
   );
 };
 
-export default CategoryModal;
+export default BenefitsModal;

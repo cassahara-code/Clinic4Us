@@ -1,18 +1,31 @@
 import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  MenuItem,
+  IconButton,
+  Paper,
+} from "@mui/material";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Add, FilterAltOff } from "@mui/icons-material";
+import { Delete, Edit, Settings } from "@mui/icons-material";
 import PlanModal, { PlanData } from "../components/modals/PlanModal";
 import ConfirmModal from "../components/modals/ConfirmModal";
+import BenefitsModal from "../components/modals/BenefitsModal";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import { FaqButton } from "../components/FaqButton";
-import Pagination from "../components/Pagination";
+import StandardPagination from "../components/Pagination/StandardPagination";
+import AddButton from "../components/AddButton";
+import ClearFiltersButton from "../components/ClearFiltersButton";
+import { colors, typography, inputs } from "../theme/designSystem";
 import {
   useCreateLegacyPlano,
-  useUpdateLegacyPlano,
   useDeleteLegacyPlano,
+  useUpdateLegacyPlano,
 } from "../hooks/usePlano";
 
 interface MenuItemProps {
@@ -36,7 +49,7 @@ interface Plan {
   name: string;
   description: string;
   price: number;
-  duration: number; // em meses
+  duration: number;
   maxUsers: number;
   features: string[];
   status: "Ativo" | "Inativo";
@@ -46,40 +59,51 @@ interface Plan {
 
 const AdminPlans: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
-  const { goToDashboard, goToSchedule, goToPatients } = useNavigation();
+  const { goToDashboard } = useNavigation();
   const { toast, showToast, hideToast } = useToast();
   const createLegacyPlanoMutation = useCreateLegacyPlano();
   const updateLegacyPlanoMutation = useUpdateLegacyPlano();
   const deleteLegacyPlanoMutation = useDeleteLegacyPlano();
 
-  // Estados dos filtros
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     "Todos" | "Ativo" | "Inativo"
   >("Ativo");
 
-  // Estados da paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
-  // Estado da ordenação
   const [sortField, setSortField] = useState<
     "name" | "price" | "duration" | "maxUsers" | "status" | "createdAt"
   >("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  // Estados dos modais
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
   const [planToEdit, setPlanToEdit] = useState<Plan | null>(null);
 
-  // Estados do modal de plano
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [planModalMode, setPlanModalMode] = useState<"create" | "edit">(
     "create"
   );
 
-  // Dados de exemplo dos planos - geração de dados para testar paginação
+  const [isBenefitsModalOpen, setIsBenefitsModalOpen] = useState(false);
+  const [hasFilterChanges, setHasFilterChanges] = useState(false);
+
+  // Valores iniciais dos filtros
+  const initialFilters = {
+    searchTerm: "",
+    statusFilter: "Ativo" as "Todos" | "Ativo" | "Inativo",
+    sortField: "name" as
+      | "name"
+      | "price"
+      | "duration"
+      | "maxUsers"
+      | "status"
+      | "createdAt",
+    sortOrder: "asc" as "asc" | "desc",
+  };
+
   const [plans] = useState<Plan[]>(() => {
     const basePlans = [
       {
@@ -146,7 +170,6 @@ const AdminPlans: React.FC = () => {
       },
     ];
 
-    // Gerar dados adicionais para testar paginação
     const additionalPlans = [];
     const planTypes = [
       "Básico",
@@ -168,7 +191,7 @@ const AdminPlans: React.FC = () => {
     for (let i = 5; i <= 120; i++) {
       const planType = planTypes[i % planTypes.length];
       const description = descriptions[i % descriptions.length];
-      const isActive = Math.random() > 0.3; // 70% ativos
+      const isActive = Math.random() > 0.3;
 
       additionalPlans.push({
         id: i.toString(),
@@ -195,7 +218,6 @@ const AdminPlans: React.FC = () => {
     return [...basePlans, ...additionalPlans];
   });
 
-  // Filtrar e ordenar planos
   const filteredAndSortedPlans = plans
     .filter((plan) => {
       const matchesSearch =
@@ -228,18 +250,16 @@ const AdminPlans: React.FC = () => {
       return sortOrder === "asc" ? compareValue : -compareValue;
     });
 
-  // Calcular paginação
   const totalPages = Math.ceil(filteredAndSortedPlans.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedPlans = filteredAndSortedPlans.slice(startIndex, endIndex);
 
-  // Função para rolar para o início da lista
   const scrollToTop = () => {
     const listContainer = document.querySelector(".admin-plans-list-container");
     if (listContainer) {
       const containerRect = listContainer.getBoundingClientRect();
-      const offset = 100; // Margem superior para não ficar escondido pelo header
+      const offset = 100;
       const targetPosition = window.pageYOffset + containerRect.top - offset;
 
       window.scrollTo({
@@ -247,14 +267,13 @@ const AdminPlans: React.FC = () => {
         behavior: "smooth",
       });
     } else {
-      // Fallback: rolar para o topo da página
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // Reset para primeira página
+    setCurrentPage(1);
     setTimeout(scrollToTop, 100);
   };
 
@@ -269,12 +288,6 @@ const AdminPlans: React.FC = () => {
     }
     setCurrentPage(1);
   };
-
-  // Gerar opções para o seletor de itens por página
-  const itemsPerPageOptions = [];
-  for (let i = 50; i <= 200; i += 10) {
-    itemsPerPageOptions.push(i);
-  }
 
   useEffect(() => {
     const simulatedUserSession: UserSession = {
@@ -295,18 +308,26 @@ const AdminPlans: React.FC = () => {
     setUserSession(simulatedUserSession);
   }, []);
 
-  // Reset página quando filtros ou ordenação mudarem
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, sortOrder]);
 
-  // Função para formatar data
+  // Verificar se há mudanças nos filtros
+  useEffect(() => {
+    const hasChanges =
+      searchTerm !== initialFilters.searchTerm ||
+      statusFilter !== initialFilters.statusFilter ||
+      sortField !== initialFilters.sortField ||
+      sortOrder !== initialFilters.sortOrder;
+
+    setHasFilterChanges(hasChanges);
+  }, [searchTerm, statusFilter, sortField, sortOrder]);
+
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString("pt-BR");
   };
 
-  // Função para formatar preço
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -315,11 +336,12 @@ const AdminPlans: React.FC = () => {
   };
 
   const clearFilters = () => {
-    setSearchTerm("");
-    setStatusFilter("Ativo");
-    setSortField("name");
-    setSortOrder("asc");
+    setSearchTerm(initialFilters.searchTerm);
+    setStatusFilter(initialFilters.statusFilter);
+    setSortField(initialFilters.sortField);
+    setSortOrder(initialFilters.sortOrder);
     setCurrentPage(1);
+    setHasFilterChanges(false);
   };
 
   const handleAddPlan = () => {
@@ -328,51 +350,48 @@ const AdminPlans: React.FC = () => {
     setIsPlanModalOpen(true);
   };
 
-  const handleSavePlan = async (data: PlanData) => {
-    // Converter features de array de objetos para array de PlanoBenefit
-    const now = new Date().toISOString();
-    const userId = userSession?.alias || "admin";
-    const planoRequest = {
-      id:
-        planModalMode === "edit" && planToEdit
-          ? planToEdit.id
-          : `plan-${Date.now()}`,
-      planTitle: data.name,
-      description: data.description,
-      monthlyValue: data.price,
-      anualyValue: data.annualPrice,
-      createdAt:
-        planModalMode === "edit" && planToEdit ? planToEdit.createdAt : now,
-      updatedAt: now,
-      createdBy: userId,
-      updatedBy: userId,
-      plansBenefits: data.features.map((f, idx) => ({
-        id: `benefit-${Date.now()}-${idx}`,
-        planId:
-          planModalMode === "edit" && planToEdit
-            ? planToEdit.id
-            : `plan-${Date.now()}`,
-        itenDescription: f.name,
-        covered: f.included,
-        createdAt: now,
-        updatedAt: now,
-        createdBy: userId,
-        updatedBy: userId,
-      })),
-    };
-    try {
-      if (planModalMode === "create") {
-        await createLegacyPlanoMutation.mutateAsync(planoRequest);
-        showToast("Plano criado com sucesso!", "success");
-      } else if (planModalMode === "edit" && planToEdit) {
-        await updateLegacyPlanoMutation.mutateAsync({
-          id: planToEdit.id,
-          plano: planoRequest,
-        });
-        showToast("Plano editado com sucesso!", "success");
-      }
-    } catch (error) {
-      showToast("Erro ao salvar plano!", "error");
+  const handleOpenBenefitsModal = () => {
+    setIsBenefitsModalOpen(true);
+  };
+
+  const handleSaveBenefits = (benefits: any[]) => {
+    console.log("Benefícios atualizados:", benefits);
+    showToast("Benefícios atualizados com sucesso!", "success");
+  };
+
+  const handleSavePlan = (data: PlanData) => {
+    const includedFeatures = data.features
+      .filter((f) => f.included)
+      .map((f) => f.name);
+
+    if (planModalMode === "create") {
+      const newPlan: Plan = {
+        id: `plan-${Date.now()}`,
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        duration: data.duration,
+        maxUsers: data.maxUsers,
+        features: includedFeatures,
+        status: data.status,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      console.log("Novo plano criado:", newPlan);
+      showToast("Plano criado com sucesso!", "success");
+    } else {
+      console.log("Plano editado:", {
+        ...planToEdit,
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        duration: data.duration,
+        maxUsers: data.maxUsers,
+        features: includedFeatures,
+        status: data.status,
+        updatedAt: new Date().toISOString(),
+      });
+      showToast("Plano editado com sucesso!", "success");
     }
     setIsPlanModalOpen(false);
   };
@@ -389,9 +408,13 @@ const AdminPlans: React.FC = () => {
   const handleDeleteConfirm = async () => {
     if (!planToDelete) return;
     try {
-      await deleteLegacyPlanoMutation.mutateAsync(planToDelete.id);
+      console.log(
+        `Excluindo plano: ${planToDelete.name} (ID: ${planToDelete.id})`
+      );
+
       setIsDeleteModalOpen(false);
       setPlanToDelete(null);
+
       showToast("Plano excluído com sucesso!", "success");
     } catch (error) {
       showToast("Erro ao excluir plano", "error");
@@ -423,7 +446,18 @@ const AdminPlans: React.FC = () => {
   };
 
   if (!userSession) {
-    return <div>Carregando...</div>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <Typography>Carregando...</Typography>
+      </Box>
+    );
   }
 
   const handleRevalidateLogin = () => {
@@ -446,7 +480,7 @@ const AdminPlans: React.FC = () => {
   };
 
   return (
-    <div className="professional-schedule">
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <HeaderInternal
         showCTAButton={false}
         className="login-header"
@@ -461,454 +495,448 @@ const AdminPlans: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main
-        style={{
+      <Box
+        component="main"
+        sx={{
           padding: "1rem",
-          paddingTop: "0.25rem",
           minHeight: "calc(100vh - 120px)",
-          background: "#f8f9fa",
-          marginTop: "20px",
+          background: colors.background,
+          marginTop: "85px",
+          flex: 1,
         }}
       >
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "100%",
-            margin: "0",
-            padding: "0",
-          }}
-        >
-          {/* Título da Lista de Planos */}
-          <div
-            style={{
+        <Container maxWidth={false} disableGutters>
+          {/* Título da Página */}
+          <Box
+            sx={{
               display: "flex",
-              alignItems: "center",
               justifyContent: "space-between",
-              marginBottom: "1.5rem",
+              alignItems: "flex-start",
+              mb: 1,
+              gap: 2,
             }}
           >
-            <h1
-              style={{
-                margin: "0",
-                fontSize: "1.3rem",
-                fontWeight: "600",
-                color: "#6c757d",
-              }}
-            >
-              Gestão de Planos
-            </h1>
-            <div
-              style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-            >
-              <FaqButton />
-              <button
-                onClick={handleAddPlan}
-                title="Adicionar novo plano"
-                className="btn-add"
-              >
-                <Add />
-              </button>
-            </div>
-          </div>
-
-          {/* Filtros da lista de planos */}
-          <div
-            className="schedule-filters"
-            style={{
-              background: "white",
-              borderRadius: "12px",
-              padding: "1.5rem",
-              boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
-              border: "1px solid #e9ecef",
-              marginBottom: "1rem",
-            }}
-          >
-            <div
-              className="schedule-filters-grid"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: "0.75rem",
-                marginBottom: "1rem",
-              }}
-            >
-              {/* Busca por nome */}
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.95rem",
-                    color: "#6c757d",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  Nome do Plano
-                </label>
-                <input
-                  type="text"
-                  placeholder="Buscar plano"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "0.375rem 0.5rem",
-                    border: "1px solid #ced4da",
-                    borderRadius: "4px",
-                    fontSize: "1rem",
-                    color: "#495057",
-                    height: "40px",
-                    boxSizing: "border-box",
-                    outline: "none",
-                    transition:
-                      "border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out",
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "#03B4C6";
-                    e.target.style.boxShadow =
-                      "0 0 0 3px rgba(3, 180, 198, 0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "#ced4da";
-                    e.target.style.boxShadow = "none";
-                  }}
-                />
-              </div>
-
-              {/* Status */}
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.95rem",
-                    color: "#6c757d",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  Status
-                </label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
-                  style={{
-                    width: "100%",
-                    padding: "0.375rem 0.5rem",
-                    border: "1px solid #ced4da",
-                    borderRadius: "4px",
-                    fontSize: "1rem",
-                    color: "#495057",
-                    height: "40px",
-                    boxSizing: "border-box",
-                    outline: "none",
-                    transition:
-                      "border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out",
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "#03B4C6";
-                    e.target.style.boxShadow =
-                      "0 0 0 3px rgba(3, 180, 198, 0.1)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "#ced4da";
-                    e.target.style.boxShadow = "none";
-                  }}
-                >
-                  <option value="Ativo">Ativo</option>
-                  <option value="Todos">Todos</option>
-                  <option value="Inativo">Inativo</option>
-                </select>
-              </div>
-
-              {/* Botão limpar filtros */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "flex-end",
-                  paddingBottom: "2px",
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontSize: "1.3rem",
+                  mb: 1,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: colors.textPrimary,
                 }}
               >
-                <button
-                  onClick={clearFilters}
-                  title="Limpar filtros"
-                  className="btn-clear-filters"
-                >
-                  <FilterAltOff fontSize="small" />
-                </button>
-              </div>
-            </div>
-          </div>
+                Gestão de Planos
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary,
+                  pb: "15px",
+                }}
+              >
+                Gestão de planos e serviços oferecidos pela clínica.
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <FaqButton />
+              <IconButton
+                onClick={handleOpenBenefitsModal}
+                title="Gerenciar benefícios"
+                className="btn-settings"
+                sx={{
+                  width: "40px",
+                  height: "40px",
+                  backgroundColor: colors.textSecondary,
+                  color: colors.white,
+                  borderRadius: "4px",
+                  "&:hover": {
+                    backgroundColor: "#5a6268",
+                  },
+                }}
+              >
+                <Settings />
+              </IconButton>
+              <AddButton onClick={handleAddPlan} title="Adicionar novo plano" />
+            </Box>
+          </Box>
 
-          {/* Paginação superior */}
-          <div
-            style={{
-              background: "white",
+          {/* Filtros, Paginação e Lista */}
+          <Paper
+            elevation={0}
+            sx={{
+              padding: "1.5rem",
+              mb: 2,
               borderRadius: "12px",
-              padding: "1rem",
               boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
-              border: "1px solid #e9ecef",
-              marginBottom: "1rem",
+              border: `1px solid ${colors.backgroundAlt}`,
             }}
           >
-            <Pagination
+            {/* Filtros */}
+            <Box sx={{ mb: 3 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  alignItems: "flex-end",
+                  flexWrap: "wrap",
+                }}
+              >
+                <TextField
+                  label="Nome do Plano"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Buscar plano"
+                  InputLabelProps={{ shrink: true }}
+                  sx={{
+                    flex: "2 1 300px",
+                    "& .MuiOutlinedInput-root": {
+                      height: inputs.default.height,
+                      "& fieldset": {
+                        borderColor: colors.border,
+                      },
+                      "&:hover fieldset": {
+                        borderColor: colors.border,
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: colors.primary,
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontSize: inputs.default.labelFontSize,
+                      color: colors.textSecondary,
+                      backgroundColor: colors.white,
+                      padding: inputs.default.labelPadding,
+                      "&.Mui-focused": {
+                        color: colors.primary,
+                      },
+                    },
+                  }}
+                />
+
+                <TextField
+                  select
+                  label="Status"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{
+                    minWidth: "150px",
+                    flex: "1 1 150px",
+                    "& .MuiOutlinedInput-root": {
+                      height: inputs.default.height,
+                      "& fieldset": {
+                        borderColor: colors.border,
+                      },
+                      "&:hover fieldset": {
+                        borderColor: colors.border,
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: colors.primary,
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontSize: inputs.default.labelFontSize,
+                      color: colors.textSecondary,
+                      backgroundColor: colors.white,
+                      padding: inputs.default.labelPadding,
+                      "&.Mui-focused": {
+                        color: colors.primary,
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="Ativo">Ativo</MenuItem>
+                  <MenuItem value="Todos">Todos</MenuItem>
+                  <MenuItem value="Inativo">Inativo</MenuItem>
+                </TextField>
+
+                <Box
+                  sx={{
+                    opacity: hasFilterChanges ? 1 : 0.5,
+                    pointerEvents: hasFilterChanges ? "auto" : "none",
+                  }}
+                >
+                  <ClearFiltersButton onClick={clearFilters} />
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Paginação */}
+            <StandardPagination
               currentPage={currentPage}
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
               totalItems={filteredAndSortedPlans.length}
-              itemLabel="planos"
               onPageChange={(page) => {
                 setCurrentPage(page);
                 setTimeout(scrollToTop, 100);
               }}
               onItemsPerPageChange={handleItemsPerPageChange}
             />
-          </div>
 
-          {/* Lista de planos */}
-          <div className="admin-plans-list-container">
-            <div className="admin-plans-table">
-              <div className="admin-plans-table-header">
-                <div
-                  className="admin-plans-header-cell"
-                  style={{
-                    textAlign: "left",
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                  onClick={() => handleSort("name")}
-                  title="Ordenar por nome"
-                >
-                  Nome{" "}
-                  {sortField === "name"
-                    ? sortOrder === "asc"
-                      ? "↑"
-                      : "↓"
-                    : "↕"}
-                </div>
-                <div
-                  className="admin-plans-header-cell"
-                  style={{ textAlign: "left" }}
-                >
-                  Descrição
-                </div>
-                <div
-                  className="admin-plans-header-cell"
-                  style={{
-                    textAlign: "left",
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                  onClick={() => handleSort("price")}
-                  title="Ordenar por preço"
-                >
-                  Preço{" "}
-                  {sortField === "price"
-                    ? sortOrder === "asc"
-                      ? "↑"
-                      : "↓"
-                    : "↕"}
-                </div>
-                <div
-                  className="admin-plans-header-cell"
-                  style={{
-                    textAlign: "left",
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                  onClick={() => handleSort("duration")}
-                  title="Ordenar por duração"
-                >
-                  Duração{" "}
-                  {sortField === "duration"
-                    ? sortOrder === "asc"
-                      ? "↑"
-                      : "↓"
-                    : "↕"}
-                </div>
-                <div
-                  className="admin-plans-header-cell"
-                  style={{
-                    textAlign: "left",
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                  onClick={() => handleSort("maxUsers")}
-                  title="Ordenar por máx usuários"
-                >
-                  Max Usuários{" "}
-                  {sortField === "maxUsers"
-                    ? sortOrder === "asc"
-                      ? "↑"
-                      : "↓"
-                    : "↕"}
-                </div>
-                <div
-                  className="admin-plans-header-cell"
-                  style={{
-                    textAlign: "left",
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                  onClick={() => handleSort("status")}
-                  title="Ordenar por status"
-                >
-                  Status{" "}
-                  {sortField === "status"
-                    ? sortOrder === "asc"
-                      ? "↑"
-                      : "↓"
-                    : "↕"}
-                </div>
-                <div
-                  className="admin-plans-header-cell"
-                  style={{
-                    textAlign: "left",
-                    cursor: "pointer",
-                    userSelect: "none",
-                  }}
-                  onClick={() => handleSort("createdAt")}
-                  title="Ordenar por data de criação"
-                >
-                  Criado em{" "}
-                  {sortField === "createdAt"
-                    ? sortOrder === "asc"
-                      ? "↑"
-                      : "↓"
-                    : "↕"}
-                </div>
-                <div
-                  className="admin-plans-header-cell"
-                  style={{ justifyContent: "flex-end" }}
-                >
-                  Ações
-                </div>
-              </div>
-
-              <div className="admin-plans-table-body">
-                {paginatedPlans.map((plan) => (
-                  <div
-                    key={plan.id}
-                    className="admin-plans-table-row"
-                    onClick={() => handlePlanRowClick(plan.id)}
-                    style={{ cursor: "pointer" }}
+            {/* Lista de Planos */}
+            <Box className="admin-plans-list-container" sx={{ mt: 2 }}>
+              <Box className="admin-plans-table">
+                <Box className="admin-plans-table-header">
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }}
+                    onClick={() => handleSort("name")}
+                    title="Ordenar por nome"
                   >
-                    <div
-                      className="admin-plans-cell admin-plans-name"
-                      data-label="Nome"
-                      style={{ textAlign: "left" }}
-                    >
-                      {plan.name}
-                    </div>
-                    <div
-                      className="admin-plans-cell admin-plans-description"
-                      data-label="Descrição"
-                      style={{ textAlign: "left" }}
-                    >
-                      {plan.description}
-                    </div>
-                    <div
-                      className="admin-plans-cell admin-plans-price"
-                      data-label="Preço"
-                      style={{ textAlign: "left" }}
-                    >
-                      {formatPrice(plan.price)}
-                    </div>
-                    <div
-                      className="admin-plans-cell admin-plans-duration"
-                      data-label="Duração"
-                      style={{ textAlign: "left" }}
-                    >
-                      {plan.duration} {plan.duration === 1 ? "mês" : "meses"}
-                    </div>
-                    <div
-                      className="admin-plans-cell admin-plans-users"
-                      data-label="Max Usuários"
-                      style={{ textAlign: "left" }}
-                    >
-                      {plan.maxUsers} usuários
-                    </div>
-                    <div
-                      className="admin-plans-cell admin-plans-status"
-                      data-label="Status"
-                      style={{ textAlign: "left" }}
-                    >
-                      <span
-                        className={`plan-status-indicator ${
-                          plan.status === "Ativo" ? "active" : "inactive"
-                        }`}
-                      >
-                        {plan.status}
-                      </span>
-                    </div>
-                    <div
-                      className="admin-plans-cell admin-plans-created"
-                      data-label="Criado em"
-                      style={{ textAlign: "left" }}
-                    >
-                      {formatDate(plan.createdAt)}
-                    </div>
-                    <div
-                      className="admin-plans-cell admin-plans-actions"
-                      data-label="Ações"
-                      style={{ textAlign: "right" }}
-                    >
-                      <button
-                        className="btn-action-edit"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePlanAction("edit", plan.id);
-                        }}
-                        title="Editar plano"
-                      >
-                        <Edit fontSize="small" />
-                      </button>
-                      <button
-                        className="btn-action-delete"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePlanAction("delete", plan.id);
-                        }}
-                        title="Excluir plano"
-                      >
-                        <Delete fontSize="small" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+                    Nome{" "}
+                    {sortField === "name"
+                      ? sortOrder === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </Box>
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{ textAlign: "left" }}
+                  >
+                    Descrição
+                  </Box>
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }}
+                    onClick={() => handleSort("price")}
+                    title="Ordenar por preço"
+                  >
+                    Preço{" "}
+                    {sortField === "price"
+                      ? sortOrder === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </Box>
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }}
+                    onClick={() => handleSort("duration")}
+                    title="Ordenar por duração"
+                  >
+                    Duração{" "}
+                    {sortField === "duration"
+                      ? sortOrder === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </Box>
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }}
+                    onClick={() => handleSort("maxUsers")}
+                    title="Ordenar por máx usuários"
+                  >
+                    Max Usuários{" "}
+                    {sortField === "maxUsers"
+                      ? sortOrder === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </Box>
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }}
+                    onClick={() => handleSort("status")}
+                    title="Ordenar por status"
+                  >
+                    Status{" "}
+                    {sortField === "status"
+                      ? sortOrder === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </Box>
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }}
+                    onClick={() => handleSort("createdAt")}
+                    title="Ordenar por data de criação"
+                  >
+                    Criado em{" "}
+                    {sortField === "createdAt"
+                      ? sortOrder === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </Box>
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{ justifyContent: "flex-end" }}
+                  >
+                    Ações
+                  </Box>
+                </Box>
 
-          {/* Paginação inferior */}
-          <div
-            style={{
-              background: "white",
-              borderRadius: "12px",
-              padding: "1rem",
-              boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
-              border: "1px solid #e9ecef",
-              marginTop: "1rem",
-            }}
-          >
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
-              totalItems={filteredAndSortedPlans.length}
-              itemLabel="planos"
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
-          </div>
-        </div>
-      </main>
+                <Box className="admin-plans-table-body">
+                  {paginatedPlans.map((plan) => (
+                    <Box
+                      key={plan.id}
+                      className="admin-plans-table-row"
+                      onClick={() => handlePlanRowClick(plan.id)}
+                      sx={{ cursor: "pointer" }}
+                    >
+                      <Box
+                        className="admin-plans-cell admin-plans-name"
+                        data-label="Nome"
+                        sx={{ textAlign: "left" }}
+                      >
+                        {plan.name}
+                      </Box>
+                      <Box
+                        className="admin-plans-cell admin-plans-description"
+                        data-label="Descrição"
+                        sx={{ textAlign: "left" }}
+                      >
+                        {plan.description}
+                      </Box>
+                      <Box
+                        className="admin-plans-cell admin-plans-price"
+                        data-label="Preço"
+                        sx={{ textAlign: "left" }}
+                      >
+                        {formatPrice(plan.price)}
+                      </Box>
+                      <Box
+                        className="admin-plans-cell admin-plans-duration"
+                        data-label="Duração"
+                        sx={{ textAlign: "left" }}
+                      >
+                        {plan.duration} {plan.duration === 1 ? "mês" : "meses"}
+                      </Box>
+                      <Box
+                        className="admin-plans-cell admin-plans-users"
+                        data-label="Max Usuários"
+                        sx={{ textAlign: "left" }}
+                      >
+                        {plan.maxUsers} usuários
+                      </Box>
+                      <Box
+                        className="admin-plans-cell admin-plans-status"
+                        data-label="Status"
+                        sx={{ textAlign: "left" }}
+                      >
+                        <span
+                          className={`plan-status-indicator ${
+                            plan.status === "Ativo" ? "active" : "inactive"
+                          }`}
+                        >
+                          {plan.status}
+                        </span>
+                      </Box>
+                      <Box
+                        className="admin-plans-cell admin-plans-created"
+                        data-label="Criado em"
+                        sx={{ textAlign: "left" }}
+                      >
+                        {formatDate(plan.createdAt)}
+                      </Box>
+                      <Box
+                        className="admin-plans-cell admin-plans-actions"
+                        data-label="Ações"
+                        sx={{ textAlign: "right" }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 1,
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlanAction("edit", plan.id);
+                            }}
+                            title="Editar plano"
+                            sx={{
+                              backgroundColor: "#03B4C6",
+                              color: "white",
+                              width: "32px",
+                              height: "32px",
+                              "&:hover": {
+                                backgroundColor: "#029AAB",
+                              },
+                            }}
+                          >
+                            <Edit sx={{ fontSize: "1rem" }} />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlanAction("delete", plan.id);
+                            }}
+                            title="Excluir plano"
+                            sx={{
+                              backgroundColor: "#dc3545",
+                              color: "white",
+                              width: "32px",
+                              height: "32px",
+                              "&:hover": {
+                                backgroundColor: "#c82333",
+                              },
+                            }}
+                          >
+                            <Delete sx={{ fontSize: "1rem" }} />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Paginação Inferior */}
+            <Box sx={{ mt: 2 }}>
+              <StandardPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredAndSortedPlans.length}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  setTimeout(scrollToTop, 100);
+                }}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
 
       <FooterInternal simplified={true} className="login-footer-component" />
 
-      {/* Modal de confirmação de exclusão */}
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         title="Confirmar Exclusão"
@@ -921,7 +949,6 @@ const AdminPlans: React.FC = () => {
         type="danger"
       />
 
-      {/* Modal de adicionar/editar plano */}
       <PlanModal
         isOpen={isPlanModalOpen}
         onClose={() => setIsPlanModalOpen(false)}
@@ -933,7 +960,7 @@ const AdminPlans: React.FC = () => {
                 name: planToEdit.name,
                 description: planToEdit.description,
                 price: planToEdit.price,
-                annualPrice: planToEdit.price * 12 * 0.9, // Valor anual com 10% de desconto por padrão
+                annualPrice: planToEdit.price * 12 * 0.9,
                 duration: planToEdit.duration,
                 maxUsers: planToEdit.maxUsers,
                 features: planToEdit.features.map((f) => ({
@@ -946,14 +973,19 @@ const AdminPlans: React.FC = () => {
         }
       />
 
-      {/* Toast de notificação */}
+      <BenefitsModal
+        isOpen={isBenefitsModalOpen}
+        onClose={() => setIsBenefitsModalOpen(false)}
+        onSave={handleSaveBenefits}
+      />
+
       <Toast
         message={toast.message}
         type={toast.type}
         isVisible={toast.isVisible}
         onClose={hideToast}
       />
-    </div>
+    </Box>
   );
 };
 

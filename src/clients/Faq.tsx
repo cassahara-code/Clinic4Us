@@ -1,9 +1,25 @@
 import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  IconButton,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Chip,
+  Link,
+  MenuItem
+} from '@mui/material';
+import { ExpandMore, FilterAltOff } from '@mui/icons-material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
 import { FaqButton } from "../components/FaqButton";
-import { ExpandMore, ExpandLess, Delete, FirstPage, LastPage, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import StandardPagination from "../components/Pagination/StandardPagination";
+import { colors, spacing, typography, inputs } from "../theme/designSystem";
 
 interface MenuItemProps {
   label: string;
@@ -132,30 +148,8 @@ const Faq: React.FC = () => {
   const endIndex = startIndex + itemsPerPage;
   const currentItems = filteredFaq.slice(startIndex, endIndex);
 
-  const itemsPerPageOptions = [5, 10, 20, 50];
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const goToFirstPage = () => {
-    setCurrentPage(1);
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToLastPage = () => {
-    setCurrentPage(totalPages);
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToPreviousPage = () => {
-    setCurrentPage(prev => Math.max(prev - 1, 1));
-    setTimeout(scrollToTop, 100);
-  };
-
-  const goToNextPage = () => {
-    setCurrentPage(prev => Math.min(prev + 1, totalPages));
-    setTimeout(scrollToTop, 100);
   };
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
@@ -163,17 +157,28 @@ const Faq: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory("all");
+  };
+
+  const hasFilters = searchTerm !== "" || selectedCategory !== "all";
+
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedCategory]);
 
   if (!userSession) {
-    return <div>Carregando...</div>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Typography>Carregando...</Typography>
+      </Box>
+    );
   }
 
   return (
-    <div className="login-page">
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <HeaderInternal
         showCTAButton={false}
         className="login-header"
@@ -188,277 +193,366 @@ const Faq: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main className="dashboard-main">
-        <div className="dashboard-container">
-          <div className="dashboard-content">
-            {/* Título da Página */}
-            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h1 className="page-title">FAQ</h1>
-              <FaqButton />
-            </div>
+      <Box
+        component="main"
+        sx={{
+          padding: '1rem',
+          minHeight: 'calc(100vh - 120px)',
+          background: colors.background,
+          marginTop: '85px',
+          flex: 1
+        }}
+      >
+        <Container maxWidth={false} disableGutters>
+          {/* Título da Página */}
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            mb: 3,
+            gap: 2
+          }}>
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontSize: '1.3rem',
+                  mb: 1,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: colors.textPrimary
+                }}
+              >
+                FAQ - Perguntas Frequentes
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary
+                }}
+              >
+                Encontre respostas para as dúvidas mais comuns sobre o sistema.
+              </Typography>
+            </Box>
+            <FaqButton />
+          </Box>
 
-            {/* Busca e Filtros */}
-            <div className="faq-filters-container">
-              <div className="faq-filters-grid">
-                {/* Dropdown de Categorias */}
-                <div className="faq-filter-group">
-                  <label>Categoria</label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="faq-category-select"
-                  >
-                    <option value="all">Todas as categorias</option>
-                    {categories.filter(cat => cat !== "all").map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
-                </div>
+          {/* Filtros, Paginação e Lista de FAQ */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              mb: 2,
+              borderRadius: '12px',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${colors.backgroundAlt}`,
+            }}
+          >
+            {/* Filtros */}
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end', flexWrap: 'wrap', mb: 2 }}>
+              <TextField
+                select
+                label="Categoria"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  minWidth: '200px',
+                  flex: '1 1 200px',
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.primary,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: colors.primary,
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="all">Todas as categorias</MenuItem>
+                {categories.filter(cat => cat !== "all").map(category => (
+                  <MenuItem key={category} value={category}>{category}</MenuItem>
+                ))}
+              </TextField>
 
-                {/* Campo de Busca */}
-                <div className="faq-filter-group">
-                  <label>Busca por palavra</label>
-                  <input
-                    type="text"
-                    placeholder="Pesquisar FAQ"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="faq-search-input"
-                  />
-                </div>
+              <TextField
+                label="Busca por palavra"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Pesquisar FAQ"
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  flex: '2 1 300px',
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.primary,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: colors.primary,
+                    },
+                  },
+                }}
+              />
 
-                {/* Botão limpar filtros */}
-                <div className="faq-clear-button-wrapper">
-                  <button
-                    onClick={() => {
-                      setSearchTerm("");
-                      setSelectedCategory("all");
-                    }}
-                    title="Limpar filtros"
-                    className="faq-clear-button"
-                  >
-                    <Delete fontSize="small" />
-                  </button>
-                </div>
-              </div>
+              <IconButton
+                onClick={handleClearFilters}
+                disabled={!hasFilters}
+                title="Limpar filtros"
+                sx={{
+                  width: '40px',
+                  height: '40px',
+                  backgroundColor: hasFilters ? colors.textSecondary : colors.backgroundAlt,
+                  color: hasFilters ? colors.white : colors.borderHover,
+                  borderRadius: '4px',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    backgroundColor: hasFilters ? '#5a6268' : colors.backgroundAlt,
+                  },
+                  '&:disabled': {
+                    opacity: 0.6,
+                  },
+                }}
+              >
+                <FilterAltOff fontSize="small" />
+              </IconButton>
+            </Box>
 
-              {/* Paginação */}
-              <div className="faq-pagination-wrapper" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e9ecef' }}>
-                <div className="pagination-container">
-                  <div className="items-per-page-selector">
-                    <label>Itens por página:</label>
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                    >
-                      {itemsPerPageOptions.map(option => (
-                        <option key={option} value={option}>{option}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="pagination-navigation">
-                    <button
-                      onClick={goToFirstPage}
-                      disabled={currentPage === 1}
-                      title="Primeira página"
-                      className="pagination-btn"
-                    >
-                      <FirstPage />
-                    </button>
-
-                    <button
-                      onClick={goToPreviousPage}
-                      disabled={currentPage === 1}
-                      title="Página anterior"
-                      className="pagination-btn"
-                    >
-                      <ChevronLeft />
-                    </button>
-
-                    <span className="pagination-info">
-                      {currentPage} de {totalPages}
-                    </span>
-
-                    <button
-                      onClick={goToNextPage}
-                      disabled={currentPage === totalPages}
-                      title="Próxima página"
-                      className="pagination-btn"
-                    >
-                      <ChevronRight />
-                    </button>
-
-                    <button
-                      onClick={goToLastPage}
-                      disabled={currentPage === totalPages}
-                      title="Última página"
-                      className="pagination-btn"
-                    >
-                      <LastPage />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Paginação */}
+            <StandardPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredFaq.length}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                setTimeout(scrollToTop, 100);
+              }}
+              onItemsPerPageChange={handleItemsPerPageChange}
+            />
 
             {/* Lista de FAQ */}
-            <div className="faq-list-container">
-              {currentItems.length === 0 ? (
-                <div className="faq-empty-state">
+            <Box sx={{ mt: 2 }}>
+            {currentItems.length === 0 ? (
+              <Box sx={{ p: 4, textAlign: 'center' }}>
+                <Typography sx={{ color: colors.textSecondary }}>
                   Nenhum item encontrado para sua busca.
-                </div>
-              ) : (
-                currentItems.map((item) => (
-                  <div key={item.id} className="faq-item">
-                    {/* Pergunta - Clicável */}
-                    <div
-                      onClick={() => toggleItem(item.id)}
-                      className={`faq-question-header ${expandedItems.includes(item.id) ? 'expanded' : ''}`}
+                </Typography>
+              </Box>
+            ) : (
+              currentItems.map((item) => (
+                <Accordion
+                  key={item.id}
+                  expanded={expandedItems.includes(item.id)}
+                  onChange={() => toggleItem(item.id)}
+                  elevation={0}
+                  sx={{
+                    mb: 1,
+                    borderRadius: '8px !important',
+                    border: `1px solid ${colors.backgroundAlt}`,
+                    '&:before': {
+                      display: 'none',
+                    },
+                    '&.Mui-expanded': {
+                      margin: '0 0 8px 0',
+                    },
+                    '&:last-child': {
+                      mb: 0,
+                    },
+                  }}
+                >
+                  <AccordionSummary
+                    expandIcon={<ExpandMore sx={{ color: colors.primary }} />}
+                    sx={{
+                      '&.Mui-expanded': {
+                        borderBottom: `1px solid ${colors.backgroundAlt}`,
+                      },
+                    }}
+                  >
+                    <Box>
+                      <Chip
+                        label={item.category}
+                        size="small"
+                        sx={{
+                          mb: 1,
+                          backgroundColor: colors.primaryLight,
+                          color: colors.primary,
+                          fontSize: typography.fontSize.xs,
+                          fontWeight: typography.fontWeight.medium,
+                        }}
+                      />
+                      <Typography
+                        sx={{
+                          fontSize: typography.fontSize.base,
+                          fontWeight: typography.fontWeight.semibold,
+                          color: colors.textPrimary,
+                        }}
+                      >
+                        {item.question}
+                      </Typography>
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ pt: 2 }}>
+                    <Typography
+                      sx={{
+                        fontSize: typography.fontSize.sm,
+                        color: colors.textPrimary,
+                        whiteSpace: 'pre-wrap',
+                        lineHeight: 1.7,
+                        mb: 2
+                      }}
                     >
-                      <div className="faq-question-content">
-                        <div className="faq-category-label">
-                          {item.category}
-                        </div>
-                        <div className="faq-question-text">
-                          {item.question}
-                        </div>
-                      </div>
-                      {expandedItems.includes(item.id) ? (
-                        <ExpandLess style={{ color: '#03B4C6' }} />
-                      ) : (
-                        <ExpandMore style={{ color: '#6c757d' }} />
-                      )}
-                    </div>
+                      {item.answer}
+                    </Typography>
 
-                    {/* Resposta - Expansível */}
-                    {expandedItems.includes(item.id) && (
-                      <div className="faq-answer-container">
-                        <div className="faq-answer-text">
-                          {item.answer}
-                        </div>
-
-                        {/* Vídeo (se houver) */}
-                        {item.videoUrl && (
-                          <div className="faq-video-wrapper">
-                            <div className="faq-video-container">
-                              <iframe
-                                src={item.videoUrl}
-                                className="faq-video-iframe"
-                                allowFullScreen
-                                title={item.question}
-                              />
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Links (se houver) */}
-                        {item.links && item.links.length > 0 && (
-                          <div className="faq-links-container">
-                            {item.links.map((link, idx) => (
-                              <a
-                                key={idx}
-                                href={link.url}
-                                className="faq-link"
-                              >
-                                → {link.text}
-                              </a>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Como configurar a disponibilidade de agenda */}
-                        {item.id === 2 && (
-                          <div className="faq-config-steps">
-                            <div className="faq-config-title">
-                              Como configurar a disponibilidade de agenda:
-                            </div>
-                            <ol className="faq-config-list">
-                              <li>Com um usuário no perfil "Adm. Cliente", acesse o menu <strong>"Entidades"</strong>.</li>
-                              <li>Clique no ícone <strong>"Usuários"</strong> para visualizar os profissionais cadastrados.</li>
-                              <li>Encontre o profissional desejado e clique no ícone <strong>"Disponibilidade"</strong>.</li>
-                              <li>Clique no ícone <strong>"+"</strong> para incluir um novo período de disponibilidade para o profissional.</li>
-                            </ol>
-                            <div className="faq-config-note">
-                              <strong>Observação:</strong> A disponibilidade é definida por dia da semana. Certifique-se de excluir os horários de intervalo, como nos exemplos abaixo:
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                    {/* Vídeo */}
+                    {item.videoUrl && (
+                      <Box sx={{ mb: 2 }}>
+                        <Box sx={{
+                          position: 'relative',
+                          paddingBottom: '56.25%',
+                          height: 0,
+                          overflow: 'hidden',
+                          borderRadius: '8px'
+                        }}>
+                          <iframe
+                            src={item.videoUrl}
+                            style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              height: '100%',
+                              border: 'none'
+                            }}
+                            allowFullScreen
+                            title={item.question}
+                          />
+                        </Box>
+                      </Box>
                     )}
-                  </div>
-                ))
-              )}
-            </div>
+
+                    {/* Links */}
+                    {item.links && item.links.length > 0 && (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+                        {item.links.map((link, idx) => (
+                          <Link
+                            key={idx}
+                            href={link.url}
+                            sx={{
+                              color: colors.primary,
+                              fontSize: typography.fontSize.sm,
+                              textDecoration: 'none',
+                              '&:hover': {
+                                textDecoration: 'underline'
+                              }
+                            }}
+                          >
+                            → {link.text}
+                          </Link>
+                        ))}
+                      </Box>
+                    )}
+
+                    {/* Configuração especial para item 2 */}
+                    {item.id === 2 && (
+                      <Box sx={{
+                        mt: 2,
+                        p: 2,
+                        backgroundColor: colors.background,
+                        borderRadius: '8px'
+                      }}>
+                        <Typography
+                          sx={{
+                            fontSize: typography.fontSize.sm,
+                            fontWeight: typography.fontWeight.semibold,
+                            color: colors.textPrimary,
+                            mb: 1
+                          }}
+                        >
+                          Como configurar a disponibilidade de agenda:
+                        </Typography>
+                        <Box
+                          component="ol"
+                          sx={{
+                            pl: 2,
+                            '& li': {
+                              fontSize: typography.fontSize.sm,
+                              color: colors.textPrimary,
+                              mb: 0.5
+                            }
+                          }}
+                        >
+                          <li>Com um usuário no perfil "Adm. Cliente", acesse o menu <strong>"Entidades"</strong>.</li>
+                          <li>Clique no ícone <strong>"Usuários"</strong> para visualizar os profissionais cadastrados.</li>
+                          <li>Encontre o profissional desejado e clique no ícone <strong>"Disponibilidade"</strong>.</li>
+                          <li>Clique no ícone <strong>"+"</strong> para incluir um novo período de disponibilidade para o profissional.</li>
+                        </Box>
+                        <Typography
+                          sx={{
+                            fontSize: typography.fontSize.sm,
+                            color: colors.textSecondary,
+                            mt: 1,
+                            fontStyle: 'italic'
+                          }}
+                        >
+                          <strong>Observação:</strong> A disponibilidade é definida por dia da semana. Certifique-se de excluir os horários de intervalo, como nos exemplos abaixo:
+                        </Typography>
+                      </Box>
+                    )}
+                  </AccordionDetails>
+                </Accordion>
+              ))
+            )}
+            </Box>
 
             {/* Paginação Inferior */}
             {currentItems.length > 0 && (
-              <div className="faq-filters-container" style={{ marginTop: '1.5rem' }}>
-                <div className="faq-pagination-wrapper">
-                  <div className="pagination-container">
-                    <div className="items-per-page-selector">
-                      <label>Itens por página:</label>
-                      <select
-                        value={itemsPerPage}
-                        onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                      >
-                        {itemsPerPageOptions.map(option => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="pagination-navigation">
-                      <button
-                        onClick={goToFirstPage}
-                        disabled={currentPage === 1}
-                        title="Primeira página"
-                        className="pagination-btn"
-                      >
-                        <FirstPage />
-                      </button>
-
-                      <button
-                        onClick={goToPreviousPage}
-                        disabled={currentPage === 1}
-                        title="Página anterior"
-                        className="pagination-btn"
-                      >
-                        <ChevronLeft />
-                      </button>
-
-                      <span className="pagination-info">
-                        {currentPage} de {totalPages}
-                      </span>
-
-                      <button
-                        onClick={goToNextPage}
-                        disabled={currentPage === totalPages}
-                        title="Próxima página"
-                        className="pagination-btn"
-                      >
-                        <ChevronRight />
-                      </button>
-
-                      <button
-                        onClick={goToLastPage}
-                        disabled={currentPage === totalPages}
-                        title="Última página"
-                        className="pagination-btn"
-                      >
-                        <LastPage />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <Box sx={{ mt: 2 }}>
+                <StandardPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={filteredFaq.length}
+                  onPageChange={(page) => {
+                    setCurrentPage(page);
+                    setTimeout(scrollToTop, 100);
+                  }}
+                  onItemsPerPageChange={handleItemsPerPageChange}
+                />
+              </Box>
             )}
-          </div>
-        </div>
-      </main>
+          </Paper>
+        </Container>
+      </Box>
 
       <FooterInternal />
-    </div>
+    </Box>
   );
 };
 

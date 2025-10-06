@@ -1,6 +1,7 @@
 import React from "react";
 import "./Footer.css";
 import logo from "../../images/logo_clinic4us.png";
+import { Box, Container, Typography, Link } from '@mui/material';
 
 interface FooterProps {
   onScrollToTop?: () => void;
@@ -18,73 +19,132 @@ const Footer: React.FC<FooterProps> = ({ onScrollToTop }) => {
   };
 
   return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer-content">
-          <div className="footer-section">
-            <img
+    <Box
+      component="footer"
+      className="footer"
+      sx={{
+        backgroundColor: '#2D3748',
+        color: 'white',
+        py: 6,
+        mt: 'auto'
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, mb: 4 }}>
+          <Box sx={{ flex: '1 1 300px', minWidth: '250px' }}>
+            <Box
+              component="img"
               src={logo}
               alt="CLINIC4US"
               className="footer-logo"
               onClick={scrollToTop}
-              style={{ cursor: "pointer" }}
+              sx={{
+                height: '40px',
+                cursor: 'pointer',
+                mb: 2,
+                objectFit: 'contain'
+              }}
             />
-            <p>
-              A plataforma completa para gestão de clínicas
-              multidisciplinares.
-            </p>
-          </div>
-          <div className="footer-section">
-            <h4>Produto</h4>
-            <ul>
-              <li>
-                <a href="#funcionalidades">Funcionalidades</a>
-              </li>
-              <li>
-                <a href="#planos">Planos</a>
-              </li>
-              <li>
-                <a href="#comparacao">Comparação</a>
-              </li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h4>Suporte</h4>
-            <ul>
-              <li>
-                <a href="#help">Central de Ajuda</a>
-              </li>
-              <li>
-                <a href="#contact">Contato</a>
-              </li>
-              <li>
-                <a href="#docs">Documentação</a>
-              </li>
-            </ul>
-          </div>
-          <div className="footer-section">
-            <h4>Empresa</h4>
-            <ul>
-              <li>
-                <a href="#about">Sobre</a>
-              </li>
-              <li>
-                <a href="#privacy">Privacidade</a>
-              </li>
-              <li>
-                <a href="#terms">Termos de Uso</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>&copy; 2024 CLINIC4US. Todos os direitos reservados.</p>
-          <p style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.5rem' }}>
-            Imagens by <a href="http://www.freepik.com" target="_blank" rel="noopener noreferrer" style={{ color: '#03B4C6', textDecoration: 'none' }}>Freepik</a>
-          </p>
-        </div>
-      </div>
-    </footer>
+            <Typography variant="body2" sx={{ color: '#CBD5E0', lineHeight: 1.7 }}>
+              A plataforma completa para gestão de clínicas multidisciplinares.
+            </Typography>
+          </Box>
+
+          <Box sx={{ flex: '1 1 200px', minWidth: '150px' }}>
+            <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600, mb: 2 }}>
+              Produto
+            </Typography>
+            <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
+              <Box component="li" sx={{ mb: 1 }}>
+                <Link href="#funcionalidades" sx={{ color: '#CBD5E0', textDecoration: 'none', fontSize: '0.875rem', '&:hover': { color: '#03B4C6', textDecoration: 'underline' } }}>
+                  Funcionalidades
+                </Link>
+              </Box>
+              <Box component="li" sx={{ mb: 1 }}>
+                <Link href="#planos" sx={{ color: '#CBD5E0', textDecoration: 'none', fontSize: '0.875rem', '&:hover': { color: '#03B4C6', textDecoration: 'underline' } }}>
+                  Planos
+                </Link>
+              </Box>
+              <Box component="li" sx={{ mb: 1 }}>
+                <Link href="#comparacao" sx={{ color: '#CBD5E0', textDecoration: 'none', fontSize: '0.875rem', '&:hover': { color: '#03B4C6', textDecoration: 'underline' } }}>
+                  Comparação
+                </Link>
+              </Box>
+            </Box>
+          </Box>
+
+          <Box sx={{ flex: '1 1 200px', minWidth: '150px' }}>
+            <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600, mb: 2 }}>
+              Suporte
+            </Typography>
+            <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
+              <Box component="li" sx={{ mb: 1 }}>
+                <Link href="#help" sx={{ color: '#CBD5E0', textDecoration: 'none', fontSize: '0.875rem', '&:hover': { color: '#03B4C6', textDecoration: 'underline' } }}>
+                  Central de Ajuda
+                </Link>
+              </Box>
+              <Box component="li" sx={{ mb: 1 }}>
+                <Link href="#contact" sx={{ color: '#CBD5E0', textDecoration: 'none', fontSize: '0.875rem', '&:hover': { color: '#03B4C6', textDecoration: 'underline' } }}>
+                  Contato
+                </Link>
+              </Box>
+              <Box component="li" sx={{ mb: 1 }}>
+                <Link href="#docs" sx={{ color: '#CBD5E0', textDecoration: 'none', fontSize: '0.875rem', '&:hover': { color: '#03B4C6', textDecoration: 'underline' } }}>
+                  Documentação
+                </Link>
+              </Box>
+            </Box>
+          </Box>
+
+          <Box sx={{ flex: '1 1 200px', minWidth: '150px' }}>
+            <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 600, mb: 2 }}>
+              Empresa
+            </Typography>
+            <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
+              <Box component="li" sx={{ mb: 1 }}>
+                <Link href="#about" sx={{ color: '#CBD5E0', textDecoration: 'none', fontSize: '0.875rem', '&:hover': { color: '#03B4C6', textDecoration: 'underline' } }}>
+                  Sobre
+                </Link>
+              </Box>
+              <Box component="li" sx={{ mb: 1 }}>
+                <Link href="#privacy" sx={{ color: '#CBD5E0', textDecoration: 'none', fontSize: '0.875rem', '&:hover': { color: '#03B4C6', textDecoration: 'underline' } }}>
+                  Privacidade
+                </Link>
+              </Box>
+              <Box component="li" sx={{ mb: 1 }}>
+                <Link href="#terms" sx={{ color: '#CBD5E0', textDecoration: 'none', fontSize: '0.875rem', '&:hover': { color: '#03B4C6', textDecoration: 'underline' } }}>
+                  Termos de Uso
+                </Link>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            mt: 4,
+            pt: 3,
+            textAlign: 'center'
+          }}
+        >
+          <Typography variant="body2" sx={{ color: '#CBD5E0' }}>
+            &copy; 2024 CLINIC4US. Todos os direitos reservados.
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#999', mt: 0.5, display: 'block' }}>
+            Imagens by{' '}
+            <Link
+              href="http://www.freepik.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ color: '#03B4C6', textDecoration: 'none' }}
+            >
+              Freepik
+            </Link>
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

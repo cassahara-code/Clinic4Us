@@ -1,10 +1,27 @@
 import React, { useState, useEffect } from "react";
-import "./PatientRegister.css";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
-import { useNavigation } from "../contexts/RouterContext";
-import { Rotate90DegreesCw, Search, BarChart, CalendarToday, TrendingUp, InsertDriveFile } from '@mui/icons-material';
+import { useNavigation, useRouter } from "../contexts/RouterContext";
+import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
+import PhotoUpload from "../components/PhotoUpload";
+import {
+  TextField,
+  MenuItem,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  Checkbox,
+  Typography,
+  Box,
+  CircularProgress,
+  Button,
+  Tabs,
+  Tab
+} from '@mui/material';
+import { colors, typography, inputs } from '../theme/designSystem';
 
 interface MenuItemProps {
   label: string;
@@ -70,7 +87,36 @@ interface PatientFormData {
 
 const PatientRegister: React.FC = () => {
   const { goToPatients, goToDashboard, goToSchedule } = useNavigation();
+  const { getParam } = useRouter();
   const [userSession, setUserSession] = useState<UserSession | null>(null);
+
+  // Reusable styles for form fields
+  const textFieldSx = {
+    '& .MuiOutlinedInput-root': {
+      height: '40px',
+      fontSize: '1rem',
+      backgroundColor: 'white',
+      '& fieldset': {
+        borderColor: '#ced4da',
+        legend: { maxWidth: '100%' },
+      },
+    },
+    '& .MuiSelect-select': {
+      padding: '0.375rem 0.5rem',
+      color: '#495057',
+    },
+    '& .MuiInputLabel-root': {
+      fontSize: '0.95rem',
+      color: '#6c757d',
+      backgroundColor: 'white',
+      paddingLeft: '4px',
+      paddingRight: '4px',
+      '&.Mui-focused': {
+        color: '#03B4C6',
+      },
+    },
+  };
+
   const [formData, setFormData] = useState<PatientFormData>({
     name: "",
     isResponsible: false,
@@ -111,11 +157,11 @@ const PatientRegister: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('cadastro');
+  const [isNewPatient, setIsNewPatient] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [cepLoading, setCepLoading] = useState(false);
+  const [originalFormData, setOriginalFormData] = useState<PatientFormData | null>(null);
 
   // Limpar campo "Indicado por" quando canal não for indicação
   useEffect(() => {
@@ -145,6 +191,71 @@ const PatientRegister: React.FC = () => {
 
     setUserSession(simulatedUserSession);
   }, []);
+
+  // Carregar dados do paciente se houver ID na URL
+  useEffect(() => {
+    const patientId = getParam('id');
+
+    if (patientId) {
+      // Paciente existente - modo visualização
+      setIsNewPatient(false);
+      setIsEditing(false);
+
+      // Dados mockados de um paciente existente
+      const mockPatientData: PatientFormData = {
+        id: patientId,
+        name: "João Silva Santos",
+        isResponsible: false,
+        phone: "11999999999",
+        cep: "01310100",
+        documentType: "CPF",
+        document: "12345678900",
+        email: "joao.silva@email.com",
+        responsibleName: "Maria Silva Santos",
+        address: "Avenida Paulista",
+        number: "1578",
+        expeditorOrgan: "SSP",
+        birthDate: "1990-05-15",
+        responsibleDocumentType: "CPF",
+        responsibleDocument: "98765432100",
+        complement: "Apto 101",
+        neighborhood: "Bela Vista",
+        gender: "Masculino",
+        kinship: "Mãe",
+        responsiblePhone: "11988888888",
+        city: "São Paulo",
+        uf: "SP",
+        nativeLanguage: "Português",
+        originCountry: "Brasil",
+        responsibleEmail: "maria.silva@email.com",
+        isComplete: true,
+        observations: "Paciente com histórico de hipertensão. Acompanhamento mensal necessário.",
+        referredBy: "Dr. Carlos Mendes",
+        entryChannel: "Indicação profissional",
+        photo: undefined,
+        photoRotation: 0,
+        photoZoom: 1,
+        photoFlipX: 1,
+        photoPositionX: 0,
+        photoPositionY: 0,
+        responsible2Name: "Pedro Silva Santos",
+        responsible2DocumentType: "CPF",
+        responsible2Document: "11122233344",
+        responsible2Kinship: "Pai",
+        responsible2Phone: "11977777777",
+        responsible2Email: "pedro.silva@email.com",
+        responsibleFinancial: true,
+        responsible2Financial: false
+      };
+
+      setFormData(mockPatientData);
+      setOriginalFormData(mockPatientData);
+    } else {
+      // Novo paciente
+      setIsNewPatient(true);
+      setIsEditing(false);
+    }
+  }, [getParam]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -212,6 +323,11 @@ const PatientRegister: React.FC = () => {
 
     const birth = new Date(birthDate);
     const today = new Date();
+
+    // Validação: data de nascimento não pode ser maior que hoje
+    if (birth > today) {
+      return 'Data inválida';
+    }
 
     let years = today.getFullYear() - birth.getFullYear();
     let months = today.getMonth() - birth.getMonth();
@@ -354,22 +470,49 @@ const PatientRegister: React.FC = () => {
   };
 
   const handleCancel = () => {
-    goToPatients();
+    if (isNewPatient) {
+      goToPatients();
+    } else {
+      // Cancelar edição - restaurar dados originais
+      if (originalFormData) {
+        setFormData(originalFormData);
+      }
+      setIsEditing(false);
+      setErrors({});
+    }
   };
+
+  const handleEdit = () => {
+    // Salvar os dados atuais antes de editar
+    setOriginalFormData({ ...formData });
+    setIsEditing(true);
+
+    // Focar no primeiro campo após um pequeno delay para garantir que o campo foi habilitado
+    setTimeout(() => {
+      const nameInput = document.getElementById('name');
+      if (nameInput) {
+        nameInput.focus();
+        nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  };
+
+  // Determina se os campos podem ser editados
+  const canEdit = isNewPatient || isEditing;
 
   const getAvailableTabs = () => {
     const allTabs = [
-      { id: 'cadastro', label: 'Cadastro', enabled: true },
-      { id: 'resumo', label: 'Resumo', enabled: true },
-      { id: 'anotacoes', label: 'Anotações', enabled: true },
-      { id: 'agenda', label: 'Agenda', enabled: true },
-      { id: 'diagnostico', label: 'Diagnóstico', enabled: true },
-      { id: 'avaliacoes', label: 'Avaliações', enabled: true },
-      { id: 'plano-terap', label: 'Plano Terap', enabled: true },
-      { id: 'evolucoes', label: 'Evoluções', enabled: true },
-      { id: 'financeiro', label: 'Financeiro', enabled: true },
-      { id: 'receituario', label: 'Receituário', enabled: true },
-      { id: 'arquivos', label: 'Arquivos', enabled: true }
+      { id: 'cadastro', label: 'Cadastro', enabled: true, icon: Person, color: '#03B4C6' },
+      { id: 'resumo', label: 'Resumo', enabled: true, icon: Assessment, color: '#2196f3' },
+      { id: 'anotacoes', label: 'Anotações', enabled: true, icon: Note, color: '#ff9800' },
+      { id: 'agenda', label: 'Agenda', enabled: true, icon: Event, color: '#9c27b0' },
+      { id: 'diagnostico', label: 'Diagnóstico', enabled: true, icon: LocalHospital, color: '#f44336' },
+      { id: 'avaliacoes', label: 'Avaliações', enabled: true, icon: Assignment, color: '#4caf50' },
+      { id: 'plano-terap', label: 'Plano Terap', enabled: true, icon: Psychology, color: '#e91e63' },
+      { id: 'evolucoes', label: 'Evoluções', enabled: true, icon: Timeline, color: '#00bcd4' },
+      { id: 'financeiro', label: 'Financeiro', enabled: true, icon: AttachMoney, color: '#4caf50' },
+      { id: 'receituario', label: 'Receituário', enabled: true, icon: LocalPharmacy, color: '#009688' },
+      { id: 'arquivos', label: 'Arquivos', enabled: true, icon: Folder, color: '#795548' }
     ];
 
     // Filter tabs based on user permissions
@@ -432,48 +575,6 @@ const PatientRegister: React.FC = () => {
 
   const handleLogoClick = () => {
     goToDashboard();
-  };
-
-  // Funções para arrastar a foto
-  const handlePhotoMouseDown = (e: React.MouseEvent) => {
-    if (!formData.photo) return;
-    e.preventDefault();
-    setIsDragging(true);
-    setDragStart({
-      x: e.clientX - (formData.photoPositionX || 0),
-      y: e.clientY - (formData.photoPositionY || 0)
-    });
-  };
-
-  const handlePhotoMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !formData.photo) return;
-    e.preventDefault();
-
-    const newX = e.clientX - dragStart.x;
-    const newY = e.clientY - dragStart.y;
-
-    // Limitar o movimento dentro da área do preview (250x250px)
-    const maxX = 125;
-    const maxY = 125;
-    const minX = -125;
-    const minY = -125;
-
-    const clampedX = Math.max(minX, Math.min(maxX, newX));
-    const clampedY = Math.max(minY, Math.min(maxY, newY));
-
-    setFormData(prev => ({
-      ...prev,
-      photoPositionX: clampedX,
-      photoPositionY: clampedY
-    }));
-  };
-
-  const handlePhotoMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handlePhotoMouseLeave = () => {
-    setIsDragging(false);
   };
 
   // Função para criar a foto cortada no tamanho do preview
@@ -539,29 +640,103 @@ const PatientRegister: React.FC = () => {
 
       <main className="patient-register-main">
         {/* Título da Página */}
-        <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', padding: '0 1rem' }}>
-          <h1 className="page-title">Cadastro de Paciente</h1>
-          <FaqButton />
-        </div>
-
-        {/* Tabs de navegação */}
-        <div className="patient-tabs-container">
-          <div className="patient-tabs">
-            {getAvailableTabs().map(tab => (
-              <button
-                key={tab.id}
-                className={`tab-button ${activeTab === tab.id ? 'active' : ''} ${!tab.enabled ? 'disabled' : ''}`}
-                data-tab={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                disabled={!tab.enabled}
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          mb: 1,
+          gap: 2
+        }}>
+          <Box>
+            <Typography
+              variant="h4"
+              sx={{
+                fontSize: '1.3rem',
+                mb: 1,
+                fontWeight: typography.fontWeight.semibold,
+                color: colors.textPrimary
+              }}
+            >
+              {isNewPatient ? 'Cadastro de Paciente' : formData.name || 'Paciente'}
+            </Typography>
+            {isNewPatient ? (
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary,
+                  pb: '15px'
+                }}
               >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
+                Preencha os dados para cadastrar um novo paciente no sistema.
+              </Typography>
+            ) : (
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary,
+                  pb: '15px'
+                }}
+              >
+                ID: {formData.id}
+              </Typography>
+            )}
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FaqButton />
+          </Box>
+        </Box>
 
         <div className="patient-register-container">
+          {/* Tabs de navegação */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2, mt: '-5px', mx: '-1.5rem' }}>
+            <Tabs
+              value={activeTab}
+              onChange={(e, newValue) => handleTabChange(newValue)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                px: '1.5rem',
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  minHeight: '48px',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  color: '#6c757d',
+                  padding: '12px 12px',
+                  minWidth: 'auto',
+                  '&.Mui-selected': {
+                    color: '#03B4C6',
+                    fontWeight: 600,
+                  },
+                },
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#03B4C6',
+                  height: '3px',
+                },
+                '& .MuiTabScrollButton-root': {
+                  width: '30px',
+                  padding: '0',
+                },
+              }}
+            >
+              {getAvailableTabs().map(tab => {
+                const IconComponent = tab.icon;
+                return (
+                  <Tab
+                    key={tab.id}
+                    value={tab.id}
+                    label={tab.label}
+                    icon={<IconComponent sx={{ fontSize: '1rem', color: tab.color }} />}
+                    iconPosition="start"
+                    disabled={!tab.enabled}
+                  />
+                );
+              })}
+            </Tabs>
+          </Box>
+
           {/* Conteúdo da aba ativa */}
           <div className="tab-content">
             {activeTab === 'cadastro' && (
@@ -570,206 +745,18 @@ const PatientRegister: React.FC = () => {
                 <div className="personal-data-layout">
                     {/* Seção de Upload de Foto */}
                     <div className="photo-upload-container">
-                      <div className="photo-upload-component">
-                        <div
-                          className="photo-preview"
-                          onClick={() => !formData.photo && document.getElementById('photo-upload')?.click()}
-                          onMouseMove={handlePhotoMouseMove}
-                          onMouseUp={handlePhotoMouseUp}
-                          onMouseLeave={handlePhotoMouseLeave}
-                        >
-                          {formData.photo ? (
-                            <img
-                              src={formData.photo}
-                              alt="Foto do paciente"
-                              className="patient-photo"
-                              style={{
-                                transform: `translate(-50%, -50%) translate(${formData.photoPositionX || 0}px, ${formData.photoPositionY || 0}px) rotate(${formData.photoRotation || 0}deg) scale(${formData.photoZoom || 1}) scaleX(${formData.photoFlipX || 1})`,
-                                transformOrigin: 'center',
-                                transition: isDragging ? 'none' : 'transform 0.3s ease',
-                                cursor: isDragging ? 'grabbing' : 'grab'
-                              }}
-                              onMouseDown={handlePhotoMouseDown}
-                              draggable={false}
-                              onLoad={(e) => {
-                                const img = e.target as HTMLImageElement;
+                      <PhotoUpload
+                        photo={formData.photo}
+                        photoRotation={formData.photoRotation}
+                        photoZoom={formData.photoZoom}
+                        photoFlipX={formData.photoFlipX}
+                        photoPositionX={formData.photoPositionX}
+                        photoPositionY={formData.photoPositionY}
+                        onPhotoChange={(photoData) => setFormData(prev => ({ ...prev, ...photoData }))}
+                      />
 
-                                // Only set initial scale if it's not already set
-                                if (formData.photoZoom === undefined) {
-                                  const containerWidth = 250;
-                                  const containerHeight = 250;
-                                  const imgAspectRatio = img.naturalWidth / img.naturalHeight;
-                                  const containerAspectRatio = containerWidth / containerHeight;
-
-                                  let initialScale = 1;
-                                  if (imgAspectRatio > containerAspectRatio) {
-                                    // Image is wider than container - scale to fit width
-                                    initialScale = containerWidth / img.naturalWidth;
-                                  } else {
-                                    // Image is taller than container - scale to fit height
-                                    initialScale = containerHeight / img.naturalHeight;
-                                  }
-
-                                  // Set initial scale to fit the image in the container while preserving aspect ratio
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    photoZoom: initialScale
-                                  }));
-                                }
-                              }}
-                            />
-                          ) : (
-                            <div className="no-photo-placeholder">
-                              <div className="photo-icon">📷</div>
-                              <span>Clique para adicionar foto</span>
-                            </div>
-                          )}
-                        </div>
-                        <input
-                          type="file"
-                          id="photo-upload"
-                          accept="image/*"
-                          style={{ display: 'none' }}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (event) => {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  photo: event.target?.result as string,
-                                  photoRotation: 0,
-                                  photoZoom: undefined, // Will be set by onLoad
-                                  photoFlipX: 1,
-                                  photoPositionX: 0,
-                                  photoPositionY: 0
-                                }));
-                              };
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                        />
-
-                        {/* Controles principais */}
-                        <div className="photo-main-controls">
-                          <button
-                            type="button"
-                            className="btn-photo-main"
-                            onClick={() => document.getElementById('photo-upload')?.click()}
-                          >
-                            {formData.photo ? 'Alterar' : 'Selecionar'}
-                          </button>
-                          {formData.photo && (
-                            <button
-                              type="button"
-                              className="btn-photo-main btn-remove"
-                              onClick={() => setFormData(prev => ({
-                                ...prev,
-                                photo: '',
-                                photoRotation: 0,
-                                photoZoom: 1,
-                                photoFlipX: 1,
-                                photoPositionX: 0,
-                                photoPositionY: 0
-                              }))}
-                              title="Remover foto"
-                            >
-                              Remover
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Controles de edição */}
-                        {formData.photo && (
-                          <div className="photo-edit-controls">
-                            <div className="edit-control-row">
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Girar à esquerda"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoRotation: (prev.photoRotation || 0) - 90
-                                }))}
-                              >
-                                <Rotate90DegreesCw fontSize="small" />
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Girar à direita"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoRotation: (prev.photoRotation || 0) + 90
-                                }))}
-                              >
-                                🔃
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Zoom out"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoZoom: Math.max(0.5, (prev.photoZoom || 1) - 0.1)
-                                }))}
-                              >
-                                <Search fontSize="small" />
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Zoom in"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoZoom: Math.min(3, (prev.photoZoom || 1) + 0.1)
-                                }))}
-                              >
-                                🔎
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Reset"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoRotation: 0,
-                                  photoZoom: 1,
-                                  photoFlipX: 1,
-                                  photoPositionX: 0,
-                                  photoPositionY: 0
-                                }))}
-                              >
-                                ⚡
-                              </button>
-                              <button
-                                type="button"
-                                className="btn-photo-edit-small"
-                                title="Centralizar posição"
-                                onClick={() => setFormData(prev => ({
-                                  ...prev,
-                                  photoPositionX: 0,
-                                  photoPositionY: 0
-                                }))}
-                              >
-                                🎯
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="photo-instructions">
-                          <small>JPG, PNG, GIF • Max 5MB</small>
-                          {formData.photo && (
-                            <>
-                              <small>🖱️ Arraste a foto para posicioná-la</small>
-                              <small>📐 A foto será cortada no tamanho do preview ao salvar</small>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Mini Dashboard de Presenças */}
-                        <div className="mini-dashboard">
+                      {/* Mini Dashboard de Presenças */}
+                      <div className="mini-dashboard">
                           <h4 className="dashboard-title"><BarChart fontSize="small" style={{marginRight: '0.5rem', verticalAlign: 'middle'}} />Resumo de Presenças</h4>
 
                           <div className="dashboard-item">
@@ -813,214 +800,269 @@ const PatientRegister: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                      </div>
                     </div>
 
                     {/* Seção de Campos */}
                     <div className="personal-data-fields">
-                      {/* Primeira linha: Nome, Data de Nascimento + Idade, Gênero */}
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="name">Nome Completo*</label>
-                          <input
-                            type="text"
+                      {/* Grid de migração - 3 colunas com bordas */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '10px',
+                          px: 0,
+                          pb: '5px'
+                        }
+                      }}>
+                        <Box>
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="name"
                             name="name"
+                            label="Nome Completo*"
                             value={formData.name}
                             onChange={handleInputChange}
                             placeholder="Nome completo do paciente"
+                            disabled={!canEdit}
+                            error={!!errors.name}
+                            helperText={errors.name}
+                            InputLabelProps={{ shrink: true }}
                           />
-                        </div>
-                        <div className="form-group birth-age-group">
-                          <div className="birth-age-container">
-                            <div className="form-subgroup">
-                              <label htmlFor="birthDate">Data de Nascimento*</label>
-                              <input
-                                type="date"
-                                id="birthDate"
-                                name="birthDate"
-                                value={formData.birthDate}
-                                onChange={handleInputChange}
-                              />
-                            </div>
-                            <div className="form-subgroup">
-                              <label htmlFor="age">Idade</label>
-                              <input
-                                type="text"
-                                id="age"
-                                name="age"
-                                value={calculateAge(formData.birthDate)}
-                                readOnly
-                                disabled
-                                placeholder="Calculado automaticamente"
-                                className="age-field"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="gender">Gênero*</label>
-                          <select
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            type="date"
+                            id="birthDate"
+                            name="birthDate"
+                            label="Data de Nascimento*"
+                            value={formData.birthDate}
+                            onChange={handleInputChange}
+                            disabled={!canEdit}
+                            error={!!errors.birthDate}
+                            helperText={errors.birthDate}
+                            InputLabelProps={{ shrink: true }}
+                          />
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="age"
+                            name="age"
+                            label="Idade"
+                            value={calculateAge(formData.birthDate)}
+                            disabled
+                            placeholder="Calculado automaticamente"
+                            InputLabelProps={{ shrink: true }}
+                            sx={{
+                              '& .MuiInputBase-input': {
+                                fontSize: '12px'
+                              }
+                            }}
+                          />
+                        </Box>
+                        <Box>
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
                             id="gender"
                             name="gender"
+                            label="Gênero*"
                             value={formData.gender}
                             onChange={handleInputChange}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
                           >
-                            <option value="">Selecione o gênero</option>
-                            <option value="Masculino">Masculino</option>
-                            <option value="Feminino">Feminino</option>
-                            <option value="Outro">Outro</option>
-                          </select>
-                        </div>
-                      </div>
+                            <MenuItem value="" disabled>Selecione</MenuItem>
+                            <MenuItem value="Masculino">Masculino</MenuItem>
+                            <MenuItem value="Feminino">Feminino</MenuItem>
+                            <MenuItem value="Outro">Outro</MenuItem>
+                          </TextField>
+                        </Box>
+                      </Box>
 
-                      {/* Segunda linha: Documento (Tipo + Número), Órgão Expedidor */}
-                      <div className="form-row">
-                        <div className="form-group document-type-number">
-                          <div className="document-container">
-                            <div className="form-subgroup">
-                              <label htmlFor="documentType">Tipo de Documento*</label>
-                              <select
-                                id="documentType"
-                                name="documentType"
-                                value={formData.documentType}
-                                onChange={handleInputChange}
-                                className="document-type-input"
-                              >
-                                <option value="CPF">CPF</option>
-                                <option value="RG">RG</option>
-                                <option value="CNH">CNH</option>
-                                <option value="Passaporte">Passaporte</option>
-                              </select>
-                            </div>
-                            <div className="form-subgroup">
-                              <label htmlFor="document">Documento*</label>
-                              <input
-                                type="text"
-                                id="document"
-                                name="document"
-                                value={formData.document}
-                                onChange={handleInputChange}
-                                placeholder="000.000.000-00"
-                                className="document-number-input"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="expeditorOrgan">Órgão Expedidor</label>
-                          <input
-                            type="text"
-                            id="expeditorOrgan"
+                      {/* Segunda linha do grid de migração */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '10px',
+                          px: 0,
+                          pb: '5px'
+                        }
+                      }}>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
+                            id="documentType-new"
+                            name="documentType"
+                            label="Tipo de Documento*"
+                            value={formData.documentType}
+                            onChange={handleInputChange}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                          >
+                            <MenuItem value="CPF">CPF</MenuItem>
+                            <MenuItem value="RG">RG</MenuItem>
+                            <MenuItem value="CNH">CNH</MenuItem>
+                            <MenuItem value="Passaporte">Passaporte</MenuItem>
+                          </TextField>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="document-new"
+                            name="document"
+                            label="Documento*"
+                            value={formData.document}
+                            onChange={handleInputChange}
+                            placeholder="000.000.000-00"
+                            disabled={!canEdit}
+                            error={!!errors.document}
+                            helperText={errors.document}
+                            InputLabelProps={{ shrink: true }}
+                          />
+                        </Box>
+                        <Box>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="expeditorOrgan-new"
                             name="expeditorOrgan"
+                            label="Órgão Expedidor"
                             value={formData.expeditorOrgan}
                             onChange={handleInputChange}
                             placeholder="SSP, DETRAN, etc."
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
                           />
-                        </div>
-                        <div className="form-group country-language">
-                          <div className="country-language-container">
-                            <div className="form-subgroup">
-                              <label htmlFor="originCountry">País de Origem*</label>
-                              <select
-                                id="originCountry"
-                                name="originCountry"
-                                value={formData.originCountry}
-                                onChange={handleInputChange}
-                                className="country-input"
-                              >
-                                <option value="Brasil">Brasil</option>
-                                <option value="Argentina">Argentina</option>
-                                <option value="Estados Unidos">Estados Unidos</option>
-                              </select>
-                            </div>
-                            <div className="form-subgroup">
-                              <label htmlFor="nativeLanguage">Idioma Nativo*</label>
-                              <select
-                                id="nativeLanguage"
-                                name="nativeLanguage"
-                                value={formData.nativeLanguage}
-                                onChange={handleInputChange}
-                                className="language-input"
-                              >
-                                <option value="Português">Português</option>
-                                <option value="Inglês">Inglês</option>
-                                <option value="Espanhol">Espanhol</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
+                            id="originCountry-new"
+                            name="originCountry"
+                            label="País de Origem*"
+                            value={formData.originCountry}
+                            onChange={handleInputChange}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                          >
+                            <MenuItem value="Brasil">Brasil</MenuItem>
+                            <MenuItem value="Argentina">Argentina</MenuItem>
+                            <MenuItem value="Estados Unidos">Estados Unidos</MenuItem>
+                          </TextField>
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
+                            id="nativeLanguage-new"
+                            name="nativeLanguage"
+                            label="Idioma Nativo*"
+                            value={formData.nativeLanguage}
+                            onChange={handleInputChange}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                          >
+                            <MenuItem value="Português">Português</MenuItem>
+                            <MenuItem value="Inglês">Inglês</MenuItem>
+                            <MenuItem value="Espanhol">Espanhol</MenuItem>
+                          </TextField>
+                        </Box>
+                      </Box>
 
-                      {/* Terceira linha: Responsabilidade, Telefone + Email */}
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label>É o próprio responsável?*</label>
-                          <div className="radio-group">
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isResponsible"
-                                value="true"
-                                checked={formData.isResponsible === true}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isResponsible', value: 'true' }
-                                })}
-                              />
-                              <span>Sim</span>
-                            </label>
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isResponsible"
-                                value="false"
-                                checked={formData.isResponsible === false}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isResponsible', value: 'false' }
-                                })}
-                              />
-                              <span>Não</span>
-                            </label>
-                          </div>
-                          {errors.isResponsible && <span className="error-message">{errors.isResponsible}</span>}
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="phone">
-                            Telefone (Whatsapp){formData.isResponsible ? '*' : ''}
-                          </label>
-                          <input
-                            type="text"
-                            id="phone"
+                      {/* Terceira linha do grid de migração */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '2px',
+                          px: 0,
+                          pb: '5px'
+                        },
+                        '& > div:nth-child(2), & > div:nth-child(3)': {
+                          pt: '10px'
+                        }
+                      }}>
+                        <Box>
+                          <FormControl component="fieldset" error={!!errors.isResponsible}>
+                            <FormLabel component="legend" sx={{ fontSize: '11px', color: '#6c757d', mb: 0.5, pt: 0 }}>
+                              É o próprio responsável?*
+                            </FormLabel>
+                            <RadioGroup
+                              row
+                              name="isResponsible"
+                              value={formData.isResponsible.toString()}
+                              onChange={(e) => handleInputChange({
+                                ...e,
+                                target: { ...e.target, name: 'isResponsible', value: e.target.value }
+                              })}
+                            >
+                              <FormControlLabel value="true" control={<Radio size="small" />} label="Sim" disabled={!canEdit} />
+                              <FormControlLabel value="false" control={<Radio size="small" />} label="Não" disabled={!canEdit} />
+                            </RadioGroup>
+                            {errors.isResponsible && <Typography variant="caption" color="error">{errors.isResponsible}</Typography>}
+                          </FormControl>
+                        </Box>
+                        <Box>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="phone-new"
                             name="phone"
+                            label={`Telefone (Whatsapp)${formData.isResponsible ? '*' : ''}`}
                             value={formatPhone(formData.phone)}
                             onChange={(e) => handleInputChange({
                               ...e,
                               target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
                             })}
                             placeholder="(11) 99999-9999"
-                            maxLength={15}
-                            className={errors.phone ? 'error' : ''}
+                            inputProps={{ maxLength: 15 }}
+                            error={!!errors.phone}
+                            helperText={errors.phone}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
                           />
-                          {errors.phone && <span className="error-message">{errors.phone}</span>}
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="email">
-                            E-mail{formData.isResponsible ? '*' : ''}
-                          </label>
-                          <input
+                        </Box>
+                        <Box>
+                          <TextField
+                            fullWidth
+                            size="small"
                             type="email"
-                            id="email"
+                            id="email-new"
                             name="email"
+                            label={`E-mail${formData.isResponsible ? '*' : ''}`}
                             value={formData.email}
                             onChange={handleInputChange}
                             placeholder="email@exemplo.com"
-                            className={errors.email ? 'error' : ''}
+                            error={!!errors.email}
+                            helperText={errors.email}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
                           />
-                          {errors.email && <span className="error-message">{errors.email}</span>}
-                        </div>
-                      </div>
+                        </Box>
+                      </Box>
+
 
                       {/* Responsáveis (condicional) */}
                       {!formData.isResponsible && (
@@ -1028,147 +1070,184 @@ const PatientRegister: React.FC = () => {
                           <div className="responsible-divider">
                             <h4>Responsáveis</h4>
                           </div>
-                          {/* 1º Responsável */}
-                          <div className="form-row">
-                            <div className="form-group">
-                              <label htmlFor="responsibleName">Nome Completo (1º Resp)*</label>
-                              <input
-                                type="text"
-                                id="responsibleName"
+
+                          {/* 1º Responsável - Grid de 3 colunas */}
+                          <Box sx={{
+                            display: 'grid',
+                            gridTemplateColumns: {
+                              xs: '1fr',
+                              md: 'repeat(3, 1fr)'
+                            },
+                            gap: 2,
+                            mb: '15px',
+                            '& > div': {
+                              pt: '10px',
+                              px: 0,
+                              pb: '5px'
+                            }
+                          }}>
+                            <Box>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                id="responsibleName-new"
                                 name="responsibleName"
+                                label="Nome Completo (1º Resp)*"
                                 value={formData.responsibleName}
                                 onChange={handleInputChange}
                                 placeholder="Nome completo do responsável"
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
                               />
-                            </div>
-                            <div className="form-group cpf-financial-group">
-                              <div className="cpf-financial-container">
-                                <div className="form-subgroup">
-                                  <label htmlFor="responsibleDocument">CPF</label>
-                                  <input
-                                    type="text"
-                                    id="responsibleDocument"
-                                    name="responsibleDocument"
-                                    value={formData.responsibleDocument}
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                id="responsibleDocument-new"
+                                name="responsibleDocument"
+                                label="CPF"
+                                value={formData.responsibleDocument}
+                                onChange={handleInputChange}
+                                placeholder="000.000.000-00"
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    name="responsibleFinancial"
+                                    checked={formData.responsibleFinancial}
                                     onChange={handleInputChange}
-                                    placeholder="000.000.000-00"
+                                    size="small"
+                                    disabled={!canEdit}
                                   />
-                                </div>
-                                <div className="form-subgroup checkbox-subgroup">
-                                  <label className="checkbox-label">
-                                    <input
-                                      type="checkbox"
-                                      name="responsibleFinancial"
-                                      checked={formData.responsibleFinancial}
-                                      onChange={handleInputChange}
-                                    />
-                                    Resp. Financeiro
-                                  </label>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="form-group phone-email">
-                              <div className="phone-email-container">
-                                <div className="form-subgroup">
-                                  <label htmlFor="responsiblePhone">Telefone (Whatsapp)</label>
-                                  <input
-                                    type="text"
-                                    id="responsiblePhone"
-                                    name="responsiblePhone"
-                                    value={formatPhone(formData.responsiblePhone)}
-                                    onChange={(e) => handleInputChange({
-                                      ...e,
-                                      target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
-                                    })}
-                                    placeholder="(11) 99999-9999"
-                                    maxLength={15}
-                                  />
-                                </div>
-                                <div className="form-subgroup">
-                                  <label htmlFor="responsibleEmail">E-mail</label>
-                                  <input
-                                    type="email"
-                                    id="responsibleEmail"
-                                    name="responsibleEmail"
-                                    value={formData.responsibleEmail}
-                                    onChange={handleInputChange}
-                                    placeholder="email@exemplo.com"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                                }
+                                label="Resp. Financeiro"
+                                sx={{ whiteSpace: 'nowrap' }}
+                              />
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                id="responsiblePhone-new"
+                                name="responsiblePhone"
+                                label="Telefone (Whatsapp)"
+                                value={formatPhone(formData.responsiblePhone)}
+                                onChange={(e) => handleInputChange({
+                                  ...e,
+                                  target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
+                                })}
+                                placeholder="(11) 99999-9999"
+                                inputProps={{ maxLength: 15 }}
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                              <TextField
+                                fullWidth
+                                size="small"
+                                type="email"
+                                id="responsibleEmail-new"
+                                name="responsibleEmail"
+                                label="E-mail"
+                                value={formData.responsibleEmail}
+                                onChange={handleInputChange}
+                                placeholder="email@exemplo.com"
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                            </Box>
+                          </Box>
 
-                          {/* 2º Responsável */}
-                          <div className="form-row">
-                            <div className="form-group">
-                              <label htmlFor="responsible2Name">Nome Completo (2º Resp)</label>
-                              <input
-                                type="text"
-                                id="responsible2Name"
+                          {/* 2º Responsável - Grid de 3 colunas */}
+                          <Box sx={{
+                            display: 'grid',
+                            gridTemplateColumns: {
+                              xs: '1fr',
+                              md: 'repeat(3, 1fr)'
+                            },
+                            gap: 2,
+                            mb: '15px',
+                            '& > div': {
+                              pt: '10px',
+                              px: 0,
+                              pb: '5px'
+                            }
+                          }}>
+                            <Box>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                id="responsible2Name-new"
                                 name="responsible2Name"
+                                label="Nome Completo (2º Resp)"
                                 value={formData.responsible2Name}
                                 onChange={handleInputChange}
                                 placeholder="Nome completo do 2º responsável"
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
                               />
-                            </div>
-                            <div className="form-group cpf-financial-group">
-                              <div className="cpf-financial-container">
-                                <div className="form-subgroup">
-                                  <label htmlFor="responsible2Document">CPF</label>
-                                  <input
-                                    type="text"
-                                    id="responsible2Document"
-                                    name="responsible2Document"
-                                    value={formData.responsible2Document}
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                id="responsible2Document-new"
+                                name="responsible2Document"
+                                label="CPF"
+                                value={formData.responsible2Document}
+                                onChange={handleInputChange}
+                                placeholder="000.000.000-00"
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    name="responsible2Financial"
+                                    checked={formData.responsible2Financial}
                                     onChange={handleInputChange}
-                                    placeholder="000.000.000-00"
+                                    size="small"
+                                    disabled={!canEdit}
                                   />
-                                </div>
-                                <div className="form-subgroup checkbox-subgroup">
-                                  <label className="checkbox-label">
-                                    <input
-                                      type="checkbox"
-                                      name="responsible2Financial"
-                                      checked={formData.responsible2Financial}
-                                      onChange={handleInputChange}
-                                    />
-                                    Resp. Financeiro
-                                  </label>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="form-group phone-email">
-                              <div className="phone-email-container">
-                                <div className="form-subgroup">
-                                  <label htmlFor="responsible2Phone">Telefone (Whatsapp)</label>
-                                  <input
-                                    type="text"
-                                    id="responsible2Phone"
-                                    name="responsible2Phone"
-                                    value={formatPhone(formData.responsible2Phone)}
-                                    onChange={(e) => handleInputChange({
-                                      ...e,
-                                      target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
-                                    })}
-                                    placeholder="(11) 99999-9999"
-                                    maxLength={15}
-                                  />
-                                </div>
-                                <div className="form-subgroup">
-                                  <label htmlFor="responsible2Email">E-mail</label>
-                                  <input
-                                    type="email"
-                                    id="responsible2Email"
-                                    name="responsible2Email"
-                                    value={formData.responsible2Email}
-                                    onChange={handleInputChange}
-                                    placeholder="email@exemplo.com"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                                }
+                                label="Resp. Financeiro"
+                                sx={{ whiteSpace: 'nowrap' }}
+                              />
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                              <TextField
+                                fullWidth
+                                size="small"
+                                id="responsible2Phone-new"
+                                name="responsible2Phone"
+                                label="Telefone (Whatsapp)"
+                                value={formatPhone(formData.responsible2Phone)}
+                                onChange={(e) => handleInputChange({
+                                  ...e,
+                                  target: { ...e.target, value: e.target.value.replace(/\D/g, '') }
+                                })}
+                                placeholder="(11) 99999-9999"
+                                inputProps={{ maxLength: 15 }}
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                              <TextField
+                                fullWidth
+                                size="small"
+                                type="email"
+                                id="responsible2Email-new"
+                                name="responsible2Email"
+                                label="E-mail"
+                                value={formData.responsible2Email}
+                                onChange={handleInputChange}
+                                placeholder="email@exemplo.com"
+                                disabled={!canEdit}
+                                InputLabelProps={{ shrink: true }}
+                              />
+                            </Box>
+                          </Box>
                         </>
                       )}
 
@@ -1177,228 +1256,359 @@ const PatientRegister: React.FC = () => {
                         <h4>Endereço</h4>
                       </div>
 
-                      {/* CEP e Logradouro na primeira linha */}
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="cep">CEP*</label>
-                          <div className="cep-input-container">
-                            <input
-                              type="text"
-                              id="cep"
-                              name="cep"
-                              value={formatCep(formData.cep)}
-                              onChange={(e) => {
-                                const rawValue = e.target.value;
-                                const cep = rawValue.replace(/\D/g, '');
+                      {/* Primeira linha de Endereço - Grid de 3 colunas */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '10px',
+                          px: 0,
+                          pb: '5px'
+                        }
+                      }}>
+                        <Box>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="cep-new"
+                            name="cep"
+                            label="CEP*"
+                            value={formatCep(formData.cep)}
+                            onChange={(e) => {
+                              const rawValue = e.target.value;
+                              const cep = rawValue.replace(/\D/g, '');
 
-                                // Permitir apenas 8 dígitos
-                                if (cep.length <= 8) {
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    cep: cep
-                                  }));
+                              // Permitir apenas 8 dígitos
+                              if (cep.length <= 8) {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  cep: cep
+                                }));
 
-                                  // Auto-busca quando CEP completo
-                                  if (cep.length === 8) {
-                                    handleCepSearch(cep);
-                                  }
+                                // Auto-busca quando CEP completo
+                                if (cep.length === 8) {
+                                  handleCepSearch(cep);
                                 }
-                              }}
-                              placeholder="00000-000"
-                              maxLength={9}
-                            />
-                            {cepLoading && <span className="cep-loading"><Search fontSize="small" /></span>}
-                          </div>
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="address">Logradouro*</label>
-                          <input
-                            type="text"
-                            id="address"
+                              }
+                            }}
+                            placeholder="00000-000"
+                            inputProps={{ maxLength: 9 }}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            InputProps={{
+                              endAdornment: cepLoading && <CircularProgress size={20} />
+                            }}
+                          />
+                        </Box>
+                        <Box>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="address-new"
                             name="address"
+                            label="Logradouro*"
                             value={formData.address}
                             onChange={handleInputChange}
                             placeholder="Rua, Avenida, etc."
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
                           />
-                        </div>
-                        <div className="form-group address-number-complement">
-                          <div className="number-complement-container">
-                            <div className="form-subgroup">
-                              <label htmlFor="number">Número*</label>
-                              <input
-                                type="text"
-                                id="number"
-                                name="number"
-                                value={formData.number}
-                                onChange={handleInputChange}
-                                placeholder="123"
-                                className="number-input"
-                              />
-                            </div>
-                            <div className="form-subgroup">
-                              <label htmlFor="complement">Complemento</label>
-                              <input
-                                type="text"
-                                id="complement"
-                                name="complement"
-                                value={formData.complement}
-                                onChange={handleInputChange}
-                                placeholder="Apto, Bloco, etc."
-                                className="complement-input"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="number-new"
+                            name="number"
+                            label="Número*"
+                            value={formData.number}
+                            onChange={handleInputChange}
+                            placeholder="123"
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                          />
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="complement-new"
+                            name="complement"
+                            label="Complemento"
+                            value={formData.complement}
+                            onChange={handleInputChange}
+                            placeholder="Apto, Bloco, etc."
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                          />
+                        </Box>
+                      </Box>
 
-                      {/* Bairro, Cidade, UF */}
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="neighborhood">Bairro*</label>
-                          <input
-                            type="text"
-                            id="neighborhood"
+                      {/* Segunda linha de Endereço - Grid de 3 colunas */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '10px',
+                          px: 0,
+                          pb: '5px'
+                        }
+                      }}>
+                        <Box>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="neighborhood-new"
                             name="neighborhood"
+                            label="Bairro*"
                             value={formData.neighborhood}
                             onChange={handleInputChange}
                             placeholder="Nome do bairro"
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
                           />
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="city">Cidade*</label>
-                          <input
-                            type="text"
-                            id="city"
+                        </Box>
+                        <Box>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            id="city-new"
                             name="city"
+                            label="Cidade*"
                             value={formData.city}
                             onChange={handleInputChange}
                             placeholder="Nome da cidade"
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
                           />
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="uf">UF*</label>
-                          <select
-                            id="uf"
+                        </Box>
+                        <Box>
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
+                            id="uf-new"
                             name="uf"
+                            label="UF*"
                             value={formData.uf}
                             onChange={handleInputChange}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
                           >
-                            <option value="">Selecione</option>
-                            <option value="AC">AC</option>
-                            <option value="AL">AL</option>
-                            <option value="AP">AP</option>
-                            <option value="AM">AM</option>
-                            <option value="BA">BA</option>
-                            <option value="CE">CE</option>
-                            <option value="DF">DF</option>
-                            <option value="ES">ES</option>
-                            <option value="GO">GO</option>
-                            <option value="MA">MA</option>
-                            <option value="MT">MT</option>
-                            <option value="MS">MS</option>
-                            <option value="MG">MG</option>
-                            <option value="PA">PA</option>
-                            <option value="PB">PB</option>
-                            <option value="PR">PR</option>
-                            <option value="PE">PE</option>
-                            <option value="PI">PI</option>
-                            <option value="RJ">RJ</option>
-                            <option value="RN">RN</option>
-                            <option value="RS">RS</option>
-                            <option value="RO">RO</option>
-                            <option value="RR">RR</option>
-                            <option value="SC">SC</option>
-                            <option value="SP">SP</option>
-                            <option value="SE">SE</option>
-                            <option value="TO">TO</option>
-                          </select>
-                        </div>
-                      </div>
+                            <MenuItem value="" disabled>Selecione</MenuItem>
+                            <MenuItem value="AC">AC</MenuItem>
+                            <MenuItem value="AL">AL</MenuItem>
+                            <MenuItem value="AP">AP</MenuItem>
+                            <MenuItem value="AM">AM</MenuItem>
+                            <MenuItem value="BA">BA</MenuItem>
+                            <MenuItem value="CE">CE</MenuItem>
+                            <MenuItem value="DF">DF</MenuItem>
+                            <MenuItem value="ES">ES</MenuItem>
+                            <MenuItem value="GO">GO</MenuItem>
+                            <MenuItem value="MA">MA</MenuItem>
+                            <MenuItem value="MT">MT</MenuItem>
+                            <MenuItem value="MS">MS</MenuItem>
+                            <MenuItem value="MG">MG</MenuItem>
+                            <MenuItem value="PA">PA</MenuItem>
+                            <MenuItem value="PB">PB</MenuItem>
+                            <MenuItem value="PR">PR</MenuItem>
+                            <MenuItem value="PE">PE</MenuItem>
+                            <MenuItem value="PI">PI</MenuItem>
+                            <MenuItem value="RJ">RJ</MenuItem>
+                            <MenuItem value="RN">RN</MenuItem>
+                            <MenuItem value="RS">RS</MenuItem>
+                            <MenuItem value="RO">RO</MenuItem>
+                            <MenuItem value="RR">RR</MenuItem>
+                            <MenuItem value="SC">SC</MenuItem>
+                            <MenuItem value="SP">SP</MenuItem>
+                            <MenuItem value="SE">SE</MenuItem>
+                            <MenuItem value="TO">TO</MenuItem>
+                          </TextField>
+                        </Box>
+                      </Box>
 
                       {/* Observações ocupando 3 colunas dentro da seção de endereço */}
                       <div className="responsible-divider">
                         <h4>Observações</h4>
                       </div>
 
-                      <div className="form-row">
-                        <div className="form-group observations-group">
-                          <label htmlFor="observations">Observações Gerais</label>
-                          <textarea
-                            id="observations"
+                      {/* Grid de Observações - 1 coluna ocupando o tamanho de 3 colunas */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '10px',
+                          px: 0,
+                          pb: '5px'
+                        }
+                      }}>
+                        <Box sx={{ gridColumn: 'span 3' }}>
+                          <TextField
+                            label="Observações Gerais"
+                            fullWidth
+                            multiline
+                            rows={3}
                             name="observations"
                             value={formData.observations}
                             onChange={handleInputChange}
-                            rows={4}
-                            placeholder="Observações importantes sobre o paciente, medicações, alergias, etc."
-                            className="observations-textarea"
+                            placeholder="Observações sobre o paciente"
+                            disabled={!canEdit}
+                            InputLabelProps={{
+                              shrink: inputs.multiline.labelShrink,
+                              sx: {
+                                fontSize: inputs.multiline.labelFontSize,
+                                color: inputs.multiline.labelColor,
+                                backgroundColor: inputs.multiline.labelBackground,
+                                padding: inputs.multiline.labelPadding,
+                                '&.Mui-focused': {
+                                  color: colors.primary,
+                                },
+                              },
+                            }}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                position: inputs.multiline.position,
+                                opacity: inputs.multiline.opacity,
+                                alignItems: inputs.multiline.alignItems,
+                                fontSize: inputs.multiline.fontSize,
+                                minHeight: inputs.multiline.minHeight,
+                                maxHeight: inputs.multiline.maxHeight,
+                                overflow: inputs.multiline.overflow,
+                                padding: 0,
+                                '& fieldset': {
+                                  borderColor: inputs.multiline.borderColor,
+                                },
+                                '&:hover fieldset': {
+                                  borderColor: inputs.multiline.borderColor,
+                                },
+                                '& textarea': {
+                                  wordWrap: inputs.multiline.wordWrap,
+                                  whiteSpace: inputs.multiline.whiteSpace,
+                                  padding: inputs.multiline.inputPadding,
+                                  height: inputs.multiline.textareaHeight,
+                                  maxHeight: inputs.multiline.textareaMaxHeight,
+                                  overflow: `${inputs.multiline.textareaOverflow} !important`,
+                                  boxSizing: inputs.multiline.textareaBoxSizing,
+                                  '&::-webkit-scrollbar': {
+                                    width: inputs.multiline.scrollbarWidth,
+                                  },
+                                  '&::-webkit-scrollbar-track': {
+                                    backgroundColor: inputs.multiline.scrollbarTrackColor,
+                                  },
+                                  '&::-webkit-scrollbar-thumb': {
+                                    backgroundColor: inputs.multiline.scrollbarThumbColor,
+                                    borderRadius: '4px',
+                                    '&:hover': {
+                                      backgroundColor: inputs.multiline.scrollbarThumbHoverColor,
+                                    },
+                                  },
+                                },
+                              },
+                            }}
                           />
-                        </div>
-                      </div>
+                        </Box>
+                      </Box>
 
-                      {/* Linha com 3 colunas: Canal de entrada, Indicado por e Status + Botões */}
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label htmlFor="entryChannel">Canal de entrada</label>
-                          <select
+                      {/* Grid: Canal de entrada, Indicado por e Status */}
+                      <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                          xs: '1fr',
+                          md: 'repeat(3, 1fr)'
+                        },
+                        gap: 2,
+                        mb: '15px',
+                        '& > div': {
+                          pt: '2px',
+                          px: 0,
+                          pb: '5px'
+                        },
+                        '& > div:nth-child(1), & > div:nth-child(2)': {
+                          pt: '10px'
+                        }
+                      }}>
+                        <Box>
+                          <TextField
+                            select
+                            fullWidth
+                            size="small"
                             id="entryChannel"
                             name="entryChannel"
+                            label="Canal de entrada"
                             value={formData.entryChannel}
                             onChange={handleInputChange}
+                            disabled={!canEdit}
+                            InputLabelProps={{ shrink: true }}
+                            SelectProps={{
+                              MenuProps: {
+                                PaperProps: {
+                                  sx: {
+                                    backgroundColor: 'white',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                                  },
+                                },
+                              },
+                            }}
                           >
-                            <option value="">Selecione</option>
-                            <option value="Instagram">Instagram</option>
-                            <option value="Facebook">Facebook</option>
-                            <option value="Google">Google</option>
-                            <option value="Site">Site</option>
-                            <option value="Indicação profissional">Indicação profissional</option>
-                            <option value="Indicação de conhecido">Indicação de conhecido</option>
-                            <option value="Outros">Outros</option>
-                          </select>
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="referredBy">Indicado por</label>
-                          <input
-                            type="text"
+                            <MenuItem value="">Selecione</MenuItem>
+                            <MenuItem value="Instagram">Instagram</MenuItem>
+                            <MenuItem value="Facebook">Facebook</MenuItem>
+                            <MenuItem value="Google">Google</MenuItem>
+                            <MenuItem value="Site">Site</MenuItem>
+                            <MenuItem value="Indicação profissional">Indicação profissional</MenuItem>
+                            <MenuItem value="Indicação de conhecido">Indicação de conhecido</MenuItem>
+                            <MenuItem value="Outros">Outros</MenuItem>
+                          </TextField>
+                        </Box>
+
+                        <Box>
+                          <TextField
+                            fullWidth
+                            size="small"
                             id="referredBy"
                             name="referredBy"
+                            label="Indicado por"
                             value={formData.referredBy || ''}
                             onChange={handleInputChange}
                             placeholder="Nome da pessoa ou instituição que indicou o paciente"
-                            disabled={!formData.entryChannel.includes('Indicação')}
+                            disabled={!canEdit || !formData.entryChannel.includes('Indicação')}
+                            InputLabelProps={{ shrink: true }}
                           />
-                        </div>
-                        <div className="form-group">
-                          <label>Status do Cadastro</label>
-                          <div className="radio-group">
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isComplete"
-                                value="true"
-                                checked={formData.isComplete === true}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isComplete', value: 'true' }
-                                })}
-                              />
-                              <span>Completo</span>
-                            </label>
-                            <label className="radio-label">
-                              <input
-                                type="radio"
-                                name="isComplete"
-                                value="false"
-                                checked={formData.isComplete === false}
-                                onChange={(e) => handleInputChange({
-                                  ...e,
-                                  target: { ...e.target, name: 'isComplete', value: 'false' }
-                                })}
-                              />
-                              <span>Incompleto</span>
-                            </label>
-                          </div>
-                        </div>
-                      </div>
+                        </Box>
+
+                        <Box>
+                          <FormControl component="fieldset">
+                            <FormLabel component="legend" sx={{ fontSize: '11px', color: '#6c757d', mb: 0.5, pt: 0 }}>
+                              Status do Cadastro
+                            </FormLabel>
+                            <RadioGroup
+                              row
+                              name="isComplete"
+                              value={formData.isComplete.toString()}
+                              onChange={(e) => handleInputChange({
+                                ...e,
+                                target: { ...e.target, name: 'isComplete', value: e.target.value }
+                              })}
+                            >
+                              <FormControlLabel value="true" control={<Radio size="small" />} label="Completo" />
+                              <FormControlLabel value="false" control={<Radio size="small" />} label="Incompleto" />
+                            </RadioGroup>
+                          </FormControl>
+                        </Box>
+                      </Box>
 
                       {/* Linha demarcatória turquesa entre observações e botões */}
                       <div className="form-divider-line"></div>
@@ -1412,22 +1622,74 @@ const PatientRegister: React.FC = () => {
                           {/* Segunda coluna vazia */}
                         </div>
                         <div className="form-group">
-                          <div className="form-actions-inline">
-                            <button
-                              type="button"
-                              className="btn-cancel-form-small"
-                              onClick={handleCancel}
-                            >
-                              Cancelar
-                            </button>
-                            <button
-                              type="submit"
-                              className="btn-save-small"
-                              disabled={isLoading}
-                            >
-                              {isLoading ? "Salvando..." : "Salvar"}
-                            </button>
-                          </div>
+                          <Box sx={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                            {isNewPatient || isEditing ? (
+                              <>
+                                <Button
+                                  variant="outlined"
+                                  onClick={handleCancel}
+                                  sx={{
+                                    color: '#6c757d',
+                                    borderColor: '#6c757d',
+                                    textTransform: 'none',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    padding: '0.5rem 1.5rem',
+                                    '&:hover': {
+                                      borderColor: '#5a6268',
+                                      backgroundColor: 'rgba(108, 117, 125, 0.04)',
+                                    },
+                                  }}
+                                >
+                                  Cancelar
+                                </Button>
+                                <Button
+                                  type="submit"
+                                  variant="contained"
+                                  disabled={isLoading}
+                                  sx={{
+                                    backgroundColor: '#03B4C6',
+                                    color: '#ffffff',
+                                    textTransform: 'none',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 600,
+                                    padding: '0.5rem 1.5rem',
+                                    boxShadow: 'none',
+                                    '&:hover': {
+                                      backgroundColor: '#029AAB',
+                                      boxShadow: 'none',
+                                    },
+                                    '&:disabled': {
+                                      backgroundColor: '#ced4da',
+                                      color: '#ffffff',
+                                    },
+                                  }}
+                                >
+                                  {isLoading ? "Salvando..." : "Salvar"}
+                                </Button>
+                              </>
+                            ) : (
+                              <Button
+                                variant="contained"
+                                onClick={handleEdit}
+                                sx={{
+                                  backgroundColor: '#03B4C6',
+                                  color: '#ffffff',
+                                  textTransform: 'none',
+                                  fontSize: '0.875rem',
+                                  fontWeight: 600,
+                                  padding: '0.5rem 1.5rem',
+                                  boxShadow: 'none',
+                                  '&:hover': {
+                                    backgroundColor: '#029AAB',
+                                    boxShadow: 'none',
+                                  },
+                                }}
+                              >
+                                Editar
+                              </Button>
+                            )}
+                          </Box>
                         </div>
                       </div>
                     </div>
@@ -1465,17 +1727,46 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Anotações */}
             {activeTab === 'anotacoes' && (
               <div className="tab-content-section">
-                <h3>Anotações do Paciente</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Anotações do Paciente
+                </Typography>
                 <div className="notes-section">
-                  <div className="notes-toolbar">
-                    <button className="btn-add-note">+ Nova Anotação</button>
-                    <select className="notes-filter">
-                      <option>Todas as anotações</option>
-                      <option>Consultas</option>
-                      <option>Observações</option>
-                      <option>Exames</option>
-                    </select>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Anotação
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="all"
+                      sx={{
+                        minWidth: '200px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">Todas as anotações</MenuItem>
+                      <MenuItem value="consultas">Consultas</MenuItem>
+                      <MenuItem value="observacoes">Observações</MenuItem>
+                      <MenuItem value="exames">Exames</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="notes-list">
                     <div className="note-item">
                       <div className="note-header">
@@ -1505,18 +1796,45 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Agenda */}
             {activeTab === 'agenda' && (
               <div className="tab-content-section">
-                <h3>Agenda do Paciente</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Agenda do Paciente
+                </Typography>
                 <div className="agenda-section">
-                  <div className="agenda-toolbar">
-                    <button className="btn-schedule">+ Agendar Consulta</button>
-                    <div className="agenda-filters">
-                      <select>
-                        <option>Próximos 30 dias</option>
-                        <option>Próximos 7 dias</option>
-                        <option>Histórico</option>
-                      </select>
-                    </div>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Agendar Consulta
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="30days"
+                      sx={{
+                        minWidth: '180px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="30days">Próximos 30 dias</MenuItem>
+                      <MenuItem value="7days">Próximos 7 dias</MenuItem>
+                      <MenuItem value="history">Histórico</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="appointments-list">
                     <div className="appointment-item future">
                       <div className="appointment-time">
@@ -1528,10 +1846,40 @@ const PatientRegister: React.FC = () => {
                         <p>Dr. João Silva - Cardiologia</p>
                         <span className="status confirmed">Confirmada</span>
                       </div>
-                      <div className="appointment-actions">
-                        <button className="btn-edit">Editar</button>
-                        <button className="btn-cancel">Cancelar</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#dc3545',
+                            color: '#dc3545',
+                            '&:hover': {
+                              borderColor: '#c82333',
+                              backgroundColor: 'rgba(220, 53, 69, 0.04)',
+                            },
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                      </Box>
                     </div>
                     <div className="appointment-item past">
                       <div className="appointment-time">
@@ -1543,9 +1891,24 @@ const PatientRegister: React.FC = () => {
                         <p>Dr. João Silva - Cardiologia</p>
                         <span className="status completed">Realizada</span>
                       </div>
-                      <div className="appointment-actions">
-                        <button className="btn-view">Ver Detalhes</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Ver Detalhes
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>
@@ -1555,11 +1918,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Diagnóstico */}
             {activeTab === 'diagnostico' && (
               <div className="tab-content-section">
-                <h3>Diagnósticos</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Diagnósticos
+                </Typography>
                 <div className="diagnosis-section">
-                  <div className="diagnosis-toolbar">
-                    <button className="btn-add-diagnosis">+ Novo Diagnóstico</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Novo Diagnóstico
+                    </Button>
+                  </Box>
                   <div className="diagnosis-list">
                     <div className="diagnosis-item">
                       <div className="diagnosis-header">
@@ -1581,17 +1962,46 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Avaliações */}
             {activeTab === 'avaliacoes' && (
               <div className="tab-content-section">
-                <h3>Avaliações</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Avaliações
+                </Typography>
                 <div className="evaluations-section">
-                  <div className="evaluations-toolbar">
-                    <button className="btn-new-evaluation">+ Nova Avaliação</button>
-                    <select className="evaluation-type-filter">
-                      <option>Todos os tipos</option>
-                      <option>Avaliação Inicial</option>
-                      <option>Reavaliação</option>
-                      <option>Avaliação Especializada</option>
-                    </select>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Avaliação
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="all"
+                      sx={{
+                        minWidth: '220px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">Todos os tipos</MenuItem>
+                      <MenuItem value="inicial">Avaliação Inicial</MenuItem>
+                      <MenuItem value="reavaliacao">Reavaliação</MenuItem>
+                      <MenuItem value="especializada">Avaliação Especializada</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="evaluations-list">
                     <div className="evaluation-item">
                       <div className="evaluation-header">
@@ -1599,10 +2009,25 @@ const PatientRegister: React.FC = () => {
                         <span className="evaluation-date">15/03/2024</span>
                       </div>
                       <p className="evaluation-summary">Avaliação inicial completa com ECG e ecocardiograma.</p>
-                      <div className="evaluation-footer">
+                      <Box sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
                         <span className="evaluation-status completed">Concluída</span>
-                        <button className="btn-view-evaluation">Ver Detalhes</button>
-                      </div>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Ver Detalhes
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>
@@ -1612,11 +2037,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Plano Terapêutico */}
             {activeTab === 'plano-terap' && (
               <div className="tab-content-section">
-                <h3>Plano Terapêutico</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Plano Terapêutico
+                </Typography>
                 <div className="therapy-plan-section">
-                  <div className="therapy-toolbar">
-                    <button className="btn-new-plan">+ Novo Plano</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Novo Plano
+                    </Button>
+                  </Box>
                   <div className="therapy-plans">
                     <div className="therapy-plan-item">
                       <div className="plan-header">
@@ -1651,11 +2094,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Evoluções */}
             {activeTab === 'evolucoes' && (
               <div className="tab-content-section">
-                <h3>Evoluções</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Evoluções
+                </Typography>
                 <div className="evolution-section">
-                  <div className="evolution-toolbar">
-                    <button className="btn-new-evolution">+ Nova Evolução</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Evolução
+                    </Button>
+                  </Box>
                   <div className="evolution-timeline">
                     <div className="evolution-item">
                       <div className="evolution-date">22/03/2024</div>
@@ -1715,11 +2176,29 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Receituário */}
             {activeTab === 'receituario' && (
               <div className="tab-content-section">
-                <h3>Receituário</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Receituário
+                </Typography>
                 <div className="prescription-section">
-                  <div className="prescription-toolbar">
-                    <button className="btn-new-prescription">+ Nova Receita</button>
-                  </div>
+                  <Box sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Nova Receita
+                    </Button>
+                  </Box>
                   <div className="prescriptions-list">
                     <div className="prescription-item">
                       <div className="prescription-header">
@@ -1734,10 +2213,25 @@ const PatientRegister: React.FC = () => {
                           <strong>Hidroclorotiazida 25mg</strong> - 1 comprimido ao dia, pela manhã
                         </div>
                       </div>
-                      <div className="prescription-footer">
+                      <Box sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'space-between' }}>
                         <span className="prescription-doctor">Dr. João Silva - CRM 12345</span>
-                        <button className="btn-print">Imprimir</button>
-                      </div>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Imprimir
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>
@@ -1747,17 +2241,46 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Arquivos */}
             {activeTab === 'arquivos' && (
               <div className="tab-content-section">
-                <h3>Arquivos</h3>
+                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
+                  Arquivos
+                </Typography>
                 <div className="files-section">
-                  <div className="files-toolbar">
-                    <button className="btn-upload">+ Upload Arquivo</button>
-                    <select className="file-type-filter">
-                      <option>Todos os tipos</option>
-                      <option>Exames</option>
-                      <option>Documentos</option>
-                      <option>Imagens</option>
-                    </select>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center' }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: '#48bb78',
+                        color: '#ffffff',
+                        textTransform: 'none',
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        boxShadow: 'none',
+                        '&:hover': {
+                          backgroundColor: '#38a169',
+                          boxShadow: 'none',
+                        },
+                      }}
+                    >
+                      + Upload Arquivo
+                    </Button>
+                    <TextField
+                      select
+                      size="small"
+                      defaultValue="all"
+                      sx={{
+                        minWidth: '180px',
+                        '& .MuiOutlinedInput-root': {
+                          height: '36px',
+                          backgroundColor: '#ffffff',
+                        },
+                      }}
+                    >
+                      <MenuItem value="all">Todos os tipos</MenuItem>
+                      <MenuItem value="exames">Exames</MenuItem>
+                      <MenuItem value="documentos">Documentos</MenuItem>
+                      <MenuItem value="imagens">Imagens</MenuItem>
+                    </TextField>
+                  </Box>
                   <div className="files-grid">
                     <div className="file-item">
                       <div className="file-icon"><InsertDriveFile fontSize="large" /></div>
@@ -1766,10 +2289,40 @@ const PatientRegister: React.FC = () => {
                         <p>Eletrocardiograma</p>
                         <span className="file-date">15/03/2024</span>
                       </div>
-                      <div className="file-actions">
-                        <button className="btn-download">Download</button>
-                        <button className="btn-view">Visualizar</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Download
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#03B4C6',
+                            color: '#03B4C6',
+                            '&:hover': {
+                              borderColor: '#029AAB',
+                              backgroundColor: 'rgba(3, 180, 198, 0.04)',
+                            },
+                          }}
+                        >
+                          Visualizar
+                        </Button>
+                      </Box>
                     </div>
                     <div className="file-item">
                       <div className="file-icon">🖼️</div>
@@ -1778,10 +2331,40 @@ const PatientRegister: React.FC = () => {
                         <p>Raio-X de Tórax</p>
                         <span className="file-date">15/03/2024</span>
                       </div>
-                      <div className="file-actions">
-                        <button className="btn-download">Download</button>
-                        <button className="btn-view">Visualizar</button>
-                      </div>
+                      <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#2196f3',
+                            color: '#2196f3',
+                            '&:hover': {
+                              borderColor: '#1976d2',
+                              backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                            },
+                          }}
+                        >
+                          Download
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            textTransform: 'none',
+                            fontSize: '0.75rem',
+                            borderColor: '#03B4C6',
+                            color: '#03B4C6',
+                            '&:hover': {
+                              borderColor: '#029AAB',
+                              backgroundColor: 'rgba(3, 180, 198, 0.04)',
+                            },
+                          }}
+                        >
+                          Visualizar
+                        </Button>
+                      </Box>
                     </div>
                   </div>
                 </div>

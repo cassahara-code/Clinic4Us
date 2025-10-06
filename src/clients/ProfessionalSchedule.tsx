@@ -1,10 +1,30 @@
 import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Button,
+  IconButton,
+  Tooltip,
+  Checkbox,
+  FormControlLabel,
+  Chip,
+  ListItemText,
+  OutlinedInput,
+} from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
 import { useNavigation } from "../contexts/RouterContext";
 import { CalendarToday, Delete, FilterAltOff, EventNote, PersonAdd, List, Folder } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
+import { colors, typography } from '../theme/designSystem';
 
 interface MenuItemProps {
   label: string;
@@ -42,7 +62,6 @@ interface LayoutEvent extends ScheduleEvent {
 
 const ProfessionalSchedule: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { goToPatientRegister, goToPatients } = useNavigation();
 
   const professionalsList = [
@@ -73,6 +92,7 @@ const ProfessionalSchedule: React.FC = () => {
   const [selectedPatients, setSelectedPatients] = useState<string[]>([]);
   const [isPatientDropdownOpen, setIsPatientDropdownOpen] = useState(false);
   const [patientSearchTerm, setPatientSearchTerm] = useState('');
+  const [hasFilterChanges, setHasFilterChanges] = useState(false);
 
   // Estados do calendário
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -259,22 +279,35 @@ const ProfessionalSchedule: React.FC = () => {
   // Fechar dropdown quando clicar fora
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isDropdownOpen) {
-        setIsDropdownOpen(false);
-      }
       if (isPatientDropdownOpen) {
         setIsPatientDropdownOpen(false);
       }
     };
 
-    if (isDropdownOpen || isPatientDropdownOpen) {
+    if (isPatientDropdownOpen) {
       document.addEventListener('click', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [isDropdownOpen, isPatientDropdownOpen]);
+  }, [isPatientDropdownOpen]);
+
+  // Verificar se há mudanças nos filtros
+  useEffect(() => {
+    const initialFilters = getInitialFilters();
+
+    const hasChanges =
+      filters.team !== initialFilters.team ||
+      filters.startDate !== initialFilters.startDate ||
+      filters.endDate !== initialFilters.endDate ||
+      selectedProfessionals.length !== initialFilters.professionals.length ||
+      selectedProfessionals.some(p => !initialFilters.professionals.includes(p)) ||
+      selectedPatients.length !== initialFilters.patients.length ||
+      patientSearchTerm !== '';
+
+    setHasFilterChanges(hasChanges);
+  }, [filters, selectedProfessionals, selectedPatients, patientSearchTerm]);
 
   const handleRevalidateLogin = () => {
     // Limpar sessão
@@ -674,9 +707,9 @@ const ProfessionalSchedule: React.FC = () => {
     setSelectedProfessionals(initialFilters.professionals);
     setSelectedPatients(initialFilters.patients);
     setPatientSearchTerm('');
+    setHasFilterChanges(false);
 
     // Fechar dropdowns
-    setIsDropdownOpen(false);
     setIsPatientDropdownOpen(false);
 
     await fetchAgendaData(initialFilters);
@@ -963,331 +996,405 @@ const ProfessionalSchedule: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main className="dashboard-main">
-        <div className="dashboard-container">
-          <div className="dashboard-content">
-            {/* Título da Agenda */}
-            <div className="page-header" style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <h1 className="page-title">Agenda Profissional</h1>
+      <Box className="dashboard-main">
+        <Container className="dashboard-container" maxWidth={false} disableGutters>
+          <Box className="dashboard-content">
+            {/* Título da Página */}
+            <Box className="page-header-container">
+              <Box className="page-header-content">
+                <Typography
+                  variant="h4"
+                  className="page-header-title"
+                  sx={{
+                    fontSize: '1.3rem',
+                    mb: 1,
+                    fontWeight: typography.fontWeight.semibold,
+                    color: colors.textPrimary
+                  }}
+                >
+                  Agenda Profissional
+                </Typography>
+                <Typography
+                  variant="body2"
+                  className="page-header-description"
+                  sx={{
+                    fontSize: typography.fontSize.sm,
+                    color: colors.textSecondary,
+                    pb: '15px'
+                  }}
+                >
+                  Gerencie sua agenda, visualize compromissos e organize horários de atendimento.
+                </Typography>
+              </Box>
               <FaqButton />
-            </div>
+            </Box>
 
             {/* Filtros da Agenda */}
-            <div className="schedule-filters" style={{
-              background: 'white',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-              border: '1px solid #e9ecef',
-              marginBottom: '1rem'
-            }}>
-              <div className="schedule-filters-grid" style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                gap: '0.75rem',
-                marginBottom: '1rem'
-              }}>
+            <Paper
+              className="schedule-filters"
+              elevation={0}
+              sx={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                padding: '1.5rem',
+                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+                border: '1px solid #e9ecef',
+                mb: 1
+              }}
+            >
+              <Box
+                className="schedule-filters-grid"
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                  gap: '0.75rem',
+                  mb: 1
+                }}
+              >
                 {/* Equipe */}
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '0.95rem',
-                    color: '#6c757d',
-                    marginBottom: '0.5rem'
-                  }}>Equipe</label>
-                  <select
+                <Box>
+                  <TextField
+                    select
+                    label="Equipe"
                     value={filters.team}
                     onChange={(e) => handleFilterChange('team', e.target.value)}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#03B4C6';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
+                    fullWidth
+                    size="small"
+                    InputLabelProps={{
+                      shrink: true,
                     }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#ced4da';
-                      e.target.style.boxShadow = 'none';
+                    SelectProps={{
+                      displayEmpty: true,
                     }}
-                    style={{
-                      width: '100%',
-                      padding: '0.375rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '1rem',
-                      color: '#495057',
-                      height: '40px',
-                      boxSizing: 'border-box',
-                      transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        height: '40px',
+                        fontSize: '1rem',
+                        backgroundColor: 'white',
+                        '& fieldset': {
+                          borderColor: '#ced4da',
+                          legend: {
+                            maxWidth: '100%',
+                          },
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#ced4da',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#03B4C6',
+                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                        },
+                      },
+                      '& .MuiSelect-select': {
+                        padding: '0.375rem 0.5rem',
+                        color: '#495057',
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                        color: '#6c757d',
+                        backgroundColor: 'white',
+                        paddingLeft: '4px',
+                        paddingRight: '4px',
+                        '&.Mui-focused': {
+                          color: '#03B4C6',
+                        },
+                      },
                     }}
                   >
-                    <option value="">Todas as equipes</option>
-                    <option value="Equipe Ninho">Equipe Ninho</option>
-                    <option value="Equipe Alpha">Equipe Alpha</option>
-                    <option value="Equipe Beta">Equipe Beta</option>
-                  </select>
-                </div>
+                    <MenuItem value="">Todas as equipes</MenuItem>
+                    <MenuItem value="Equipe Ninho">Equipe Ninho</MenuItem>
+                    <MenuItem value="Equipe Alpha">Equipe Alpha</MenuItem>
+                    <MenuItem value="Equipe Beta">Equipe Beta</MenuItem>
+                  </TextField>
+                </Box>
 
                 {/* Data inicial */}
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '0.95rem',
-                    color: '#6c757d',
-                    marginBottom: '0.5rem'
-                  }}>Data inicial</label>
-                  <input
+                <Box>
+                  <TextField
+                    label="Data inicial"
                     type="date"
                     value={filters.startDate}
                     onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#03B4C6';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
+                    fullWidth
+                    size="small"
+                    InputLabelProps={{
+                      shrink: true,
                     }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#ced4da';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '0.375rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '1rem',
-                      color: '#495057',
-                      minHeight: '40px',
-                      height: '40px',
-                      boxSizing: 'border-box',
-                      transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        height: '40px',
+                        fontSize: '1rem',
+                        backgroundColor: 'white',
+                        '& fieldset': {
+                          borderColor: '#ced4da',
+                          legend: {
+                            maxWidth: '100%',
+                          },
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#ced4da',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#03B4C6',
+                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                        },
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        padding: '0.375rem 0.5rem',
+                        color: '#495057',
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                        color: '#6c757d',
+                        backgroundColor: 'white',
+                        paddingLeft: '4px',
+                        paddingRight: '4px',
+                        '&.Mui-focused': {
+                          color: '#03B4C6',
+                        },
+                      },
                     }}
                   />
-                </div>
+                </Box>
 
                 {/* Data final */}
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '0.95rem',
-                    color: '#6c757d',
-                    marginBottom: '0.5rem'
-                  }}>Data final</label>
-                  <input
+                <Box>
+                  <TextField
+                    label="Data final"
                     type="date"
                     value={filters.endDate}
                     onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#03B4C6';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
+                    fullWidth
+                    size="small"
+                    InputLabelProps={{
+                      shrink: true,
                     }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#ced4da';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '0.375rem 0.5rem',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '1rem',
-                      color: '#495057',
-                      minHeight: '40px',
-                      height: '40px',
-                      boxSizing: 'border-box',
-                      transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        height: '40px',
+                        fontSize: '1rem',
+                        backgroundColor: 'white',
+                        '& fieldset': {
+                          borderColor: '#ced4da',
+                          legend: {
+                            maxWidth: '100%',
+                          },
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#ced4da',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#03B4C6',
+                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                        },
+                      },
+                      '& .MuiOutlinedInput-input': {
+                        padding: '0.375rem 0.5rem',
+                        color: '#495057',
+                      },
+                      '& .MuiInputLabel-root': {
+                        fontSize: '0.95rem',
+                        color: '#6c757d',
+                        backgroundColor: 'white',
+                        paddingLeft: '4px',
+                        paddingRight: '4px',
+                        '&.Mui-focused': {
+                          color: '#03B4C6',
+                        },
+                      },
                     }}
                   />
-                </div>
+                </Box>
 
                 {/* Nome do Profissional */}
-                <div style={{ position: 'relative', minWidth: '250px' }}>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '0.95rem',
-                    color: '#6c757d',
-                    marginBottom: '0.5rem'
-                  }}>Nome do Profissional</label>
-
-                  {/* Campo de seleção múltipla */}
-                  <div
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsDropdownOpen(!isDropdownOpen);
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '0.375rem 0.5rem',
-                      border: isDropdownOpen ? '1px solid #03B4C6' : '1px solid #ced4da',
-                      borderRadius: '4px',
-                      fontSize: '1rem',
-                      color: selectedProfessionals.length === 0 ? '#6c757d' : '#495057',
-                      background: 'white',
-                      cursor: 'pointer',
-                      height: '40px',
-                      boxSizing: 'border-box',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      transition: 'border-color 0.2s',
-                      outline: 'none',
-                      minWidth: '250px'
-                    }}
-                  >
-                    <span style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      flex: 1
-                    }}>
-                      {selectedProfessionals.length === 0
-                        ? 'Selecione'
-                        : selectedProfessionals.length === 1
-                        ? selectedProfessionals[0].split(' - ')[0]
-                        : `${selectedProfessionals.length} profissionais selecionados`
-                      }
-                    </span>
-                    <span style={{
-                      color: '#6c757d',
-                      marginLeft: '0.5rem',
-                      fontSize: '0.8rem',
-                      flexShrink: 0
-                    }}>
-                      {isDropdownOpen ? '▲' : '▼'}
-                    </span>
-                  </div>
-
-                  {/* Dropdown com checkboxes */}
-                  {isDropdownOpen && (
-                    <div style={{
-                      position: 'absolute',
-                      top: 'calc(100% + 2px)',
-                      left: 0,
-                      right: 0,
-                      background: 'white',
-                      border: '1px solid #ced4da',
-                      borderRadius: '4px',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                      zIndex: 1000,
-                      maxHeight: '250px',
-                      overflowY: 'auto'
-                    }}>
-                      {/* Opção Selecionar Todos */}
-                      <div
-                        onClick={(e) => {
+                <Box sx={{ minWidth: '250px' }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel
+                      id="professional-select-label"
+                      shrink
+                      sx={{
+                        fontSize: '0.95rem',
+                        color: '#6c757d',
+                        backgroundColor: 'white',
+                        paddingLeft: '4px',
+                        paddingRight: '4px',
+                        '&.Mui-focused': {
+                          color: '#03B4C6',
+                        },
+                      }}
+                    >
+                      Nome do Profissional
+                    </InputLabel>
+                    <Select
+                      labelId="professional-select-label"
+                      multiple
+                      value={selectedProfessionals}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        const filteredValue = typeof value === 'string' ? value.split(',') : value.filter((v: string) => v !== 'all');
+                        setSelectedProfessionals(filteredValue);
+                      }}
+                      input={<OutlinedInput label="Nome do Profissional" notched />}
+                      renderValue={(selected) => {
+                        if (selected.length === 0) {
+                          return <span style={{ color: '#6c757d' }}>Selecione</span>;
+                        }
+                        if (selected.length === 1) {
+                          return selected[0].split(' - ')[0];
+                        }
+                        return `${selected.length} selecionados`;
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          style: {
+                            maxHeight: 300,
+                          },
+                        },
+                      }}
+                      sx={{
+                        height: '40px',
+                        fontSize: '1rem',
+                        backgroundColor: 'white',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#ced4da',
+                          legend: {
+                            maxWidth: '100%',
+                          },
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#ced4da',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#03B4C6',
+                          boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                        },
+                        '& .MuiSelect-select': {
+                          padding: '0.375rem 0.5rem',
+                          color: '#495057',
+                        },
+                      }}
+                    >
+                      <MenuItem
+                        value="all"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
                           handleSelectAllProfessionals();
                         }}
-                        style={{
-                          padding: '0.75rem 0.5rem',
+                        sx={{
+                          backgroundColor: '#f8f9fa !important',
+                          fontWeight: 600,
+                          fontSize: '0.85rem',
                           borderBottom: '1px solid #e9ecef',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          background: '#f8f9fa',
-                          fontWeight: '600',
-                          fontSize: '0.85rem'
                         }}
                       >
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={selectedProfessionals.length === professionalsList.length}
-                          readOnly
-                          style={{
-                            marginRight: '0.75rem',
-                            transform: 'scale(1.1)'
+                          indeterminate={selectedProfessionals.length > 0 && selectedProfessionals.length < professionalsList.length}
+                          sx={{
+                            padding: '4px 8px 4px 4px',
+                            '& .MuiSvgIcon-root': {
+                              fontSize: '1.2rem',
+                            },
                           }}
                         />
-                        <span>Selecionar Todos ({professionalsList.length})</span>
-                      </div>
-
-                      {/* Lista de profissionais */}
-                      {professionalsList.map((professional, index) => (
-                        <div
-                          key={index}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleProfessionalToggle(professional);
+                        <ListItemText
+                          primary={`Selecionar Todos (${professionalsList.length})`}
+                          primaryTypographyProps={{
+                            fontSize: '0.85rem',
+                            fontWeight: 600,
                           }}
-                          style={{
-                            padding: '0.75rem 0.5rem',
-                            borderBottom: index < professionalsList.length - 1 ? '1px solid #e9ecef' : 'none',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            transition: 'background 0.2s',
-                            fontSize: '0.85rem'
+                        />
+                      </MenuItem>
+                      {professionalsList.map((professional) => (
+                        <MenuItem
+                          key={professional}
+                          value={professional}
+                          sx={{
+                            fontSize: '0.85rem',
+                            '&:hover': {
+                              backgroundColor: '#f8f9fa',
+                            },
                           }}
-                          onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
-                          onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
                         >
-                          <input
-                            type="checkbox"
+                          <Checkbox
                             checked={selectedProfessionals.includes(professional)}
-                            readOnly
-                            style={{
-                              marginRight: '0.75rem',
-                              transform: 'scale(1.1)'
+                            sx={{
+                              padding: '4px 8px 4px 4px',
+                              '& .MuiSvgIcon-root': {
+                                fontSize: '1.2rem',
+                              },
                             }}
                           />
-                          <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{
-                              fontWeight: '500',
-                              color: '#495057'
-                            }}>
-                              {professional.split(' - ')[0]}
-                            </span>
-                            <span style={{
+                          <ListItemText
+                            primary={professional.split(' - ')[0]}
+                            secondary={professional.split(' - ')[1]}
+                            primaryTypographyProps={{
+                              fontSize: '0.85rem',
+                              fontWeight: 500,
+                              color: '#495057',
+                            }}
+                            secondaryTypographyProps={{
                               fontSize: '0.75rem',
                               color: '#6c757d',
-                              marginTop: '2px'
-                            }}>
-                              {professional.split(' - ')[1]}
-                            </span>
-                          </div>
-                        </div>
+                            }}
+                          />
+                        </MenuItem>
                       ))}
-                    </div>
-                  )}
-                </div>
+                    </Select>
+                  </FormControl>
+                </Box>
 
                 {/* Busca paciente */}
                 <div className="schedule-patient-search" style={{ gridColumn: 'span 2', position: 'relative', minWidth: '300px' }}>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '0.95rem',
-                    color: '#6c757d',
-                    marginBottom: '0.5rem'
-                  }}>Busca paciente cadastrado (Digite pelo menos 3 letras)</label>
-
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <div style={{ flex: 1, position: 'relative' }}>
                       {/* Campo de busca */}
-                      <input
-                        type="text"
-                        placeholder={selectedPatients.length > 0 ? selectedPatients[0].split(' - ')[0] : "Digite o nome do paciente..."}
+                      <TextField
+                        label="Busca paciente cadastrado"
+                        placeholder="Digite o nome do paciente..."
                         value={selectedPatients.length > 0 ? selectedPatients[0].split(' - ')[0] : patientSearchTerm}
                         onChange={handlePatientSearchChange}
                         onClick={(e) => e.stopPropagation()}
-                        onFocus={(e) => {
-                          e.target.style.setProperty('border-color', '#03B4C6', 'important');
-                          e.target.style.setProperty('box-shadow', '0 0 0 3px rgba(3, 180, 198, 0.1)', 'important');
-                          e.target.style.setProperty('outline', 'none', 'important');
+                        fullWidth
+                        size="small"
+                        InputLabelProps={{
+                          shrink: true,
                         }}
-                        onBlur={(e) => {
-                          e.target.style.setProperty('border-color', '#ced4da', 'important');
-                          e.target.style.setProperty('box-shadow', 'none', 'important');
-                        }}
-                        style={{
-                          width: '100%',
-                          padding: '0.375rem 0.5rem',
-                          border: '1px solid #ced4da',
-                          borderRadius: '4px',
-                          fontSize: '1rem',
-                          color: selectedPatients.length > 0 ? '#495057' : '#495057',
-                          height: '40px',
-                          boxSizing: 'border-box',
-                          fontWeight: selectedPatients.length > 0 ? '500' : 'normal',
-                          transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            height: '40px',
+                            fontSize: '1rem',
+                            backgroundColor: 'white',
+                            '& fieldset': {
+                              borderColor: '#ced4da',
+                              legend: {
+                                maxWidth: '100%',
+                              },
+                            },
+                            '&:hover fieldset': {
+                              borderColor: '#ced4da',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#03B4C6',
+                              boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                            },
+                          },
+                          '& .MuiOutlinedInput-input': {
+                            padding: '0.375rem 0.5rem',
+                            color: '#495057',
+                            fontWeight: selectedPatients.length > 0 ? '500' : 'normal',
+                          },
+                          '& .MuiInputLabel-root': {
+                            fontSize: '0.95rem',
+                            color: '#6c757d',
+                            backgroundColor: 'white',
+                            paddingLeft: '4px',
+                            paddingRight: '4px',
+                            '&.Mui-focused': {
+                              color: '#03B4C6',
+                            },
+                          },
                         }}
                       />
 
@@ -1357,18 +1464,33 @@ const ProfessionalSchedule: React.FC = () => {
                         <CalendarToday />
                       </button>
 
-                      <button
+                      <IconButton
                         onClick={handleClearFilters}
-                        disabled={isLoading}
-                        className="btn-clear-filters"
+                        disabled={!hasFilterChanges || isLoading}
                         title="Limpar filtros"
+                        sx={{
+                          backgroundColor: '#6c757d',
+                          color: 'white',
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '4px',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            backgroundColor: '#5a6268',
+                          },
+                          '&:disabled': {
+                            backgroundColor: '#e9ecef',
+                            color: '#adb5bd',
+                            opacity: 0.6,
+                          },
+                        }}
                       >
                         <FilterAltOff fontSize="small" />
-                      </button>
+                      </IconButton>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Box>
 
               {/* Botões de ação */}
               <div className="schedule-filters-actions" style={{
@@ -1463,7 +1585,7 @@ const ProfessionalSchedule: React.FC = () => {
                   Lista de pacientes
                 </button>
               </div>
-            </div>
+            </Paper>
 
             {/* Navegação do Calendário */}
             <div className="schedule-calendar-nav" style={{
@@ -2196,9 +2318,9 @@ const ProfessionalSchedule: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </main>
+          </Box>
+        </Container>
+      </Box>
 
       {/* Modal de eventos do dia */}
       {isEventModalOpen && (

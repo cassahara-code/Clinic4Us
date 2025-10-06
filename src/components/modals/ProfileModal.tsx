@@ -1,4 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Typography,
+  IconButton,
+  Box,
+  Autocomplete,
+  Chip,
+  MenuItem,
+} from '@mui/material';
+import { Close } from '@mui/icons-material';
+import { colors, typography, inputs } from '../../theme/designSystem';
 
 // Interface para os dados do perfil
 export interface ProfileData {
@@ -106,240 +122,329 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     handleClose();
   };
 
-  // Toggle de funcionalidade
-  const toggleFunctionality = (functionalityName: string) => {
-    setFormData({
-      ...formData,
-      functionalities: formData.functionalities.map(f =>
-        f.name === functionalityName ? { ...f, included: !f.included } : f
-      )
-    });
-  };
-
-  if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.5)',
-        zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem'
-      }}
-      onClick={handleClose}
-    >
-      <div
-        style={{
-          background: 'white',
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
           borderRadius: '12px',
-          width: '100%',
-          maxWidth: '900px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
           maxHeight: '90vh',
-          overflow: 'auto',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Cabeçalho do modal */}
-        <div style={{
-          background: '#03B4C6',
-          color: 'white',
+        }
+      }}
+    >
+      {/* Cabeçalho do modal */}
+      <DialogTitle
+        sx={{
+          backgroundColor: colors.primary,
+          color: colors.white,
           padding: '1.5rem',
-          borderRadius: '12px 12px 0 0',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <h3 style={{
-            margin: 0,
+          alignItems: 'center',
+        }}
+      >
+        <Typography
+          variant="h6"
+          component="h3"
+          sx={{
             fontSize: '1.4rem',
-            fontWeight: '600'
-          }}>
-            {title || (mode === 'create' ? 'Novo Perfil' : 'Editar Perfil')}
-          </h3>
-          <button
-            onClick={handleClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              padding: '0.25rem'
-            }}
-          >
-            ×
-          </button>
-        </div>
+            fontWeight: typography.fontWeight.semibold,
+            margin: 0
+          }}
+        >
+          {title || (mode === 'create' ? 'Novo Perfil' : 'Editar Perfil')}
+        </Typography>
+        <IconButton
+          onClick={handleClose}
+          sx={{
+            color: colors.white,
+            padding: '0.25rem',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.1)'
+            }
+          }}
+        >
+          <Close />
+        </IconButton>
+      </DialogTitle>
 
-        {/* Formulário */}
-        <form style={{ padding: '1.5rem' }}>
-          {/* Primeira linha: Nome e Tipo */}
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
-            <div className="form-group">
-              <label>Nome do Perfil</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Ex: Secretário"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Tipo de Perfil</label>
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-              >
-                <option value="Nativo Cliente">Nativo Cliente</option>
-                <option value="Paciente">Paciente</option>
-                <option value="Sistema">Sistema</option>
-                <option value="Nativo Sistema">Nativo Sistema</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Segunda linha: Descrição */}
-          <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-            <label>Descrição</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Descreva as características e permissões deste perfil..."
-              rows={3}
-              style={{ resize: 'vertical' }}
+      {/* Conteúdo do modal */}
+      <DialogContent sx={{ padding: '1.5rem !important', paddingTop: '2rem !important' }}>
+        {/* Primeira linha: Nome e Tipo */}
+        <Box sx={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          <Box sx={{ flex: '2 1 300px', minWidth: '200px' }}>
+            <TextField
+              label="Nome do Perfil"
+              fullWidth
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Ex: Secretário"
+              InputLabelProps={{
+                shrink: true,
+                sx: {
+                  fontSize: inputs.default.labelFontSize,
+                  color: inputs.default.labelColor,
+                  backgroundColor: inputs.default.labelBackground,
+                  padding: inputs.default.labelPadding,
+                  '&.Mui-focused': {
+                    color: inputs.default.focus.labelColor,
+                  },
+                },
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  height: inputs.default.height,
+                  fontSize: inputs.default.fontSize,
+                  '& fieldset': {
+                    borderColor: inputs.default.borderColor,
+                    legend: {
+                      maxWidth: inputs.default.legendMaxWidth,
+                    },
+                  },
+                  '&:hover fieldset': {
+                    borderColor: inputs.default.hover.borderColor,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: inputs.default.focus.borderColor,
+                    boxShadow: inputs.default.focus.boxShadow,
+                  },
+                },
+              }}
             />
-          </div>
+          </Box>
 
-          {/* Funcionalidades */}
-          <div style={{ marginBottom: '2rem' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              color: '#2D3748',
-              marginBottom: '1rem'
-            }}>
-              Funcionalidades do Perfil
-            </label>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
-              gap: '0.75rem',
-              padding: '1rem',
-              background: '#F7FAFC',
-              borderRadius: '8px',
-              border: '1px solid #E2E8F0'
-            }}>
-              {formData.functionalities.map((functionality) => (
-                <label
-                  key={functionality.name}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    cursor: 'pointer',
-                    padding: '0.5rem',
-                    borderRadius: '6px',
-                    transition: 'background-color 0.2s',
-                    backgroundColor: functionality.included ? '#E6FFFA' : 'transparent'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!functionality.included) {
-                      e.currentTarget.style.backgroundColor = '#EDF2F7';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!functionality.included) {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={functionality.included}
-                    onChange={() => toggleFunctionality(functionality.name)}
-                    style={{
-                      width: '18px',
-                      height: '18px',
-                      cursor: 'pointer',
-                      accentColor: '#03B4C6'
-                    }}
-                  />
-                  <span style={{
-                    fontSize: '0.9rem',
-                    color: functionality.included ? '#2D3748' : '#718096',
-                    fontWeight: functionality.included ? '500' : 'normal'
-                  }}>
-                    {functionality.name}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Botões */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '1rem',
-            paddingTop: '1rem',
-            borderTop: '1px solid #e9ecef'
-          }}>
-            <button
-              type="button"
-              onClick={handleClose}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: '1px solid #ced4da',
-                borderRadius: '6px',
-                background: 'white',
-                color: '#6c757d',
-                fontSize: '1rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
+          <Box sx={{ flex: '1 1 180px', minWidth: '120px' }}>
+            <TextField
+              select
+              label="Tipo de Perfil"
+              fullWidth
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+              InputLabelProps={{
+                shrink: true,
+                sx: {
+                  fontSize: inputs.select.labelFontSize,
+                  color: inputs.select.labelColor,
+                  backgroundColor: inputs.select.labelBackground,
+                  padding: inputs.select.labelPadding,
+                },
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8f9fa';
-                e.currentTarget.style.borderColor = '#adb5bd';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
-                e.currentTarget.style.borderColor = '#ced4da';
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  height: inputs.select.height,
+                  fontSize: inputs.select.fontSize,
+                  '& fieldset': {
+                    borderColor: inputs.select.borderColor,
+                  },
+                },
               }}
             >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: 'none',
-                borderRadius: '6px',
-                background: '#03B4C6',
-                color: 'white',
-                fontSize: '1rem',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0298a8'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#03B4C6'}
-            >
-              {mode === 'create' ? 'Criar Perfil' : 'Salvar Alterações'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              <MenuItem value="Nativo Cliente">Nativo Cliente</MenuItem>
+              <MenuItem value="Paciente">Paciente</MenuItem>
+              <MenuItem value="Sistema">Sistema</MenuItem>
+              <MenuItem value="Nativo Sistema">Nativo Sistema</MenuItem>
+            </TextField>
+          </Box>
+        </Box>
+
+        {/* Segunda linha: Descrição */}
+        <Box sx={{ marginBottom: '1.5rem' }}>
+          <TextField
+            label="Descrição"
+            fullWidth
+            multiline
+            rows={3}
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Descreva as características e permissões deste perfil..."
+            InputLabelProps={{
+              shrink: inputs.multiline.labelShrink,
+              sx: {
+                fontSize: inputs.multiline.labelFontSize,
+                color: inputs.multiline.labelColor,
+                backgroundColor: inputs.multiline.labelBackground,
+                padding: inputs.multiline.labelPadding,
+                '&.Mui-focused': {
+                  color: colors.primary,
+                },
+              },
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                position: inputs.multiline.position,
+                opacity: inputs.multiline.opacity,
+                alignItems: inputs.multiline.alignItems,
+                fontSize: inputs.multiline.fontSize,
+                minHeight: inputs.multiline.minHeight,
+                maxHeight: inputs.multiline.maxHeight,
+                overflow: inputs.multiline.overflow,
+                padding: 0,
+                '& fieldset': {
+                  borderColor: inputs.multiline.borderColor,
+                },
+                '&:hover fieldset': {
+                  borderColor: inputs.multiline.borderColor,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: colors.primary,
+                },
+                '& textarea': {
+                  wordWrap: inputs.multiline.wordWrap,
+                  whiteSpace: inputs.multiline.whiteSpace,
+                  padding: inputs.multiline.inputPadding,
+                  height: inputs.multiline.textareaHeight,
+                  maxHeight: inputs.multiline.textareaMaxHeight,
+                  overflow: `${inputs.multiline.textareaOverflow} !important`,
+                  boxSizing: inputs.multiline.textareaBoxSizing,
+                  '&::-webkit-scrollbar': {
+                    width: inputs.multiline.scrollbarWidth,
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    backgroundColor: inputs.multiline.scrollbarTrackColor,
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    backgroundColor: inputs.multiline.scrollbarThumbColor,
+                    borderRadius: '4px',
+                    '&:hover': {
+                      backgroundColor: inputs.multiline.scrollbarThumbHoverColor,
+                    },
+                  },
+                },
+              },
+            }}
+          />
+        </Box>
+
+        {/* Funcionalidades */}
+        <Box sx={{ marginBottom: '2rem' }}>
+          <Autocomplete
+            multiple
+            options={AVAILABLE_FUNCTIONALITIES.map(name => ({ id: name, label: name }))}
+            value={formData.functionalities.filter(f => f.included).map(f => ({ id: f.name, label: f.name }))}
+            onChange={(_, newValue) => {
+              const updatedFunctionalities = AVAILABLE_FUNCTIONALITIES.map(name => ({
+                name,
+                included: newValue.some(v => v.id === name)
+              }));
+              setFormData({ ...formData, functionalities: updatedFunctionalities });
+            }}
+            getOptionLabel={(option) => option.label}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  {...getTagProps({ index })}
+                  key={option.id}
+                  label={option.label}
+                  sx={{
+                    backgroundColor: colors.primary,
+                    color: colors.white,
+                    '& .MuiChip-deleteIcon': {
+                      color: colors.white,
+                      '&:hover': {
+                        color: colors.white,
+                        opacity: 0.7
+                      }
+                    }
+                  }}
+                />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Funcionalidades do Perfil"
+                placeholder="Selecione as funcionalidades"
+                InputLabelProps={{
+                  shrink: true,
+                  sx: {
+                    fontSize: inputs.default.labelFontSize,
+                    color: inputs.default.labelColor,
+                    backgroundColor: inputs.default.labelBackground,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: inputs.default.focus.labelColor,
+                    },
+                  },
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    minHeight: 'calc(3 * 48px)',
+                    alignItems: 'flex-start',
+                    padding: '8px',
+                    fontSize: inputs.default.fontSize,
+                    '& fieldset': {
+                      borderColor: inputs.default.borderColor,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: inputs.default.hover.borderColor,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: inputs.default.focus.borderColor,
+                      boxShadow: inputs.default.focus.boxShadow,
+                    },
+                    '& .MuiAutocomplete-endAdornment': {
+                      top: '16px',
+                      alignSelf: 'flex-start'
+                    }
+                  }
+                }}
+              />
+            )}
+          />
+        </Box>
+
+      </DialogContent>
+
+      <DialogActions sx={{ padding: '1.5rem 2rem', borderTop: `1px solid ${colors.backgroundAlt}`, backgroundColor: colors.background, gap: '1rem' }}>
+        <Button
+          onClick={handleClose}
+          variant="outlined"
+          sx={{
+            padding: '0.75rem 1.5rem',
+            border: `1px solid ${colors.border}`,
+            borderRadius: '6px',
+            backgroundColor: colors.white,
+            color: colors.textSecondary,
+            fontSize: '1rem',
+            fontWeight: typography.fontWeight.medium,
+            textTransform: 'none',
+            '&:hover': {
+              backgroundColor: colors.background,
+              borderColor: '#adb5bd',
+            }
+          }}
+        >
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleSave}
+          variant="contained"
+          sx={{
+            padding: '0.75rem 1.5rem',
+            borderRadius: '6px',
+            backgroundColor: colors.primary,
+            color: colors.white,
+            fontSize: '1rem',
+            fontWeight: typography.fontWeight.medium,
+            textTransform: 'none',
+            boxShadow: 'none',
+            '&:hover': {
+              backgroundColor: '#029AAB',
+              boxShadow: 'none',
+              transform: 'translateY(-1px)',
+            }
+          }}
+        >
+          Salvar
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

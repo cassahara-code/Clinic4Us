@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  IconButton,
+  Paper
+} from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Person, Add, ViewModule, FilterAltOff } from '@mui/icons-material';
+import { Delete, Edit, Person, ViewModule } from '@mui/icons-material';
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import EntityModal, { EntityData } from "../components/modals/EntityModal";
 import { FaqButton } from "../components/FaqButton";
-import Pagination from "../components/Pagination";
+import StandardPagination from "../components/Pagination/StandardPagination";
+import AddButton from "../components/AddButton";
+import ClearFiltersButton from "../components/ClearFiltersButton";
+import { colors, typography, inputs } from "../theme/designSystem";
 
 interface UserSession {
   email: string;
@@ -46,6 +57,14 @@ const AdminEntities: React.FC = () => {
   const [isEntityModalOpen, setIsEntityModalOpen] = useState(false);
   const [entityModalMode, setEntityModalMode] = useState<'create' | 'edit'>('create');
   const [entityToEdit, setEntityToEdit] = useState<Entity | null>(null);
+  const [hasFilterChanges, setHasFilterChanges] = useState(false);
+
+  // Valores iniciais dos filtros
+  const initialFilters = {
+    searchTerm: '',
+    sortField: 'fantasyName' as 'fantasyName' | 'cnpjCpf' | 'socialName',
+    sortOrder: 'asc' as 'asc' | 'desc'
+  };
 
   // Dados de exemplo das entidades
   const [entities] = useState<Entity[]>(() => {
@@ -187,11 +206,24 @@ const AdminEntities: React.FC = () => {
   // Reset página quando filtros mudarem
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, sortOrder]);
+
+  // Verificar se há mudanças nos filtros
+  useEffect(() => {
+    const hasChanges =
+      searchTerm !== initialFilters.searchTerm ||
+      sortField !== initialFilters.sortField ||
+      sortOrder !== initialFilters.sortOrder;
+
+    setHasFilterChanges(hasChanges);
+  }, [searchTerm, sortField, sortOrder]);
 
   const clearFilters = () => {
-    setSearchTerm('');
+    setSearchTerm(initialFilters.searchTerm);
+    setSortField(initialFilters.sortField);
+    setSortOrder(initialFilters.sortOrder);
     setCurrentPage(1);
+    setHasFilterChanges(false);
   };
 
   const handleAddEntity = () => {
@@ -241,16 +273,15 @@ const AdminEntities: React.FC = () => {
   };
 
   if (!userSession) {
-    return <div>Carregando...</div>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <Typography>Carregando...</Typography>
+      </Box>
+    );
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-      background: '#f8f9fa'
-    }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <HeaderInternal
         showCTAButton={false}
         className="login-header"
@@ -265,259 +296,274 @@ const AdminEntities: React.FC = () => {
         onLogoClick={handleLogoClick}
       />
 
-      <main style={{
-        padding: '1rem',
-        paddingTop: '0.25rem',
-        minHeight: 'calc(100vh - 120px)',
-        background: '#f8f9fa',
-        marginTop: '20px'
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '100%',
-          margin: '0',
-          padding: '0'
-        }}>
-          {/* Título */}
-          <div style={{
+      <Box
+        component="main"
+        sx={{
+          padding: '1rem',
+          minHeight: 'calc(100vh - 120px)',
+          background: colors.background,
+          marginTop: '85px',
+          flex: 1
+        }}
+      >
+        <Container maxWidth={false} disableGutters>
+          {/* Título da Página */}
+          <Box sx={{
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'space-between',
-            marginBottom: '1.5rem'
+            alignItems: 'flex-start',
+            mb: 1,
+            gap: 2
           }}>
-            <h1 style={{
-              margin: '0',
-              fontSize: '1.3rem',
-              fontWeight: '600',
-              color: '#6c757d'
-            }}>
-              Entidades
-            </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <FaqButton />
-              <button
-                onClick={handleAddEntity}
-                title="Adicionar nova entidade"
-                className="btn-add"
+            <Box>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontSize: '1.3rem',
+                  mb: 1,
+                  fontWeight: typography.fontWeight.semibold,
+                  color: colors.textPrimary
+                }}
               >
-                <Add />
-              </button>
-            </div>
-          </div>
+                Entidades
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: typography.fontSize.sm,
+                  color: colors.textSecondary,
+                  pb: '15px'
+                }}
+              >
+                Gestão de clínicas e unidades cadastradas no sistema.
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <FaqButton />
+              <AddButton onClick={handleAddEntity} title="Adicionar nova entidade" />
+            </Box>
+          </Box>
 
-          {/* Filtros */}
-          <div className="schedule-filters" style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1.5rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginBottom: '1rem'
-          }}>
-            <div className="schedule-filters-grid" style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '0.75rem',
-              marginBottom: '1rem'
-            }}>
-              {/* Busca por palavra */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.95rem',
-                  color: '#6c757d',
-                  marginBottom: '0.5rem'
-                }}>Busca por palavra</label>
-                <input
-                  type="text"
-                  placeholder="Buscar"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.375rem 0.5rem',
-                    border: '1px solid #ced4da',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                    color: '#495057',
-                    height: '40px',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#03B4C6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(3, 180, 198, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#ced4da';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-              </div>
+          {/* Filtros, Paginação e Lista */}
+          <Paper
+            elevation={0}
+            sx={{
+              padding: '1.5rem',
+              mb: 2,
+              borderRadius: '12px',
+              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+              border: `1px solid ${colors.backgroundAlt}`,
+            }}
+          >
+            {/* Filtros */}
+            <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <TextField
+                label="Busca por palavra"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar"
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  flex: '2 1 300px',
+                  '& .MuiOutlinedInput-root': {
+                    height: inputs.default.height,
+                    '& fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&:hover fieldset': {
+                      borderColor: colors.border,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: colors.primary,
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    fontSize: inputs.default.labelFontSize,
+                    color: colors.textSecondary,
+                    backgroundColor: colors.white,
+                    padding: inputs.default.labelPadding,
+                    '&.Mui-focused': {
+                      color: colors.primary,
+                    },
+                  },
+                }}
+              />
 
-              {/* Botão limpar filtros */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'flex-end'
-              }}>
-                <button
-                  onClick={clearFilters}
-                  title="Limpar filtros"
-                  className="btn-clear-filters"
-                >
-                  <FilterAltOff fontSize="small" />
-                </button>
-              </div>
-            </div>
-          </div>
+              <Box sx={{ opacity: hasFilterChanges ? 1 : 0.5, pointerEvents: hasFilterChanges ? 'auto' : 'none' }}>
+                <ClearFiltersButton onClick={clearFilters} />
+              </Box>
+              </Box>
+            </Box>
 
-          {/* Paginação superior */}
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginBottom: '1rem'
-          }}>
-            <Pagination
+            {/* Paginação */}
+            <StandardPagination
               currentPage={currentPage}
               totalPages={totalPages}
               itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
               totalItems={filteredAndSortedEntities.length}
-              itemLabel="entidades"
               onPageChange={(page) => {
                 setCurrentPage(page);
                 setTimeout(scrollToTop, 100);
               }}
               onItemsPerPageChange={handleItemsPerPageChange}
             />
-          </div>
 
-          {/* Lista de entidades */}
-          <div className="admin-plans-list-container">
-            <div className="admin-plans-table">
-              <div className="admin-plans-table-header" style={{
+            {/* Lista de Entidades */}
+            <Box className="admin-plans-list-container" sx={{ mt: 2 }}>
+            <Box className="admin-plans-table">
+              <Box className="admin-plans-table-header" style={{
                 display: 'flex',
                 gridTemplateColumns: 'unset'
               }}>
-                <div
+                <Box
                   className="admin-plans-header-cell"
-                  style={{ flex: '0 0 250px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  sx={{ flex: '0 0 250px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
                   onClick={() => handleSort('fantasyName')}
                   title="Ordenar por nome fantasia"
                 >
                   N.Fantasia/Apelido {sortField === 'fantasyName' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div
+                </Box>
+                <Box
                   className="admin-plans-header-cell"
-                  style={{ flex: '0 0 180px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  sx={{ flex: '0 0 180px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
                   onClick={() => handleSort('cnpjCpf')}
                   title="Ordenar por CNPJ/CPF"
                 >
                   CNPJ/CPF {sortField === 'cnpjCpf' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div
+                </Box>
+                <Box
                   className="admin-plans-header-cell"
-                  style={{ flex: '1 1 auto', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
+                  sx={{ flex: '1 1 auto', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
                   onClick={() => handleSort('socialName')}
                   title="Ordenar por razão social"
                 >
                   Razão Social/Nome {sortField === 'socialName' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </div>
-                <div className="admin-plans-header-cell" style={{ flex: '0 0 180px', textAlign: 'left' }}>Horário de funcionamento</div>
-                <div className="admin-plans-header-cell" style={{ flex: '0 0 200px', justifyContent: 'flex-end' }}>Ações</div>
-              </div>
+                </Box>
+                <Box className="admin-plans-header-cell" sx={{ flex: '0 0 180px', textAlign: 'left' }}>Horário de funcionamento</Box>
+                <Box className="admin-plans-header-cell" sx={{ flex: '0 0 200px', justifyContent: 'flex-end' }}>Ações</Box>
+              </Box>
 
-              <div className="admin-plans-table-body">
+              <Box className="admin-plans-table-body">
                 {paginatedEntities.map((entity) => (
-                  <div
+                  <Box
                     key={entity.id}
                     className="admin-plans-table-row"
                     onClick={() => handleEntityRowClick(entity.id)}
-                    style={{
+                    sx={{
                       cursor: 'pointer',
                       display: 'flex',
                       gridTemplateColumns: 'unset'
                     }}
                   >
-                    <div className="admin-plans-cell" style={{ flex: '0 0 250px', textAlign: 'left' }} data-label="N.Fantasia/Apelido">
+                    <Box className="admin-plans-cell" sx={{ flex: '0 0 250px', textAlign: 'left' }} data-label="N.Fantasia/Apelido">
                       {entity.fantasyName}
-                    </div>
-                    <div className="admin-plans-cell" style={{ flex: '0 0 180px', textAlign: 'left' }} data-label="CNPJ/CPF">
+                    </Box>
+                    <Box className="admin-plans-cell" sx={{ flex: '0 0 180px', textAlign: 'left' }} data-label="CNPJ/CPF">
                       {entity.cnpjCpf}
-                    </div>
-                    <div className="admin-plans-cell" style={{ flex: '1 1 auto', textAlign: 'left', whiteSpace: 'normal', wordBreak: 'break-word' }} data-label="Razão Social/Nome">
+                    </Box>
+                    <Box className="admin-plans-cell" sx={{ flex: '1 1 auto', textAlign: 'left', whiteSpace: 'normal', wordBreak: 'break-word' }} data-label="Razão Social/Nome">
                       {entity.socialName}
-                    </div>
-                    <div className="admin-plans-cell" style={{ flex: '0 0 180px', textAlign: 'left' }} data-label="Horário de funcionamento">
+                    </Box>
+                    <Box className="admin-plans-cell" sx={{ flex: '0 0 180px', textAlign: 'left' }} data-label="Horário de funcionamento">
                       {entity.workingHours}
-                    </div>
-                    <div className="admin-plans-actions" style={{ flex: '0 0 200px', textAlign: 'right' }} data-label="Ações">
-                      <button
-                        className="btn-action-view"
-                        onClick={(e) => { e.stopPropagation(); handleEntityAction('view', entity.id); }}
-                        title="Visualizar entidade"
-                      >
-                        <ViewModule fontSize="small" />
-                      </button>
-                      <button
-                        className="btn-action-users"
-                        onClick={(e) => { e.stopPropagation(); handleEntityAction('user', entity.id); }}
-                        title="Gerenciar usuários"
-                      >
-                        <Person fontSize="small" />
-                      </button>
-                      <button
-                        className="btn-action-edit"
-                        onClick={(e) => { e.stopPropagation(); handleEntityAction('edit', entity.id); }}
-                        title="Editar entidade"
-                      >
-                        <Edit fontSize="small" />
-                      </button>
-                      <button
-                        className="btn-action-delete"
-                        onClick={(e) => { e.stopPropagation(); handleEntityAction('delete', entity.id); }}
-                        title="Excluir entidade"
-                      >
-                        <Delete fontSize="small" />
-                      </button>
-                    </div>
-                  </div>
+                    </Box>
+                    <Box className="admin-plans-cell admin-plans-actions" sx={{ flex: '0 0 200px', textAlign: 'right' }} data-label="Ações">
+                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); handleEntityAction('view', entity.id); }}
+                          title="Visualizar entidade"
+                          sx={{
+                            backgroundColor: '#6c757d',
+                            color: 'white',
+                            width: '32px',
+                            height: '32px',
+                            '&:hover': {
+                              backgroundColor: '#5a6268',
+                            }
+                          }}
+                        >
+                          <ViewModule sx={{ fontSize: '1rem' }} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); handleEntityAction('user', entity.id); }}
+                          title="Gerenciar usuários"
+                          sx={{
+                            backgroundColor: '#28a745',
+                            color: 'white',
+                            width: '32px',
+                            height: '32px',
+                            '&:hover': {
+                              backgroundColor: '#218838',
+                            }
+                          }}
+                        >
+                          <Person sx={{ fontSize: '1rem' }} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); handleEntityAction('edit', entity.id); }}
+                          title="Editar entidade"
+                          sx={{
+                            backgroundColor: '#03B4C6',
+                            color: 'white',
+                            width: '32px',
+                            height: '32px',
+                            '&:hover': {
+                              backgroundColor: '#029AAB',
+                            }
+                          }}
+                        >
+                          <Edit sx={{ fontSize: '1rem' }} />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => { e.stopPropagation(); handleEntityAction('delete', entity.id); }}
+                          title="Excluir entidade"
+                          sx={{
+                            backgroundColor: '#dc3545',
+                            color: 'white',
+                            width: '32px',
+                            height: '32px',
+                            '&:hover': {
+                              backgroundColor: '#c82333',
+                            }
+                          }}
+                        >
+                          <Delete sx={{ fontSize: '1rem' }} />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  </Box>
                 ))}
-              </div>
-            </div>
-          </div>
+              </Box>
+            </Box>
+            </Box>
 
-          {/* Paginação inferior */}
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '1rem',
-            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
-            border: '1px solid #e9ecef',
-            marginTop: '1rem'
-          }}>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
-              totalItems={filteredAndSortedEntities.length}
-              itemLabel="entidades"
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
-          </div>
-        </div>
-      </main>
+            {/* Paginação Inferior */}
+            <Box sx={{ mt: 2 }}>
+              <StandardPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredAndSortedEntities.length}
+                onPageChange={(page) => {
+                  setCurrentPage(page);
+                  setTimeout(scrollToTop, 100);
+                }}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
 
-      <FooterInternal />
+      <FooterInternal
+        simplified={true}
+        className="login-footer-component"
+      />
 
       <Toast
         message={toast.message}
@@ -552,7 +598,7 @@ const AdminEntities: React.FC = () => {
           endTime: entityToEdit.workingHours.split(' - ')[1] || '18:00'
         } : undefined}
       />
-    </div>
+    </Box>
   );
 };
 
