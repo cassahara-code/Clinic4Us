@@ -4630,28 +4630,7 @@ const PatientRegister: React.FC = () => {
                               </Box>
                             </Box>
 
-                            {/* Quarta linha: Intervenções */}
-                            <Box sx={{ mb: 1.5 }}>
-                              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.85rem', color: colors.text, mb: 0.5 }}>
-                                Intervenções:
-                              </Typography>
-                              <Box component="ul" sx={{
-                                margin: 0,
-                                paddingLeft: '1.5rem',
-                                '& li': {
-                                  fontSize: '0.8rem',
-                                  color: colors.textSecondary,
-                                  lineHeight: 1.6,
-                                  marginBottom: '0.25rem'
-                                }
-                              }}>
-                                {plan.interventions.map((intervention, index) => (
-                                  <li key={index}>{intervention}</li>
-                                ))}
-                              </Box>
-                            </Box>
-
-                            {/* Quinta linha: Barra de progresso */}
+                            {/* Quarta linha: Barra de progresso */}
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary, minWidth: '40px' }}>
                                 {plan.completionPercentage}%
@@ -4673,7 +4652,7 @@ const PatientRegister: React.FC = () => {
                               </Box>
                             </Box>
 
-                            {/* Sexta linha: Responsável */}
+                            {/* Quinta linha: Responsável */}
                             <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary }}>
                               Responsável: <strong style={{ color: colors.text }}>
                                 {plan.responsible === 'dr_silva' ? 'Dr. Silva' :
