@@ -177,20 +177,50 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           multiline
           rows={4}
-          InputLabelProps={{ shrink: true }}
+          InputLabelProps={{
+            shrink: inputs.multiline.labelShrink,
+            sx: {
+              fontSize: inputs.multiline.labelFontSize,
+              color: inputs.multiline.labelColor,
+              backgroundColor: inputs.multiline.labelBackground,
+              padding: inputs.multiline.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
           sx={{
             marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
-              '& fieldset': { borderColor: colors.border },
+              position: inputs.multiline.position,
+              opacity: inputs.multiline.opacity,
+              alignItems: inputs.multiline.alignItems,
+              fontSize: inputs.multiline.fontSize,
+              minHeight: inputs.multiline.minHeight,
+              maxHeight: inputs.multiline.maxHeight,
+              overflow: inputs.multiline.overflow,
+              padding: 0,
+              '& fieldset': { borderColor: inputs.multiline.borderColor },
               '&:hover fieldset': { borderColor: colors.border },
-              '&.Mui-focused fieldset': { borderColor: colors.primary }
-            },
-            '& .MuiInputLabel-root': {
-              fontSize: inputs.default.labelFontSize,
-              color: colors.textSecondary,
-              backgroundColor: colors.white,
-              padding: inputs.default.labelPadding,
-              '&.Mui-focused': { color: colors.primary }
+              '&.Mui-focused fieldset': { borderColor: colors.primary },
+              '& textarea': {
+                height: inputs.multiline.textareaHeight,
+                maxHeight: inputs.multiline.textareaMaxHeight,
+                overflow: inputs.multiline.textareaOverflow,
+                boxSizing: inputs.multiline.textareaBoxSizing,
+                padding: inputs.multiline.inputPadding,
+                '&::-webkit-scrollbar': {
+                  width: inputs.multiline.scrollbarWidth
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: inputs.multiline.scrollbarTrackColor
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: inputs.multiline.scrollbarThumbColor,
+                  borderRadius: '4px'
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: inputs.multiline.scrollbarThumbHoverColor
+                }
+              }
             }
           }}
         />
@@ -233,19 +263,49 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           multiline
           rows={4}
-          InputLabelProps={{ shrink: true }}
+          InputLabelProps={{
+            shrink: inputs.multiline.labelShrink,
+            sx: {
+              fontSize: inputs.multiline.labelFontSize,
+              color: inputs.multiline.labelColor,
+              backgroundColor: inputs.multiline.labelBackground,
+              padding: inputs.multiline.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
           sx={{
             '& .MuiOutlinedInput-root': {
-              '& fieldset': { borderColor: colors.border },
+              position: inputs.multiline.position,
+              opacity: inputs.multiline.opacity,
+              alignItems: inputs.multiline.alignItems,
+              fontSize: inputs.multiline.fontSize,
+              minHeight: inputs.multiline.minHeight,
+              maxHeight: inputs.multiline.maxHeight,
+              overflow: inputs.multiline.overflow,
+              padding: 0,
+              '& fieldset': { borderColor: inputs.multiline.borderColor },
               '&:hover fieldset': { borderColor: colors.border },
-              '&.Mui-focused fieldset': { borderColor: colors.primary }
-            },
-            '& .MuiInputLabel-root': {
-              fontSize: inputs.default.labelFontSize,
-              color: colors.textSecondary,
-              backgroundColor: colors.white,
-              padding: inputs.default.labelPadding,
-              '&.Mui-focused': { color: colors.primary }
+              '&.Mui-focused fieldset': { borderColor: colors.primary },
+              '& textarea': {
+                height: inputs.multiline.textareaHeight,
+                maxHeight: inputs.multiline.textareaMaxHeight,
+                overflow: inputs.multiline.textareaOverflow,
+                boxSizing: inputs.multiline.textareaBoxSizing,
+                padding: inputs.multiline.inputPadding,
+                '&::-webkit-scrollbar': {
+                  width: inputs.multiline.scrollbarWidth
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: inputs.multiline.scrollbarTrackColor
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: inputs.multiline.scrollbarThumbColor,
+                  borderRadius: '4px'
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: inputs.multiline.scrollbarThumbHoverColor
+                }
+              }
             }
           }}
         />
@@ -321,20 +381,50 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           multiline
           rows={4}
-          InputLabelProps={{ shrink: true }}
+          InputLabelProps={{
+            shrink: inputs.multiline.labelShrink,
+            sx: {
+              fontSize: inputs.multiline.labelFontSize,
+              color: inputs.multiline.labelColor,
+              backgroundColor: inputs.multiline.labelBackground,
+              padding: inputs.multiline.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
           sx={{
             marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
-              '& fieldset': { borderColor: colors.border },
+              position: inputs.multiline.position,
+              opacity: inputs.multiline.opacity,
+              alignItems: inputs.multiline.alignItems,
+              fontSize: inputs.multiline.fontSize,
+              minHeight: inputs.multiline.minHeight,
+              maxHeight: inputs.multiline.maxHeight,
+              overflow: inputs.multiline.overflow,
+              padding: 0,
+              '& fieldset': { borderColor: inputs.multiline.borderColor },
               '&:hover fieldset': { borderColor: colors.border },
-              '&.Mui-focused fieldset': { borderColor: colors.primary }
-            },
-            '& .MuiInputLabel-root': {
-              fontSize: inputs.default.labelFontSize,
-              color: colors.textSecondary,
-              backgroundColor: colors.white,
-              padding: inputs.default.labelPadding,
-              '&.Mui-focused': { color: colors.primary }
+              '&.Mui-focused fieldset': { borderColor: colors.primary },
+              '& textarea': {
+                height: inputs.multiline.textareaHeight,
+                maxHeight: inputs.multiline.textareaMaxHeight,
+                overflow: inputs.multiline.textareaOverflow,
+                boxSizing: inputs.multiline.textareaBoxSizing,
+                padding: inputs.multiline.inputPadding,
+                '&::-webkit-scrollbar': {
+                  width: inputs.multiline.scrollbarWidth
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: inputs.multiline.scrollbarTrackColor
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: inputs.multiline.scrollbarThumbColor,
+                  borderRadius: '4px'
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: inputs.multiline.scrollbarThumbHoverColor
+                }
+              }
             }
           }}
         />
@@ -347,19 +437,49 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           multiline
           rows={4}
-          InputLabelProps={{ shrink: true }}
+          InputLabelProps={{
+            shrink: inputs.multiline.labelShrink,
+            sx: {
+              fontSize: inputs.multiline.labelFontSize,
+              color: inputs.multiline.labelColor,
+              backgroundColor: inputs.multiline.labelBackground,
+              padding: inputs.multiline.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
           sx={{
             '& .MuiOutlinedInput-root': {
-              '& fieldset': { borderColor: colors.border },
+              position: inputs.multiline.position,
+              opacity: inputs.multiline.opacity,
+              alignItems: inputs.multiline.alignItems,
+              fontSize: inputs.multiline.fontSize,
+              minHeight: inputs.multiline.minHeight,
+              maxHeight: inputs.multiline.maxHeight,
+              overflow: inputs.multiline.overflow,
+              padding: 0,
+              '& fieldset': { borderColor: inputs.multiline.borderColor },
               '&:hover fieldset': { borderColor: colors.border },
-              '&.Mui-focused fieldset': { borderColor: colors.primary }
-            },
-            '& .MuiInputLabel-root': {
-              fontSize: inputs.default.labelFontSize,
-              color: colors.textSecondary,
-              backgroundColor: colors.white,
-              padding: inputs.default.labelPadding,
-              '&.Mui-focused': { color: colors.primary }
+              '&.Mui-focused fieldset': { borderColor: colors.primary },
+              '& textarea': {
+                height: inputs.multiline.textareaHeight,
+                maxHeight: inputs.multiline.textareaMaxHeight,
+                overflow: inputs.multiline.textareaOverflow,
+                boxSizing: inputs.multiline.textareaBoxSizing,
+                padding: inputs.multiline.inputPadding,
+                '&::-webkit-scrollbar': {
+                  width: inputs.multiline.scrollbarWidth
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: inputs.multiline.scrollbarTrackColor
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: inputs.multiline.scrollbarThumbColor,
+                  borderRadius: '4px'
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: inputs.multiline.scrollbarThumbHoverColor
+                }
+              }
             }
           }}
         />
@@ -626,19 +746,49 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           multiline
           rows={2}
-          InputLabelProps={{ shrink: true }}
+          InputLabelProps={{
+            shrink: inputs.multiline.labelShrink,
+            sx: {
+              fontSize: inputs.multiline.labelFontSize,
+              color: inputs.multiline.labelColor,
+              backgroundColor: inputs.multiline.labelBackground,
+              padding: inputs.multiline.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
           sx={{
             '& .MuiOutlinedInput-root': {
-              '& fieldset': { borderColor: colors.border },
+              position: inputs.multiline.position,
+              opacity: inputs.multiline.opacity,
+              alignItems: inputs.multiline.alignItems,
+              fontSize: inputs.multiline.fontSize,
+              minHeight: inputs.multiline.minHeight,
+              maxHeight: inputs.multiline.maxHeight,
+              overflow: inputs.multiline.overflow,
+              padding: 0,
+              '& fieldset': { borderColor: inputs.multiline.borderColor },
               '&:hover fieldset': { borderColor: colors.border },
-              '&.Mui-focused fieldset': { borderColor: colors.primary }
-            },
-            '& .MuiInputLabel-root': {
-              fontSize: inputs.default.labelFontSize,
-              color: colors.textSecondary,
-              backgroundColor: colors.white,
-              padding: inputs.default.labelPadding,
-              '&.Mui-focused': { color: colors.primary }
+              '&.Mui-focused fieldset': { borderColor: colors.primary },
+              '& textarea': {
+                height: inputs.multiline.textareaHeight,
+                maxHeight: inputs.multiline.textareaMaxHeight,
+                overflow: inputs.multiline.textareaOverflow,
+                boxSizing: inputs.multiline.textareaBoxSizing,
+                padding: inputs.multiline.inputPadding,
+                '&::-webkit-scrollbar': {
+                  width: inputs.multiline.scrollbarWidth
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: inputs.multiline.scrollbarTrackColor
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: inputs.multiline.scrollbarThumbColor,
+                  borderRadius: '4px'
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: inputs.multiline.scrollbarThumbHoverColor
+                }
+              }
             }
           }}
         />
