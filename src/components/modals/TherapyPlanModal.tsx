@@ -156,7 +156,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           placeholder="Título do plano"
           fullWidth
           sx={{
-            marginBottom: '1rem',
+            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -185,7 +185,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
             }
           }}
           sx={{
-            marginBottom: '1rem',
+            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               position: inputs.multiline.position,
               opacity: inputs.multiline.opacity,
@@ -239,7 +239,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1rem',
+            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -327,7 +327,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1rem',
+            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -365,7 +365,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1rem',
+            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -406,7 +406,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
             }
           }}
           sx={{
-            marginBottom: '1rem',
+            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               position: inputs.multiline.position,
               opacity: inputs.multiline.opacity,
@@ -501,7 +501,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
 
       {/* Coluna direita */}
       <Box sx={{ flex: '1' }}>
-        <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+        <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
           <TextField
             label="Período"
             value={formData.period}
@@ -561,7 +561,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           </TextField>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+        <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
           <TextField
             label="Data Inicial"
             type="date"
@@ -619,7 +619,6 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '0.5rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -654,7 +653,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           }
           label="Desconsiderar CID"
           sx={{
-            marginBottom: '1rem',
+            marginBottom: '1.5rem',
             '& .MuiFormControlLabel-label': {
               fontSize: '0.875rem',
               color: colors.textSecondary
@@ -670,7 +669,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1rem',
+            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -700,7 +699,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1rem',
+            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -730,7 +729,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1rem',
+            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
