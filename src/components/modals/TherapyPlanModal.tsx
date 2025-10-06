@@ -223,7 +223,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
         />
 
         <TextField
-          label="Nível de qualidade (Justificativa)*"
+          label="Nível de qualidade*"
           value={formData.qualityLevel}
           onChange={(e) => {
             const newValue = e.target.value;
@@ -319,7 +319,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
 
         <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
           <TextField
-            label="Nível de qualidade - pretendido (Objetivo)*"
+            label="Nível pretendido*"
             value={formData.qualityLevelPreferred}
             onChange={(e) => setFormData({ ...formData, qualityLevelPreferred: e.target.value })}
             select
@@ -356,7 +356,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           </TextField>
 
           <TextField
-            label="Quantidade de sessões para atingir o objetivo*"
+            label="Qtd. de sessões*"
             value={formData.sessionsQuantity}
             onChange={(e) => setFormData({ ...formData, sessionsQuantity: e.target.value })}
             select
