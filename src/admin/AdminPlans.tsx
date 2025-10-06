@@ -22,11 +22,6 @@ import StandardPagination from "../components/Pagination/StandardPagination";
 import AddButton from "../components/AddButton";
 import ClearFiltersButton from "../components/ClearFiltersButton";
 import { colors, typography, inputs } from "../theme/designSystem";
-import {
-  useCreateLegacyPlano,
-  useDeleteLegacyPlano,
-  useUpdateLegacyPlano,
-} from "../hooks/usePlano";
 
 interface MenuItemProps {
   label: string;
@@ -61,9 +56,6 @@ const AdminPlans: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
   const { goToDashboard } = useNavigation();
   const { toast, showToast, hideToast } = useToast();
-  const createLegacyPlanoMutation = useCreateLegacyPlano();
-  const updateLegacyPlanoMutation = useUpdateLegacyPlano();
-  const deleteLegacyPlanoMutation = useDeleteLegacyPlano();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<
