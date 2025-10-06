@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+// import App from "./App";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
 import "./global.css";
 import reportWebVitals from "./reportWebVitals";
 import { RouterProvider, useRouter } from "./contexts/RouterContext";
-import LandingPage from "./components/LandingPage";
 import Login from "./clients/Login";
 import AliasRegister from "./clients/AliasRegister";
 import Dashboard from "./clients/Dashboard";
@@ -18,8 +19,11 @@ import AdminFunctionalities from "./admin/AdminFunctionalities";
 import AdminEntities from "./admin/AdminEntities";
 import AdminFaq from "./admin/AdminFaq";
 import AdminProfessionalTypes from "./admin/AdminProfessionalTypes";
-import UserProfile from "./clients/UserProfile";
 import Faq from "./clients/Faq";
+import UserProfile from "./clients/UserProfile";
+import LandingPage from "./components/LandingPage";
+
+const queryClient = new QueryClient();
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -30,37 +34,37 @@ const AppContent = () => {
   const { currentPage } = useRouter();
 
   switch (currentPage) {
-    case 'login':
+    case "login":
       return <Login />;
-    case 'alias-register':
+    case "alias-register":
       return <AliasRegister />;
-    case 'dashboard':
+    case "dashboard":
       return <Dashboard />;
-    case 'schedule':
+    case "schedule":
       return <ProfessionalSchedule />;
-    case 'patients':
+    case "patients":
       return <PatientsList />;
-    case 'patient-register':
+    case "patient-register":
       return <PatientRegister />;
-    case 'page-model':
+    case "page-model":
       return <PageModel />;
-    case 'admin-plans':
+    case "admin-plans":
       return <AdminPlans />;
-    case 'admin-profiles':
+    case "admin-profiles":
       return <AdminProfiles />;
-    case 'admin-functionalities':
+    case "admin-functionalities":
       return <AdminFunctionalities />;
-    case 'admin-entities':
+    case "admin-entities":
       return <AdminEntities />;
-    case 'admin-faq':
+    case "admin-faq":
       return <AdminFaq />;
-    case 'admin-professional-types':
+    case "admin-professional-types":
       return <AdminProfessionalTypes />;
-    case 'faq':
+    case "faq":
       return <Faq />;
-    case 'user-profile':
+    case "user-profile":
       return <UserProfile />;
-    case 'landing':
+    case "landing":
     default:
       return <LandingPage />;
   }
@@ -77,7 +81,9 @@ const App = () => {
 
 root.render(
   <React.StrictMode>
-    <App />
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
   </React.StrictMode>
 );
 
