@@ -355,34 +355,47 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
             </Box>
           </Box>
 
-          {/* Quadros/Tabela à direita */}
+          {/* Períodos à direita */}
           <Box sx={{ flex: '1 1 auto' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: typography.fontWeight.semibold, marginBottom: '1rem' }}>
-              Quadros
+              Períodos
             </Typography>
             <Box sx={{ maxHeight: '500px', overflowY: 'auto' }}>
-              <Box sx={{ display: 'flex', padding: '0.75rem', backgroundColor: colors.backgroundAlt, borderBottom: `2px solid ${colors.border}`, fontWeight: typography.fontWeight.semibold, fontSize: typography.fontSize.sm }}>
+              {/* Cabeçalho da tabela */}
+              <Box sx={{
+                display: 'flex',
+                padding: '12px 16px',
+                backgroundColor: '#e9ecef',
+                borderBottom: '2px solid #dee2e6',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                color: '#495057'
+              }}>
                 <Box sx={{ flex: '0 0 150px', textAlign: 'left' }}>Título</Box>
                 <Box sx={{ flex: '0 0 150px', textAlign: 'left' }}>Data Inicial</Box>
                 <Box sx={{ flex: '0 0 150px', textAlign: 'left' }}>Data Final</Box>
                 <Box sx={{ flex: '0 0 100px', textAlign: 'right' }}>Ações</Box>
               </Box>
 
-              {periods.map((period) => (
+              {/* Linhas da tabela */}
+              {periods.map((period, index) => (
                 <Box
                   key={period.id}
                   sx={{
                     display: 'flex',
-                    padding: '1rem 0.75rem',
-                    borderBottom: `1px solid ${colors.backgroundAlt}`,
-                    '&:hover': { backgroundColor: colors.background }
+                    padding: '12px 16px',
+                    backgroundColor: index % 2 === 0 ? 'white' : '#fafbfc',
+                    borderBottom: '1px solid #e9ecef',
+                    '&:hover': { backgroundColor: '#f0f9fa' }
                   }}
                 >
-                  <Box sx={{ flex: '0 0 150px', textAlign: 'left', color: colors.text }}>{period.title}</Box>
-                  <Box sx={{ flex: '0 0 150px', textAlign: 'left', color: colors.textSecondary }}>
+                  <Box sx={{ flex: '0 0 150px', textAlign: 'left', color: '#212529', fontSize: '0.875rem' }}>
+                    {period.title}
+                  </Box>
+                  <Box sx={{ flex: '0 0 150px', textAlign: 'left', color: '#6c757d', fontSize: '0.875rem' }}>
                     {new Date(period.startDate).toLocaleDateString('pt-BR')}
                   </Box>
-                  <Box sx={{ flex: '0 0 150px', textAlign: 'left', color: colors.textSecondary }}>
+                  <Box sx={{ flex: '0 0 150px', textAlign: 'left', color: '#6c757d', fontSize: '0.875rem' }}>
                     {new Date(period.endDate).toLocaleDateString('pt-BR')}
                   </Box>
                   <Box sx={{ flex: '0 0 100px', textAlign: 'left', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
@@ -393,6 +406,8 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
                         backgroundColor: colors.primary,
                         color: colors.white,
                         padding: '0.5rem',
+                        width: '32px',
+                        height: '32px',
                         '&:hover': { backgroundColor: '#029AAB' }
                       }}
                     >
@@ -405,6 +420,8 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
                         backgroundColor: '#f0f0f0',
                         color: colors.textSecondary,
                         padding: '0.5rem',
+                        width: '32px',
+                        height: '32px',
                         '&:hover': { backgroundColor: '#e0e0e0' }
                       }}
                     >
