@@ -280,6 +280,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
             }
           }}
           sx={{
+            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               position: inputs.multiline.position,
               opacity: inputs.multiline.opacity,
@@ -315,77 +316,78 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
             }
           }}
         />
+
+        <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+          <TextField
+            label="Nível de qualidade - pretendido (Objetivo)*"
+            value={formData.qualityLevelPreferred}
+            onChange={(e) => setFormData({ ...formData, qualityLevelPreferred: e.target.value })}
+            select
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          >
+            <MenuItem value="">Selecione</MenuItem>
+            {qualityLevels
+              .filter((level) => {
+                // Se houver nível da justificativa selecionado, mostrar apenas os maiores ou iguais
+                if (formData.qualityLevel) {
+                  return level >= parseInt(formData.qualityLevel);
+                }
+                return true;
+              })
+              .map((level) => (
+                <MenuItem key={level} value={level.toString()}>{level}</MenuItem>
+              ))}
+          </TextField>
+
+          <TextField
+            label="Quantidade de sessões para atingir o objetivo*"
+            value={formData.sessionsQuantity}
+            onChange={(e) => setFormData({ ...formData, sessionsQuantity: e.target.value })}
+            select
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          >
+            <MenuItem value="">Selecione</MenuItem>
+            {[5, 10, 15, 20, 25, 30].map((num) => (
+              <MenuItem key={num} value={num.toString()}>{num}</MenuItem>
+            ))}
+          </TextField>
+        </Box>
       </Box>
 
       {/* Coluna central */}
       <Box sx={{ flex: '1' }}>
-        <TextField
-          label="Nível de qualidade - pretendido (Objetivo)*"
-          value={formData.qualityLevelPreferred}
-          onChange={(e) => setFormData({ ...formData, qualityLevelPreferred: e.target.value })}
-          select
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-          sx={{
-            marginBottom: '1.5rem',
-            '& .MuiOutlinedInput-root': {
-              height: inputs.default.height,
-              '& fieldset': { borderColor: colors.border },
-              '&:hover fieldset': { borderColor: colors.border },
-              '&.Mui-focused fieldset': { borderColor: colors.primary }
-            },
-            '& .MuiInputLabel-root': {
-              fontSize: inputs.default.labelFontSize,
-              color: colors.textSecondary,
-              backgroundColor: colors.white,
-              padding: inputs.default.labelPadding,
-              '&.Mui-focused': { color: colors.primary }
-            }
-          }}
-        >
-          <MenuItem value="">Selecione</MenuItem>
-          {qualityLevels
-            .filter((level) => {
-              // Se houver nível da justificativa selecionado, mostrar apenas os maiores ou iguais
-              if (formData.qualityLevel) {
-                return level >= parseInt(formData.qualityLevel);
-              }
-              return true;
-            })
-            .map((level) => (
-              <MenuItem key={level} value={level.toString()}>{level}</MenuItem>
-            ))}
-        </TextField>
-
-        <TextField
-          label="Quantidade de sessões para atingir o objetivo*"
-          value={formData.sessionsQuantity}
-          onChange={(e) => setFormData({ ...formData, sessionsQuantity: e.target.value })}
-          select
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-          sx={{
-            marginBottom: '1.5rem',
-            '& .MuiOutlinedInput-root': {
-              height: inputs.default.height,
-              '& fieldset': { borderColor: colors.border },
-              '&:hover fieldset': { borderColor: colors.border },
-              '&.Mui-focused fieldset': { borderColor: colors.primary }
-            },
-            '& .MuiInputLabel-root': {
-              fontSize: inputs.default.labelFontSize,
-              color: colors.textSecondary,
-              backgroundColor: colors.white,
-              padding: inputs.default.labelPadding,
-              '&.Mui-focused': { color: colors.primary }
-            }
-          }}
-        >
-          <MenuItem value="">Selecione</MenuItem>
-          {[5, 10, 15, 20, 25, 30].map((num) => (
-            <MenuItem key={num} value={num.toString()}>{num}</MenuItem>
-          ))}
-        </TextField>
 
         <TextField
           label="Métrica"
