@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation, useRouter } from "../contexts/RouterContext";
-import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Check, Warning, MedicalServices, Edit, Delete, Add, FilterAltOff, Close, PriorityHigh, OpenInNew } from '@mui/icons-material';
+import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Check, Warning, MedicalServices, Edit, Delete, Add, FilterAltOff, Close, PriorityHigh, OpenInNew, DateRange } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import PhotoUpload from "../components/PhotoUpload";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
+import TherapyPeriodModal from "../components/modals/TherapyPeriodModal";
 import {
   TextField,
   MenuItem,
@@ -230,6 +231,9 @@ const PatientRegister: React.FC = () => {
     observations: '',
     deadline: ''
   });
+
+  // Estado do modal de períodos de plano terapêutico
+  const [isTherapyPeriodModalOpen, setIsTherapyPeriodModalOpen] = useState(false);
 
   // Lista de pacientes para o modal (apenas o paciente atual)
   const patientsList = formData.name ? [formData.name] : [];
@@ -4528,28 +4532,49 @@ const PatientRegister: React.FC = () => {
                       </span>
                     </Tooltip>
                   </Box>
-                  <Tooltip title="Novo Plano Terapêutico" arrow>
-                    <IconButton
-                      onClick={() => {
-                        // TODO: Implementar modal de novo plano
-                        console.log('Novo plano terapêutico');
-                      }}
-                      sx={{
-                        borderColor: '#03B4C6',
-                        color: '#03B4C6',
-                        border: '2px solid #03B4C6',
-                        borderRadius: '8px',
-                        width: '40px',
-                        height: '40px',
-                        '&:hover': {
-                          borderColor: '#029AAB',
-                          backgroundColor: 'rgba(3, 180, 198, 0.08)',
-                        },
-                      }}
-                    >
-                      <Add />
-                    </IconButton>
-                  </Tooltip>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Tooltip title="Administração de Períodos" arrow>
+                      <IconButton
+                        onClick={() => setIsTherapyPeriodModalOpen(true)}
+                        sx={{
+                          borderColor: '#6c757d',
+                          color: '#6c757d',
+                          border: '2px solid #6c757d',
+                          borderRadius: '8px',
+                          width: '40px',
+                          height: '40px',
+                          '&:hover': {
+                            borderColor: '#5a6268',
+                            backgroundColor: 'rgba(108, 117, 125, 0.08)',
+                          },
+                        }}
+                      >
+                        <DateRange />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Novo Plano Terapêutico" arrow>
+                      <IconButton
+                        onClick={() => {
+                          // TODO: Implementar modal de novo plano
+                          console.log('Novo plano terapêutico');
+                        }}
+                        sx={{
+                          borderColor: '#03B4C6',
+                          color: '#03B4C6',
+                          border: '2px solid #03B4C6',
+                          borderRadius: '8px',
+                          width: '40px',
+                          height: '40px',
+                          '&:hover': {
+                            borderColor: '#029AAB',
+                            backgroundColor: 'rgba(3, 180, 198, 0.08)',
+                          },
+                        }}
+                      >
+                        <Add />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </Box>
 
                 {/* Contador de registros */}
@@ -5468,6 +5493,17 @@ const PatientRegister: React.FC = () => {
         title={appointmentModalMode === 'create' ? 'Agendamento' : 'Editar Agendamento'}
         patientsList={patientsList}
         disablePatientField={true}
+      />
+
+      {/* Modal de Períodos de Plano Terapêutico */}
+      <TherapyPeriodModal
+        isOpen={isTherapyPeriodModalOpen}
+        onClose={() => setIsTherapyPeriodModalOpen(false)}
+        onSave={(periods) => {
+          // TODO: Implementar salvamento de períodos
+          console.log('Períodos salvos:', periods);
+          setIsTherapyPeriodModalOpen(false);
+        }}
       />
 
       {/* Modal de Inserção/Edição de Diagnóstico */}
