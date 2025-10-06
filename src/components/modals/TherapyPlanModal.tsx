@@ -75,10 +75,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
   );
 
   // Mock data para os selects
-  const qualityLevels = [
-    'Pretendido (Objetivo)',
-    'Deve ser pretendido que é marcador da justificativa'
-  ];
+  const qualityLevels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   const priorities = ['Baixa', 'Média', 'Alta'];
   const periods = ['Período 01', 'Período 02'];
@@ -228,7 +225,16 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
         <TextField
           label="Nível de qualidade (Justificativa)*"
           value={formData.qualityLevel}
-          onChange={(e) => setFormData({ ...formData, qualityLevel: e.target.value })}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            setFormData((prev) => {
+              // Se o novo nível da justificativa for maior que o pretendido, limpar o pretendido
+              if (prev.qualityLevelPreferred && parseInt(newValue) > parseInt(prev.qualityLevelPreferred)) {
+                return { ...prev, qualityLevel: newValue, qualityLevelPreferred: '' };
+              }
+              return { ...prev, qualityLevel: newValue };
+            });
+          }}
           select
           fullWidth
           InputLabelProps={{ shrink: true }}
@@ -251,7 +257,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
         >
           <MenuItem value="">Selecione</MenuItem>
           {qualityLevels.map((level) => (
-            <MenuItem key={level} value={level}>{level}</MenuItem>
+            <MenuItem key={level} value={level.toString()}>{level}</MenuItem>
           ))}
         </TextField>
 
@@ -338,9 +344,17 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           }}
         >
           <MenuItem value="">Selecione</MenuItem>
-          {qualityLevels.map((level) => (
-            <MenuItem key={level} value={level}>{level}</MenuItem>
-          ))}
+          {qualityLevels
+            .filter((level) => {
+              // Se houver nível da justificativa selecionado, mostrar apenas os maiores ou iguais
+              if (formData.qualityLevel) {
+                return level >= parseInt(formData.qualityLevel);
+              }
+              return true;
+            })
+            .map((level) => (
+              <MenuItem key={level} value={level.toString()}>{level}</MenuItem>
+            ))}
         </TextField>
 
         <TextField
