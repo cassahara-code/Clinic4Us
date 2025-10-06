@@ -10,10 +10,16 @@ import {
   Box,
   MenuItem,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  FormControl,
+  InputLabel,
+  Select,
+  OutlinedInput,
+  Chip
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { colors, typography, inputs } from '../../theme/designSystem';
+import type { SelectChangeEvent } from '@mui/material/Select';
 
 interface TherapyPlanFormData {
   title: string;
@@ -33,7 +39,7 @@ interface TherapyPlanFormData {
   team: string;
   professional: string;
   specialty: string;
-  responsibles: string;
+  responsibles: string[];
 }
 
 interface TherapyPlanModalProps {
@@ -70,7 +76,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
       team: '',
       professional: '',
       specialty: '',
-      responsibles: ''
+      responsibles: []
     }
   );
 
@@ -83,6 +89,15 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
   const teams = ['Equipe 1', 'Equipe 2', 'Equipe 3'];
   const professionals = ['Profissional 1', 'Profissional 2', 'Profissional 3'];
   const specialties = ['Especialidade 1', 'Especialidade 2', 'Especialidade 3'];
+
+  // Mock de responsáveis disponíveis
+  const availableResponsibles = [
+    'Dr. Silva - Coordenação',
+    'Dra. Oliveira - Supervisão',
+    'Dr. Santos - Gestão',
+    'Dra. Costa - Administração',
+    'Dr. Pereira - Técnico'
+  ];
 
   const handleSave = () => {
     if (formData.title.trim()) {
@@ -110,7 +125,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
       team: '',
       professional: '',
       specialty: '',
-      responsibles: ''
+      responsibles: []
     });
     onClose();
   };
@@ -750,60 +765,89 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           ))}
         </TextField>
 
-        <TextField
-          label="Responsáveis"
-          value={formData.responsibles}
-          onChange={(e) => setFormData({ ...formData, responsibles: e.target.value })}
-          placeholder="Responsáveis"
+        <FormControl
           fullWidth
-          multiline
-          rows={2}
-          InputLabelProps={{
-            shrink: inputs.multiline.labelShrink,
-            sx: {
-              fontSize: inputs.multiline.labelFontSize,
-              color: inputs.multiline.labelColor,
-              backgroundColor: inputs.multiline.labelBackground,
-              padding: inputs.multiline.labelPadding,
+        >
+          <InputLabel
+            id="responsibles-label"
+            sx={{
+              fontSize: inputs.default.labelFontSize,
+              color: colors.textSecondary,
+              backgroundColor: colors.white,
+              padding: inputs.default.labelPadding,
               '&.Mui-focused': { color: colors.primary }
-            }
-          }}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              position: inputs.multiline.position,
-              opacity: inputs.multiline.opacity,
-              alignItems: inputs.multiline.alignItems,
-              fontSize: inputs.multiline.fontSize,
-              minHeight: inputs.multiline.minHeight,
-              maxHeight: inputs.multiline.maxHeight,
-              overflow: inputs.multiline.overflow,
-              padding: 0,
-              '& fieldset': { borderColor: inputs.multiline.borderColor },
+            }}
+          >
+            Responsáveis
+          </InputLabel>
+          <Select
+            labelId="responsibles-label"
+            id="responsibles-select"
+            multiple
+            value={formData.responsibles}
+            onChange={(event: SelectChangeEvent<string[]>) => {
+              const value = event.target.value;
+              setFormData({
+                ...formData,
+                responsibles: typeof value === 'string' ? value.split(',') : value
+              });
+            }}
+            input={<OutlinedInput label="Responsáveis" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value) => (
+                  <Chip
+                    key={value}
+                    label={value}
+                    sx={{
+                      backgroundColor: colors.backgroundAlt,
+                      height: '24px',
+                      fontSize: '0.8125rem'
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
+            sx={{
+              minHeight: '96px',
+              maxHeight: '96px',
+              '& .MuiSelect-select': {
+                minHeight: '96px !important',
+                maxHeight: '96px !important',
+                overflowY: 'auto !important',
+                padding: '8px',
+                alignItems: 'flex-start',
+                display: 'flex',
+                flexWrap: 'wrap'
+              },
+              '& fieldset': { borderColor: colors.border },
               '&:hover fieldset': { borderColor: colors.border },
-              '&.Mui-focused fieldset': { borderColor: colors.primary },
-              '& textarea': {
-                height: inputs.multiline.textareaHeight,
-                maxHeight: inputs.multiline.textareaMaxHeight,
-                overflow: inputs.multiline.textareaOverflow,
-                boxSizing: inputs.multiline.textareaBoxSizing,
-                padding: inputs.multiline.inputPadding,
-                '&::-webkit-scrollbar': {
-                  width: inputs.multiline.scrollbarWidth
+              '&.Mui-focused fieldset': { borderColor: colors.primary }
+            }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 48 * 4.5 + 8,
+                  width: 250,
                 },
-                '&::-webkit-scrollbar-track': {
-                  background: inputs.multiline.scrollbarTrackColor
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  background: inputs.multiline.scrollbarThumbColor,
-                  borderRadius: '4px'
-                },
-                '&::-webkit-scrollbar-thumb:hover': {
-                  background: inputs.multiline.scrollbarThumbHoverColor
-                }
-              }
-            }
-          }}
-        />
+              },
+            }}
+          >
+            {availableResponsibles.map((responsible) => (
+              <MenuItem
+                key={responsible}
+                value={responsible}
+                sx={{
+                  fontWeight: formData.responsibles.includes(responsible)
+                    ? typography.fontWeight.semibold
+                    : typography.fontWeight.normal
+                }}
+              >
+                {responsible}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
     </Box>
   );
