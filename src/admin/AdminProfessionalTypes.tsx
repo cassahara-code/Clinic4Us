@@ -486,18 +486,12 @@ const AdminProfessionalTypes: React.FC = () => {
               </Box>
             </Box>
 
-            {/* Paginação */}
-            <StandardPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredAndSortedTypes.length}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
+            {/* Contador de registros */}
+            <Box sx={{ mb: 2, px: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                <strong>{filteredAndSortedTypes.length}</strong> tipos profissionais encontrados
+              </Typography>
+            </Box>
 
             {/* Lista de Tipos */}
             <Box className="admin-plans-list-container" sx={{ mt: 2 }}>
@@ -617,7 +611,7 @@ const AdminProfessionalTypes: React.FC = () => {
         title="Confirmar Exclusão"
         message={`Tem certeza que deseja excluir o tipo ${typeToDelete?.name}?`}
         warningMessage="Esta ação não poderá ser desfeita e pode afetar profissionais associados a este tipo."
-        confirmButtonText="Excluir Tipo"
+        confirmButtonText="Excluir"
         cancelButtonText="Cancelar"
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}

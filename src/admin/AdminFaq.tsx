@@ -467,18 +467,12 @@ const AdminFaq: React.FC = () => {
               </Box>
             </Box>
 
-            {/* Paginação */}
-            <StandardPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredAndSortedFaqs.length}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
+            {/* Contador de registros */}
+            <Box sx={{ mb: 2, px: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                <strong>{filteredAndSortedFaqs.length}</strong> FAQs encontrados
+              </Typography>
+            </Box>
 
             {/* Lista de FAQs */}
             <Box className="admin-plans-list-container" sx={{ mt: 2 }}>

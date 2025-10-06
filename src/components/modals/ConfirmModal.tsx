@@ -110,7 +110,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ padding: '2rem' }}>
+      <DialogContent sx={{ padding: '1.5rem !important', paddingTop: '2rem !important' }}>
         <Typography
           sx={{
             fontSize: '1rem',

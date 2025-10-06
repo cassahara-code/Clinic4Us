@@ -544,18 +544,12 @@ const AdminFunctionalities: React.FC = () => {
               </Box>
             </Box>
 
-            {/* Paginação */}
-            <StandardPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredAndSortedFunctionalities.length}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
+            {/* Contador de registros */}
+            <Box sx={{ mb: 2, px: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                <strong>{filteredAndSortedFunctionalities.length}</strong> funcionalidades encontradas
+              </Typography>
+            </Box>
 
             {/* Lista de Funcionalidades */}
             <Box className="admin-functionalities-list-container" sx={{ mt: 2 }}>
@@ -697,7 +691,7 @@ const AdminFunctionalities: React.FC = () => {
         title="Confirmar Exclusão"
         message={`Tem certeza que deseja excluir a funcionalidade ${functionalityToDelete?.name}?`}
         warningMessage="Esta ação não poderá ser desfeita e afetará todos os perfis que utilizam esta funcionalidade."
-        confirmButtonText="Excluir Funcionalidade"
+        confirmButtonText="Excluir"
         cancelButtonText="Cancelar"
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}

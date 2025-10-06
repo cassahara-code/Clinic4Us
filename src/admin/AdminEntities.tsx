@@ -5,12 +5,17 @@ import {
   Typography,
   TextField,
   IconButton,
-  Paper
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button
 } from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Person, ViewModule } from '@mui/icons-material';
+import { Delete, Edit, Person, ViewModule, Close, Warning } from '@mui/icons-material';
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import EntityModal, { EntityData } from "../components/modals/EntityModal";
@@ -58,6 +63,8 @@ const AdminEntities: React.FC = () => {
   const [entityModalMode, setEntityModalMode] = useState<'create' | 'edit'>('create');
   const [entityToEdit, setEntityToEdit] = useState<Entity | null>(null);
   const [hasFilterChanges, setHasFilterChanges] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [entityToDelete, setEntityToDelete] = useState<Entity | null>(null);
 
   // Valores iniciais dos filtros
   const initialFilters = {
@@ -249,11 +256,25 @@ const AdminEntities: React.FC = () => {
         setIsEntityModalOpen(true);
         break;
       case 'delete':
-        showToast(`Entidade ${entity.fantasyName} removida com sucesso`, 'success');
+        setEntityToDelete(entity);
+        setIsDeleteModalOpen(true);
         break;
       default:
         break;
     }
+  };
+
+  const handleConfirmDelete = () => {
+    if (entityToDelete) {
+      showToast(`Entidade ${entityToDelete.fantasyName} removida com sucesso`, 'success');
+      setIsDeleteModalOpen(false);
+      setEntityToDelete(null);
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setEntityToDelete(null);
   };
 
   const handleSaveEntity = (data: EntityData) => {
@@ -396,18 +417,12 @@ const AdminEntities: React.FC = () => {
               </Box>
             </Box>
 
-            {/* Paginação */}
-            <StandardPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredAndSortedEntities.length}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
+            {/* Contador de registros */}
+            <Box sx={{ mb: 2, px: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                <strong>{filteredAndSortedEntities.length}</strong> entidades encontradas
+              </Typography>
+            </Box>
 
             {/* Lista de Entidades */}
             <Box className="admin-plans-list-container" sx={{ mt: 2 }}>
@@ -571,6 +586,140 @@ const AdminEntities: React.FC = () => {
         isVisible={toast.isVisible}
         onClose={hideToast}
       />
+
+      {/* Modal de Confirmação de Exclusão */}
+      <Dialog
+        open={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+            maxHeight: '90vh',
+          }
+        }}
+      >
+        <DialogTitle
+          sx={{
+            backgroundColor: colors.primary,
+            color: colors.white,
+            padding: '1.5rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Typography
+            variant="h6"
+            component="h3"
+            sx={{
+              fontSize: '1.4rem',
+              fontWeight: typography.fontWeight.semibold,
+              margin: 0
+            }}
+          >
+            Confirmar Exclusão
+          </Typography>
+          <IconButton
+            onClick={handleCloseDeleteModal}
+            sx={{
+              color: colors.white,
+              padding: '0.25rem',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+              }
+            }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ padding: '1.5rem !important', paddingTop: '2rem !important' }}>
+          <Typography variant="body1" sx={{ marginBottom: '1rem', color: colors.textPrimary }}>
+            Tem certeza que deseja excluir esta entidade?
+          </Typography>
+          {entityToDelete && (
+            <Box sx={{ p: 2, backgroundColor: '#f8f9fa', borderRadius: '8px', mb: 2 }}>
+              <Typography variant="body2" sx={{ fontSize: '0.875rem', color: colors.textSecondary, mb: 0.5 }}>
+                <strong>Nome Fantasia:</strong> {entityToDelete.fantasyName}
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: '0.875rem', color: colors.textSecondary, mb: 0.5 }}>
+                <strong>CNPJ/CPF:</strong> {entityToDelete.cnpjCpf}
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: '0.875rem', color: colors.textSecondary }}>
+                <strong>Razão Social:</strong> {entityToDelete.socialName}
+              </Typography>
+            </Box>
+          )}
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.75rem',
+              backgroundColor: '#fff3cd',
+              color: '#856404',
+              borderRadius: '8px',
+              border: '1px solid #ffeaa7',
+            }}
+          >
+            <Warning fontSize="small" />
+            <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
+              Esta ação não poderá ser desfeita.
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{
+          padding: '1.5rem 2rem',
+          borderTop: `1px solid ${colors.backgroundAlt}`,
+          backgroundColor: colors.background,
+          justifyContent: 'flex-end',
+          gap: '0.75rem'
+        }}>
+          <Button
+            onClick={handleCloseDeleteModal}
+            variant="outlined"
+            sx={{
+              padding: '0.75rem 1.5rem',
+              border: `1px solid ${colors.border}`,
+              borderRadius: '6px',
+              backgroundColor: colors.white,
+              color: colors.textSecondary,
+              fontSize: '1rem',
+              fontWeight: typography.fontWeight.medium,
+              textTransform: 'none',
+              '&:hover': {
+                backgroundColor: colors.background,
+                borderColor: '#adb5bd',
+              }
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            sx={{
+              padding: '0.75rem 1.5rem',
+              borderRadius: '6px',
+              backgroundColor: colors.error,
+              color: colors.white,
+              fontSize: '1rem',
+              fontWeight: typography.fontWeight.medium,
+              textTransform: 'none',
+              boxShadow: 'none',
+              '&:hover': {
+                backgroundColor: '#c82333',
+                boxShadow: 'none',
+                transform: 'translateY(-1px)',
+              }
+            }}
+          >
+            Excluir
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <EntityModal
         isOpen={isEntityModalOpen}

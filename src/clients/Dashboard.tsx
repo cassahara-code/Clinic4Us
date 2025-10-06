@@ -25,7 +25,7 @@ import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { FaqButton } from "../components/FaqButton";
 import DateRangeFilter from "../components/DateRangeFilter";
-import { CalendarToday, CheckCircle, Assignment, Cake, WhatsApp, Email, Folder } from '@mui/icons-material';
+import { CalendarToday, CheckCircle, Assignment, Cake, WhatsApp, Email, Folder, BarChart } from '@mui/icons-material';
 import { colors, typography } from '../theme/designSystem';
 
 interface MenuItemProps {
@@ -204,6 +204,14 @@ const Dashboard: React.FC = () => {
     const birthdaysSection = document.querySelector('.dashboard-birthdays-section');
     if (birthdaysSection) {
       birthdaysSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleViewAttendanceChart = () => {
+    // Scroll para o gráfico de status de presença
+    const attendanceChart = document.querySelector('.dashboard-attendance-chart');
+    if (attendanceChart) {
+      attendanceChart.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -531,6 +539,7 @@ const Dashboard: React.FC = () => {
                     </Box>
                   </Box>
                   <Button
+                    onClick={handleViewAttendanceChart}
                     className="dashboard-card-button"
                     variant="contained"
                     fullWidth
@@ -573,100 +582,168 @@ const Dashboard: React.FC = () => {
                     </Typography>
                   </Box>
                   <Box className="dashboard-card-content">
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
-                      {/* Gráfico de pizza animado para registros */}
-                      <Box sx={{ position: 'relative', width: '120px', height: '120px', flexShrink: 0 }}>
-                        <svg width="120" height="120" viewBox="0 0 42 42" style={{ transform: 'rotate(-90deg)' }}>
-                          {/* Background circle */}
-                          <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e9ecef" strokeWidth="3"/>
-                          {/* Com evolução - 42% (155 de 371) */}
-                          <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#17a2b8" strokeWidth="3"
-                            strokeDasharray="42 58" strokeLinecap="round"
-                            style={{
-                              animation: 'drawCircle 2s ease-out forwards',
-                              strokeDashoffset: '100'
-                            }}/>
-                          {/* Com agendamentos - 22% (82 de 371) */}
-                          <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#28a745" strokeWidth="3"
-                            strokeDasharray="22 78" strokeDashoffset="-42" strokeLinecap="round"
-                            style={{
-                              animation: 'drawCircle 2s ease-out 0.5s forwards',
-                              strokeDashoffset: '100'
-                            }}/>
-                          {/* Com cadastro completo - 21% (77 de 371) */}
-                          <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#ffc107" strokeWidth="3"
-                            strokeDasharray="21 79" strokeDashoffset="-64" strokeLinecap="round"
-                            style={{
-                              animation: 'drawCircle 2s ease-out 1s forwards',
-                              strokeDashoffset: '100'
-                            }}/>
-                          {/* Sem registros - 15% (restante) */}
-                          <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#6c757d" strokeWidth="3"
-                            strokeDasharray="15 85" strokeDashoffset="-85" strokeLinecap="round"
-                            style={{
-                              animation: 'drawCircle 2s ease-out 1.5s forwards',
-                              strokeDashoffset: '100'
-                            }}/>
-                        </svg>
-
-                        {/* Total no centro */}
-                        <Box sx={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          textAlign: 'center'
-                        }}>
-                          <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#2196f3' }}>
-                            371
+                    {/* Gráfico de barras */}
+                    <Box sx={{ mb: 2 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        {/* Barra: Com evolução */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 500, minWidth: '110px', textAlign: 'right' }}>
+                            Com evolução
                           </Typography>
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                            Total
+                          <Box sx={{ flex: 1, position: 'relative' }}>
+                            <Box sx={{
+                              width: '100%',
+                              height: '8px',
+                              backgroundColor: '#e9ecef',
+                              borderRadius: '4px',
+                              overflow: 'hidden'
+                            }}>
+                              <Box sx={{
+                                width: '42%',
+                                height: '100%',
+                                backgroundColor: '#17a2b8',
+                                animation: 'expandBar 1s ease-out forwards',
+                                '@keyframes expandBar': {
+                                  from: { width: 0 },
+                                  to: { width: '42%' }
+                                }
+                              }} />
+                            </Box>
+                          </Box>
+                          <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#17a2b8', minWidth: '30px' }}>
+                            155
+                          </Typography>
+                        </Box>
+
+                        {/* Barra: Com agendamentos */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 500, minWidth: '110px', textAlign: 'right' }}>
+                            Com agendamentos
+                          </Typography>
+                          <Box sx={{ flex: 1 }}>
+                            <Box sx={{
+                              width: '100%',
+                              height: '8px',
+                              backgroundColor: '#e9ecef',
+                              borderRadius: '4px',
+                              overflow: 'hidden'
+                            }}>
+                              <Box sx={{
+                                width: '22%',
+                                height: '100%',
+                                backgroundColor: '#28a745',
+                                animation: 'expandBar2 1s ease-out 0.2s forwards',
+                                '@keyframes expandBar2': {
+                                  from: { width: 0 },
+                                  to: { width: '22%' }
+                                }
+                              }} />
+                            </Box>
+                          </Box>
+                          <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#28a745', minWidth: '30px' }}>
+                            82
+                          </Typography>
+                        </Box>
+
+                        {/* Barra: Cadastro completo */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 500, minWidth: '110px', textAlign: 'right' }}>
+                            Cadastro completo
+                          </Typography>
+                          <Box sx={{ flex: 1 }}>
+                            <Box sx={{
+                              width: '100%',
+                              height: '8px',
+                              backgroundColor: '#e9ecef',
+                              borderRadius: '4px',
+                              overflow: 'hidden'
+                            }}>
+                              <Box sx={{
+                                width: '21%',
+                                height: '100%',
+                                backgroundColor: '#ffc107',
+                                animation: 'expandBar3 1s ease-out 0.4s forwards',
+                                '@keyframes expandBar3': {
+                                  from: { width: 0 },
+                                  to: { width: '21%' }
+                                }
+                              }} />
+                            </Box>
+                          </Box>
+                          <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#ffc107', minWidth: '30px' }}>
+                            77
+                          </Typography>
+                        </Box>
+
+                        {/* Barra: Com plano de ação */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 500, minWidth: '110px', textAlign: 'right' }}>
+                            Com plano de ação
+                          </Typography>
+                          <Box sx={{ flex: 1 }}>
+                            <Box sx={{
+                              width: '100%',
+                              height: '8px',
+                              backgroundColor: '#e9ecef',
+                              borderRadius: '4px',
+                              overflow: 'hidden'
+                            }}>
+                              <Box sx={{
+                                width: '4%',
+                                height: '100%',
+                                backgroundColor: '#fd7e14',
+                                animation: 'expandBar4 1s ease-out 0.6s forwards',
+                                '@keyframes expandBar4': {
+                                  from: { width: 0 },
+                                  to: { width: '4%' }
+                                }
+                              }} />
+                            </Box>
+                          </Box>
+                          <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#fd7e14', minWidth: '30px' }}>
+                            14
+                          </Typography>
+                        </Box>
+
+                        {/* Barra: Com CID */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 500, minWidth: '110px', textAlign: 'right' }}>
+                            Com CID
+                          </Typography>
+                          <Box sx={{ flex: 1 }}>
+                            <Box sx={{
+                              width: '100%',
+                              height: '8px',
+                              backgroundColor: '#e9ecef',
+                              borderRadius: '4px',
+                              overflow: 'hidden'
+                            }}>
+                              <Box sx={{
+                                width: '3%',
+                                height: '100%',
+                                backgroundColor: '#e83e8c',
+                                animation: 'expandBar5 1s ease-out 0.8s forwards',
+                                '@keyframes expandBar5': {
+                                  from: { width: 0 },
+                                  to: { width: '3%' }
+                                }
+                              }} />
+                            </Box>
+                          </Box>
+                          <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#e83e8c', minWidth: '30px' }}>
+                            12
                           </Typography>
                         </Box>
                       </Box>
 
-                      {/* Lista de estatísticas */}
-                      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.25 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                            <Box sx={{ width: 8, height: 8, bgcolor: '#17a2b8', borderRadius: '50%' }}></Box>
-                            <Typography variant="caption">Com evolução</Typography>
-                          </Box>
-                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#17a2b8' }}>155</Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                            <Box sx={{ width: 8, height: 8, bgcolor: '#28a745', borderRadius: '50%' }}></Box>
-                            <Typography variant="caption">Com agendamentos</Typography>
-                          </Box>
-                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#28a745' }}>82</Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                            <Box sx={{ width: 8, height: 8, bgcolor: '#ffc107', borderRadius: '50%' }}></Box>
-                            <Typography variant="caption">Cadastro completo</Typography>
-                          </Box>
-                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#ffc107' }}>77</Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                            <Box sx={{ width: 8, height: 8, bgcolor: '#fd7e14', borderRadius: '50%' }}></Box>
-                            <Typography variant="caption">Com plano de ação</Typography>
-                          </Box>
-                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#fd7e14' }}>14</Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.3 }}>
-                            <Box sx={{ width: 8, height: 8, bgcolor: '#e83e8c', borderRadius: '50%' }}></Box>
-                            <Typography variant="caption">Com CID</Typography>
-                          </Box>
-                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#e83e8c' }}>12</Typography>
-                        </Box>
+                      {/* Total */}
+                      <Box sx={{ mt: 1, pt: 1, borderTop: '1px solid #e9ecef', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          Total de Registros
+                        </Typography>
+                        <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#2196f3' }}>
+                          371
+                        </Typography>
                       </Box>
                     </Box>
                   </Box>
@@ -817,6 +894,169 @@ const Dashboard: React.FC = () => {
               </Box>
             </Box>
 
+            {/* Gráfico de Status de Presença por Dia */}
+            <Box className="dashboard-attendance-chart" sx={{ mt: 4 }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08) !important',
+                  p: 3,
+                  borderRadius: '12px'
+                }}
+              >
+                <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box className="dashboard-card-icon blue">
+                      <BarChart />
+                    </Box>
+                    <Box>
+                      <Typography variant="h5" sx={{ fontSize: '1.25rem' }}>
+                        Status de Presença por Dia
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <DateRangeFilter
+                    startDate={startDate}
+                    endDate={endDate}
+                    onStartDateChange={setStartDate}
+                    onEndDateChange={setEndDate}
+                    onClear={handleClearFilters}
+                    initialStartDate={initialStartDate}
+                    initialEndDate={initialEndDate}
+                  />
+                </Box>
+
+                <Box sx={{ mb: 3 }}>
+
+                  {/* Gráfico de Barras Verticais */}
+                  <Box sx={{
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    gap: 1,
+                    height: '300px',
+                    borderBottom: '2px solid #e9ecef',
+                    borderLeft: '2px solid #e9ecef',
+                    pl: 2,
+                    pb: 2,
+                    overflowX: 'auto',
+                    '&::-webkit-scrollbar': { height: '8px' },
+                    '&::-webkit-scrollbar-track': { backgroundColor: '#f1f1f1', borderRadius: '4px' },
+                    '&::-webkit-scrollbar-thumb': { backgroundColor: '#888', borderRadius: '4px' }
+                  }}>
+                    {/* Barras para os últimos 30 dias */}
+                    {Array.from({ length: 30 }, (_, i) => {
+                      const date = new Date();
+                      date.setDate(date.getDate() - (29 - i));
+                      const day = date.getDate().toString().padStart(2, '0');
+                      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+
+                      // Dados mock de presença
+                      const presente = Math.floor(Math.random() * 15);
+                      const ausente = Math.floor(Math.random() * 8);
+                      const justificado = Math.floor(Math.random() * 5);
+                      const total = presente + ausente + justificado;
+                      const maxHeight = 280;
+
+                      return (
+                        <Box key={i} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '40px', gap: 0.5 }}>
+                          {/* Stack de barras */}
+                          <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column-reverse',
+                            height: `${maxHeight}px`,
+                            justifyContent: 'flex-start',
+                            gap: 0.5
+                          }}>
+                            {/* Presente */}
+                            {presente > 0 && (
+                              <Tooltip title={`Presente: ${presente}`} arrow>
+                                <Box sx={{
+                                  width: '35px',
+                                  height: `${(presente / 20) * maxHeight}px`,
+                                  backgroundColor: '#28a745',
+                                  borderRadius: '4px 4px 0 0',
+                                  cursor: 'pointer',
+                                  transition: 'opacity 0.2s',
+                                  animation: `growBar${i} 1s ease-out forwards`,
+                                  [`@keyframes growBar${i}`]: {
+                                    from: { height: 0 },
+                                    to: { height: `${(presente / 20) * maxHeight}px` }
+                                  },
+                                  '&:hover': { opacity: 0.8 }
+                                }} />
+                              </Tooltip>
+                            )}
+
+                            {/* Ausente */}
+                            {ausente > 0 && (
+                              <Tooltip title={`Ausente: ${ausente}`} arrow>
+                                <Box sx={{
+                                  width: '35px',
+                                  height: `${(ausente / 20) * maxHeight}px`,
+                                  backgroundColor: '#dc3545',
+                                  borderRadius: justificado > 0 ? '0' : '4px 4px 0 0',
+                                  cursor: 'pointer',
+                                  transition: 'opacity 0.2s',
+                                  animation: `growBar${i}a 1s ease-out 0.2s forwards`,
+                                  [`@keyframes growBar${i}a`]: {
+                                    from: { height: 0 },
+                                    to: { height: `${(ausente / 20) * maxHeight}px` }
+                                  },
+                                  '&:hover': { opacity: 0.8 }
+                                }} />
+                              </Tooltip>
+                            )}
+
+                            {/* Justificado */}
+                            {justificado > 0 && (
+                              <Tooltip title={`Justificado: ${justificado}`} arrow>
+                                <Box sx={{
+                                  width: '35px',
+                                  height: `${(justificado / 20) * maxHeight}px`,
+                                  backgroundColor: '#ffc107',
+                                  borderRadius: '4px 4px 0 0',
+                                  cursor: 'pointer',
+                                  transition: 'opacity 0.2s',
+                                  animation: `growBar${i}j 1s ease-out 0.4s forwards`,
+                                  [`@keyframes growBar${i}j`]: {
+                                    from: { height: 0 },
+                                    to: { height: `${(justificado / 20) * maxHeight}px` }
+                                  },
+                                  '&:hover': { opacity: 0.8 }
+                                }} />
+                              </Tooltip>
+                            )}
+                          </Box>
+
+                          {/* Data */}
+                          <Typography variant="caption" sx={{ fontSize: '0.65rem', color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                            {day}/{month}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+
+                  {/* Legenda */}
+                  <Box sx={{ display: 'flex', gap: 3, mt: 3, justifyContent: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#28a745', borderRadius: '4px' }} />
+                      <Typography variant="body2">Presente</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#dc3545', borderRadius: '4px' }} />
+                      <Typography variant="body2">Ausente</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#ffc107', borderRadius: '4px' }} />
+                      <Typography variant="body2">Justificado</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Paper>
+            </Box>
+
             {/* Seção de Aniversários */}
             <Box className="dashboard-birthdays-section" sx={{ mt: 4 }}>
               <Box className="dashboard-birthdays-header" sx={{ mb: 3 }}>
@@ -842,88 +1082,12 @@ const Dashboard: React.FC = () => {
                 />
               </Box>
 
-              {/* Navegador de páginas - Superior */}
-              <Paper
-                className="birthday-pagination-container"
-                elevation={0}
-                sx={{
-                  p: 2,
-                  mb: 2,
-                  bgcolor: '#f8f9fa',
-                  border: 'none',
-                  boxShadow: 'none'
-                }}
-              >
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="body2" className="birthday-pagination-info" sx={{ color: 'text.secondary' }}>
-                    Mostrando {startIndex + 1}-{Math.min(endIndex, birthdayPeople.length)} de{' '}
-                    <strong>{birthdayPeople.length}</strong> aniversariantes
-                  </Typography>
-
-                  <Box className="birthday-pagination-controls" sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                    {/* Seletor de itens por página */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
-                        Itens por página:
-                      </Typography>
-                      <FormControl size="small">
-                        <Select
-                          value={itemsPerPage}
-                          onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                          sx={{
-                            minWidth: 80,
-                            height: '40px',
-                            fontSize: '1rem',
-                            backgroundColor: 'white',
-                            '& .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#ced4da',
-                            },
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#ced4da',
-                            },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#03B4C6',
-                              boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
-                            },
-                            '& .MuiSelect-select': {
-                              padding: '0.375rem 0.5rem',
-                              color: '#495057',
-                            },
-                          }}
-                        >
-                          <MenuItem value={5}>5</MenuItem>
-                          <MenuItem value={10}>10</MenuItem>
-                          <MenuItem value={15}>15</MenuItem>
-                          <MenuItem value={20}>20</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Box>
-
-                    {/* Navegação de páginas com Pagination do MUI */}
-                    <Pagination
-                      count={totalPages}
-                      page={currentPage}
-                      onChange={(event, page) => setCurrentPage(page)}
-                      color="primary"
-                      showFirstButton
-                      showLastButton
-                      size="small"
-                      sx={{
-                        '& .MuiPaginationItem-root': {
-                          color: '#495057',
-                          '&.Mui-selected': {
-                            backgroundColor: '#03B4C6',
-                            color: 'white',
-                            '&:hover': {
-                              backgroundColor: '#029AAB',
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  </Box>
-                </Box>
-              </Paper>
+              {/* Contador de registros */}
+              <Box sx={{ mb: 2, px: 1 }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                  <strong>{birthdayPeople.length}</strong> aniversariantes encontrados
+                </Typography>
+              </Box>
 
               <TableContainer
                 component={Paper}
