@@ -147,7 +147,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
   );
 
   const renderFormContent = () => (
-    <Box sx={{ display: 'flex', gap: '2rem' }}>
+    <Box sx={{ display: 'flex', gap: '1.5rem' }}>
       {/* Coluna esquerda */}
       <Box sx={{ flex: '1' }}>
         <TextField
@@ -812,7 +812,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
     <Dialog
       open={isOpen}
       onClose={handleClose}
-      maxWidth="xl"
+      maxWidth="lg"
       fullWidth
       PaperProps={{
         sx: {
