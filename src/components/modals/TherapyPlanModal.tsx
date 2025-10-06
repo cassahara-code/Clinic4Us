@@ -147,7 +147,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
   );
 
   const renderFormContent = () => (
-    <Box sx={{ display: 'flex', gap: '1.5rem' }}>
+    <Box sx={{ display: 'flex', gap: '2rem' }}>
       {/* Coluna esquerda */}
       <Box sx={{ flex: '1' }}>
         <TextField
@@ -384,10 +384,6 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
             ))}
           </TextField>
         </Box>
-      </Box>
-
-      {/* Coluna central */}
-      <Box sx={{ flex: '1' }}>
 
         <TextField
           label="Métrica"
@@ -464,6 +460,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
             }
           }}
           sx={{
+            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               position: inputs.multiline.position,
               opacity: inputs.multiline.opacity,
