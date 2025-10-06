@@ -817,90 +817,12 @@ const PatientsList: React.FC = () => {
           </Box>
 
           {/* Paginação + Tabela */}
-            {/* Navegador de páginas - Superior */}
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                mb: 2,
-                bgcolor: '#f8f9fa',
-                border: 'none',
-                boxShadow: 'none'
-              }}
-            >
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  Mostrando {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPatients.length)} de{' '}
-                  <strong>{filteredAndSortedPatients.length}</strong> pacientes
-                </Typography>
-
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-                  {/* Seletor de itens por página */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
-                      Itens por página:
-                    </Typography>
-                    <FormControl size="small">
-                      <Select
-                        value={itemsPerPage}
-                        onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                        sx={{
-                          minWidth: 80,
-                          height: '40px',
-                          fontSize: '1rem',
-                          backgroundColor: 'white',
-                          '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#ced4da',
-                          },
-                          '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#ced4da',
-                          },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: '#03B4C6',
-                            boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
-                          },
-                          '& .MuiSelect-select': {
-                            padding: '0.375rem 0.5rem',
-                            color: '#495057',
-                          },
-                        }}
-                      >
-                        <MenuItem value={5}>5</MenuItem>
-                        <MenuItem value={10}>10</MenuItem>
-                        <MenuItem value={15}>15</MenuItem>
-                        <MenuItem value={20}>20</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
-
-                  {/* Navegação de páginas com Pagination do MUI */}
-                  <Pagination
-                    count={totalPages}
-                    page={currentPage}
-                    onChange={(event, page) => {
-                      setCurrentPage(page);
-                      setTimeout(scrollToTop, 100);
-                    }}
-                    color="primary"
-                    showFirstButton
-                    showLastButton
-                    size="small"
-                    sx={{
-                      '& .MuiPaginationItem-root': {
-                        color: '#495057',
-                        '&.Mui-selected': {
-                          backgroundColor: '#03B4C6',
-                          color: 'white',
-                          '&:hover': {
-                            backgroundColor: '#029AAB',
-                          },
-                        },
-                      },
-                    }}
-                  />
-                </Box>
-              </Box>
-            </Paper>
+            {/* Contador de registros */}
+            <Box sx={{ mb: 2, px: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                <strong>{filteredAndSortedPatients.length}</strong> pacientes encontrados
+              </Typography>
+            </Box>
 
             {/* Lista de pacientes */}
             <TableContainer

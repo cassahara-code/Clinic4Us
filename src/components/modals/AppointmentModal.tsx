@@ -54,6 +54,7 @@ interface AppointmentModalProps {
   title?: string;
   patientsList: string[];
   showPricing?: boolean; // Controla a visibilidade dos campos de valores
+  disablePatientField?: boolean; // Desabilita o campo de paciente
 }
 
 const AppointmentModal: React.FC<AppointmentModalProps> = ({
@@ -64,7 +65,8 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   initialData = {},
   title,
   patientsList,
-  showPricing = true
+  showPricing = true,
+  disablePatientField = false
 }) => {
   // Estado do formulário
   const [formData, setFormData] = useState<AppointmentData>({
@@ -240,6 +242,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
           <Autocomplete
             freeSolo
+            disabled={disablePatientField}
             options={patientsList}
             value={formData.patient}
             onChange={(_, newValue) => {

@@ -533,18 +533,12 @@ const AdminProfiles: React.FC = () => {
               </Box>
             </Box>
 
-            {/* Paginação */}
-            <StandardPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredAndSortedProfiles.length}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
+            {/* Contador de registros */}
+            <Box sx={{ mb: 2, px: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                <strong>{filteredAndSortedProfiles.length}</strong> perfis encontrados
+              </Typography>
+            </Box>
 
             {/* Lista de Perfis */}
             <Box className="admin-plans-list-container" sx={{ mt: 2 }}>
@@ -689,7 +683,7 @@ const AdminProfiles: React.FC = () => {
         title="Confirmar Exclusão"
         message={`Tem certeza que deseja excluir o perfil ${profileToDelete?.name}?`}
         warningMessage="Esta ação não poderá ser desfeita e afetará todos os usuários que utilizam este perfil."
-        confirmButtonText="Excluir Perfil"
+        confirmButtonText="Excluir"
         cancelButtonText="Cancelar"
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
