@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation, useRouter } from "../contexts/RouterContext";
-import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Check, Warning, MedicalServices, Edit, Delete, Add, FilterAltOff, Close, PriorityHigh, OpenInNew } from '@mui/icons-material';
+import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Check, Warning, MedicalServices, Edit, Delete, Add, FilterAltOff, Close, PriorityHigh, OpenInNew, DateRange } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import PhotoUpload from "../components/PhotoUpload";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
+import TherapyPeriodModal from "../components/modals/TherapyPeriodModal";
 import {
   TextField,
   MenuItem,
@@ -231,6 +232,9 @@ const PatientRegister: React.FC = () => {
     deadline: ''
   });
 
+  // Estado do modal de períodos de plano terapêutico
+  const [isTherapyPeriodModalOpen, setIsTherapyPeriodModalOpen] = useState(false);
+
   // Lista de pacientes para o modal (apenas o paciente atual)
   const patientsList = formData.name ? [formData.name] : [];
 
@@ -258,79 +262,192 @@ const PatientRegister: React.FC = () => {
     'Avaliação Geriátrica',
   ];
 
+  // Estados dos filtros de avaliações
+  const [evalTypeFilter, setEvalTypeFilter] = useState('');
+  const [evalStatusFilter, setEvalStatusFilter] = useState('');
+  const [evalStartDate, setEvalStartDate] = useState('');
+  const [evalEndDate, setEvalEndDate] = useState('');
+  const [evalRequestedByFilter, setEvalRequestedByFilter] = useState('');
+
   // Lista mock de avaliações
   const [evaluationsList, setEvaluationsList] = useState([
     {
       id: '1',
       form: 'Avaliação Cardiológica Inicial',
+      type: 'inicial',
       observations: 'Paciente apresenta histórico familiar de problemas cardíacos',
       deadline: '2025-10-15',
       createdDate: '2025-10-01',
       completionPercentage: 100,
-      status: 'Finalizada'
+      status: 'Finalizada',
+      requestedBy: 'dr_silva'
     },
     {
       id: '2',
       form: 'Avaliação Nutricional',
+      type: 'inicial',
       observations: 'Necessário avaliar hábitos alimentares e orientar sobre dieta balanceada',
       deadline: '2025-10-20',
       createdDate: '2025-10-03',
       completionPercentage: 75,
-      status: 'Em andamento'
+      status: 'Em andamento',
+      requestedBy: 'dra_oliveira'
     },
     {
       id: '3',
       form: 'Avaliação Psicológica',
+      type: 'especializada',
       observations: 'Paciente relata ansiedade e estresse relacionado ao trabalho',
       deadline: '2025-10-18',
       createdDate: '2025-10-02',
       completionPercentage: 50,
-      status: 'Em andamento'
+      status: 'Em andamento',
+      requestedBy: 'dr_santos'
     },
     {
       id: '4',
       form: 'Avaliação Fisioterapêutica',
+      type: 'reavaliacao',
       observations: 'Avaliar mobilidade e recomendar exercícios para fortalecimento',
       deadline: '2025-10-25',
       createdDate: '2025-10-05',
       completionPercentage: 30,
-      status: 'Em andamento'
+      status: 'Em andamento',
+      requestedBy: 'dra_costa'
     },
     {
       id: '5',
       form: 'Avaliação Ortopédica',
+      type: 'inicial',
       observations: 'Paciente queixa-se de dores na coluna lombar',
       deadline: '2025-10-12',
       createdDate: '2025-09-28',
       completionPercentage: 100,
-      status: 'Finalizada'
+      status: 'Finalizada',
+      requestedBy: 'dr_silva'
     },
     {
       id: '6',
       form: 'Avaliação Neurológica',
+      type: 'especializada',
       observations: 'Avaliar episódios de enxaqueca recorrente',
       deadline: '2025-10-22',
       createdDate: '2025-10-04',
       completionPercentage: 15,
-      status: 'Em andamento'
+      status: 'Em andamento',
+      requestedBy: 'dra_oliveira'
     },
     {
       id: '7',
       form: 'Avaliação Geriátrica',
+      type: 'inicial',
       observations: 'Avaliação preventiva de saúde do idoso',
       deadline: '2025-10-30',
       createdDate: '2025-10-06',
       completionPercentage: 0,
-      status: 'Pendente'
+      status: 'Pendente',
+      requestedBy: 'dr_santos'
     },
     {
       id: '8',
       form: 'Avaliação Pediátrica',
+      type: 'reavaliacao',
       observations: 'Acompanhamento de desenvolvimento motor e cognitivo',
       deadline: '2025-10-28',
       createdDate: '2025-10-05',
       completionPercentage: 100,
-      status: 'Finalizada'
+      status: 'Finalizada',
+      requestedBy: 'dra_costa'
+    }
+  ]);
+
+  // Estados dos filtros de plano terapêutico
+  const [therapyStatusFilter, setTherapyStatusFilter] = useState('');
+  const [therapyStartDate, setTherapyStartDate] = useState('');
+  const [therapyEndDate, setTherapyEndDate] = useState('');
+  const [therapyResponsibleFilter, setTherapyResponsibleFilter] = useState('');
+
+  // Lista mock de planos terapêuticos
+  const [therapyPlansList, setTherapyPlansList] = useState([
+    {
+      id: '1',
+      title: 'Plano de Tratamento Cardiovascular',
+      startDate: '2024-03-15',
+      endDate: '2024-06-15',
+      createdDate: '2024-03-10',
+      objectives: [
+        'Controle da pressão arterial',
+        'Redução do peso em 5kg',
+        'Melhora da capacidade cardiovascular'
+      ],
+      interventions: [
+        'Medicação anti-hipertensiva',
+        'Dieta com restrição de sódio',
+        'Atividade física supervisionada'
+      ],
+      status: 'Em andamento',
+      completionPercentage: 60,
+      responsible: 'dr_silva'
+    },
+    {
+      id: '2',
+      title: 'Plano de Reabilitação Fisioterapêutica',
+      startDate: '2024-04-01',
+      endDate: '2024-07-01',
+      createdDate: '2024-03-28',
+      objectives: [
+        'Recuperar amplitude de movimento',
+        'Fortalecer musculatura do joelho',
+        'Reduzir dor articular'
+      ],
+      interventions: [
+        'Exercícios de fortalecimento',
+        'Terapia manual',
+        'Crioterapia após sessões'
+      ],
+      status: 'Em andamento',
+      completionPercentage: 40,
+      responsible: 'dra_costa'
+    },
+    {
+      id: '3',
+      title: 'Plano Nutricional para Diabetes',
+      startDate: '2024-02-01',
+      endDate: '2024-05-01',
+      createdDate: '2024-01-25',
+      objectives: [
+        'Controle glicêmico adequado',
+        'Redução de HbA1c em 1%',
+        'Educação alimentar'
+      ],
+      interventions: [
+        'Dieta balanceada com controle de carboidratos',
+        'Orientação sobre índice glicêmico',
+        'Acompanhamento semanal'
+      ],
+      status: 'Finalizado',
+      completionPercentage: 100,
+      responsible: 'dra_oliveira'
+    },
+    {
+      id: '4',
+      title: 'Plano de Acompanhamento Psicológico',
+      startDate: '2024-05-01',
+      endDate: '2024-08-01',
+      createdDate: '2024-04-28',
+      objectives: [
+        'Redução dos sintomas de ansiedade',
+        'Desenvolvimento de estratégias de enfrentamento',
+        'Melhora da qualidade do sono'
+      ],
+      interventions: [
+        'Terapia cognitivo-comportamental',
+        'Técnicas de relaxamento',
+        'Sessões semanais'
+      ],
+      status: 'Pendente',
+      completionPercentage: 0,
+      responsible: 'dr_santos'
     }
   ]);
 
@@ -341,6 +458,108 @@ const PatientRegister: React.FC = () => {
     setNotesUserFilter('');
     setNotesSearchText('');
   };
+
+  // Função para limpar filtros de avaliações
+  const handleClearEvaluationsFilters = () => {
+    setEvalTypeFilter('');
+    setEvalStatusFilter('');
+    setEvalStartDate('');
+    setEvalEndDate('');
+    setEvalRequestedByFilter('');
+  };
+
+  // Função para limpar filtros de plano terapêutico
+  const handleClearTherapyFilters = () => {
+    setTherapyStatusFilter('');
+    setTherapyStartDate('');
+    setTherapyEndDate('');
+    setTherapyResponsibleFilter('');
+  };
+
+  // Função para filtrar avaliações
+  const filteredEvaluations = evaluationsList.filter((evaluation) => {
+    // Filtro por tipo
+    if (evalTypeFilter && evaluation.type !== evalTypeFilter) {
+      return false;
+    }
+
+    // Filtro por status
+    if (evalStatusFilter) {
+      const statusMap: { [key: string]: string } = {
+        'concluida': 'Finalizada',
+        'pendente': 'Pendente',
+        'em_andamento': 'Em andamento'
+      };
+      if (evaluation.status !== statusMap[evalStatusFilter]) {
+        return false;
+      }
+    }
+
+    // Filtro por data inicial
+    if (evalStartDate) {
+      const evalDate = new Date(evaluation.createdDate);
+      const filterDate = new Date(evalStartDate);
+      if (evalDate < filterDate) {
+        return false;
+      }
+    }
+
+    // Filtro por data final
+    if (evalEndDate) {
+      const evalDate = new Date(evaluation.createdDate);
+      const filterDate = new Date(evalEndDate);
+      if (evalDate > filterDate) {
+        return false;
+      }
+    }
+
+    // Filtro por solicitante
+    if (evalRequestedByFilter && evaluation.requestedBy !== evalRequestedByFilter) {
+      return false;
+    }
+
+    return true;
+  });
+
+  // Função para filtrar planos terapêuticos
+  const filteredTherapyPlans = therapyPlansList.filter((plan) => {
+    // Filtro por status
+    if (therapyStatusFilter) {
+      const statusMap: { [key: string]: string } = {
+        'finalizado': 'Finalizado',
+        'pendente': 'Pendente',
+        'em_andamento': 'Em andamento'
+      };
+      if (plan.status !== statusMap[therapyStatusFilter]) {
+        return false;
+      }
+    }
+
+    // Filtro por data inicial
+    if (therapyStartDate) {
+      const planDate = new Date(plan.createdDate);
+      const filterDate = new Date(therapyStartDate);
+      if (planDate < filterDate) {
+        return false;
+      }
+    }
+
+    // Filtro por data final
+    if (therapyEndDate) {
+      const planDate = new Date(plan.createdDate);
+      const filterDate = new Date(therapyEndDate);
+      if (planDate > filterDate) {
+        return false;
+      }
+    }
+
+    // Filtro por responsável
+    if (therapyResponsibleFilter && plan.responsible !== therapyResponsibleFilter) {
+      return false;
+    }
+
+    return true;
+  });
 
   // Funções para gerenciar anotações
   const handleOpenNoteModal = (note?: any) => {
@@ -525,11 +744,13 @@ const PatientRegister: React.FC = () => {
       const newEvaluation = {
         id: `${Date.now()}`,
         form: evaluationFormData.form,
+        type: 'inicial',
         observations: evaluationFormData.observations,
         deadline: evaluationFormData.deadline,
         createdDate: new Date().toISOString().split('T')[0],
         completionPercentage: 0,
-        status: 'Pendente'
+        status: 'Pendente',
+        requestedBy: 'dr_silva'
       };
       setEvaluationsList([...evaluationsList, newEvaluation]);
     }
@@ -3778,7 +3999,8 @@ const PatientRegister: React.FC = () => {
                       select
                       size="small"
                       label="Tipo de Avaliação"
-                      defaultValue=""
+                      value={evalTypeFilter}
+                      onChange={(e) => setEvalTypeFilter(e.target.value)}
                       InputLabelProps={{ shrink: true }}
                       SelectProps={{
                         displayEmpty: true,
@@ -3799,7 +4021,7 @@ const PatientRegister: React.FC = () => {
                         },
                       }}
                     >
-                      <MenuItem value="" disabled>Selecione</MenuItem>
+                      <MenuItem value="">Selecione</MenuItem>
                       <MenuItem value="inicial">Avaliação Inicial</MenuItem>
                       <MenuItem value="reavaliacao">Reavaliação</MenuItem>
                       <MenuItem value="especializada">Avaliação Especializada</MenuItem>
@@ -3808,7 +4030,8 @@ const PatientRegister: React.FC = () => {
                       select
                       size="small"
                       label="Status"
-                      defaultValue=""
+                      value={evalStatusFilter}
+                      onChange={(e) => setEvalStatusFilter(e.target.value)}
                       InputLabelProps={{ shrink: true }}
                       SelectProps={{
                         displayEmpty: true,
@@ -3829,7 +4052,7 @@ const PatientRegister: React.FC = () => {
                         },
                       }}
                     >
-                      <MenuItem value="" disabled>Selecione</MenuItem>
+                      <MenuItem value="">Selecione</MenuItem>
                       <MenuItem value="concluida">Concluída</MenuItem>
                       <MenuItem value="pendente">Pendente</MenuItem>
                       <MenuItem value="em_andamento">Em Andamento</MenuItem>
@@ -3838,6 +4061,8 @@ const PatientRegister: React.FC = () => {
                       type="date"
                       size="small"
                       label="Data Inicial"
+                      value={evalStartDate}
+                      onChange={(e) => setEvalStartDate(e.target.value)}
                       InputLabelProps={{ shrink: true }}
                       sx={{
                         width: '160px',
@@ -3852,6 +4077,8 @@ const PatientRegister: React.FC = () => {
                       type="date"
                       size="small"
                       label="Data Final"
+                      value={evalEndDate}
+                      onChange={(e) => setEvalEndDate(e.target.value)}
                       InputLabelProps={{ shrink: true }}
                       sx={{
                         width: '160px',
@@ -3862,9 +4089,39 @@ const PatientRegister: React.FC = () => {
                         },
                       }}
                     />
+                    <TextField
+                      select
+                      size="small"
+                      label="Solicitante"
+                      value={evalRequestedByFilter}
+                      onChange={(e) => setEvalRequestedByFilter(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      SelectProps={{
+                        displayEmpty: true,
+                        renderValue: (value) => {
+                          if (value === "") return "Selecione";
+                          return value as string;
+                        }
+                      }}
+                      sx={{
+                        width: '200px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    >
+                      <MenuItem value="">Selecione</MenuItem>
+                      <MenuItem value="dr_silva">Dr. Silva</MenuItem>
+                      <MenuItem value="dra_oliveira">Dra. Oliveira</MenuItem>
+                      <MenuItem value="dr_santos">Dr. Santos</MenuItem>
+                      <MenuItem value="dra_costa">Dra. Costa</MenuItem>
+                    </TextField>
                     <Tooltip title="Limpar filtros" arrow>
                       <span>
                         <IconButton
+                          onClick={handleClearEvaluationsFilters}
                           sx={{
                             color: '#6c757d',
                             border: '1px solid #dee2e6',
@@ -3905,13 +4162,13 @@ const PatientRegister: React.FC = () => {
                 {/* Contador de registros */}
                 <Box sx={{ mb: 2, px: 1 }}>
                   <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
-                    <strong>{evaluationsList.length}</strong> {evaluationsList.length === 1 ? 'avaliação encontrada' : 'avaliações encontradas'}
+                    <strong>{filteredEvaluations.length}</strong> {filteredEvaluations.length === 1 ? 'avaliação encontrada' : 'avaliações encontradas'}
                   </Typography>
                 </Box>
 
                 {/* Lista de avaliações */}
                 <div className="evaluations-list">
-                  {evaluationsList.map((evaluation) => {
+                  {filteredEvaluations.map((evaluation) => {
                     const isFinalized = evaluation.completionPercentage === 100;
                     const statusConfig = evaluation.status === 'Finalizada'
                       ? { bg: '#d4edda', color: '#155724', border: '#c3e6cb' }
@@ -3964,7 +4221,7 @@ const PatientRegister: React.FC = () => {
                             </Typography>
 
                             {/* Terceira linha: Barra de progresso */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary, minWidth: '40px' }}>
                                 {evaluation.completionPercentage}%
                               </Typography>
@@ -3984,6 +4241,17 @@ const PatientRegister: React.FC = () => {
                                 />
                               </Box>
                             </Box>
+
+                            {/* Quarta linha: Solicitante */}
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary }}>
+                              Solicitante: <strong style={{ color: colors.text }}>
+                                {evaluation.requestedBy === 'dr_silva' ? 'Dr. Silva' :
+                                 evaluation.requestedBy === 'dra_oliveira' ? 'Dra. Oliveira' :
+                                 evaluation.requestedBy === 'dr_santos' ? 'Dr. Santos' :
+                                 evaluation.requestedBy === 'dra_costa' ? 'Dra. Costa' :
+                                 evaluation.requestedBy}
+                              </strong>
+                            </Typography>
                           </Box>
 
                           {/* Botões de ação à direita */}
@@ -4149,57 +4417,441 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Plano Terapêutico */}
             {activeTab === 'plano-terap' && (
               <div className="tab-content-section">
-                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
-                  Plano Terapêutico
-                </Typography>
-                <div className="therapy-plan-section">
-                  <Box sx={{ mb: 2 }}>
-                    <Button
-                      variant="contained"
+                {/* Filtros e ações */}
+                <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <TextField
+                      select
+                      size="small"
+                      label="Status"
+                      value={therapyStatusFilter}
+                      onChange={(e) => setTherapyStatusFilter(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      SelectProps={{
+                        displayEmpty: true,
+                        renderValue: (value) => {
+                          if (value === "") return "Selecione";
+                          if (value === "finalizado") return "Finalizado";
+                          if (value === "pendente") return "Pendente";
+                          if (value === "em_andamento") return "Em Andamento";
+                          return value as string;
+                        }
+                      }}
                       sx={{
-                        backgroundColor: '#48bb78',
-                        color: '#ffffff',
-                        textTransform: 'none',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        boxShadow: 'none',
-                        '&:hover': {
-                          backgroundColor: '#38a169',
-                          boxShadow: 'none',
+                        width: '180px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
                         },
                       }}
                     >
-                      + Novo Plano
-                    </Button>
+                      <MenuItem value="">Selecione</MenuItem>
+                      <MenuItem value="finalizado">Finalizado</MenuItem>
+                      <MenuItem value="pendente">Pendente</MenuItem>
+                      <MenuItem value="em_andamento">Em Andamento</MenuItem>
+                    </TextField>
+                    <TextField
+                      type="date"
+                      size="small"
+                      label="Data Inicial"
+                      value={therapyStartDate}
+                      onChange={(e) => setTherapyStartDate(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        width: '160px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    />
+                    <TextField
+                      type="date"
+                      size="small"
+                      label="Data Final"
+                      value={therapyEndDate}
+                      onChange={(e) => setTherapyEndDate(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        width: '160px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    />
+                    <TextField
+                      select
+                      size="small"
+                      label="Responsável"
+                      value={therapyResponsibleFilter}
+                      onChange={(e) => setTherapyResponsibleFilter(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      SelectProps={{
+                        displayEmpty: true,
+                        renderValue: (value) => {
+                          if (value === "") return "Selecione";
+                          return value as string;
+                        }
+                      }}
+                      sx={{
+                        width: '200px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    >
+                      <MenuItem value="">Selecione</MenuItem>
+                      <MenuItem value="dr_silva">Dr. Silva</MenuItem>
+                      <MenuItem value="dra_oliveira">Dra. Oliveira</MenuItem>
+                      <MenuItem value="dr_santos">Dr. Santos</MenuItem>
+                      <MenuItem value="dra_costa">Dra. Costa</MenuItem>
+                    </TextField>
+                    <Tooltip title="Limpar filtros" arrow>
+                      <span>
+                        <IconButton
+                          onClick={handleClearTherapyFilters}
+                          sx={{
+                            color: '#6c757d',
+                            border: '1px solid #dee2e6',
+                            borderRadius: '8px',
+                            width: '40px',
+                            height: '40px',
+                            '&:hover': {
+                              bgcolor: '#e9ecef',
+                            },
+                          }}
+                        >
+                          <FilterAltOff fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
                   </Box>
-                  <div className="therapy-plans">
-                    <div className="therapy-plan-item">
-                      <div className="plan-header">
-                        <h4>Plano de Tratamento Cardiovascular</h4>
-                        <span className="plan-period">15/03/2024 - 15/06/2024</span>
-                      </div>
-                      <div className="plan-objectives">
-                        <h5>Objetivos:</h5>
-                        <ul>
-                          <li>Controle da pressão arterial</li>
-                          <li>Redução do peso em 5kg</li>
-                          <li>Melhora da capacidade cardiovascular</li>
-                        </ul>
-                      </div>
-                      <div className="plan-interventions">
-                        <h5>Intervenções:</h5>
-                        <ul>
-                          <li>Medicação anti-hipertensiva</li>
-                          <li>Dieta com restrição de sódio</li>
-                          <li>Atividade física supervisionada</li>
-                        </ul>
-                      </div>
-                      <div className="plan-status">
-                        <span className="status active">Em Andamento</span>
-                      </div>
-                    </div>
-                  </div>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Tooltip title="Administração de Períodos" arrow>
+                      <IconButton
+                        onClick={() => setIsTherapyPeriodModalOpen(true)}
+                        sx={{
+                          borderColor: '#6c757d',
+                          color: '#6c757d',
+                          border: '2px solid #6c757d',
+                          borderRadius: '8px',
+                          width: '40px',
+                          height: '40px',
+                          '&:hover': {
+                            borderColor: '#5a6268',
+                            backgroundColor: 'rgba(108, 117, 125, 0.08)',
+                          },
+                        }}
+                      >
+                        <DateRange />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Novo Plano Terapêutico" arrow>
+                      <IconButton
+                        onClick={() => {
+                          // TODO: Implementar modal de novo plano
+                          console.log('Novo plano terapêutico');
+                        }}
+                        sx={{
+                          borderColor: '#03B4C6',
+                          color: '#03B4C6',
+                          border: '2px solid #03B4C6',
+                          borderRadius: '8px',
+                          width: '40px',
+                          height: '40px',
+                          '&:hover': {
+                            borderColor: '#029AAB',
+                            backgroundColor: 'rgba(3, 180, 198, 0.08)',
+                          },
+                        }}
+                      >
+                        <Add />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Box>
+
+                {/* Contador de registros */}
+                <Box sx={{ mb: 2, px: 1 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                    <strong>{filteredTherapyPlans.length}</strong> {filteredTherapyPlans.length === 1 ? 'plano encontrado' : 'planos encontrados'}
+                  </Typography>
+                </Box>
+
+                {/* Lista de planos terapêuticos */}
+                <div className="therapy-plans-list">
+                  {filteredTherapyPlans.map((plan) => {
+                    const isFinalized = plan.completionPercentage === 100;
+                    const statusConfig = plan.status === 'Finalizado'
+                      ? { bg: '#d4edda', color: '#155724', border: '#c3e6cb' }
+                      : plan.status === 'Em andamento'
+                      ? { bg: '#fff3cd', color: '#856404', border: '#ffeaa7' }
+                      : { bg: '#f8d7da', color: '#721c24', border: '#f5c6cb' };
+
+                    return (
+                      <Box key={plan.id} sx={{
+                        backgroundColor: '#fff',
+                        borderRadius: '8px',
+                        border: '1px solid #e0e0e0',
+                        mb: 2,
+                        overflow: 'hidden'
+                      }}>
+                        <Box sx={{
+                          p: 2,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start'
+                        }}>
+                          <Box sx={{ flex: 1 }}>
+                            {/* Primeira linha: Título e Status */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5, flexWrap: 'wrap' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.95rem', color: colors.text }}>
+                                {plan.title}
+                              </Typography>
+                              <Box sx={{
+                                backgroundColor: statusConfig.bg,
+                                color: statusConfig.color,
+                                padding: '4px 12px',
+                                borderRadius: '12px',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                border: `1px solid ${statusConfig.border}`
+                              }}>
+                                {plan.status}
+                              </Box>
+                            </Box>
+
+                            {/* Segunda linha: Período */}
+                            <Typography variant="body2" sx={{ color: colors.textSecondary, fontSize: '0.875rem', mb: 1.5 }}>
+                              Período: <strong style={{ color: colors.text }}>
+                                {new Date(plan.startDate).toLocaleDateString('pt-BR')} - {new Date(plan.endDate).toLocaleDateString('pt-BR')}
+                              </strong>
+                            </Typography>
+
+                            {/* Terceira linha: Objetivos */}
+                            <Box sx={{ mb: 1.5 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.85rem', color: colors.text, mb: 0.5 }}>
+                                Objetivos:
+                              </Typography>
+                              <Box component="ul" sx={{
+                                margin: 0,
+                                paddingLeft: '1.5rem',
+                                '& li': {
+                                  fontSize: '0.8rem',
+                                  color: colors.textSecondary,
+                                  lineHeight: 1.6,
+                                  marginBottom: '0.25rem'
+                                }
+                              }}>
+                                {plan.objectives.map((objective, index) => (
+                                  <li key={index}>{objective}</li>
+                                ))}
+                              </Box>
+                            </Box>
+
+                            {/* Quarta linha: Barra de progresso */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary, minWidth: '40px' }}>
+                                {plan.completionPercentage}%
+                              </Typography>
+                              <Box sx={{ width: '120px', position: 'relative' }}>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={plan.completionPercentage}
+                                  sx={{
+                                    height: 6,
+                                    borderRadius: 3,
+                                    backgroundColor: '#e0e0e0',
+                                    '& .MuiLinearProgress-bar': {
+                                      borderRadius: 3,
+                                      backgroundColor: plan.completionPercentage === 100 ? '#4caf50' : '#ffc107',
+                                    }
+                                  }}
+                                />
+                              </Box>
+                            </Box>
+
+                            {/* Quinta linha: Responsável */}
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary }}>
+                              Responsável: <strong style={{ color: colors.text }}>
+                                {plan.responsible === 'dr_silva' ? 'Dr. Silva' :
+                                 plan.responsible === 'dra_oliveira' ? 'Dra. Oliveira' :
+                                 plan.responsible === 'dr_santos' ? 'Dr. Santos' :
+                                 plan.responsible === 'dra_costa' ? 'Dra. Costa' :
+                                 plan.responsible}
+                              </strong>
+                            </Typography>
+                          </Box>
+
+                          {/* Botões de ação à direita */}
+                          <Box sx={{ display: 'flex', gap: 1, ml: 2, alignSelf: 'flex-start' }}>
+                            <Tooltip title="Acessar plano" arrow>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  // TODO: Navegar para página de plano
+                                  console.log('Acessar plano:', plan);
+                                }}
+                                sx={{
+                                  backgroundColor: 'transparent',
+                                  color: '#03B4C6',
+                                  border: '1px solid #e0f7fa',
+                                  width: '32px',
+                                  height: '32px',
+                                  '&:hover': {
+                                    backgroundColor: '#e0f7fa',
+                                    borderColor: '#03B4C6',
+                                  }
+                                }}
+                              >
+                                <OpenInNew sx={{ fontSize: '1rem' }} />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title={isFinalized ? "Plano finalizado não pode ser editado" : "Editar plano"} arrow>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  disabled={isFinalized}
+                                  onClick={() => {
+                                    // TODO: Abrir modal de edição
+                                    console.log('Editar plano:', plan);
+                                  }}
+                                  sx={{
+                                    backgroundColor: 'transparent',
+                                    color: isFinalized ? '#ccc' : '#2196f3',
+                                    border: `1px solid ${isFinalized ? '#e0e0e0' : '#e3f2fd'}`,
+                                    width: '32px',
+                                    height: '32px',
+                                    cursor: isFinalized ? 'not-allowed' : 'pointer',
+                                    opacity: isFinalized ? 0.5 : 1,
+                                    '&:hover': {
+                                      backgroundColor: isFinalized ? 'transparent' : '#e3f2fd',
+                                      borderColor: isFinalized ? '#e0e0e0' : '#2196f3',
+                                    }
+                                  }}
+                                >
+                                  <Edit sx={{ fontSize: '1rem' }} />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                            <Tooltip title={isFinalized ? "Plano finalizado não pode ser excluído" : "Deletar plano"} arrow>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  disabled={isFinalized}
+                                  onClick={() => {
+                                    // TODO: Abrir modal de confirmação de exclusão
+                                    console.log('Deletar plano:', plan);
+                                  }}
+                                  sx={{
+                                    backgroundColor: 'transparent',
+                                    color: isFinalized ? '#ccc' : '#dc3545',
+                                    border: `1px solid ${isFinalized ? '#e0e0e0' : '#f8d7da'}`,
+                                    width: '32px',
+                                    height: '32px',
+                                    cursor: isFinalized ? 'not-allowed' : 'pointer',
+                                    opacity: isFinalized ? 0.5 : 1,
+                                    '&:hover': {
+                                      backgroundColor: isFinalized ? 'transparent' : '#f8d7da',
+                                      borderColor: isFinalized ? '#e0e0e0' : '#dc3545',
+                                    }
+                                  }}
+                                >
+                                  <Delete sx={{ fontSize: '1rem' }} />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          </Box>
+                        </Box>
+                      </Box>
+                    );
+                  })}
                 </div>
+
+                {/* Navegador de páginas */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    mt: 2,
+                    bgcolor: '#f8f9fa',
+                    border: 'none',
+                    boxShadow: 'none'
+                  }}
+                >
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      Mostrando 1-{filteredTherapyPlans.length} de <strong>{filteredTherapyPlans.length}</strong> {filteredTherapyPlans.length === 1 ? 'plano' : 'planos'}
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                      {/* Seletor de itens por página */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                          Itens por página:
+                        </Typography>
+                        <FormControl size="small">
+                          <Select
+                            value={10}
+                            sx={{
+                              minWidth: 80,
+                              height: '40px',
+                              fontSize: '1rem',
+                              backgroundColor: 'white',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#ced4da',
+                              },
+                              '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#ced4da',
+                              },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#03B4C6',
+                                boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                              },
+                              '& .MuiSelect-select': {
+                                padding: '0.375rem 0.5rem',
+                                color: '#495057',
+                              },
+                            }}
+                          >
+                            <MenuItem value={5}>5</MenuItem>
+                            <MenuItem value={10}>10</MenuItem>
+                            <MenuItem value={15}>15</MenuItem>
+                            <MenuItem value={20}>20</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+
+                      {/* Navegação de páginas */}
+                      <Pagination
+                        count={1}
+                        page={1}
+                        color="primary"
+                        showFirstButton
+                        showLastButton
+                        size="small"
+                        sx={{
+                          '& .MuiPaginationItem-root': {
+                            color: '#495057',
+                            '&.Mui-selected': {
+                              backgroundColor: '#03B4C6',
+                              color: 'white',
+                              '&:hover': {
+                                backgroundColor: '#029AAB',
+                              },
+                            },
+                          },
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </Paper>
               </div>
             )}
 
@@ -4841,6 +5493,17 @@ const PatientRegister: React.FC = () => {
         title={appointmentModalMode === 'create' ? 'Agendamento' : 'Editar Agendamento'}
         patientsList={patientsList}
         disablePatientField={true}
+      />
+
+      {/* Modal de Períodos de Plano Terapêutico */}
+      <TherapyPeriodModal
+        isOpen={isTherapyPeriodModalOpen}
+        onClose={() => setIsTherapyPeriodModalOpen(false)}
+        onSave={(periods) => {
+          // TODO: Implementar salvamento de períodos
+          console.log('Períodos salvos:', periods);
+          setIsTherapyPeriodModalOpen(false);
+        }}
       />
 
       {/* Modal de Inserção/Edição de Diagnóstico */}
