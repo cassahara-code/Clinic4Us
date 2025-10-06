@@ -398,7 +398,7 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
                   <Box sx={{ flex: '0 0 150px', textAlign: 'left', color: '#6c757d', fontSize: '0.875rem' }}>
                     {new Date(period.endDate).toLocaleDateString('pt-BR')}
                   </Box>
-                  <Box sx={{ flex: '0 0 100px', textAlign: 'left', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <Box sx={{ flex: '0 0 100px', textAlign: 'right', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                     <IconButton
                       onClick={() => handleEditPeriod(period)}
                       title="Editar período"
