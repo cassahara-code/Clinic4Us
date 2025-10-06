@@ -357,6 +357,96 @@ const PatientRegister: React.FC = () => {
     }
   ]);
 
+  // Estados dos filtros de plano terapêutico
+  const [therapyStatusFilter, setTherapyStatusFilter] = useState('');
+  const [therapyStartDate, setTherapyStartDate] = useState('');
+  const [therapyEndDate, setTherapyEndDate] = useState('');
+  const [therapyResponsibleFilter, setTherapyResponsibleFilter] = useState('');
+
+  // Lista mock de planos terapêuticos
+  const [therapyPlansList, setTherapyPlansList] = useState([
+    {
+      id: '1',
+      title: 'Plano de Tratamento Cardiovascular',
+      startDate: '2024-03-15',
+      endDate: '2024-06-15',
+      createdDate: '2024-03-10',
+      objectives: [
+        'Controle da pressão arterial',
+        'Redução do peso em 5kg',
+        'Melhora da capacidade cardiovascular'
+      ],
+      interventions: [
+        'Medicação anti-hipertensiva',
+        'Dieta com restrição de sódio',
+        'Atividade física supervisionada'
+      ],
+      status: 'Em andamento',
+      completionPercentage: 60,
+      responsible: 'dr_silva'
+    },
+    {
+      id: '2',
+      title: 'Plano de Reabilitação Fisioterapêutica',
+      startDate: '2024-04-01',
+      endDate: '2024-07-01',
+      createdDate: '2024-03-28',
+      objectives: [
+        'Recuperar amplitude de movimento',
+        'Fortalecer musculatura do joelho',
+        'Reduzir dor articular'
+      ],
+      interventions: [
+        'Exercícios de fortalecimento',
+        'Terapia manual',
+        'Crioterapia após sessões'
+      ],
+      status: 'Em andamento',
+      completionPercentage: 40,
+      responsible: 'dra_costa'
+    },
+    {
+      id: '3',
+      title: 'Plano Nutricional para Diabetes',
+      startDate: '2024-02-01',
+      endDate: '2024-05-01',
+      createdDate: '2024-01-25',
+      objectives: [
+        'Controle glicêmico adequado',
+        'Redução de HbA1c em 1%',
+        'Educação alimentar'
+      ],
+      interventions: [
+        'Dieta balanceada com controle de carboidratos',
+        'Orientação sobre índice glicêmico',
+        'Acompanhamento semanal'
+      ],
+      status: 'Finalizado',
+      completionPercentage: 100,
+      responsible: 'dra_oliveira'
+    },
+    {
+      id: '4',
+      title: 'Plano de Acompanhamento Psicológico',
+      startDate: '2024-05-01',
+      endDate: '2024-08-01',
+      createdDate: '2024-04-28',
+      objectives: [
+        'Redução dos sintomas de ansiedade',
+        'Desenvolvimento de estratégias de enfrentamento',
+        'Melhora da qualidade do sono'
+      ],
+      interventions: [
+        'Terapia cognitivo-comportamental',
+        'Técnicas de relaxamento',
+        'Sessões semanais'
+      ],
+      status: 'Pendente',
+      completionPercentage: 0,
+      responsible: 'dr_santos'
+    }
+  ]);
+
   // Função para limpar filtros de anotações
   const handleClearNotesFilters = () => {
     setNotesStartDate('');
@@ -372,6 +462,14 @@ const PatientRegister: React.FC = () => {
     setEvalStartDate('');
     setEvalEndDate('');
     setEvalRequestedByFilter('');
+  };
+
+  // Função para limpar filtros de plano terapêutico
+  const handleClearTherapyFilters = () => {
+    setTherapyStatusFilter('');
+    setTherapyStartDate('');
+    setTherapyEndDate('');
+    setTherapyResponsibleFilter('');
   };
 
   // Função para filtrar avaliações
@@ -413,6 +511,46 @@ const PatientRegister: React.FC = () => {
 
     // Filtro por solicitante
     if (evalRequestedByFilter && evaluation.requestedBy !== evalRequestedByFilter) {
+      return false;
+    }
+
+    return true;
+  });
+
+  // Função para filtrar planos terapêuticos
+  const filteredTherapyPlans = therapyPlansList.filter((plan) => {
+    // Filtro por status
+    if (therapyStatusFilter) {
+      const statusMap: { [key: string]: string } = {
+        'finalizado': 'Finalizado',
+        'pendente': 'Pendente',
+        'em_andamento': 'Em andamento'
+      };
+      if (plan.status !== statusMap[therapyStatusFilter]) {
+        return false;
+      }
+    }
+
+    // Filtro por data inicial
+    if (therapyStartDate) {
+      const planDate = new Date(plan.createdDate);
+      const filterDate = new Date(therapyStartDate);
+      if (planDate < filterDate) {
+        return false;
+      }
+    }
+
+    // Filtro por data final
+    if (therapyEndDate) {
+      const planDate = new Date(plan.createdDate);
+      const filterDate = new Date(therapyEndDate);
+      if (planDate > filterDate) {
+        return false;
+      }
+    }
+
+    // Filtro por responsável
+    if (therapyResponsibleFilter && plan.responsible !== therapyResponsibleFilter) {
       return false;
     }
 
@@ -4275,57 +4413,396 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Plano Terapêutico */}
             {activeTab === 'plano-terap' && (
               <div className="tab-content-section">
-                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
-                  Plano Terapêutico
-                </Typography>
-                <div className="therapy-plan-section">
-                  <Box sx={{ mb: 2 }}>
-                    <Button
-                      variant="contained"
+                {/* Filtros e ações */}
+                <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <TextField
+                      select
+                      size="small"
+                      label="Status"
+                      value={therapyStatusFilter}
+                      onChange={(e) => setTherapyStatusFilter(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      SelectProps={{
+                        displayEmpty: true,
+                        renderValue: (value) => {
+                          if (value === "") return "Selecione";
+                          if (value === "finalizado") return "Finalizado";
+                          if (value === "pendente") return "Pendente";
+                          if (value === "em_andamento") return "Em Andamento";
+                          return value as string;
+                        }
+                      }}
                       sx={{
-                        backgroundColor: '#48bb78',
-                        color: '#ffffff',
-                        textTransform: 'none',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        boxShadow: 'none',
-                        '&:hover': {
-                          backgroundColor: '#38a169',
-                          boxShadow: 'none',
+                        width: '180px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
                         },
                       }}
                     >
-                      + Novo Plano
-                    </Button>
+                      <MenuItem value="">Selecione</MenuItem>
+                      <MenuItem value="finalizado">Finalizado</MenuItem>
+                      <MenuItem value="pendente">Pendente</MenuItem>
+                      <MenuItem value="em_andamento">Em Andamento</MenuItem>
+                    </TextField>
+                    <TextField
+                      type="date"
+                      size="small"
+                      label="Data Inicial"
+                      value={therapyStartDate}
+                      onChange={(e) => setTherapyStartDate(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        width: '160px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    />
+                    <TextField
+                      type="date"
+                      size="small"
+                      label="Data Final"
+                      value={therapyEndDate}
+                      onChange={(e) => setTherapyEndDate(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        width: '160px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    />
+                    <TextField
+                      select
+                      size="small"
+                      label="Responsável"
+                      value={therapyResponsibleFilter}
+                      onChange={(e) => setTherapyResponsibleFilter(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      SelectProps={{
+                        displayEmpty: true,
+                        renderValue: (value) => {
+                          if (value === "") return "Selecione";
+                          return value as string;
+                        }
+                      }}
+                      sx={{
+                        width: '200px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    >
+                      <MenuItem value="">Selecione</MenuItem>
+                      <MenuItem value="dr_silva">Dr. Silva</MenuItem>
+                      <MenuItem value="dra_oliveira">Dra. Oliveira</MenuItem>
+                      <MenuItem value="dr_santos">Dr. Santos</MenuItem>
+                      <MenuItem value="dra_costa">Dra. Costa</MenuItem>
+                    </TextField>
+                    <Tooltip title="Limpar filtros" arrow>
+                      <span>
+                        <IconButton
+                          onClick={handleClearTherapyFilters}
+                          sx={{
+                            color: '#6c757d',
+                            border: '1px solid #dee2e6',
+                            borderRadius: '8px',
+                            width: '40px',
+                            height: '40px',
+                            '&:hover': {
+                              bgcolor: '#e9ecef',
+                            },
+                          }}
+                        >
+                          <FilterAltOff fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
                   </Box>
-                  <div className="therapy-plans">
-                    <div className="therapy-plan-item">
-                      <div className="plan-header">
-                        <h4>Plano de Tratamento Cardiovascular</h4>
-                        <span className="plan-period">15/03/2024 - 15/06/2024</span>
-                      </div>
-                      <div className="plan-objectives">
-                        <h5>Objetivos:</h5>
-                        <ul>
-                          <li>Controle da pressão arterial</li>
-                          <li>Redução do peso em 5kg</li>
-                          <li>Melhora da capacidade cardiovascular</li>
-                        </ul>
-                      </div>
-                      <div className="plan-interventions">
-                        <h5>Intervenções:</h5>
-                        <ul>
-                          <li>Medicação anti-hipertensiva</li>
-                          <li>Dieta com restrição de sódio</li>
-                          <li>Atividade física supervisionada</li>
-                        </ul>
-                      </div>
-                      <div className="plan-status">
-                        <span className="status active">Em Andamento</span>
-                      </div>
-                    </div>
-                  </div>
+                  <Tooltip title="Novo Plano Terapêutico" arrow>
+                    <IconButton
+                      onClick={() => {
+                        // TODO: Implementar modal de novo plano
+                        console.log('Novo plano terapêutico');
+                      }}
+                      sx={{
+                        borderColor: '#03B4C6',
+                        color: '#03B4C6',
+                        border: '2px solid #03B4C6',
+                        borderRadius: '8px',
+                        width: '40px',
+                        height: '40px',
+                        '&:hover': {
+                          borderColor: '#029AAB',
+                          backgroundColor: 'rgba(3, 180, 198, 0.08)',
+                        },
+                      }}
+                    >
+                      <Add />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+
+                {/* Contador de registros */}
+                <Box sx={{ mb: 2, px: 1 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                    <strong>{filteredTherapyPlans.length}</strong> {filteredTherapyPlans.length === 1 ? 'plano encontrado' : 'planos encontrados'}
+                  </Typography>
+                </Box>
+
+                {/* Lista de planos terapêuticos */}
+                <div className="therapy-plans-list">
+                  {filteredTherapyPlans.map((plan) => {
+                    const isFinalized = plan.completionPercentage === 100;
+                    const statusConfig = plan.status === 'Finalizado'
+                      ? { bg: '#d4edda', color: '#155724', border: '#c3e6cb' }
+                      : plan.status === 'Em andamento'
+                      ? { bg: '#fff3cd', color: '#856404', border: '#ffeaa7' }
+                      : { bg: '#f8d7da', color: '#721c24', border: '#f5c6cb' };
+
+                    return (
+                      <Box key={plan.id} sx={{
+                        backgroundColor: '#fff',
+                        borderRadius: '8px',
+                        border: '1px solid #e0e0e0',
+                        mb: 2,
+                        overflow: 'hidden'
+                      }}>
+                        <Box sx={{
+                          p: 2,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start'
+                        }}>
+                          <Box sx={{ flex: 1 }}>
+                            {/* Primeira linha: Título e Status */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5, flexWrap: 'wrap' }}>
+                              <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.95rem', color: colors.text }}>
+                                {plan.title}
+                              </Typography>
+                              <Box sx={{
+                                backgroundColor: statusConfig.bg,
+                                color: statusConfig.color,
+                                padding: '4px 12px',
+                                borderRadius: '12px',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                border: `1px solid ${statusConfig.border}`
+                              }}>
+                                {plan.status}
+                              </Box>
+                            </Box>
+
+                            {/* Segunda linha: Período */}
+                            <Typography variant="body2" sx={{ color: colors.textSecondary, fontSize: '0.875rem', mb: 1.5 }}>
+                              Período: <strong style={{ color: colors.text }}>
+                                {new Date(plan.startDate).toLocaleDateString('pt-BR')} - {new Date(plan.endDate).toLocaleDateString('pt-BR')}
+                              </strong>
+                            </Typography>
+
+                            {/* Terceira linha: Objetivos */}
+                            <Box sx={{ mb: 1.5 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.85rem', color: colors.text, mb: 0.5 }}>
+                                Objetivos:
+                              </Typography>
+                              <Box component="ul" sx={{
+                                margin: 0,
+                                paddingLeft: '1.5rem',
+                                '& li': {
+                                  fontSize: '0.8rem',
+                                  color: colors.textSecondary,
+                                  lineHeight: 1.6,
+                                  marginBottom: '0.25rem'
+                                }
+                              }}>
+                                {plan.objectives.map((objective, index) => (
+                                  <li key={index}>{objective}</li>
+                                ))}
+                              </Box>
+                            </Box>
+
+                            {/* Quarta linha: Intervenções */}
+                            <Box sx={{ mb: 1.5 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.85rem', color: colors.text, mb: 0.5 }}>
+                                Intervenções:
+                              </Typography>
+                              <Box component="ul" sx={{
+                                margin: 0,
+                                paddingLeft: '1.5rem',
+                                '& li': {
+                                  fontSize: '0.8rem',
+                                  color: colors.textSecondary,
+                                  lineHeight: 1.6,
+                                  marginBottom: '0.25rem'
+                                }
+                              }}>
+                                {plan.interventions.map((intervention, index) => (
+                                  <li key={index}>{intervention}</li>
+                                ))}
+                              </Box>
+                            </Box>
+
+                            {/* Quinta linha: Barra de progresso */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                              <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary, minWidth: '40px' }}>
+                                {plan.completionPercentage}%
+                              </Typography>
+                              <Box sx={{ width: '120px', position: 'relative' }}>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={plan.completionPercentage}
+                                  sx={{
+                                    height: 6,
+                                    borderRadius: 3,
+                                    backgroundColor: '#e0e0e0',
+                                    '& .MuiLinearProgress-bar': {
+                                      borderRadius: 3,
+                                      backgroundColor: plan.completionPercentage === 100 ? '#4caf50' : '#ffc107',
+                                    }
+                                  }}
+                                />
+                              </Box>
+                            </Box>
+
+                            {/* Sexta linha: Responsável */}
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary }}>
+                              Responsável: <strong style={{ color: colors.text }}>
+                                {plan.responsible === 'dr_silva' ? 'Dr. Silva' :
+                                 plan.responsible === 'dra_oliveira' ? 'Dra. Oliveira' :
+                                 plan.responsible === 'dr_santos' ? 'Dr. Santos' :
+                                 plan.responsible === 'dra_costa' ? 'Dra. Costa' :
+                                 plan.responsible}
+                              </strong>
+                            </Typography>
+                          </Box>
+
+                          {/* Botões de ação à direita */}
+                          <Box sx={{ display: 'flex', gap: 1, ml: 2, alignSelf: 'flex-start' }}>
+                            <Tooltip title="Acessar plano" arrow>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  // TODO: Navegar para página de plano
+                                  console.log('Acessar plano:', plan);
+                                }}
+                                sx={{
+                                  backgroundColor: 'transparent',
+                                  color: '#03B4C6',
+                                  border: '1px solid #e0f7fa',
+                                  width: '32px',
+                                  height: '32px',
+                                  '&:hover': {
+                                    backgroundColor: '#e0f7fa',
+                                    borderColor: '#03B4C6',
+                                  }
+                                }}
+                              >
+                                <OpenInNew sx={{ fontSize: '1rem' }} />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title={isFinalized ? "Plano finalizado não pode ser editado" : "Editar plano"} arrow>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  disabled={isFinalized}
+                                  onClick={() => {
+                                    // TODO: Abrir modal de edição
+                                    console.log('Editar plano:', plan);
+                                  }}
+                                  sx={{
+                                    backgroundColor: 'transparent',
+                                    color: isFinalized ? '#ccc' : '#2196f3',
+                                    border: `1px solid ${isFinalized ? '#e0e0e0' : '#e3f2fd'}`,
+                                    width: '32px',
+                                    height: '32px',
+                                    cursor: isFinalized ? 'not-allowed' : 'pointer',
+                                    opacity: isFinalized ? 0.5 : 1,
+                                    '&:hover': {
+                                      backgroundColor: isFinalized ? 'transparent' : '#e3f2fd',
+                                      borderColor: isFinalized ? '#e0e0e0' : '#2196f3',
+                                    }
+                                  }}
+                                >
+                                  <Edit sx={{ fontSize: '1rem' }} />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                            <Tooltip title={isFinalized ? "Plano finalizado não pode ser excluído" : "Deletar plano"} arrow>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  disabled={isFinalized}
+                                  onClick={() => {
+                                    // TODO: Abrir modal de confirmação de exclusão
+                                    console.log('Deletar plano:', plan);
+                                  }}
+                                  sx={{
+                                    backgroundColor: 'transparent',
+                                    color: isFinalized ? '#ccc' : '#dc3545',
+                                    border: `1px solid ${isFinalized ? '#e0e0e0' : '#f8d7da'}`,
+                                    width: '32px',
+                                    height: '32px',
+                                    cursor: isFinalized ? 'not-allowed' : 'pointer',
+                                    opacity: isFinalized ? 0.5 : 1,
+                                    '&:hover': {
+                                      backgroundColor: isFinalized ? 'transparent' : '#f8d7da',
+                                      borderColor: isFinalized ? '#e0e0e0' : '#dc3545',
+                                    }
+                                  }}
+                                >
+                                  <Delete sx={{ fontSize: '1rem' }} />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          </Box>
+                        </Box>
+                      </Box>
+                    );
+                  })}
                 </div>
+
+                {/* Navegador de páginas */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: '1rem',
+                    marginTop: '1rem',
+                    backgroundColor: 'transparent',
+                  }}
+                >
+                  <Pagination
+                    count={1}
+                    page={1}
+                    shape="rounded"
+                    showFirstButton
+                    showLastButton
+                    size="small"
+                    sx={{
+                      '& .MuiPaginationItem-root': {
+                        color: '#495057',
+                        '&.Mui-selected': {
+                          backgroundColor: '#03B4C6',
+                          color: 'white',
+                          '&:hover': {
+                            backgroundColor: '#029AAB',
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </Paper>
               </div>
             )}
 
