@@ -631,6 +631,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           onChange={(e) => setFormData({ ...formData, cid: e.target.value })}
           select
           fullWidth
+          disabled={formData.disregardCid}
           InputLabelProps={{ shrink: true }}
           sx={{
             '& .MuiOutlinedInput-root': {
@@ -658,7 +659,14 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           control={
             <Checkbox
               checked={formData.disregardCid}
-              onChange={(e) => setFormData({ ...formData, disregardCid: e.target.checked })}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setFormData({
+                  ...formData,
+                  disregardCid: checked,
+                  cid: checked ? '' : formData.cid
+                });
+              }}
               sx={{
                 color: colors.primary,
                 '&.Mui-checked': { color: colors.primary }
