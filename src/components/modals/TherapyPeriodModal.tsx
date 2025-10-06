@@ -8,11 +8,16 @@ import {
   Typography,
   IconButton,
   Box,
-  Autocomplete,
-  Chip
+  Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  OutlinedInput
 } from '@mui/material';
 import { Close, Delete, Edit } from '@mui/icons-material';
 import { colors, typography, inputs } from '../../theme/designSystem';
+import type { SelectChangeEvent } from '@mui/material/Select';
 
 interface TherapyPeriod {
   id: string;
@@ -260,60 +265,90 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
               />
             </Box>
 
-            <Autocomplete
-              multiple
-              options={availableAdministrators}
-              value={formData.administrators}
-              onChange={(event, newValue) => {
-                setFormData({ ...formData, administrators: newValue });
-              }}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Chip
-                    label={option}
-                    {...getTagProps({ index })}
-                    sx={{
-                      backgroundColor: colors.backgroundAlt,
-                      '& .MuiChip-deleteIcon': {
-                        color: colors.textSecondary,
-                        '&:hover': { color: colors.text }
-                      }
-                    }}
-                  />
-                ))
-              }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Administradores"
-                  placeholder="Selecione administradores"
-                  InputLabelProps={{ shrink: true }}
-                />
-              )}
-              sx={{
-                marginBottom: '1.5rem',
-                '& .MuiOutlinedInput-root': {
-                  minHeight: '96px',
-                  maxHeight: '96px',
-                  overflowY: 'auto',
-                  padding: '8px',
-                  alignItems: 'flex-start',
-                  '& fieldset': { borderColor: colors.border },
-                  '&:hover fieldset': { borderColor: colors.border },
-                  '&.Mui-focused fieldset': { borderColor: colors.primary },
-                  '& .MuiAutocomplete-input': {
-                    padding: '4px !important'
-                  }
-                },
-                '& .MuiInputLabel-root': {
+            <FormControl
+              fullWidth
+              sx={{ marginBottom: '1.5rem' }}
+            >
+              <InputLabel
+                id="administrators-label"
+                sx={{
                   fontSize: inputs.default.labelFontSize,
                   color: colors.textSecondary,
                   backgroundColor: colors.white,
                   padding: inputs.default.labelPadding,
                   '&.Mui-focused': { color: colors.primary }
-                }
-              }}
-            />
+                }}
+              >
+                Administradores
+              </InputLabel>
+              <Select
+                labelId="administrators-label"
+                id="administrators-select"
+                multiple
+                value={formData.administrators}
+                onChange={(event: SelectChangeEvent<string[]>) => {
+                  const value = event.target.value;
+                  setFormData({
+                    ...formData,
+                    administrators: typeof value === 'string' ? value.split(',') : value
+                  });
+                }}
+                input={<OutlinedInput label="Administradores" />}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((value) => (
+                      <Chip
+                        key={value}
+                        label={value}
+                        sx={{
+                          backgroundColor: colors.backgroundAlt,
+                          height: '24px',
+                          fontSize: '0.8125rem'
+                        }}
+                      />
+                    ))}
+                  </Box>
+                )}
+                sx={{
+                  minHeight: '96px',
+                  maxHeight: '96px',
+                  '& .MuiSelect-select': {
+                    minHeight: '96px !important',
+                    maxHeight: '96px !important',
+                    overflowY: 'auto !important',
+                    padding: '8px',
+                    alignItems: 'flex-start',
+                    display: 'flex',
+                    flexWrap: 'wrap'
+                  },
+                  '& fieldset': { borderColor: colors.border },
+                  '&:hover fieldset': { borderColor: colors.border },
+                  '&.Mui-focused fieldset': { borderColor: colors.primary }
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 48 * 4.5 + 8,
+                      width: 250,
+                    },
+                  },
+                }}
+              >
+                {availableAdministrators.map((admin) => (
+                  <MenuItem
+                    key={admin}
+                    value={admin}
+                    sx={{
+                      fontWeight: formData.administrators.includes(admin)
+                        ? typography.fontWeight.semibold
+                        : typography.fontWeight.normal
+                    }}
+                  >
+                    {admin}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
             <Box sx={{ display: 'flex', gap: '0.5rem' }}>
               {editingPeriodId && (
