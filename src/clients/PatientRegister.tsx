@@ -258,79 +258,102 @@ const PatientRegister: React.FC = () => {
     'Avaliação Geriátrica',
   ];
 
+  // Estados dos filtros de avaliações
+  const [evalTypeFilter, setEvalTypeFilter] = useState('');
+  const [evalStatusFilter, setEvalStatusFilter] = useState('');
+  const [evalStartDate, setEvalStartDate] = useState('');
+  const [evalEndDate, setEvalEndDate] = useState('');
+  const [evalRequestedByFilter, setEvalRequestedByFilter] = useState('');
+
   // Lista mock de avaliações
   const [evaluationsList, setEvaluationsList] = useState([
     {
       id: '1',
       form: 'Avaliação Cardiológica Inicial',
+      type: 'inicial',
       observations: 'Paciente apresenta histórico familiar de problemas cardíacos',
       deadline: '2025-10-15',
       createdDate: '2025-10-01',
       completionPercentage: 100,
-      status: 'Finalizada'
+      status: 'Finalizada',
+      requestedBy: 'dr_silva'
     },
     {
       id: '2',
       form: 'Avaliação Nutricional',
+      type: 'inicial',
       observations: 'Necessário avaliar hábitos alimentares e orientar sobre dieta balanceada',
       deadline: '2025-10-20',
       createdDate: '2025-10-03',
       completionPercentage: 75,
-      status: 'Em andamento'
+      status: 'Em andamento',
+      requestedBy: 'dra_oliveira'
     },
     {
       id: '3',
       form: 'Avaliação Psicológica',
+      type: 'especializada',
       observations: 'Paciente relata ansiedade e estresse relacionado ao trabalho',
       deadline: '2025-10-18',
       createdDate: '2025-10-02',
       completionPercentage: 50,
-      status: 'Em andamento'
+      status: 'Em andamento',
+      requestedBy: 'dr_santos'
     },
     {
       id: '4',
       form: 'Avaliação Fisioterapêutica',
+      type: 'reavaliacao',
       observations: 'Avaliar mobilidade e recomendar exercícios para fortalecimento',
       deadline: '2025-10-25',
       createdDate: '2025-10-05',
       completionPercentage: 30,
-      status: 'Em andamento'
+      status: 'Em andamento',
+      requestedBy: 'dra_costa'
     },
     {
       id: '5',
       form: 'Avaliação Ortopédica',
+      type: 'inicial',
       observations: 'Paciente queixa-se de dores na coluna lombar',
       deadline: '2025-10-12',
       createdDate: '2025-09-28',
       completionPercentage: 100,
-      status: 'Finalizada'
+      status: 'Finalizada',
+      requestedBy: 'dr_silva'
     },
     {
       id: '6',
       form: 'Avaliação Neurológica',
+      type: 'especializada',
       observations: 'Avaliar episódios de enxaqueca recorrente',
       deadline: '2025-10-22',
       createdDate: '2025-10-04',
       completionPercentage: 15,
-      status: 'Em andamento'
+      status: 'Em andamento',
+      requestedBy: 'dra_oliveira'
     },
     {
       id: '7',
       form: 'Avaliação Geriátrica',
+      type: 'inicial',
       observations: 'Avaliação preventiva de saúde do idoso',
       deadline: '2025-10-30',
       createdDate: '2025-10-06',
       completionPercentage: 0,
-      status: 'Pendente'
+      status: 'Pendente',
+      requestedBy: 'dr_santos'
     },
     {
       id: '8',
       form: 'Avaliação Pediátrica',
+      type: 'reavaliacao',
       observations: 'Acompanhamento de desenvolvimento motor e cognitivo',
       deadline: '2025-10-28',
       createdDate: '2025-10-05',
       completionPercentage: 100,
-      status: 'Finalizada'
+      status: 'Finalizada',
+      requestedBy: 'dra_costa'
     }
   ]);
 
@@ -341,6 +364,60 @@ const PatientRegister: React.FC = () => {
     setNotesUserFilter('');
     setNotesSearchText('');
   };
+
+  // Função para limpar filtros de avaliações
+  const handleClearEvaluationsFilters = () => {
+    setEvalTypeFilter('');
+    setEvalStatusFilter('');
+    setEvalStartDate('');
+    setEvalEndDate('');
+    setEvalRequestedByFilter('');
+  };
+
+  // Função para filtrar avaliações
+  const filteredEvaluations = evaluationsList.filter((evaluation) => {
+    // Filtro por tipo
+    if (evalTypeFilter && evaluation.type !== evalTypeFilter) {
+      return false;
+    }
+
+    // Filtro por status
+    if (evalStatusFilter) {
+      const statusMap: { [key: string]: string } = {
+        'concluida': 'Finalizada',
+        'pendente': 'Pendente',
+        'em_andamento': 'Em andamento'
+      };
+      if (evaluation.status !== statusMap[evalStatusFilter]) {
+        return false;
+      }
+    }
+
+    // Filtro por data inicial
+    if (evalStartDate) {
+      const evalDate = new Date(evaluation.createdDate);
+      const filterDate = new Date(evalStartDate);
+      if (evalDate < filterDate) {
+        return false;
+      }
+    }
+
+    // Filtro por data final
+    if (evalEndDate) {
+      const evalDate = new Date(evaluation.createdDate);
+      const filterDate = new Date(evalEndDate);
+      if (evalDate > filterDate) {
+        return false;
+      }
+    }
+
+    // Filtro por solicitante
+    if (evalRequestedByFilter && evaluation.requestedBy !== evalRequestedByFilter) {
+      return false;
+    }
+
+    return true;
+  });
 
   // Funções para gerenciar anotações
   const handleOpenNoteModal = (note?: any) => {
@@ -525,11 +602,13 @@ const PatientRegister: React.FC = () => {
       const newEvaluation = {
         id: `${Date.now()}`,
         form: evaluationFormData.form,
+        type: 'inicial',
         observations: evaluationFormData.observations,
         deadline: evaluationFormData.deadline,
         createdDate: new Date().toISOString().split('T')[0],
         completionPercentage: 0,
-        status: 'Pendente'
+        status: 'Pendente',
+        requestedBy: 'dr_silva'
       };
       setEvaluationsList([...evaluationsList, newEvaluation]);
     }
@@ -3778,7 +3857,8 @@ const PatientRegister: React.FC = () => {
                       select
                       size="small"
                       label="Tipo de Avaliação"
-                      defaultValue=""
+                      value={evalTypeFilter}
+                      onChange={(e) => setEvalTypeFilter(e.target.value)}
                       InputLabelProps={{ shrink: true }}
                       SelectProps={{
                         displayEmpty: true,
@@ -3799,7 +3879,7 @@ const PatientRegister: React.FC = () => {
                         },
                       }}
                     >
-                      <MenuItem value="" disabled>Selecione</MenuItem>
+                      <MenuItem value="">Selecione</MenuItem>
                       <MenuItem value="inicial">Avaliação Inicial</MenuItem>
                       <MenuItem value="reavaliacao">Reavaliação</MenuItem>
                       <MenuItem value="especializada">Avaliação Especializada</MenuItem>
@@ -3808,7 +3888,8 @@ const PatientRegister: React.FC = () => {
                       select
                       size="small"
                       label="Status"
-                      defaultValue=""
+                      value={evalStatusFilter}
+                      onChange={(e) => setEvalStatusFilter(e.target.value)}
                       InputLabelProps={{ shrink: true }}
                       SelectProps={{
                         displayEmpty: true,
@@ -3829,7 +3910,7 @@ const PatientRegister: React.FC = () => {
                         },
                       }}
                     >
-                      <MenuItem value="" disabled>Selecione</MenuItem>
+                      <MenuItem value="">Selecione</MenuItem>
                       <MenuItem value="concluida">Concluída</MenuItem>
                       <MenuItem value="pendente">Pendente</MenuItem>
                       <MenuItem value="em_andamento">Em Andamento</MenuItem>
@@ -3838,6 +3919,8 @@ const PatientRegister: React.FC = () => {
                       type="date"
                       size="small"
                       label="Data Inicial"
+                      value={evalStartDate}
+                      onChange={(e) => setEvalStartDate(e.target.value)}
                       InputLabelProps={{ shrink: true }}
                       sx={{
                         width: '160px',
@@ -3852,6 +3935,8 @@ const PatientRegister: React.FC = () => {
                       type="date"
                       size="small"
                       label="Data Final"
+                      value={evalEndDate}
+                      onChange={(e) => setEvalEndDate(e.target.value)}
                       InputLabelProps={{ shrink: true }}
                       sx={{
                         width: '160px',
@@ -3862,9 +3947,39 @@ const PatientRegister: React.FC = () => {
                         },
                       }}
                     />
+                    <TextField
+                      select
+                      size="small"
+                      label="Solicitante"
+                      value={evalRequestedByFilter}
+                      onChange={(e) => setEvalRequestedByFilter(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      SelectProps={{
+                        displayEmpty: true,
+                        renderValue: (value) => {
+                          if (value === "") return "Selecione";
+                          return value as string;
+                        }
+                      }}
+                      sx={{
+                        width: '200px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    >
+                      <MenuItem value="">Selecione</MenuItem>
+                      <MenuItem value="dr_silva">Dr. Silva</MenuItem>
+                      <MenuItem value="dra_oliveira">Dra. Oliveira</MenuItem>
+                      <MenuItem value="dr_santos">Dr. Santos</MenuItem>
+                      <MenuItem value="dra_costa">Dra. Costa</MenuItem>
+                    </TextField>
                     <Tooltip title="Limpar filtros" arrow>
                       <span>
                         <IconButton
+                          onClick={handleClearEvaluationsFilters}
                           sx={{
                             color: '#6c757d',
                             border: '1px solid #dee2e6',
@@ -3905,13 +4020,13 @@ const PatientRegister: React.FC = () => {
                 {/* Contador de registros */}
                 <Box sx={{ mb: 2, px: 1 }}>
                   <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
-                    <strong>{evaluationsList.length}</strong> {evaluationsList.length === 1 ? 'avaliação encontrada' : 'avaliações encontradas'}
+                    <strong>{filteredEvaluations.length}</strong> {filteredEvaluations.length === 1 ? 'avaliação encontrada' : 'avaliações encontradas'}
                   </Typography>
                 </Box>
 
                 {/* Lista de avaliações */}
                 <div className="evaluations-list">
-                  {evaluationsList.map((evaluation) => {
+                  {filteredEvaluations.map((evaluation) => {
                     const isFinalized = evaluation.completionPercentage === 100;
                     const statusConfig = evaluation.status === 'Finalizada'
                       ? { bg: '#d4edda', color: '#155724', border: '#c3e6cb' }
