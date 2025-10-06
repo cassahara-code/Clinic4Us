@@ -167,7 +167,7 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
               fullWidth
               InputLabelProps={{ shrink: true }}
               sx={{
-                marginBottom: '1rem',
+                marginBottom: '1.5rem',
                 '& .MuiOutlinedInput-root': {
                   height: inputs.default.height,
                   '& fieldset': { borderColor: colors.border },
@@ -194,7 +194,7 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
               rows={3}
               InputLabelProps={{ shrink: true }}
               sx={{
-                marginBottom: '1rem',
+                marginBottom: '1.5rem',
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': { borderColor: colors.border },
                   '&:hover fieldset': { borderColor: colors.border },
@@ -210,7 +210,7 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
               }}
             />
 
-            <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+            <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
               <TextField
                 label="Data Inicial"
                 type="date"
