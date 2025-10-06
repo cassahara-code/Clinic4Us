@@ -4753,34 +4753,79 @@ const PatientRegister: React.FC = () => {
                 <Paper
                   elevation={0}
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    padding: '1rem',
-                    marginTop: '1rem',
-                    backgroundColor: 'transparent',
+                    p: 2,
+                    mt: 2,
+                    bgcolor: '#f8f9fa',
+                    border: 'none',
+                    boxShadow: 'none'
                   }}
                 >
-                  <Pagination
-                    count={1}
-                    page={1}
-                    shape="rounded"
-                    showFirstButton
-                    showLastButton
-                    size="small"
-                    sx={{
-                      '& .MuiPaginationItem-root': {
-                        color: '#495057',
-                        '&.Mui-selected': {
-                          backgroundColor: '#03B4C6',
-                          color: 'white',
-                          '&:hover': {
-                            backgroundColor: '#029AAB',
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      Mostrando 1-{filteredTherapyPlans.length} de <strong>{filteredTherapyPlans.length}</strong> {filteredTherapyPlans.length === 1 ? 'plano' : 'planos'}
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                      {/* Seletor de itens por página */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                          Itens por página:
+                        </Typography>
+                        <FormControl size="small">
+                          <Select
+                            value={10}
+                            sx={{
+                              minWidth: 80,
+                              height: '40px',
+                              fontSize: '1rem',
+                              backgroundColor: 'white',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#ced4da',
+                              },
+                              '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#ced4da',
+                              },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#03B4C6',
+                                boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                              },
+                              '& .MuiSelect-select': {
+                                padding: '0.375rem 0.5rem',
+                                color: '#495057',
+                              },
+                            }}
+                          >
+                            <MenuItem value={5}>5</MenuItem>
+                            <MenuItem value={10}>10</MenuItem>
+                            <MenuItem value={15}>15</MenuItem>
+                            <MenuItem value={20}>20</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+
+                      {/* Navegação de páginas */}
+                      <Pagination
+                        count={1}
+                        page={1}
+                        color="primary"
+                        showFirstButton
+                        showLastButton
+                        size="small"
+                        sx={{
+                          '& .MuiPaginationItem-root': {
+                            color: '#495057',
+                            '&.Mui-selected': {
+                              backgroundColor: '#03B4C6',
+                              color: 'white',
+                              '&:hover': {
+                                backgroundColor: '#029AAB',
+                              },
+                            },
                           },
-                        },
-                      },
-                    }}
-                  />
+                        }}
+                      />
+                    </Box>
+                  </Box>
                 </Paper>
               </div>
             )}
