@@ -4079,7 +4079,7 @@ const PatientRegister: React.FC = () => {
                             </Typography>
 
                             {/* Terceira linha: Barra de progresso */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                               <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary, minWidth: '40px' }}>
                                 {evaluation.completionPercentage}%
                               </Typography>
@@ -4099,6 +4099,17 @@ const PatientRegister: React.FC = () => {
                                 />
                               </Box>
                             </Box>
+
+                            {/* Quarta linha: Solicitante */}
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary }}>
+                              Solicitante: <strong style={{ color: colors.text }}>
+                                {evaluation.requestedBy === 'dr_silva' ? 'Dr. Silva' :
+                                 evaluation.requestedBy === 'dra_oliveira' ? 'Dra. Oliveira' :
+                                 evaluation.requestedBy === 'dr_santos' ? 'Dr. Santos' :
+                                 evaluation.requestedBy === 'dra_costa' ? 'Dra. Costa' :
+                                 evaluation.requestedBy}
+                              </strong>
+                            </Typography>
                           </Box>
 
                           {/* Botões de ação à direita */}
