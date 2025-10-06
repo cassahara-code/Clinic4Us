@@ -293,9 +293,10 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
               sx={{
                 marginBottom: '1.5rem',
                 '& .MuiOutlinedInput-root': {
-                  maxHeight: '110px',
+                  minHeight: '96px',
+                  maxHeight: '96px',
                   overflowY: 'auto',
-                  padding: '4px',
+                  padding: '8px',
                   alignItems: 'flex-start',
                   '& fieldset': { borderColor: colors.border },
                   '&:hover fieldset': { borderColor: colors.border },
