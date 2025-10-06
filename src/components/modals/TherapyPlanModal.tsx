@@ -154,12 +154,10 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
       {/* Coluna esquerda */}
       <Box sx={{ flex: '1' }}>
         <TextField
-          label="Título do plano"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           placeholder="Título do plano"
           fullWidth
-          InputLabelProps={{ shrink: true }}
           sx={{
             marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
@@ -167,13 +165,6 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
               '& fieldset': { borderColor: colors.border },
               '&:hover fieldset': { borderColor: colors.border },
               '&.Mui-focused fieldset': { borderColor: colors.primary }
-            },
-            '& .MuiInputLabel-root': {
-              fontSize: inputs.default.labelFontSize,
-              color: colors.textSecondary,
-              backgroundColor: colors.white,
-              padding: inputs.default.labelPadding,
-              '&.Mui-focused': { color: colors.primary }
             }
           }}
         />
