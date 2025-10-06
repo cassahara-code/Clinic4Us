@@ -150,9 +150,9 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
   );
 
   const renderFormContent = () => (
-    <Box sx={{ display: 'flex', gap: '2rem' }}>
+    <Box sx={{ display: 'flex', gap: '1.5rem' }}>
       {/* Coluna esquerda */}
-      <Box sx={{ flex: '0 0 48%' }}>
+      <Box sx={{ flex: '1' }}>
         <TextField
           label="Título do plano"
           value={formData.title}
@@ -161,7 +161,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -185,10 +185,10 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           placeholder="Justificativa"
           fullWidth
           multiline
-          rows={5}
+          rows={4}
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
               '& fieldset': { borderColor: colors.border },
               '&:hover fieldset': { borderColor: colors.border },
@@ -212,7 +212,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -241,10 +241,9 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           placeholder="Objetivo"
           fullWidth
           multiline
-          rows={5}
+          rows={4}
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               '& fieldset': { borderColor: colors.border },
               '&:hover fieldset': { borderColor: colors.border },
@@ -262,16 +261,16 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
       </Box>
 
       {/* Coluna central */}
-      <Box sx={{ flex: '0 0 24%' }}>
+      <Box sx={{ flex: '1' }}>
         <TextField
-          label="Nível de qualidade - pretendido (Objetivo)* - deve ser pretendido que é marcador da justificativa"
+          label="Nível de qualidade - pretendido (Objetivo)*"
           value={formData.qualityLevelPreferred}
           onChange={(e) => setFormData({ ...formData, qualityLevelPreferred: e.target.value })}
           select
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -301,7 +300,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -330,10 +329,10 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           placeholder="Métrica"
           fullWidth
           multiline
-          rows={5}
+          rows={4}
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
               '& fieldset': { borderColor: colors.border },
               '&:hover fieldset': { borderColor: colors.border },
@@ -356,10 +355,9 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           placeholder="Observações"
           fullWidth
           multiline
-          rows={5}
+          rows={4}
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               '& fieldset': { borderColor: colors.border },
               '&:hover fieldset': { borderColor: colors.border },
@@ -377,68 +375,68 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
       </Box>
 
       {/* Coluna direita */}
-      <Box sx={{ flex: '0 0 24%' }}>
-        <TextField
-          label="Período"
-          value={formData.period}
-          onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-          select
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-          sx={{
-            marginBottom: '1.5rem',
-            '& .MuiOutlinedInput-root': {
-              height: inputs.default.height,
-              '& fieldset': { borderColor: colors.border },
-              '&:hover fieldset': { borderColor: colors.border },
-              '&.Mui-focused fieldset': { borderColor: colors.primary }
-            },
-            '& .MuiInputLabel-root': {
-              fontSize: inputs.default.labelFontSize,
-              color: colors.textSecondary,
-              backgroundColor: colors.white,
-              padding: inputs.default.labelPadding,
-              '&.Mui-focused': { color: colors.primary }
-            }
-          }}
-        >
-          <MenuItem value="">Selecione</MenuItem>
-          {periods.map((period) => (
-            <MenuItem key={period} value={period}>{period}</MenuItem>
-          ))}
-        </TextField>
+      <Box sx={{ flex: '1' }}>
+        <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+          <TextField
+            label="Período"
+            value={formData.period}
+            onChange={(e) => setFormData({ ...formData, period: e.target.value })}
+            select
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          >
+            <MenuItem value="">Selecione</MenuItem>
+            {periods.map((period) => (
+              <MenuItem key={period} value={period}>{period}</MenuItem>
+            ))}
+          </TextField>
 
-        <TextField
-          label="Prioridade"
-          value={formData.priority}
-          onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-          select
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-          sx={{
-            marginBottom: '1.5rem',
-            '& .MuiOutlinedInput-root': {
-              height: inputs.default.height,
-              '& fieldset': { borderColor: colors.border },
-              '&:hover fieldset': { borderColor: colors.border },
-              '&.Mui-focused fieldset': { borderColor: colors.primary }
-            },
-            '& .MuiInputLabel-root': {
-              fontSize: inputs.default.labelFontSize,
-              color: colors.textSecondary,
-              backgroundColor: colors.white,
-              padding: inputs.default.labelPadding,
-              '&.Mui-focused': { color: colors.primary }
-            }
-          }}
-        >
-          <MenuItem value="">Baixa</MenuItem>
-          {priorities.map((priority) => (
-            <MenuItem key={priority} value={priority}>{priority}</MenuItem>
-          ))}
-        </TextField>
+          <TextField
+            label="Prioridade"
+            value={formData.priority}
+            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+            select
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          >
+            <MenuItem value="">Baixa</MenuItem>
+            {priorities.map((priority) => (
+              <MenuItem key={priority} value={priority}>{priority}</MenuItem>
+            ))}
+          </TextField>
+        </Box>
 
-        <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+        <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
           <TextField
             label="Data Inicial"
             type="date"
@@ -531,7 +529,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           }
           label="Desconsiderar CID"
           sx={{
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             '& .MuiFormControlLabel-label': {
               fontSize: '0.875rem',
               color: colors.textSecondary
@@ -547,7 +545,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -577,7 +575,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -607,7 +605,7 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           fullWidth
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
+            marginBottom: '1rem',
             '& .MuiOutlinedInput-root': {
               height: inputs.default.height,
               '& fieldset': { borderColor: colors.border },
@@ -636,10 +634,9 @@ const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
           placeholder="Responsáveis"
           fullWidth
           multiline
-          rows={3}
+          rows={2}
           InputLabelProps={{ shrink: true }}
           sx={{
-            marginBottom: '1.5rem',
             '& .MuiOutlinedInput-root': {
               '& fieldset': { borderColor: colors.border },
               '&:hover fieldset': { borderColor: colors.border },
