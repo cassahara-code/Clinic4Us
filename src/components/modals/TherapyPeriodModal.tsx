@@ -414,9 +414,9 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
                 fontSize: '0.875rem',
                 color: '#495057'
               }}>
-                <Box sx={{ flex: '0 0 150px', textAlign: 'left' }}>Título</Box>
-                <Box sx={{ flex: '0 0 150px', textAlign: 'left' }}>Data Inicial</Box>
-                <Box sx={{ flex: '0 0 150px', textAlign: 'left' }}>Data Final</Box>
+                <Box sx={{ flex: '1 1 auto', textAlign: 'left' }}>Título</Box>
+                <Box sx={{ flex: '0 0 120px', textAlign: 'left' }}>Data Inicial</Box>
+                <Box sx={{ flex: '0 0 120px', textAlign: 'left' }}>Data Final</Box>
                 <Box sx={{ flex: '0 0 100px', textAlign: 'right' }}>Ações</Box>
               </Box>
 
@@ -432,16 +432,16 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
                     '&:hover': { backgroundColor: '#f0f9fa' }
                   }}
                 >
-                  <Box sx={{ flex: '0 0 150px', textAlign: 'left', color: '#212529', fontSize: '0.875rem' }}>
+                  <Box sx={{ flex: '1 1 auto', textAlign: 'left', color: '#212529', fontSize: '0.875rem' }}>
                     {period.title}
                   </Box>
-                  <Box sx={{ flex: '0 0 150px', textAlign: 'left', color: '#6c757d', fontSize: '0.875rem' }}>
+                  <Box sx={{ flex: '0 0 120px', textAlign: 'left', color: '#6c757d', fontSize: '0.875rem' }}>
                     {new Date(period.startDate).toLocaleDateString('pt-BR')}
                   </Box>
-                  <Box sx={{ flex: '0 0 150px', textAlign: 'left', color: '#6c757d', fontSize: '0.875rem' }}>
+                  <Box sx={{ flex: '0 0 120px', textAlign: 'left', color: '#6c757d', fontSize: '0.875rem' }}>
                     {new Date(period.endDate).toLocaleDateString('pt-BR')}
                   </Box>
-                  <Box sx={{ flex: '0 0 100px', textAlign: 'right', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <Box sx={{ flex: '0 0 100px', display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                     <IconButton
                       onClick={() => handleEditPeriod(period)}
                       title="Editar período"
