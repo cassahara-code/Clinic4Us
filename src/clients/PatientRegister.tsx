@@ -5971,7 +5971,7 @@ const PatientRegister: React.FC = () => {
                             {evolution.observations && (
                               <Box sx={{ mb: 1.5 }}>
                                 <Typography variant="body2" sx={{ color: colors.text, fontWeight: 600, fontSize: '0.85rem', mb: 0.5 }}>
-                                  Observações:
+                                  Observações (Informação interna, não aparece nos relatórios):
                                 </Typography>
                                 <Typography
                                   variant="body2"

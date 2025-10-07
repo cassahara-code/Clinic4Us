@@ -14,7 +14,7 @@ import {
   Checkbox
 } from '@mui/material';
 import { Close, Mic, InfoOutlined, Clear } from '@mui/icons-material';
-import { colors, typography, inputs, buttons } from '../../theme/designSystem';
+import { colors, typography, inputs } from '../../theme/designSystem';
 import { getMultilineTextFieldSx, getMultilineInputLabelProps } from '../../theme/textFieldStyles';
 
 interface EvolutionFormData {
@@ -38,14 +38,16 @@ interface EvolutionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (evolutionData: EvolutionFormData) => void;
+  onDelete?: () => void;
   editData?: EvolutionFormData | null;
-  mode: 'add' | 'edit';
+  mode: 'add' | 'edit' | 'delete';
 }
 
 const EvolutionModal: React.FC<EvolutionModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   editData,
   mode
 }) => {
@@ -352,8 +354,37 @@ const EvolutionModal: React.FC<EvolutionModalProps> = ({
     onClose();
   };
 
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete();
+      onClose();
+    }
+  };
+
   const getTitle = () => {
-    return mode === 'add' ? 'Registrar evolução' : 'Editar evolução';
+    switch (mode) {
+      case 'add':
+        return 'Registrar evolução';
+      case 'edit':
+        return 'Editar evolução';
+      case 'delete':
+        return 'Excluir evolução';
+      default:
+        return 'Evolução';
+    }
+  };
+
+  const getButtonText = () => {
+    switch (mode) {
+      case 'add':
+        return 'Salvar';
+      case 'edit':
+        return 'Salvar';
+      case 'delete':
+        return 'Excluir';
+      default:
+        return 'Salvar';
+    }
   };
 
   return (
@@ -396,6 +427,11 @@ const EvolutionModal: React.FC<EvolutionModalProps> = ({
       </DialogTitle>
 
       <DialogContent sx={{ padding: '1.5rem !important', paddingTop: '2rem !important' }}>
+        {mode === 'delete' ? (
+          <Typography sx={{ mb: 3, fontSize: typography.fontSize.base }}>
+            Tem certeza que deseja excluir esta evolução? Esta ação não pode ser desfeita.
+          </Typography>
+        ) : (
         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
             {/* Coluna Esquerda */}
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -1187,6 +1223,7 @@ const EvolutionModal: React.FC<EvolutionModalProps> = ({
               />
             </Box>
           </Box>
+        )}
       </DialogContent>
 
       {/* Botões de ação fixos */}
@@ -1216,27 +1253,51 @@ const EvolutionModal: React.FC<EvolutionModalProps> = ({
         >
           Cancelar
         </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          sx={{
-            padding: '0.75rem 1.5rem',
-            borderRadius: '6px',
-            backgroundColor: colors.primary,
-            color: colors.white,
-            fontSize: '1rem',
-            fontWeight: typography.fontWeight.medium,
-            textTransform: 'none',
-            boxShadow: 'none',
-            '&:hover': {
-              backgroundColor: '#029AAB',
+        {mode === 'delete' ? (
+          <Button
+            onClick={handleDelete}
+            variant="contained"
+            sx={{
+              padding: '0.75rem 1.5rem',
+              borderRadius: '6px',
+              backgroundColor: '#dc3545',
+              color: colors.white,
+              fontSize: '1rem',
+              fontWeight: typography.fontWeight.medium,
+              textTransform: 'none',
               boxShadow: 'none',
-              transform: 'translateY(-1px)'
-            }
-          }}
-        >
-          Salvar
-        </Button>
+              '&:hover': {
+                backgroundColor: '#c82333',
+                boxShadow: 'none',
+                transform: 'translateY(-1px)'
+              }
+            }}
+          >
+            {getButtonText()}
+          </Button>
+        ) : (
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            sx={{
+              padding: '0.75rem 1.5rem',
+              borderRadius: '6px',
+              backgroundColor: colors.primary,
+              color: colors.white,
+              fontSize: '1rem',
+              fontWeight: typography.fontWeight.medium,
+              textTransform: 'none',
+              boxShadow: 'none',
+              '&:hover': {
+                backgroundColor: '#029AAB',
+                boxShadow: 'none',
+                transform: 'translateY(-1px)'
+              }
+            }}
+          >
+            Salvar
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
