@@ -7,6 +7,7 @@ import { FaqButton } from "../components/FaqButton";
 import PhotoUpload from "../components/PhotoUpload";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
 import TherapyPeriodModal from "../components/modals/TherapyPeriodModal";
+import TherapyPlanModal from "../components/modals/TherapyPlanModal";
 import {
   TextField,
   MenuItem,
@@ -234,6 +235,11 @@ const PatientRegister: React.FC = () => {
 
   // Estado do modal de períodos de plano terapêutico
   const [isTherapyPeriodModalOpen, setIsTherapyPeriodModalOpen] = useState(false);
+
+  // Estados do modal de plano terapêutico
+  const [isTherapyPlanModalOpen, setIsTherapyPlanModalOpen] = useState(false);
+  const [therapyPlanModalMode, setTherapyPlanModalMode] = useState<'add' | 'edit' | 'delete'>('add');
+  const [editingTherapyPlan, setEditingTherapyPlan] = useState<any>(null);
 
   // Lista de pacientes para o modal (apenas o paciente atual)
   const patientsList = formData.name ? [formData.name] : [];
@@ -4537,15 +4543,15 @@ const PatientRegister: React.FC = () => {
                       <IconButton
                         onClick={() => setIsTherapyPeriodModalOpen(true)}
                         sx={{
-                          borderColor: '#6c757d',
-                          color: '#6c757d',
-                          border: '2px solid #6c757d',
+                          borderColor: '#03B4C6',
+                          color: '#03B4C6',
+                          border: '2px solid #03B4C6',
                           borderRadius: '8px',
                           width: '40px',
                           height: '40px',
                           '&:hover': {
-                            borderColor: '#5a6268',
-                            backgroundColor: 'rgba(108, 117, 125, 0.08)',
+                            borderColor: '#029AAB',
+                            backgroundColor: 'rgba(3, 180, 198, 0.08)',
                           },
                         }}
                       >
@@ -4555,8 +4561,9 @@ const PatientRegister: React.FC = () => {
                     <Tooltip title="Novo Plano Terapêutico" arrow>
                       <IconButton
                         onClick={() => {
-                          // TODO: Implementar modal de novo plano
-                          console.log('Novo plano terapêutico');
+                          setTherapyPlanModalMode('add');
+                          setEditingTherapyPlan(null);
+                          setIsTherapyPlanModalOpen(true);
                         }}
                         sx={{
                           borderColor: '#03B4C6',
@@ -4719,8 +4726,9 @@ const PatientRegister: React.FC = () => {
                                   size="small"
                                   disabled={isFinalized}
                                   onClick={() => {
-                                    // TODO: Abrir modal de edição
-                                    console.log('Editar plano:', plan);
+                                    setTherapyPlanModalMode('edit');
+                                    setEditingTherapyPlan(plan);
+                                    setIsTherapyPlanModalOpen(true);
                                   }}
                                   sx={{
                                     backgroundColor: 'transparent',
@@ -4746,8 +4754,9 @@ const PatientRegister: React.FC = () => {
                                   size="small"
                                   disabled={isFinalized}
                                   onClick={() => {
-                                    // TODO: Abrir modal de confirmação de exclusão
-                                    console.log('Deletar plano:', plan);
+                                    setTherapyPlanModalMode('delete');
+                                    setEditingTherapyPlan(plan);
+                                    setIsTherapyPlanModalOpen(true);
                                   }}
                                   sx={{
                                     backgroundColor: 'transparent',
@@ -5504,6 +5513,23 @@ const PatientRegister: React.FC = () => {
           console.log('Períodos salvos:', periods);
           setIsTherapyPeriodModalOpen(false);
         }}
+      />
+
+      {/* Modal de Plano Terapêutico */}
+      <TherapyPlanModal
+        isOpen={isTherapyPlanModalOpen}
+        onClose={() => {
+          setIsTherapyPlanModalOpen(false);
+          setEditingTherapyPlan(null);
+        }}
+        onSave={(planData) => {
+          // TODO: Implementar salvamento/edição/exclusão de plano
+          console.log('Plano salvo:', planData);
+          setIsTherapyPlanModalOpen(false);
+          setEditingTherapyPlan(null);
+        }}
+        editData={editingTherapyPlan}
+        mode={therapyPlanModalMode}
       />
 
       {/* Modal de Inserção/Edição de Diagnóstico */}
