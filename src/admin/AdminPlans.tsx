@@ -22,6 +22,7 @@ import StandardPagination from "../components/Pagination/StandardPagination";
 import AddButton from "../components/AddButton";
 import ClearFiltersButton from "../components/ClearFiltersButton";
 import { colors, typography, inputs } from "../theme/designSystem";
+import { planoService } from "../services/planoService";
 
 interface MenuItemProps {
   label: string;
@@ -96,134 +97,73 @@ const AdminPlans: React.FC = () => {
     sortOrder: "asc" as "asc" | "desc",
   };
 
-  const [plans] = useState<Plan[]>(() => {
-    const basePlans = [
-      {
-        id: "1",
-        name: "Plano Básico",
-        description: "Plano ideal para clínicas pequenas",
-        price: 199.9,
-        duration: 12,
-        maxUsers: 5,
-        features: [
-          "Agenda básica",
-          "Cadastro de pacientes",
-          "Relatórios simples",
-        ],
-        status: "Ativo" as const,
-        createdAt: "2024-01-15T10:00:00Z",
-        updatedAt: "2024-02-20T14:30:00Z",
-      },
-      {
-        id: "2",
-        name: "Plano Professional",
-        description: "Para clínicas em crescimento",
-        price: 399.9,
-        duration: 12,
-        maxUsers: 15,
-        features: [
-          "Agenda avançada",
-          "Múltiplos profissionais",
-          "Relatórios completos",
-          "Integração WhatsApp",
-        ],
-        status: "Ativo" as const,
-        createdAt: "2024-01-20T09:15:00Z",
-        updatedAt: "2024-03-10T16:45:00Z",
-      },
-      {
-        id: "3",
-        name: "Plano Enterprise",
-        description: "Para grandes clínicas e hospitais",
-        price: 799.9,
-        duration: 12,
-        maxUsers: 50,
-        features: [
-          "Recursos ilimitados",
-          "API personalizada",
-          "Suporte 24/7",
-          "Customizações",
-        ],
-        status: "Ativo" as const,
-        createdAt: "2024-02-01T11:30:00Z",
-        updatedAt: "2024-03-15T13:20:00Z",
-      },
-      {
-        id: "4",
-        name: "Plano Teste",
-        description: "Plano para demonstrações",
-        price: 0,
-        duration: 1,
-        maxUsers: 2,
-        features: ["Funcionalidades limitadas", "Apenas para testes"],
-        status: "Inativo" as const,
-        createdAt: "2024-01-10T08:00:00Z",
-        updatedAt: "2024-01-10T08:00:00Z",
-      },
-    ];
-
-    const additionalPlans = [];
-    const planTypes = [
-      "Básico",
-      "Standard",
-      "Premium",
-      "Enterprise",
-      "Corporate",
-      "Starter",
-    ];
-    const descriptions = [
-      "Ideal para pequenos consultórios",
-      "Perfeito para clínicas médias",
-      "Desenvolvido para hospitais",
-      "Customizado para grandes redes",
-      "Solução corporativa completa",
-      "Plano inicial econômico",
-    ];
-
-    for (let i = 5; i <= 120; i++) {
-      const planType = planTypes[i % planTypes.length];
-      const description = descriptions[i % descriptions.length];
-      const isActive = Math.random() > 0.3;
-
-      additionalPlans.push({
-        id: i.toString(),
-        name: `${planType} ${i}`,
-        description: `${description} - Versão ${i}`,
-        price: Math.round((Math.random() * 800 + 100) * 100) / 100,
-        duration: [6, 12, 24][Math.floor(Math.random() * 3)],
-        maxUsers: [5, 10, 25, 50, 100][Math.floor(Math.random() * 5)],
-        features: [`Recurso ${i}A`, `Funcionalidade ${i}B`, `Feature ${i}C`],
-        status: isActive ? ("Ativo" as const) : ("Inativo" as const),
-        createdAt: new Date(
-          2024,
-          Math.floor(Math.random() * 3),
-          Math.floor(Math.random() * 28) + 1
-        ).toISOString(),
-        updatedAt: new Date(
-          2024,
-          Math.floor(Math.random() * 3) + 1,
-          Math.floor(Math.random() * 28) + 1
-        ).toISOString(),
-      });
-    }
-
-    return [...basePlans, ...additionalPlans];
-  });
+  // Busca lista de planos do backend
+  const [plans, setPlans] = useState<Plan[]>([]);
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const planos = await planoService.getAllPlanos();
+        // Mapear os dados recebidos para o tipo Plan
+        const mappedPlans: Plan[] = planos.map((plano: any) => ({
+          id: plano.id,
+          name: plano.planTitle, // Corrigido para usar o campo correto do backend
+          description: plano.description,
+          price: plano.price,
+          duration: plano.duration,
+          maxUsers: plano.maxUsers,
+          features: plano.features ?? [],
+          status: plano.active == 1 ? "Ativo" : "Inativo",
+          createdAt: plano.createdAt,
+          updatedAt: plano.updatedAt,
+        }));
+        console.log("Planos recebidos do backend:", planos);
+        console.log("Planos mapeados:", mappedPlans);
+        setPlans(mappedPlans);
+      } catch (error) {
+        console.error("Erro ao buscar planos:", error);
+      }
+    };
+    fetchPlans();
+  }, []);
 
   const filteredAndSortedPlans = plans
     .filter((plan) => {
-      const matchesSearch =
-        plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        plan.description.toLowerCase().includes(searchTerm.toLowerCase());
+      // Normaliza status para evitar problemas de backend
+      const statusNormalized = (plan.status || "")
+        .toString()
+        .trim()
+        .toLowerCase();
+      const statusFilterNormalized = statusFilter
+        .toString()
+        .trim()
+        .toLowerCase();
 
+      // Aceita "ativo", "inativo", etc. e ignora acentuação
       const matchesStatus =
-        statusFilter === "Todos" || plan.status === statusFilter;
+        statusFilterNormalized === "todos" ||
+        statusNormalized === statusFilterNormalized ||
+        (statusFilterNormalized === "ativo" &&
+          ["ativo", "active"].includes(statusNormalized)) ||
+        (statusFilterNormalized === "inativo" &&
+          ["inativo", "inactive"].includes(statusNormalized));
+
+      // Busca insensível a maiúsculas/minúsculas e ignora acentuação
+      const normalize = (str: string | undefined): string =>
+        (str || "")
+          .toString()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase();
+      const name = normalize(plan?.name);
+      const description = normalize(plan?.description);
+      const search = normalize(searchTerm);
+      const matchesSearch =
+        name.includes(search) || description.includes(search);
 
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
       let compareValue = 0;
-
       if (sortField === "name") {
         compareValue = a.name.localeCompare(b.name, "pt-BR");
       } else if (sortField === "price") {
@@ -238,14 +178,16 @@ const AdminPlans: React.FC = () => {
         compareValue =
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
-
       return sortOrder === "asc" ? compareValue : -compareValue;
     });
+  console.log("filteredAndSortedPlans:", filteredAndSortedPlans);
 
   const totalPages = Math.ceil(filteredAndSortedPlans.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedPlans = filteredAndSortedPlans.slice(startIndex, endIndex);
+  const paginatedPlans = Array.isArray(filteredAndSortedPlans)
+    ? filteredAndSortedPlans.slice(startIndex, endIndex)
+    : [];
 
   const scrollToTop = () => {
     const listContainer = document.querySelector(".admin-plans-list-container");
@@ -282,23 +224,24 @@ const AdminPlans: React.FC = () => {
   };
 
   useEffect(() => {
-    const simulatedUserSession: UserSession = {
-      email: "admin@clinic4us.com",
-      alias: "Admin Demo",
-      clinicName: "Admin Dashboard",
-      role: "Administrator",
-      permissions: ["admin_access", "manage_plans", "view_all"],
-      menuItems: [
-        { label: "Dashboard", href: "/dashboard" },
-        { label: "Planos", href: "/admin-plans" },
-        { label: "Usuários", href: "/admin-users" },
-        { label: "Relatórios", href: "/admin-reports" },
-      ],
-      loginTime: new Date().toISOString(),
-    };
-
-    setUserSession(simulatedUserSession);
-  }, []);
+    // Inicializa a sessão do usuário automaticamente ao carregar os planos
+    if (!userSession && plans.length > 0) {
+      setUserSession({
+        email: "admin@clinic4us.com",
+        alias: "Admin Demo",
+        clinicName: "Admin Dashboard",
+        role: "Administrator",
+        permissions: ["admin_access", "manage_plans", "view_all"],
+        menuItems: [
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Planos", href: "/admin-plans" },
+          { label: "Usuários", href: "/admin-users" },
+          { label: "Relatórios", href: "/admin-reports" },
+        ],
+        loginTime: new Date().toISOString(),
+      });
+    }
+  }, [userSession, plans]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -313,7 +256,16 @@ const AdminPlans: React.FC = () => {
       sortOrder !== initialFilters.sortOrder;
 
     setHasFilterChanges(hasChanges);
-  }, [searchTerm, statusFilter, sortField, sortOrder]);
+  }, [
+    searchTerm,
+    statusFilter,
+    sortField,
+    sortOrder,
+    initialFilters.searchTerm,
+    initialFilters.statusFilter,
+    initialFilters.sortField,
+    initialFilters.sortOrder,
+  ]);
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -358,7 +310,7 @@ const AdminPlans: React.FC = () => {
 
     if (planModalMode === "create") {
       const newPlan: Plan = {
-        id: `plan-${Date.now()}`,
+        id: crypto.randomUUID(),
         name: data.name,
         description: data.description,
         price: data.price,
@@ -789,122 +741,135 @@ const AdminPlans: React.FC = () => {
                 </Box>
 
                 <Box className="admin-plans-table-body">
-                  {paginatedPlans.map((plan) => (
+                  {paginatedPlans.length === 0 ? (
                     <Box
-                      key={plan.id}
-                      className="admin-plans-table-row"
-                      onClick={() => handlePlanRowClick(plan.id)}
-                      sx={{ cursor: "pointer" }}
+                      sx={{
+                        textAlign: "center",
+                        py: 4,
+                        color: colors.textSecondary,
+                      }}
                     >
+                      Nenhum plano encontrado.
+                    </Box>
+                  ) : (
+                    paginatedPlans.map((plan) => (
                       <Box
-                        className="admin-plans-cell admin-plans-name"
-                        data-label="Nome"
-                        sx={{ textAlign: "left" }}
-                      >
-                        {plan.name}
-                      </Box>
-                      <Box
-                        className="admin-plans-cell admin-plans-description"
-                        data-label="Descrição"
-                        sx={{ textAlign: "left" }}
-                      >
-                        {plan.description}
-                      </Box>
-                      <Box
-                        className="admin-plans-cell admin-plans-price"
-                        data-label="Preço"
-                        sx={{ textAlign: "left" }}
-                      >
-                        {formatPrice(plan.price)}
-                      </Box>
-                      <Box
-                        className="admin-plans-cell admin-plans-duration"
-                        data-label="Duração"
-                        sx={{ textAlign: "left" }}
-                      >
-                        {plan.duration} {plan.duration === 1 ? "mês" : "meses"}
-                      </Box>
-                      <Box
-                        className="admin-plans-cell admin-plans-users"
-                        data-label="Max Usuários"
-                        sx={{ textAlign: "left" }}
-                      >
-                        {plan.maxUsers} usuários
-                      </Box>
-                      <Box
-                        className="admin-plans-cell admin-plans-status"
-                        data-label="Status"
-                        sx={{ textAlign: "left" }}
-                      >
-                        <span
-                          className={`plan-status-indicator ${
-                            plan.status === "Ativo" ? "active" : "inactive"
-                          }`}
-                        >
-                          {plan.status}
-                        </span>
-                      </Box>
-                      <Box
-                        className="admin-plans-cell admin-plans-created"
-                        data-label="Criado em"
-                        sx={{ textAlign: "left" }}
-                      >
-                        {formatDate(plan.createdAt)}
-                      </Box>
-                      <Box
-                        className="admin-plans-cell admin-plans-actions"
-                        data-label="Ações"
-                        sx={{ textAlign: "right" }}
+                        key={plan.id}
+                        className="admin-plans-table-row"
+                        onClick={() => handlePlanRowClick(plan.id)}
+                        sx={{ cursor: "pointer" }}
                       >
                         <Box
-                          sx={{
-                            display: "flex",
-                            gap: 1,
-                            justifyContent: "flex-end",
-                          }}
+                          className="admin-plans-cell admin-plans-name"
+                          data-label="Nome"
+                          sx={{ textAlign: "left" }}
                         >
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePlanAction("edit", plan.id);
-                            }}
-                            title="Editar plano"
+                          {plan.name}
+                        </Box>
+                        <Box
+                          className="admin-plans-cell admin-plans-description"
+                          data-label="Descrição"
+                          sx={{ textAlign: "left" }}
+                        >
+                          {plan.description}
+                        </Box>
+                        <Box
+                          className="admin-plans-cell admin-plans-price"
+                          data-label="Preço"
+                          sx={{ textAlign: "left" }}
+                        >
+                          {formatPrice(plan.price)}
+                        </Box>
+                        <Box
+                          className="admin-plans-cell admin-plans-duration"
+                          data-label="Duração"
+                          sx={{ textAlign: "left" }}
+                        >
+                          {plan.duration}{" "}
+                          {plan.duration === 1 ? "mês" : "meses"}
+                        </Box>
+                        <Box
+                          className="admin-plans-cell admin-plans-users"
+                          data-label="Max Usuários"
+                          sx={{ textAlign: "left" }}
+                        >
+                          {plan.maxUsers} usuários
+                        </Box>
+                        <Box
+                          className="admin-plans-cell admin-plans-status"
+                          data-label="Status"
+                          sx={{ textAlign: "left" }}
+                        >
+                          <span
+                            className={`plan-status-indicator ${
+                              plan.status === "Ativo" ? "active" : "inactive"
+                            }`}
+                          >
+                            {plan.status}
+                          </span>
+                        </Box>
+                        <Box
+                          className="admin-plans-cell admin-plans-created"
+                          data-label="Criado em"
+                          sx={{ textAlign: "left" }}
+                        >
+                          {formatDate(plan.createdAt)}
+                        </Box>
+                        <Box
+                          className="admin-plans-cell admin-plans-actions"
+                          data-label="Ações"
+                          sx={{ textAlign: "right" }}
+                        >
+                          <Box
                             sx={{
-                              backgroundColor: "#03B4C6",
-                              color: "white",
-                              width: "32px",
-                              height: "32px",
-                              "&:hover": {
-                                backgroundColor: "#029AAB",
-                              },
+                              display: "flex",
+                              gap: 1,
+                              justifyContent: "flex-end",
                             }}
                           >
-                            <Edit sx={{ fontSize: "1rem" }} />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePlanAction("delete", plan.id);
-                            }}
-                            title="Excluir plano"
-                            sx={{
-                              backgroundColor: "#dc3545",
-                              color: "white",
-                              width: "32px",
-                              height: "32px",
-                              "&:hover": {
-                                backgroundColor: "#c82333",
-                              },
-                            }}
-                          >
-                            <Delete sx={{ fontSize: "1rem" }} />
-                          </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePlanAction("edit", plan.id);
+                              }}
+                              title="Editar plano"
+                              sx={{
+                                backgroundColor: "#03B4C6",
+                                color: "white",
+                                width: "32px",
+                                height: "32px",
+                                "&:hover": {
+                                  backgroundColor: "#029AAB",
+                                },
+                              }}
+                            >
+                              <Edit sx={{ fontSize: "1rem" }} />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePlanAction("delete", plan.id);
+                              }}
+                              title="Excluir plano"
+                              sx={{
+                                backgroundColor: "#dc3545",
+                                color: "white",
+                                width: "32px",
+                                height: "32px",
+                                "&:hover": {
+                                  backgroundColor: "#c82333",
+                                },
+                              }}
+                            >
+                              <Delete sx={{ fontSize: "1rem" }} />
+                            </IconButton>
+                          </Box>
                         </Box>
                       </Box>
-                    </Box>
-                  ))}
+                    ))
+                  )}
                 </Box>
               </Box>
             </Box>

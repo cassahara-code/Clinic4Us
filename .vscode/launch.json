@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "inputs": [
+    {
+      "id": "close-terminals-input",
+      "type": "command",
+      "command": "workbench.action.closeAllEditors"
+    }
+  ],
+  "configurations": [
+    {
+      "name": "Dev Web",
+      "type": "msedge",
+      "request": "launch",
+      "preLaunchTask": "npm: start:local",
+      "postDebugTask": "close-terminals-input",
+      "url": "http://localhost:3000/",
+      "cwd": "${workspaceFolder}",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}

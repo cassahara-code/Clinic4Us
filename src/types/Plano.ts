@@ -17,8 +17,9 @@ export interface Plano {
   anualyValue: number;
   createdAt: string;
   updatedAt: string;
-  createdBy: string;
+  createdBy: string;  
   updatedBy: string;
+  active: number
   plansBenefits: PlanoBenefit[];
 }
 

@@ -8,6 +8,10 @@ const api = axios.create({
 });
 
 export const planoService = {
+  getAllPlanos: async (): Promise<Plano[]> => {
+    const response = await api.get("/Plan/legacy");
+    return response.data;
+  },
   createLegacyPlano: async (plano: CreatePlanoRequest): Promise<Plano> => {
     const response = await api.post("/Plan/legacy", plano);
     return response.data;

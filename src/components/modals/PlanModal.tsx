@@ -111,7 +111,7 @@ const PlanModal: React.FC<PlanModalProps> = ({
 
   // Função para formatar preço
   const formatCurrency = (value: number) => {
-    return value.toLocaleString("pt-BR", {
+    return value?.toLocaleString("pt-BR", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
