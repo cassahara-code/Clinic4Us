@@ -393,7 +393,7 @@ const TherapyPeriodModal: React.FC<TherapyPeriodModalProps> = ({
                   }
                 }}
               >
-                Cadastrar
+                Salvar
               </Button>
             </Box>
           </Box>
