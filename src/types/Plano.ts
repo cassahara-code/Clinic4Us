@@ -1,6 +1,4 @@
 export interface PlanoBenefit {
-  id: string;
-  planId: string;
   itenDescription: string;
   covered: boolean;
   createdAt: string;
@@ -10,7 +8,6 @@ export interface PlanoBenefit {
 }
 
 export interface Plano {
-  id: string;
   planTitle: string;
   description: string;
   monthlyValue: number;
@@ -23,7 +20,6 @@ export interface Plano {
 }
 
 export interface CreatePlanoRequest {
-  id: string;
   planTitle: string;
   description: string;
   monthlyValue: number;

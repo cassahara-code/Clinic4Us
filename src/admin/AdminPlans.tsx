@@ -13,6 +13,7 @@ import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
 import { Delete, Edit, Settings } from "@mui/icons-material";
 import PlanModal, { PlanData } from "../components/modals/PlanModal";
+import { planoService } from "../services/planoService";
 import ConfirmModal from "../components/modals/ConfirmModal";
 import BenefitsModal from "../components/modals/BenefitsModal";
 import { Toast } from "../components/Toast";
@@ -351,39 +352,42 @@ const AdminPlans: React.FC = () => {
     showToast("Benefícios atualizados com sucesso!", "success");
   };
 
-  const handleSavePlan = (data: PlanData) => {
+  const handleSavePlan = async (data: PlanData) => {
     const includedFeatures = data.features
       .filter((f) => f.included)
       .map((f) => f.name);
 
-    if (planModalMode === "create") {
-      const newPlan: Plan = {
-        id: `plan-${Date.now()}`,
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        duration: data.duration,
-        maxUsers: data.maxUsers,
-        features: includedFeatures,
-        status: data.status,
+    // Monta o objeto CreatePlanoRequest
+    const planoRequest = {
+      // id não informado na criação, será gerado pelo backend
+      planTitle: data.name,
+      description: data.description,
+      monthlyValue: data.price,
+      anualyValue: data.annualPrice,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: crypto.randomUUID(), // ajuste conforme autenticação real
+      updatedBy: crypto.randomUUID(), // ajuste conforme autenticação real
+      plansBenefits: includedFeatures.map((desc) => ({
+        itenDescription: desc,
+        covered: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      };
-      console.log("Novo plano criado:", newPlan);
-      showToast("Plano criado com sucesso!", "success");
-    } else {
-      console.log("Plano editado:", {
-        ...planToEdit,
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        duration: data.duration,
-        maxUsers: data.maxUsers,
-        features: includedFeatures,
-        status: data.status,
-        updatedAt: new Date().toISOString(),
-      });
-      showToast("Plano editado com sucesso!", "success");
+        createdBy: crypto.randomUUID(),
+        updatedBy: crypto.randomUUID(),
+      })),
+    };
+
+    try {
+      if (planModalMode === "create") {
+        await planoService.createLegacyPlano(planoRequest);
+        showToast("Plano criado com sucesso!", "success");
+      } else {
+        // Para edição, ajuste conforme necessário
+        showToast("Plano editado com sucesso!", "success");
+      }
+    } catch (error) {
+      showToast("Erro ao salvar plano", "error");
     }
     setIsPlanModalOpen(false);
   };
