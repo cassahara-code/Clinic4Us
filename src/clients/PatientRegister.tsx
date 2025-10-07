@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation, useRouter } from "../contexts/RouterContext";
-import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Check, Warning, MedicalServices, Edit, Delete, Add, FilterAltOff, Close, PriorityHigh, OpenInNew, DateRange } from '@mui/icons-material';
+import { useAuth } from "../contexts/AuthContext";
+import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Check, Warning, MedicalServices, Edit, Delete, Add, FilterAltOff, Close, PriorityHigh, OpenInNew, DateRange, Print, Description, Article, Summarize, ListAlt, FileDownload } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import PhotoUpload from "../components/PhotoUpload";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
 import TherapyPeriodModal from "../components/modals/TherapyPeriodModal";
 import TherapyPlanModal from "../components/modals/TherapyPlanModal";
+import EvolutionModal from "../components/modals/EvolutionModal";
+import ConfirmModal from "../components/modals/ConfirmModal";
 import {
   TextField,
   MenuItem,
@@ -36,7 +39,7 @@ import {
   Autocomplete,
   LinearProgress
 } from '@mui/material';
-import { colors, typography, inputs } from '../theme/designSystem';
+import { colors, typography, inputs, actionIcons } from '../theme/designSystem';
 
 interface MenuItemProps {
   label: string;
@@ -103,6 +106,7 @@ interface PatientFormData {
 const PatientRegister: React.FC = () => {
   const { goToPatients, goToDashboard } = useNavigation();
   const { getParam } = useRouter();
+  const { user } = useAuth();
   const [userSession, setUserSession] = useState<UserSession | null>(null);
 
   // Reusable styles for form fields
@@ -241,6 +245,15 @@ const PatientRegister: React.FC = () => {
   const [therapyPlanModalMode, setTherapyPlanModalMode] = useState<'add' | 'edit' | 'delete'>('add');
   const [editingTherapyPlan, setEditingTherapyPlan] = useState<any>(null);
 
+  // Estados do modal de evolução
+  const [isEvolutionModalOpen, setIsEvolutionModalOpen] = useState(false);
+  const [evolutionModalMode, setEvolutionModalMode] = useState<'add' | 'edit'>('add');
+  const [editingEvolution, setEditingEvolution] = useState<any>(null);
+
+  // Estados do modal de exclusão de evolução
+  const [isDeleteEvolutionModalOpen, setIsDeleteEvolutionModalOpen] = useState(false);
+  const [evolutionToDelete, setEvolutionToDelete] = useState<any>(null);
+
   // Lista de pacientes para o modal (apenas o paciente atual)
   const patientsList = formData.name ? [formData.name] : [];
 
@@ -274,6 +287,20 @@ const PatientRegister: React.FC = () => {
   const [evalStartDate, setEvalStartDate] = useState('');
   const [evalEndDate, setEvalEndDate] = useState('');
   const [evalRequestedByFilter, setEvalRequestedByFilter] = useState('');
+
+  // Estados dos filtros de evoluções
+  const [evolutionStartDate, setEvolutionStartDate] = useState('');
+  const [evolutionEndDate, setEvolutionEndDate] = useState('');
+  const [evolutionProfessionalFilter, setEvolutionProfessionalFilter] = useState('');
+  const [evolutionKeywordFilter, setEvolutionKeywordFilter] = useState('');
+
+  // Estados de seleção para impressão de evoluções
+  const [selectedEvolutionsForPrint, setSelectedEvolutionsForPrint] = useState<string[]>([]);
+
+  // Debug: Log quando selectedEvolutionsForPrint mudar
+  useEffect(() => {
+    console.log('🔄 Estado de seleção atualizado:', selectedEvolutionsForPrint);
+  }, [selectedEvolutionsForPrint]);
 
   // Lista mock de avaliações
   const [evaluationsList, setEvaluationsList] = useState([
@@ -367,20 +394,102 @@ const PatientRegister: React.FC = () => {
     }
   ]);
 
+  // Lista mock de evoluções
+  // Mock de evoluções para testes
+  // NOTA: Para testar a validação de autoria, use o alias do usuário logado em algumas evoluções
+  // Ex: Se logado como "admin", as evoluções 1, 4 e 6 estarão editáveis
+  const [evolutionsList] = useState([
+    {
+      id: '1',
+      date: '2025-10-05',
+      title: 'Evolução - Consulta de Retorno',
+      content: 'Paciente apresenta melhora significativa dos sintomas. PA: 130/80 mmHg. Mantém medicação atual. Orientado a manter dieta hipossódica e prática regular de exercícios físicos.',
+      professional: user?.alias || 'Dr. João Silva', // Usa alias do usuário logado (editável)
+      professionalId: 'current_user'
+    },
+    {
+      id: '2',
+      date: '2025-10-03',
+      title: 'Evolução - Sessão de Fisioterapia',
+      content: 'Paciente realizou sessão de fisioterapia para fortalecimento da musculatura lombar. Exercícios de alongamento e fortalecimento foram bem tolerados. Sem queixas álgicas durante a sessão.',
+      professional: 'Dra. Maria Oliveira', // Outro profissional (não editável)
+      professionalId: 'dra_oliveira'
+    },
+    {
+      id: '3',
+      date: '2025-10-01',
+      title: 'Evolução - Avaliação Nutricional',
+      content: 'Paciente aderiu parcialmente às orientações nutricionais. Peso atual: 78kg. Orientado a aumentar consumo de fibras e reduzir ingestão de gorduras saturadas. Próxima consulta em 15 dias.',
+      professional: 'Dr. Pedro Santos', // Outro profissional (não editável)
+      professionalId: 'dr_santos'
+    },
+    {
+      id: '4',
+      date: '2025-09-28',
+      title: 'Evolução - Consulta Psicológica',
+      content: 'Paciente relata melhora do quadro ansioso. Técnicas de respiração e mindfulness têm auxiliado no controle da ansiedade. Mantém acompanhamento semanal.',
+      professional: user?.alias || 'Dra. Ana Costa', // Usa alias do usuário logado (editável)
+      professionalId: 'current_user'
+    },
+    {
+      id: '5',
+      date: '2025-09-25',
+      title: 'Evolução - Consulta Inicial',
+      content: 'Paciente inicia tratamento para hipertensão arterial sistêmica. Prescrito anti-hipertensivo e orientações sobre mudanças no estilo de vida. Solicitados exames laboratoriais de controle.',
+      professional: 'Dr. Carlos Ferreira', // Outro profissional (não editável)
+      professionalId: 'dr_ferreira'
+    },
+    {
+      id: '6',
+      date: '2025-09-22',
+      title: 'Evolução - Retorno Ortopédico',
+      content: 'Paciente com melhora da dor lombar após início da fisioterapia. Mantém uso de analgésicos conforme necessidade. Orientado a evitar levantamento de peso.',
+      professional: user?.alias || 'Dr. Pedro Santos', // Usa alias do usuário logado (editável)
+      professionalId: 'current_user'
+    }
+  ]);
+
+  // Definição dos períodos com datas
+  const therapyPeriods = [
+    { id: 'Período 01', startDate: '2024-09-01', endDate: '2024-09-30' },
+    { id: 'Período 02', startDate: '2025-01-01', endDate: '2025-06-30' }
+  ];
+
+  // Último período criado
+  const lastPeriod = therapyPeriods[therapyPeriods.length - 1];
+
   // Estados dos filtros de plano terapêutico
   const [therapyStatusFilter, setTherapyStatusFilter] = useState('');
-  const [therapyStartDate, setTherapyStartDate] = useState('');
-  const [therapyEndDate, setTherapyEndDate] = useState('');
+  const [therapyStartDate, setTherapyStartDate] = useState(lastPeriod.startDate);
+  const [therapyEndDate, setTherapyEndDate] = useState(lastPeriod.endDate);
   const [therapyResponsibleFilter, setTherapyResponsibleFilter] = useState('');
+  const [therapyPeriodFilter, setTherapyPeriodFilter] = useState(lastPeriod.id);
+
+  // Handler para mudança de período que atualiza as datas
+  const handlePeriodChange = (periodId: string) => {
+    setTherapyPeriodFilter(periodId);
+    if (periodId) {
+      const selectedPeriod = therapyPeriods.find(p => p.id === periodId);
+      if (selectedPeriod) {
+        setTherapyStartDate(selectedPeriod.startDate);
+        setTherapyEndDate(selectedPeriod.endDate);
+      }
+    } else {
+      setTherapyStartDate('');
+      setTherapyEndDate('');
+    }
+  };
 
   // Lista mock de planos terapêuticos
   const [therapyPlansList, setTherapyPlansList] = useState([
+    // Planos do Período 01
     {
       id: '1',
       title: 'Plano de Tratamento Cardiovascular',
-      startDate: '2024-03-15',
-      endDate: '2024-06-15',
-      createdDate: '2024-03-10',
+      startDate: '2024-09-01',
+      endDate: '2024-09-30',
+      createdDate: '2024-08-25',
+      period: 'Período 01',
       objectives: [
         'Controle da pressão arterial',
         'Redução do peso em 5kg',
@@ -391,36 +500,17 @@ const PatientRegister: React.FC = () => {
         'Dieta com restrição de sódio',
         'Atividade física supervisionada'
       ],
-      status: 'Em andamento',
-      completionPercentage: 60,
+      status: 'Finalizado',
+      completionPercentage: 100,
       responsible: 'dr_silva'
     },
     {
       id: '2',
-      title: 'Plano de Reabilitação Fisioterapêutica',
-      startDate: '2024-04-01',
-      endDate: '2024-07-01',
-      createdDate: '2024-03-28',
-      objectives: [
-        'Recuperar amplitude de movimento',
-        'Fortalecer musculatura do joelho',
-        'Reduzir dor articular'
-      ],
-      interventions: [
-        'Exercícios de fortalecimento',
-        'Terapia manual',
-        'Crioterapia após sessões'
-      ],
-      status: 'Em andamento',
-      completionPercentage: 40,
-      responsible: 'dra_costa'
-    },
-    {
-      id: '3',
       title: 'Plano Nutricional para Diabetes',
-      startDate: '2024-02-01',
-      endDate: '2024-05-01',
-      createdDate: '2024-01-25',
+      startDate: '2024-09-01',
+      endDate: '2024-09-30',
+      createdDate: '2024-08-28',
+      period: 'Período 01',
       objectives: [
         'Controle glicêmico adequado',
         'Redução de HbA1c em 1%',
@@ -436,11 +526,76 @@ const PatientRegister: React.FC = () => {
       responsible: 'dra_oliveira'
     },
     {
+      id: '3',
+      title: 'Terapia de Fala e Linguagem',
+      startDate: '2024-09-05',
+      endDate: '2024-09-30',
+      createdDate: '2024-09-01',
+      period: 'Período 01',
+      objectives: [
+        'Melhorar articulação de fonemas',
+        'Aumentar vocabulário expressivo',
+        'Desenvolver comunicação funcional'
+      ],
+      interventions: [
+        'Exercícios de motricidade orofacial',
+        'Atividades lúdicas de linguagem',
+        'Sessões de fonoaudiologia 2x/semana'
+      ],
+      status: 'Finalizado',
+      completionPercentage: 100,
+      responsible: 'dr_santos'
+    },
+    {
       id: '4',
+      title: 'Programa de Atividade Física Adaptada',
+      startDate: '2024-09-10',
+      endDate: '2024-09-30',
+      createdDate: '2024-09-05',
+      period: 'Período 01',
+      objectives: [
+        'Melhorar condicionamento físico',
+        'Desenvolver coordenação motora',
+        'Promover socialização'
+      ],
+      interventions: [
+        'Exercícios aeróbicos leves',
+        'Atividades em grupo',
+        'Treino funcional'
+      ],
+      status: 'Finalizado',
+      completionPercentage: 100,
+      responsible: 'dra_costa'
+    },
+    // Planos do Período 02
+    {
+      id: '5',
+      title: 'Plano de Reabilitação Fisioterapêutica',
+      startDate: '2025-01-01',
+      endDate: '2025-06-30',
+      createdDate: '2024-12-20',
+      period: 'Período 02',
+      objectives: [
+        'Recuperar amplitude de movimento',
+        'Fortalecer musculatura do joelho',
+        'Reduzir dor articular'
+      ],
+      interventions: [
+        'Exercícios de fortalecimento',
+        'Terapia manual',
+        'Crioterapia após sessões'
+      ],
+      status: 'Em andamento',
+      completionPercentage: 45,
+      responsible: 'dra_costa'
+    },
+    {
+      id: '6',
       title: 'Plano de Acompanhamento Psicológico',
-      startDate: '2024-05-01',
-      endDate: '2024-08-01',
-      createdDate: '2024-04-28',
+      startDate: '2025-01-01',
+      endDate: '2025-06-30',
+      createdDate: '2024-12-28',
+      period: 'Período 02',
       objectives: [
         'Redução dos sintomas de ansiedade',
         'Desenvolvimento de estratégias de enfrentamento',
@@ -451,9 +606,93 @@ const PatientRegister: React.FC = () => {
         'Técnicas de relaxamento',
         'Sessões semanais'
       ],
+      status: 'Em andamento',
+      completionPercentage: 30,
+      responsible: 'dr_santos'
+    },
+    {
+      id: '7',
+      title: 'Terapia Ocupacional - Atividades de Vida Diária',
+      startDate: '2025-01-05',
+      endDate: '2025-06-30',
+      createdDate: '2025-01-02',
+      period: 'Período 02',
+      objectives: [
+        'Desenvolver independência em AVDs',
+        'Melhorar coordenação motora fina',
+        'Adaptar ambiente doméstico'
+      ],
+      interventions: [
+        'Treino de atividades cotidianas',
+        'Exercícios de preensão',
+        'Orientação familiar'
+      ],
+      status: 'Em andamento',
+      completionPercentage: 25,
+      responsible: 'dra_oliveira'
+    },
+    {
+      id: '8',
+      title: 'Programa de Integração Sensorial',
+      startDate: '2025-01-10',
+      endDate: '2025-06-30',
+      createdDate: '2025-01-05',
+      period: 'Período 02',
+      objectives: [
+        'Melhorar processamento sensorial',
+        'Reduzir comportamentos defensivos',
+        'Aumentar tolerância a estímulos'
+      ],
+      interventions: [
+        'Atividades de estimulação sensorial',
+        'Terapia de integração sensorial',
+        'Sessões de 45min 2x/semana'
+      ],
+      status: 'Pendente',
+      completionPercentage: 0,
+      responsible: 'dr_silva'
+    },
+    {
+      id: '9',
+      title: 'Desenvolvimento de Habilidades Sociais',
+      startDate: '2025-02-01',
+      endDate: '2025-06-30',
+      createdDate: '2025-01-25',
+      period: 'Período 02',
+      objectives: [
+        'Melhorar interação social',
+        'Desenvolver comunicação não-verbal',
+        'Promover reconhecimento de emoções'
+      ],
+      interventions: [
+        'Dinâmicas de grupo',
+        'Role-playing de situações sociais',
+        'Jogos cooperativos'
+      ],
       status: 'Pendente',
       completionPercentage: 0,
       responsible: 'dr_santos'
+    },
+    {
+      id: '10',
+      title: 'Acompanhamento Nutricional Pediátrico',
+      startDate: '2025-01-15',
+      endDate: '2025-06-30',
+      createdDate: '2025-01-10',
+      period: 'Período 02',
+      objectives: [
+        'Adequar ingestão nutricional',
+        'Ganho de peso adequado',
+        'Educação alimentar familiar'
+      ],
+      interventions: [
+        'Plano alimentar individualizado',
+        'Suplementação quando necessário',
+        'Consultas mensais de acompanhamento'
+      ],
+      status: 'Em andamento',
+      completionPercentage: 35,
+      responsible: 'dra_oliveira'
     }
   ]);
 
@@ -477,9 +716,8 @@ const PatientRegister: React.FC = () => {
   // Função para limpar filtros de plano terapêutico
   const handleClearTherapyFilters = () => {
     setTherapyStatusFilter('');
-    setTherapyStartDate('');
-    setTherapyEndDate('');
     setTherapyResponsibleFilter('');
+    handlePeriodChange(lastPeriod.id);
   };
 
   // Função para filtrar avaliações
@@ -527,6 +765,140 @@ const PatientRegister: React.FC = () => {
     return true;
   });
 
+  // Função para filtrar evoluções
+  const filteredEvolutions = evolutionsList.filter((evolution) => {
+    // Filtro por data inicial
+    if (evolutionStartDate) {
+      const evolutionDate = new Date(evolution.date);
+      const filterDate = new Date(evolutionStartDate);
+      if (evolutionDate < filterDate) {
+        return false;
+      }
+    }
+
+    // Filtro por data final
+    if (evolutionEndDate) {
+      const evolutionDate = new Date(evolution.date);
+      const filterDate = new Date(evolutionEndDate);
+      if (evolutionDate > filterDate) {
+        return false;
+      }
+    }
+
+    // Filtro por profissional
+    if (evolutionProfessionalFilter && evolution.professionalId !== evolutionProfessionalFilter) {
+      return false;
+    }
+
+    // Filtro por palavra-chave
+    if (evolutionKeywordFilter) {
+      const keyword = evolutionKeywordFilter.toLowerCase();
+      const matchesTitle = evolution.title.toLowerCase().includes(keyword);
+      const matchesContent = evolution.content.toLowerCase().includes(keyword);
+      const matchesProfessional = evolution.professional.toLowerCase().includes(keyword);
+
+      if (!matchesTitle && !matchesContent && !matchesProfessional) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  // Função para limpar filtros de evoluções
+  const handleClearEvolutionsFilters = () => {
+    setEvolutionStartDate('');
+    setEvolutionEndDate('');
+    setEvolutionProfessionalFilter('');
+    setEvolutionKeywordFilter('');
+  };
+
+  // Funções para gerenciar seleção de evoluções para impressão
+  const handleToggleEvolutionSelection = (evolutionId: string) => {
+    console.log('=== TOGGLE CHECKBOX ===');
+    console.log('ID clicado:', evolutionId);
+    console.log('Estado ANTES:', selectedEvolutionsForPrint);
+
+    setSelectedEvolutionsForPrint(prev => {
+      const isSelected = prev.includes(evolutionId);
+      console.log('Está selecionado?', isSelected);
+
+      if (isSelected) {
+        const newState = prev.filter(id => id !== evolutionId);
+        console.log('Removendo - Novo estado:', newState);
+        return newState;
+      } else {
+        const newState = [...prev, evolutionId];
+        console.log('Adicionando - Novo estado:', newState);
+        return newState;
+      }
+    });
+  };
+
+  const handleSelectAllEvolutions = () => {
+    console.log('=== SELECIONAR TODOS ===');
+    const filteredIds = filteredEvolutions.map(ev => ev.id);
+    console.log('IDs filtrados:', filteredIds);
+    console.log('Estado atual:', selectedEvolutionsForPrint);
+
+    const allCurrentSelected = filteredIds.length > 0 && filteredIds.every(id => selectedEvolutionsForPrint.includes(id));
+    console.log('Todos já selecionados?', allCurrentSelected);
+
+    if (allCurrentSelected) {
+      // Desmarcar todos os itens filtrados (mantém seleções de outras páginas/filtros)
+      console.log('→ Desmarcando todos');
+      setSelectedEvolutionsForPrint(prev => {
+        const newState = prev.filter(id => !filteredIds.includes(id));
+        console.log('Novo estado:', newState);
+        return newState;
+      });
+    } else {
+      // Marcar todos os itens filtrados (mantém seleções anteriores)
+      console.log('→ Marcando todos');
+      setSelectedEvolutionsForPrint(prev => {
+        const allIds = new Set([...prev, ...filteredIds]);
+        const newState = Array.from(allIds);
+        console.log('Novo estado:', newState);
+        return newState;
+      });
+    }
+  };
+
+  // Verificar se todos os itens filtrados estão selecionados
+  const filteredIds = filteredEvolutions.map(ev => ev.id);
+  const isAllEvolutionsSelected = filteredEvolutions.length > 0 && filteredIds.every(id => selectedEvolutionsForPrint.includes(id));
+  const isSomeEvolutionsSelected = filteredEvolutions.length > 0 && filteredIds.some(id => selectedEvolutionsForPrint.includes(id)) && !isAllEvolutionsSelected;
+
+  // Handlers do modal de evolução
+  const handleSaveEvolution = (evolutionData: any) => {
+    console.log('Salvar nova evolução:', evolutionData);
+    // TODO: Implementar lógica de salvamento (adicionar à lista ou enviar ao backend)
+    setIsEvolutionModalOpen(false);
+  };
+
+  const handleUpdateEvolution = (evolutionData: any) => {
+    console.log('Atualizar evolução:', editingEvolution?.id, evolutionData);
+    // TODO: Implementar lógica de atualização (atualizar na lista ou enviar ao backend)
+    setIsEvolutionModalOpen(false);
+  };
+
+  const handleConfirmDeleteEvolution = () => {
+    console.log('Deletar evolução:', evolutionToDelete?.id);
+    // TODO: Implementar lógica de exclusão (remover da lista ou enviar ao backend)
+    setIsDeleteEvolutionModalOpen(false);
+    setEvolutionToDelete(null);
+  };
+
+  const handleCloseDeleteEvolutionModal = () => {
+    setIsDeleteEvolutionModalOpen(false);
+    setEvolutionToDelete(null);
+  };
+
+  const handleCloseEvolutionModal = () => {
+    setIsEvolutionModalOpen(false);
+    setEditingEvolution(null);
+  };
+
   // Função para filtrar planos terapêuticos
   const filteredTherapyPlans = therapyPlansList.filter((plan) => {
     // Filtro por status
@@ -561,6 +933,11 @@ const PatientRegister: React.FC = () => {
 
     // Filtro por responsável
     if (therapyResponsibleFilter && plan.responsible !== therapyResponsibleFilter) {
+      return false;
+    }
+
+    // Filtro por período
+    if (therapyPeriodFilter && plan.period !== therapyPeriodFilter) {
       return false;
     }
 
@@ -4262,6 +4639,65 @@ const PatientRegister: React.FC = () => {
 
                           {/* Botões de ação à direita */}
                           <Box sx={{ display: 'flex', gap: 1, ml: 2, alignSelf: 'flex-start' }}>
+                            <Tooltip title="Imprimir avaliação" arrow>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  const patientData = {
+                                    name: formData.name,
+                                    birthDate: formData.birthDate,
+                                    responsible: formData.responsibleName
+                                  };
+                                  const evaluationData = {
+                                    id: evaluation.id,
+                                    form: evaluation.form,
+                                    createdDate: evaluation.createdDate,
+                                    deadline: evaluation.deadline,
+                                    status: evaluation.status,
+                                    observations: evaluation.observations,
+                                    requestedBy: evaluation.requestedBy
+                                  };
+                                  const patientDataEncoded = encodeURIComponent(JSON.stringify(patientData));
+                                  const evaluationDataEncoded = encodeURIComponent(JSON.stringify(evaluationData));
+                                  window.open(`/?page=evaluation-print&patientData=${patientDataEncoded}&evaluationData=${evaluationDataEncoded}`, '_blank');
+                                }}
+                                sx={{
+                                  backgroundColor: 'transparent',
+                                  color: actionIcons.print.color,
+                                  border: `1px solid ${actionIcons.print.borderColor}`,
+                                  width: '32px',
+                                  height: '32px',
+                                  '&:hover': {
+                                    backgroundColor: actionIcons.print.hoverBackgroundColor,
+                                    borderColor: actionIcons.print.hoverBorderColor,
+                                  }
+                                }}
+                              >
+                                <Print sx={{ fontSize: '1rem' }} />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Exportar para Excel" arrow>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  // TODO: Implementar exportação para Excel
+                                  console.log('Exportar avaliação para Excel:', evaluation);
+                                }}
+                                sx={{
+                                  backgroundColor: 'transparent',
+                                  color: actionIcons.excel.color,
+                                  border: `1px solid ${actionIcons.excel.borderColor}`,
+                                  width: '32px',
+                                  height: '32px',
+                                  '&:hover': {
+                                    backgroundColor: actionIcons.excel.hoverBackgroundColor,
+                                    borderColor: actionIcons.excel.hoverBorderColor,
+                                  }
+                                }}
+                              >
+                                <FileDownload sx={{ fontSize: '1rem' }} />
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title="Acessar avaliação" arrow>
                               <IconButton
                                 size="small"
@@ -4429,22 +4865,19 @@ const PatientRegister: React.FC = () => {
                     <TextField
                       select
                       size="small"
-                      label="Status"
-                      value={therapyStatusFilter}
-                      onChange={(e) => setTherapyStatusFilter(e.target.value)}
+                      label="Período"
+                      value={therapyPeriodFilter}
+                      onChange={(e) => handlePeriodChange(e.target.value)}
                       InputLabelProps={{ shrink: true }}
                       SelectProps={{
                         displayEmpty: true,
                         renderValue: (value) => {
-                          if (value === "") return "Selecione";
-                          if (value === "finalizado") return "Finalizado";
-                          if (value === "pendente") return "Pendente";
-                          if (value === "em_andamento") return "Em Andamento";
+                          if (value === "") return "Todos os períodos";
                           return value as string;
                         }
                       }}
                       sx={{
-                        width: '180px',
+                        width: '160px',
                         backgroundColor: '#fff',
                         '& .MuiOutlinedInput-root': {
                           fontSize: '0.875rem',
@@ -4452,11 +4885,120 @@ const PatientRegister: React.FC = () => {
                         },
                       }}
                     >
-                      <MenuItem value="">Selecione</MenuItem>
-                      <MenuItem value="finalizado">Finalizado</MenuItem>
-                      <MenuItem value="pendente">Pendente</MenuItem>
-                      <MenuItem value="em_andamento">Em Andamento</MenuItem>
+                      <MenuItem value="">Todos os períodos</MenuItem>
+                      <MenuItem value="Período 01">Período 01</MenuItem>
+                      <MenuItem value="Período 02">Período 02</MenuItem>
                     </TextField>
+                    <Tooltip title="Relatório de Período" arrow>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const patientData = {
+                            name: formData.name,
+                            birthDate: formData.birthDate,
+                            responsible: formData.responsibleName
+                          };
+                          const selectedPeriod = therapyPeriods.find(p => p.id === therapyPeriodFilter);
+                          const periodData = selectedPeriod || { id: '', startDate: '', endDate: '' };
+                          const filteredPlans = therapyPlansList.filter(plan =>
+                            therapyPeriodFilter ? plan.period === therapyPeriodFilter : true
+                          ).map((plan, index) => {
+                            // Mock scores variados entre 3 e 9
+                            const mockScores = [5, 7, 4, 8, 6, 9, 3, 7, 8, 6];
+                            const scoreLatest = mockScores[index % mockScores.length];
+                            const scoreInitial = 4;
+                            const scoreAverage = (scoreInitial + scoreLatest) / 2;
+                            return {
+                              id: plan.id,
+                              number: index + 1,
+                              title: plan.title,
+                              responsibles: plan.responsible,
+                              priority: 'Urgente',
+                              startDate: plan.startDate,
+                              endDate: plan.endDate,
+                              scoreInitial: scoreInitial,
+                              scoreLatest: scoreLatest,
+                              scoreAverage: scoreAverage,
+                              status: plan.status,
+                              progress: plan.completionPercentage
+                            };
+                          });
+                          const patientDataEncoded = encodeURIComponent(JSON.stringify(patientData));
+                          const periodDataEncoded = encodeURIComponent(JSON.stringify(periodData));
+                          const plansDataEncoded = encodeURIComponent(JSON.stringify(filteredPlans));
+                          window.open(`/?page=period-report-print&patientData=${patientDataEncoded}&periodData=${periodDataEncoded}&plansData=${plansDataEncoded}`, '_blank');
+                        }}
+                        sx={{
+                          color: actionIcons.print.color,
+                          border: `1px solid ${actionIcons.print.borderColor}`,
+                          borderRadius: '4px',
+                          width: '40px',
+                          height: '40px',
+                          '&:hover': {
+                            borderColor: actionIcons.print.hoverBorderColor,
+                            backgroundColor: actionIcons.print.hoverBackgroundColor,
+                          },
+                        }}
+                      >
+                        <Summarize sx={{ fontSize: '1.25rem' }} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Relatório Detalhado" arrow>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const patientData = {
+                            name: formData.name,
+                            birthDate: formData.birthDate,
+                            responsible: formData.responsibleName
+                          };
+                          const selectedPeriod = therapyPeriods.find(p => p.id === therapyPeriodFilter);
+                          const periodData = selectedPeriod || { id: '', startDate: '', endDate: '' };
+                          const filteredPlans = therapyPlansList.filter(plan =>
+                            therapyPeriodFilter ? plan.period === therapyPeriodFilter : true
+                          ).map((plan, index) => {
+                            const mockScores = [5, 7, 4, 8, 6, 9, 3, 7, 8, 6];
+                            const scoreLatest = mockScores[index % mockScores.length];
+                            const scoreInitial = 4;
+                            const scoreAverage = (scoreInitial + scoreLatest) / 2;
+                            return {
+                              id: plan.id,
+                              number: index + 1,
+                              title: plan.title,
+                              responsibles: plan.responsible,
+                              priority: 'Urgente',
+                              startDate: plan.startDate,
+                              endDate: plan.endDate,
+                              progress: plan.completionPercentage,
+                              justification: 'Paciente está acima do peso 10 Kg',
+                              objective: 'Perder 5 kg em 3 meses',
+                              metric: 'Pesar no início e final',
+                              observations: 'Paciente hoje com 70 kg',
+                              scoreInitial: scoreInitial,
+                              scoreLatest: scoreLatest,
+                              scoreAverage: scoreAverage
+                            };
+                          });
+                          const patientDataEncoded = encodeURIComponent(JSON.stringify(patientData));
+                          const periodDataEncoded = encodeURIComponent(JSON.stringify(periodData));
+                          const plansDataEncoded = encodeURIComponent(JSON.stringify(filteredPlans));
+                          window.open(`/?page=detailed-period-report-print&patientData=${patientDataEncoded}&periodData=${periodDataEncoded}&plansData=${plansDataEncoded}`, '_blank');
+                        }}
+                        sx={{
+                          color: actionIcons.print.color,
+                          border: `1px solid ${actionIcons.print.borderColor}`,
+                          borderRadius: '4px',
+                          width: '40px',
+                          height: '40px',
+                          '&:hover': {
+                            borderColor: actionIcons.print.hoverBorderColor,
+                            backgroundColor: actionIcons.print.hoverBackgroundColor,
+                          },
+                        }}
+                      >
+                        <ListAlt sx={{ fontSize: '1.25rem' }} />
+                      </IconButton>
+                    </Tooltip>
                     <TextField
                       type="date"
                       size="small"
@@ -4517,6 +5059,37 @@ const PatientRegister: React.FC = () => {
                       <MenuItem value="dra_oliveira">Dra. Oliveira</MenuItem>
                       <MenuItem value="dr_santos">Dr. Santos</MenuItem>
                       <MenuItem value="dra_costa">Dra. Costa</MenuItem>
+                    </TextField>
+                    <TextField
+                      select
+                      size="small"
+                      label="Status"
+                      value={therapyStatusFilter}
+                      onChange={(e) => setTherapyStatusFilter(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      SelectProps={{
+                        displayEmpty: true,
+                        renderValue: (value) => {
+                          if (value === "") return "Selecione";
+                          if (value === "finalizado") return "Finalizado";
+                          if (value === "pendente") return "Pendente";
+                          if (value === "em_andamento") return "Em Andamento";
+                          return value as string;
+                        }
+                      }}
+                      sx={{
+                        width: '180px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    >
+                      <MenuItem value="">Selecione</MenuItem>
+                      <MenuItem value="finalizado">Finalizado</MenuItem>
+                      <MenuItem value="pendente">Pendente</MenuItem>
+                      <MenuItem value="em_andamento">Em Andamento</MenuItem>
                     </TextField>
                     <Tooltip title="Limpar filtros" arrow>
                       <span>
@@ -4698,6 +5271,34 @@ const PatientRegister: React.FC = () => {
 
                           {/* Botões de ação à direita */}
                           <Box sx={{ display: 'flex', gap: 1, ml: 2, alignSelf: 'flex-start' }}>
+                            <Tooltip title="Imprimir plano" arrow>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  const patientData = {
+                                    name: formData.name,
+                                    birthDate: formData.birthDate,
+                                    responsible: formData.responsibleName
+                                  };
+                                  const planDataEncoded = encodeURIComponent(JSON.stringify(plan));
+                                  const patientDataEncoded = encodeURIComponent(JSON.stringify(patientData));
+                                  window.open(`/?page=therapy-plan-print&planData=${planDataEncoded}&patientData=${patientDataEncoded}`, '_blank');
+                                }}
+                                sx={{
+                                  backgroundColor: 'transparent',
+                                  color: actionIcons.print.color,
+                                  border: `1px solid ${actionIcons.print.borderColor}`,
+                                  width: '32px',
+                                  height: '32px',
+                                  '&:hover': {
+                                    backgroundColor: actionIcons.print.hoverBackgroundColor,
+                                    borderColor: actionIcons.print.hoverBorderColor,
+                                  }
+                                }}
+                              >
+                                <Print sx={{ fontSize: '1rem' }} />
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title="Acessar plano" arrow>
                               <IconButton
                                 size="small"
@@ -4867,48 +5468,495 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Evoluções */}
             {activeTab === 'evolucoes' && (
               <div className="tab-content-section">
-                <Typography variant="h5" sx={{ fontSize: '1.25rem', fontWeight: 600, mb: 2 }}>
-                  Evoluções
-                </Typography>
-                <div className="evolution-section">
-                  <Box sx={{ mb: 2 }}>
-                    <Button
-                      variant="contained"
+                {/* Filtros e ações */}
+                <Box sx={{ display: 'flex', gap: '1rem', mb: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <TextField
+                      type="date"
+                      size="small"
+                      label="Data Inicial"
+                      value={evolutionStartDate}
+                      onChange={(e) => setEvolutionStartDate(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
                       sx={{
-                        backgroundColor: '#48bb78',
-                        color: '#ffffff',
-                        textTransform: 'none',
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        boxShadow: 'none',
-                        '&:hover': {
-                          backgroundColor: '#38a169',
-                          boxShadow: 'none',
+                        width: '160px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    />
+                    <TextField
+                      type="date"
+                      size="small"
+                      label="Data Final"
+                      value={evolutionEndDate}
+                      onChange={(e) => setEvolutionEndDate(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        width: '160px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    />
+                    <TextField
+                      select
+                      size="small"
+                      label="Profissional"
+                      value={evolutionProfessionalFilter}
+                      onChange={(e) => setEvolutionProfessionalFilter(e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                      SelectProps={{
+                        displayEmpty: true,
+                        renderValue: (value) => {
+                          if (value === "") return "Selecione";
+                          return value as string;
+                        }
+                      }}
+                      sx={{
+                        width: '200px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
                         },
                       }}
                     >
-                      + Nova Evolução
-                    </Button>
+                      <MenuItem value="">Selecione</MenuItem>
+                      <MenuItem value="dr_silva">Dr. João Silva</MenuItem>
+                      <MenuItem value="dra_oliveira">Dra. Maria Oliveira</MenuItem>
+                      <MenuItem value="dr_santos">Dr. Pedro Santos</MenuItem>
+                      <MenuItem value="dra_costa">Dra. Ana Costa</MenuItem>
+                    </TextField>
+                    <TextField
+                      size="small"
+                      label="Palavra-chave"
+                      value={evolutionKeywordFilter}
+                      onChange={(e) => setEvolutionKeywordFilter(e.target.value)}
+                      placeholder="Buscar..."
+                      InputLabelProps={{ shrink: true }}
+                      sx={{
+                        width: '200px',
+                        backgroundColor: '#fff',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          height: '40px',
+                        },
+                      }}
+                    />
+                    <Tooltip title="Limpar filtros" arrow>
+                      <span>
+                        <IconButton
+                          size="small"
+                          onClick={handleClearEvolutionsFilters}
+                          disabled={!evolutionStartDate && !evolutionEndDate && !evolutionProfessionalFilter && !evolutionKeywordFilter}
+                          sx={{
+                            backgroundColor: '#6c757d',
+                            color: '#ffffff',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '4px',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              backgroundColor: '#5a6268',
+                            },
+                            '&:disabled': {
+                              backgroundColor: '#e9ecef',
+                              color: '#adb5bd',
+                              opacity: 0.6,
+                            }
+                          }}
+                        >
+                          <FilterAltOff sx={{ fontSize: '1.25rem' }} />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
                   </Box>
-                  <div className="evolution-timeline">
-                    <div className="evolution-item">
-                      <div className="evolution-date">22/03/2024</div>
-                      <div className="evolution-content">
-                        <h4>Evolução - Consulta de Retorno</h4>
-                        <p>Paciente apresenta melhora significativa. PA: 130/80 mmHg. Mantém medicação atual.</p>
-                        <span className="evolution-author">Dr. João Silva</span>
-                      </div>
-                    </div>
-                    <div className="evolution-item">
-                      <div className="evolution-date">15/03/2024</div>
-                      <div className="evolution-content">
-                        <h4>Evolução - Consulta Inicial</h4>
-                        <p>Paciente inicia tratamento para hipertensão. Orientações sobre dieta e exercícios.</p>
-                        <span className="evolution-author">Dr. João Silva</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Tooltip title={selectedEvolutionsForPrint.length === 0 ? "Selecione pelo menos uma evolução para imprimir" : "Imprimir evoluções selecionadas"} arrow>
+                      <span>
+                        <IconButton
+                          disabled={selectedEvolutionsForPrint.length === 0}
+                          onClick={() => {
+                            console.log('=== IMPRIMIR EVOLUÇÕES ===');
+                            console.log('IDs selecionados:', selectedEvolutionsForPrint);
+
+                            // Filtrar evoluções selecionadas
+                            const selectedEvolutions = evolutionsList.filter(ev =>
+                              selectedEvolutionsForPrint.includes(ev.id)
+                            );
+
+                            console.log('Evoluções filtradas:', selectedEvolutions);
+                            console.log('Quantidade de evoluções:', selectedEvolutions.length);
+
+                            // Dados do paciente para impressão
+                            const patientDataForPrint = {
+                              name: formData.name || 'Paciente',
+                              birthDate: formData.birthDate || '',
+                              responsible: formData.responsibleName || ''
+                            };
+
+                            console.log('Dados do paciente:', patientDataForPrint);
+
+                            // Serializar dados para URL
+                            const patientDataParam = encodeURIComponent(JSON.stringify(patientDataForPrint));
+                            const evolutionsDataParam = encodeURIComponent(JSON.stringify(selectedEvolutions));
+
+                            console.log('URL gerada:', `?page=evolutions-print&patientData=${patientDataParam}&evolutionsData=${evolutionsDataParam}`);
+
+                            // Navegar para página de impressão
+                            window.open(
+                              `?page=evolutions-print&patientData=${patientDataParam}&evolutionsData=${evolutionsDataParam}`,
+                              '_blank'
+                            );
+                          }}
+                          sx={{
+                            color: '#03B4C6',
+                            border: `2px solid #03B4C6`,
+                            borderRadius: '8px',
+                            width: '40px',
+                            height: '40px',
+                            '&:hover': {
+                              borderColor: '#029AAB',
+                              backgroundColor: 'rgba(3, 180, 198, 0.08)',
+                            },
+                            '&:disabled': {
+                              color: '#e0e0e0',
+                              borderColor: '#e0e0e0',
+                              cursor: 'not-allowed'
+                            }
+                          }}
+                        >
+                          <Print sx={{ fontSize: '1.25rem' }} />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    <Tooltip title="Nova Evolução" arrow>
+                      <IconButton
+                        onClick={() => {
+                          setEvolutionModalMode('add');
+                          setEditingEvolution(null);
+                          setIsEvolutionModalOpen(true);
+                        }}
+                        sx={{
+                          borderColor: '#03B4C6',
+                          color: '#03B4C6',
+                          border: '2px solid #03B4C6',
+                          borderRadius: '8px',
+                          width: '40px',
+                          height: '40px',
+                          '&:hover': {
+                            borderColor: '#029AAB',
+                            backgroundColor: 'rgba(3, 180, 198, 0.08)',
+                          },
+                        }}
+                      >
+                        <Add />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Box>
+
+                {/* Contador de evoluções e seleção */}
+                <Box sx={{ mb: 2, px: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                    <strong>{filteredEvolutions.length}</strong> {filteredEvolutions.length === 1 ? 'evolução encontrada' : 'evoluções encontradas'}
+                    {selectedEvolutionsForPrint.length > 0 && (
+                      <span style={{ marginLeft: '8px', color: colors.primary, fontWeight: 600 }}>
+                        ({selectedEvolutionsForPrint.length} selecionada{selectedEvolutionsForPrint.length > 1 ? 's' : ''} para impressão)
+                      </span>
+                    )}
+                  </Typography>
+                  <Box
+                    onClick={() => filteredEvolutions.length > 0 && handleSelectAllEvolutions()}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      cursor: filteredEvolutions.length > 0 ? 'pointer' : 'default',
+                      minHeight: '42px'
+                    }}
+                  >
+                    <Checkbox
+                      checked={isAllEvolutionsSelected}
+                      indeterminate={isSomeEvolutionsSelected}
+                      onChange={() => {}}
+                      onClick={(e) => e.preventDefault()}
+                      disabled={filteredEvolutions.length === 0}
+                      inputProps={{ 'aria-label': 'Selecionar todas as evoluções' }}
+                      sx={{
+                        color: colors.primary,
+                        '&.Mui-checked': { color: colors.primary },
+                        '&.MuiCheckbox-indeterminate': { color: colors.primary },
+                        padding: '9px',
+                        '& .MuiSvgIcon-root': {
+                          fontSize: '1.5rem'
+                        },
+                        pointerEvents: 'none'
+                      }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: '0.875rem',
+                        color: colors.textSecondary,
+                        userSelect: 'none',
+                        ml: -0.5,
+                        pointerEvents: 'none'
+                      }}
+                    >
+                      Selecionar todos
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* Lista de evoluções */}
+                <Box>
+                  {filteredEvolutions.map((evolution, index) => (
+                    <Box key={evolution.id} sx={{ mb: 3 }}>
+                      {/* Card da evolução */}
+                      <Box sx={{
+                        backgroundColor: '#fff',
+                        borderRadius: '8px',
+                        border: selectedEvolutionsForPrint.includes(evolution.id) ? `2px solid ${colors.primary}` : '1px solid #e0e0e0',
+                        overflow: 'hidden',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          borderColor: '#03B4C6'
+                        },
+                        '& .MuiButtonBase-root': {
+                          pointerEvents: 'auto'
+                        }
+                      }}>
+                        <Box sx={{
+                          p: 2,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start'
+                        }}>
+                          {/* Checkbox de seleção com área clicável maior */}
+                          <Box
+                            onClick={() => handleToggleEvolutionSelection(evolution.id)}
+                            sx={{
+                              mr: 2,
+                              mt: 0.5,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              minWidth: '42px',
+                              minHeight: '42px'
+                            }}
+                          >
+                            <Checkbox
+                              checked={selectedEvolutionsForPrint.includes(evolution.id)}
+                              onChange={() => {}}
+                              onClick={(e) => e.preventDefault()}
+                              inputProps={{ 'aria-label': `Selecionar evolução ${evolution.id}` }}
+                              sx={{
+                                color: colors.primary,
+                                '&.Mui-checked': { color: colors.primary },
+                                padding: '9px',
+                                '& .MuiSvgIcon-root': {
+                                  fontSize: '1.5rem'
+                                },
+                                pointerEvents: 'none'
+                              }}
+                            />
+                          </Box>
+
+                          <Box sx={{ flex: 1 }}>
+                            {/* Primeira linha: Data */}
+                            <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.95rem', color: colors.text, mb: 1 }}>
+                              {new Date(evolution.date).toLocaleDateString('pt-BR')}
+                            </Typography>
+
+                            {/* Segunda linha: Título */}
+                            <Typography variant="body2" sx={{ color: colors.text, fontWeight: 600, fontSize: '0.9rem', mb: 1 }}>
+                              {evolution.title}
+                            </Typography>
+
+                            {/* Terceira linha: Conteúdo */}
+                            <Typography variant="body2" sx={{ color: colors.textSecondary, fontSize: '0.875rem', lineHeight: 1.6, mb: 1.5 }}>
+                              {evolution.content}
+                            </Typography>
+
+                            {/* Quarta linha: Profissional */}
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary }}>
+                              <strong style={{ color: colors.text }}>{evolution.professional}</strong>
+                            </Typography>
+                          </Box>
+
+                          {/* Botões de ação à direita */}
+                          <Box sx={{ display: 'flex', gap: 1, ml: 2, alignSelf: 'flex-start' }}>
+                            {(() => {
+                              // Verificar se o usuário atual é o autor da evolução
+                              const isAuthor = user?.alias === evolution.professional;
+                              const tooltipMessage = isAuthor ? "Editar evolução" : "Apenas o autor pode editar esta evolução";
+
+                              return (
+                                <Tooltip title={tooltipMessage} arrow>
+                                  <span>
+                                    <IconButton
+                                      size="small"
+                                      disabled={!isAuthor}
+                                      onClick={() => {
+                                        if (isAuthor) {
+                                          setEvolutionModalMode('edit');
+                                          setEditingEvolution(evolution);
+                                          setIsEvolutionModalOpen(true);
+                                        }
+                                      }}
+                                      sx={{
+                                        backgroundColor: 'transparent',
+                                        color: isAuthor ? '#2196f3' : '#ccc',
+                                        border: `1px solid ${isAuthor ? '#e3f2fd' : '#e0e0e0'}`,
+                                        width: '32px',
+                                        height: '32px',
+                                        '&:hover': {
+                                          backgroundColor: isAuthor ? '#e3f2fd' : 'transparent',
+                                          borderColor: isAuthor ? '#2196f3' : '#e0e0e0',
+                                        },
+                                        '&:disabled': {
+                                          cursor: 'not-allowed',
+                                          opacity: 0.5
+                                        }
+                                      }}
+                                    >
+                                      <Edit sx={{ fontSize: '1rem' }} />
+                                    </IconButton>
+                                  </span>
+                                </Tooltip>
+                              );
+                            })()}
+
+                            {(() => {
+                              // Verificar se o usuário atual é o autor da evolução
+                              const isAuthor = user?.alias === evolution.professional;
+                              const tooltipMessage = isAuthor ? "Deletar evolução" : "Apenas o autor pode deletar esta evolução";
+
+                              return (
+                                <Tooltip title={tooltipMessage} arrow>
+                                  <span>
+                                    <IconButton
+                                      size="small"
+                                      disabled={!isAuthor}
+                                      onClick={() => {
+                                        if (isAuthor) {
+                                          setEvolutionToDelete(evolution);
+                                          setIsDeleteEvolutionModalOpen(true);
+                                        }
+                                      }}
+                                      sx={{
+                                        backgroundColor: 'transparent',
+                                        color: isAuthor ? '#dc3545' : '#ccc',
+                                        border: `1px solid ${isAuthor ? '#f8d7da' : '#e0e0e0'}`,
+                                        width: '32px',
+                                        height: '32px',
+                                        '&:hover': {
+                                          backgroundColor: isAuthor ? '#f8d7da' : 'transparent',
+                                          borderColor: isAuthor ? '#dc3545' : '#e0e0e0',
+                                        },
+                                        '&:disabled': {
+                                          cursor: 'not-allowed',
+                                          opacity: 0.5
+                                        }
+                                      }}
+                                    >
+                                      <Delete sx={{ fontSize: '1rem' }} />
+                                    </IconButton>
+                                  </span>
+                                </Tooltip>
+                              );
+                            })()}
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+
+                {/* Paginação */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    mt: 2,
+                    bgcolor: '#f8f9fa',
+                    border: 'none',
+                    boxShadow: 'none'
+                  }}
+                >
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      Mostrando 1-{filteredEvolutions.length} de <strong>{filteredEvolutions.length}</strong> {filteredEvolutions.length === 1 ? 'evolução' : 'evoluções'}
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                      {/* Seletor de itens por página */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                          Itens por página:
+                        </Typography>
+                        <FormControl size="small">
+                          <Select
+                            value={10}
+                            sx={{
+                              minWidth: 80,
+                              height: '40px',
+                              fontSize: '1rem',
+                              backgroundColor: 'white',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#ced4da',
+                              },
+                              '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#ced4da',
+                              },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#03B4C6',
+                                boxShadow: '0 0 0 3px rgba(3, 180, 198, 0.1)',
+                              },
+                              '& .MuiSelect-select': {
+                                padding: '0.375rem 0.5rem',
+                                color: '#495057',
+                              },
+                            }}
+                          >
+                            <MenuItem value={5}>5</MenuItem>
+                            <MenuItem value={10}>10</MenuItem>
+                            <MenuItem value={15}>15</MenuItem>
+                            <MenuItem value={20}>20</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+
+                      {/* Navegação de páginas */}
+                      <Pagination
+                        count={1}
+                        page={1}
+                        color="primary"
+                        showFirstButton
+                        showLastButton
+                        size="small"
+                        sx={{
+                          '& .MuiPaginationItem-root': {
+                            color: '#495057',
+                            '&.Mui-selected': {
+                              backgroundColor: '#03B4C6',
+                              color: 'white',
+                              '&:hover': {
+                                backgroundColor: '#029AAB',
+                              },
+                            },
+                          },
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </Paper>
               </div>
             )}
 
@@ -6102,6 +7150,28 @@ const PatientRegister: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Modal de Evolução (Add/Edit/Delete) */}
+      <EvolutionModal
+        isOpen={isEvolutionModalOpen}
+        onClose={handleCloseEvolutionModal}
+        onSave={evolutionModalMode === 'edit' ? handleUpdateEvolution : handleSaveEvolution}
+        editData={editingEvolution}
+        mode={evolutionModalMode}
+      />
+
+      {/* Modal de Exclusão de Evolução */}
+      <ConfirmModal
+        isOpen={isDeleteEvolutionModalOpen}
+        title="Excluir Evolução"
+        message="Tem certeza que deseja excluir esta evolução?"
+        warningMessage="Esta ação não poderá ser desfeita."
+        confirmButtonText="Excluir"
+        cancelButtonText="Cancelar"
+        onConfirm={handleConfirmDeleteEvolution}
+        onCancel={handleCloseDeleteEvolutionModal}
+        type="danger"
+      />
 
       {/* Modal de Exclusão de Avaliação */}
       <Dialog
