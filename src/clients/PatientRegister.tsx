@@ -3,7 +3,7 @@ import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation, useRouter } from "../contexts/RouterContext";
 import { useAuth } from "../contexts/AuthContext";
-import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Check, Warning, MedicalServices, Edit, Delete, Add, FilterAltOff, Close, PriorityHigh, OpenInNew, DateRange, Print, Description, Article, Summarize, ListAlt, FileDownload } from '@mui/icons-material';
+import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Check, Warning, MedicalServices, Edit, Delete, Add, FilterAltOff, Close, PriorityHigh, OpenInNew, DateRange, Print, Description, Article, Summarize, ListAlt, FileDownload, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import PhotoUpload from "../components/PhotoUpload";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
@@ -297,10 +297,20 @@ const PatientRegister: React.FC = () => {
   // Estados de seleção para impressão de evoluções
   const [selectedEvolutionsForPrint, setSelectedEvolutionsForPrint] = useState<string[]>([]);
 
+  // Estados para controle de expansão de texto das evoluções
+  const [expandedEvolutions, setExpandedEvolutions] = useState<{ [key: string]: { therapeutic: boolean; conduct: boolean; observations: boolean } }>({});
+  const [showAllExpanded, setShowAllExpanded] = useState(false);
+  const [evolutionSortOrder, setEvolutionSortOrder] = useState<'asc' | 'desc'>('desc'); // 'desc' = mais recente primeiro
+
   // Debug: Log quando selectedEvolutionsForPrint mudar
   useEffect(() => {
     console.log('🔄 Estado de seleção atualizado:', selectedEvolutionsForPrint);
   }, [selectedEvolutionsForPrint]);
+
+  // Debug: Log quando showAllExpanded mudar
+  useEffect(() => {
+    console.log('📖 Expandir todos alterado:', showAllExpanded);
+  }, [showAllExpanded]);
 
   // Lista mock de avaliações
   const [evaluationsList, setEvaluationsList] = useState([
@@ -403,48 +413,56 @@ const PatientRegister: React.FC = () => {
       id: '1',
       date: '2025-10-05',
       title: 'Evolução - Consulta de Retorno',
-      content: 'Paciente apresenta melhora significativa dos sintomas. PA: 130/80 mmHg. Mantém medicação atual. Orientado a manter dieta hipossódica e prática regular de exercícios físicos.',
-      professional: user?.alias || 'Dr. João Silva', // Usa alias do usuário logado (editável)
+      therapeuticEvolution: 'Paciente apresenta melhora significativa dos sintomas cardiovasculares. Pressão arterial aferida em 130/80 mmHg, mantendo-se dentro dos parâmetros considerados adequados para o caso clínico. Relata adesão satisfatória ao tratamento medicamentoso prescrito anteriormente, sem efeitos colaterais. Exame físico cardiovascular dentro da normalidade, com bulhas rítmicas e normofonéticas. Ausculta pulmonar sem ruídos adventícios. Edema de membros inferiores ausente. Paciente demonstra compreensão adequada sobre sua condição de saúde e a importância da continuidade terapêutica.',
+      conductGuidance: 'Orientado a manter rigorosamente a dieta hipossódica prescrita, com restrição de sal a menos de 5g/dia. Enfatizada a importância da prática regular de exercícios físicos aeróbicos, preferencialmente caminhadas de 30 minutos, 5 vezes por semana. Manter uso contínuo das medicações anti-hipertensivas conforme prescrição vigente. Reforçadas orientações sobre monitoramento domiciliar da pressão arterial, registrando os valores em caderneta. Solicitar exames laboratoriais de rotina (hemograma, função renal, eletrólitos, perfil lipídico) para próxima consulta. Retorno agendado em 30 dias ou antes em caso de sintomas como cefaleia intensa, dispneia ou dor precordial.',
+      observations: 'Paciente demonstrou boa aceitação às orientações fornecidas durante a consulta. Familiar presente acompanhando o atendimento. Importante destacar que o paciente tem demonstrado progressos constantes no autocuidado e na adesão terapêutica desde o início do tratamento. Continuaremos monitorando de perto a evolução do quadro clínico nas próximas consultas.',
+      professional: user?.alias || 'Dr. João Silva',
       professionalId: 'current_user'
     },
     {
       id: '2',
       date: '2025-10-03',
       title: 'Evolução - Sessão de Fisioterapia',
-      content: 'Paciente realizou sessão de fisioterapia para fortalecimento da musculatura lombar. Exercícios de alongamento e fortalecimento foram bem tolerados. Sem queixas álgicas durante a sessão.',
-      professional: 'Dra. Maria Oliveira', // Outro profissional (não editável)
+      therapeuticEvolution: 'Texto curto de teste.',
+      conductGuidance: 'Orientação curta.',
+      observations: 'Observação breve.',
+      professional: 'Dra. Maria Oliveira',
       professionalId: 'dra_oliveira'
     },
     {
       id: '3',
       date: '2025-10-01',
       title: 'Evolução - Avaliação Nutricional',
-      content: 'Paciente aderiu parcialmente às orientações nutricionais. Peso atual: 78kg. Orientado a aumentar consumo de fibras e reduzir ingestão de gorduras saturadas. Próxima consulta em 15 dias.',
-      professional: 'Dr. Pedro Santos', // Outro profissional (não editável)
+      therapeuticEvolution: 'Paciente compareceu à consulta nutricional de acompanhamento. Aderiu parcialmente às orientações nutricionais fornecidas na consulta anterior, relatando dificuldades em manter a regularidade das refeições devido à rotina de trabalho. Peso atual aferido em 78kg (peso anterior: 79,5kg), representando perda de 1,5kg no período de 30 dias. IMC calculado em 26,8 kg/m², classificado como sobrepeso. Circunferência abdominal medida em 92cm. Relata consumo aumentado de alimentos ultraprocessados nos finais de semana. Ingesta hídrica referida como insuficiente, aproximadamente 1 litro por dia.',
+      conductGuidance: 'Orientação de curta duração para teste.',
+      professional: 'Dr. Pedro Santos',
       professionalId: 'dr_santos'
     },
     {
       id: '4',
       date: '2025-09-28',
       title: 'Evolução - Consulta Psicológica',
-      content: 'Paciente relata melhora do quadro ansioso. Técnicas de respiração e mindfulness têm auxiliado no controle da ansiedade. Mantém acompanhamento semanal.',
-      professional: user?.alias || 'Dra. Ana Costa', // Usa alias do usuário logado (editável)
+      therapeuticEvolution: 'Durante a sessão de hoje, o paciente relatou melhora significativa do quadro ansioso que motivou o início do acompanhamento psicológico. Demonstrou maior capacidade de reconhecimento e manejo das emoções, utilizando adequadamente as técnicas de respiração diafragmática e exercícios de mindfulness ensinados nas sessões anteriores. Relata redução na frequência e intensidade das crises de ansiedade, que ocorriam diariamente e agora acontecem apenas em situações específicas de maior estresse laboral. Sono apresentando melhora progressiva, com redução do tempo de latência para adormecer. Paciente verbalizou sentir-se mais confiante para lidar com situações desafiadoras do cotidiano.',
+      conductGuidance: 'Manter o acompanhamento psicológico semanal conforme estabelecido no plano terapêutico. Orientado a continuar praticando diariamente as técnicas de relaxamento e mindfulness, preferencialmente nos períodos matutino e noturno, com duração mínima de 10 minutos por sessão. Reforçada a importância do registro no diário emocional, anotando situações gatilho, pensamentos automáticos e estratégias de enfrentamento utilizadas. Sugerida a leitura do material psicoeducativo sobre manejo de ansiedade fornecido ao final da sessão. Caso ocorra intensificação dos sintomas ansiosos, orientado a entrar em contato antes da próxima sessão programada.',
+      professional: user?.alias || 'Dra. Ana Costa',
       professionalId: 'current_user'
     },
     {
       id: '5',
       date: '2025-09-25',
       title: 'Evolução - Consulta Inicial',
-      content: 'Paciente inicia tratamento para hipertensão arterial sistêmica. Prescrito anti-hipertensivo e orientações sobre mudanças no estilo de vida. Solicitados exames laboratoriais de controle.',
-      professional: 'Dr. Carlos Ferreira', // Outro profissional (não editável)
+      therapeuticEvolution: 'Primeira consulta do paciente na unidade. Comparece trazendo exames complementares realizados previamente que confirmam diagnóstico de hipertensão arterial sistêmica estágio I. Nega história familiar significativa de doenças cardiovasculares. Sedentário há aproximadamente 5 anos. Tabagista (10 cigarros/dia há 15 anos). Etilismo social. Ao exame físico: PA: 148/94 mmHg (média de 3 aferições), FC: 78 bpm, peso: 82kg, altura: 1,75m, IMC: 26,8 kg/m². Ausculta cardiopulmonar sem alterações. Fundoscopia sem sinais de retinopatia hipertensiva. Pulsos periféricos palpáveis e simétricos.',
+      conductGuidance: 'Iniciado tratamento farmacológico anti-hipertensivo com Losartana 50mg, 1 comprimido pela manhã. Fornecidas orientações detalhadas sobre modificações no estilo de vida, incluindo: redução do consumo de sal, prática regular de atividade física, cessação do tabagismo e moderação no consumo de bebidas alcoólicas. Encaminhado ao programa de cessação do tabagismo da unidade. Solicitados exames laboratoriais complementares: hemograma completo, glicemia de jejum, hemoglobina glicada, função renal (ureia e creatinina), eletrólitos (sódio, potássio), perfil lipídico completo, TSH, ácido úrico, EAS e urocultura. Solicitado eletrocardiograma de repouso. Orientado sobre sinais de alerta que necessitam avaliação médica urgente. Retorno agendado em 30 dias para reavaliação clínica e ajuste terapêutico conforme resultados dos exames.',
+      professional: 'Dr. Carlos Ferreira',
       professionalId: 'dr_ferreira'
     },
     {
       id: '6',
       date: '2025-09-22',
       title: 'Evolução - Retorno Ortopédico',
-      content: 'Paciente com melhora da dor lombar após início da fisioterapia. Mantém uso de analgésicos conforme necessidade. Orientado a evitar levantamento de peso.',
-      professional: user?.alias || 'Dr. Pedro Santos', // Usa alias do usuário logado (editável)
+      therapeuticEvolution: 'Paciente retorna à consulta ortopédica relatando melhora significativa do quadro álgico lombar que motivou a primeira avaliação. Iniciou protocolo fisioterápico há 3 semanas, com frequência de 2 sessões semanais, apresentando evolução favorável. Dor mensurada pela escala visual analógica (EVA) reduziu de 8/10 para 3/10. Refere que a dor, anteriormente constante e incapacitante, agora é intermitente e de menor intensidade, manifestando-se principalmente ao final do dia ou após atividades que exigem permanência prolongada na posição ortostática. Mantém uso de analgésicos (paracetamol 750mg) apenas em situações de exacerbação da dor, com frequência aproximada de 2-3 vezes por semana. Ao exame físico: marcha preservada, amplitude de movimento da coluna lombar aumentada em relação à avaliação anterior, teste de Lasègue negativo bilateralmente, força muscular preservada em membros inferiores.',
+      conductGuidance: 'Reforçada orientação sobre mecânica corporal adequada e ergonomia, especialmente evitar levantamento de objetos pesados, flexão anterior excessiva do tronco e movimentos bruscos da coluna. Manter o protocolo fisioterápico em andamento, com foco em fortalecimento da musculatura paravertebral e do core, alongamento da cadeia posterior e correção postural. Continuar com uso de analgésicos (paracetamol 750mg, até 4x ao dia) conforme necessidade, em caso de dor intensa. Liberado para retorno gradual às atividades laborais, evitando sobrecarga da coluna lombar. Orientado sobre exercícios domiciliares de manutenção. Retorno programado em 45 dias para reavaliação clínica. Paciente orientado a procurar atendimento antes do retorno caso apresente sinais de alarme como dor irradiada para membros inferiores, alterações de sensibilidade, fraqueza muscular ou alterações esfincterianas.',
+      professional: user?.alias || 'Dr. Pedro Santos',
       professionalId: 'current_user'
     }
   ]);
@@ -794,15 +812,20 @@ const PatientRegister: React.FC = () => {
     if (evolutionKeywordFilter) {
       const keyword = evolutionKeywordFilter.toLowerCase();
       const matchesTitle = evolution.title.toLowerCase().includes(keyword);
-      const matchesContent = evolution.content.toLowerCase().includes(keyword);
+      const matchesTherapeutic = evolution.therapeuticEvolution?.toLowerCase().includes(keyword) || false;
+      const matchesConduct = evolution.conductGuidance?.toLowerCase().includes(keyword) || false;
       const matchesProfessional = evolution.professional.toLowerCase().includes(keyword);
 
-      if (!matchesTitle && !matchesContent && !matchesProfessional) {
+      if (!matchesTitle && !matchesTherapeutic && !matchesConduct && !matchesProfessional) {
         return false;
       }
     }
 
     return true;
+  }).sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return evolutionSortOrder === 'desc' ? dateB - dateA : dateA - dateB;
   });
 
   // Função para limpar filtros de evoluções
@@ -868,6 +891,24 @@ const PatientRegister: React.FC = () => {
   const filteredIds = filteredEvolutions.map(ev => ev.id);
   const isAllEvolutionsSelected = filteredEvolutions.length > 0 && filteredIds.every(id => selectedEvolutionsForPrint.includes(id));
   const isSomeEvolutionsSelected = filteredEvolutions.length > 0 && filteredIds.some(id => selectedEvolutionsForPrint.includes(id)) && !isAllEvolutionsSelected;
+
+  // Funções para controlar expansão de texto
+  const toggleEvolutionText = (evolutionId: string, field: 'therapeutic' | 'conduct' | 'observations') => {
+    setExpandedEvolutions(prev => ({
+      ...prev,
+      [evolutionId]: {
+        therapeutic: field === 'therapeutic' ? !prev[evolutionId]?.therapeutic : prev[evolutionId]?.therapeutic || false,
+        conduct: field === 'conduct' ? !prev[evolutionId]?.conduct : prev[evolutionId]?.conduct || false,
+        observations: field === 'observations' ? !prev[evolutionId]?.observations : prev[evolutionId]?.observations || false
+      }
+    }));
+  };
+
+  const isTextExpanded = (evolutionId: string, field: 'therapeutic' | 'conduct' | 'observations') => {
+    const result = showAllExpanded ? true : (expandedEvolutions[evolutionId]?.[field] || false);
+    console.log(`📖 isTextExpanded(${evolutionId}, ${field}): showAllExpanded=${showAllExpanded}, result=${result}`);
+    return result;
+  };
 
   // Handlers do modal de evolução
   const handleSaveEvolution = (evolutionData: any) => {
@@ -5671,45 +5712,107 @@ const PatientRegister: React.FC = () => {
                       </span>
                     )}
                   </Typography>
-                  <Box
-                    onClick={() => filteredEvolutions.length > 0 && handleSelectAllEvolutions()}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      cursor: filteredEvolutions.length > 0 ? 'pointer' : 'default',
-                      minHeight: '42px'
-                    }}
-                  >
-                    <Checkbox
-                      checked={isAllEvolutionsSelected}
-                      indeterminate={isSomeEvolutionsSelected}
-                      onChange={() => {}}
-                      onClick={(e) => e.preventDefault()}
-                      disabled={filteredEvolutions.length === 0}
-                      inputProps={{ 'aria-label': 'Selecionar todas as evoluções' }}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    {/* Botão para alternar ordem de classificação */}
+                    <Tooltip title={evolutionSortOrder === 'desc' ? 'Mais recentes primeiro' : 'Mais antigas primeiro'}>
+                      <IconButton
+                        onClick={() => setEvolutionSortOrder(evolutionSortOrder === 'desc' ? 'asc' : 'desc')}
+                        sx={{
+                          padding: '8px',
+                          color: colors.primary,
+                          '&:hover': {
+                            backgroundColor: 'rgba(3, 154, 171, 0.1)'
+                          }
+                        }}
+                      >
+                        {evolutionSortOrder === 'desc' ? <ArrowDownward /> : <ArrowUpward />}
+                      </IconButton>
+                    </Tooltip>
+
+                    {/* Switch para expandir todos os textos */}
+                    <Box
                       sx={{
-                        color: colors.primary,
-                        '&.Mui-checked': { color: colors.primary },
-                        '&.MuiCheckbox-indeterminate': { color: colors.primary },
-                        padding: '9px',
-                        '& .MuiSvgIcon-root': {
-                          fontSize: '1.5rem'
-                        },
-                        pointerEvents: 'none'
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        cursor: 'pointer',
+                        position: 'relative',
+                        zIndex: 10
                       }}
-                    />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: '0.875rem',
-                        color: colors.textSecondary,
-                        userSelect: 'none',
-                        ml: -0.5,
-                        pointerEvents: 'none'
+                      onClick={() => {
+                        console.log('📦 Box clicked, current showAllExpanded:', showAllExpanded);
+                        const newValue = !showAllExpanded;
+                        setShowAllExpanded(newValue);
+                        // Se estiver desativando o switch, resetar todos os estados individuais
+                        if (!newValue) {
+                          setExpandedEvolutions({});
+                        }
                       }}
                     >
-                      Selecionar todos
-                    </Typography>
+                      <Switch
+                        checked={showAllExpanded}
+                        onChange={(e) => {
+                          console.log('🔄 Switch onChange, current:', showAllExpanded, 'new value:', e.target.checked);
+                        }}
+                        size="small"
+                        color="primary"
+                        sx={{
+                          pointerEvents: 'auto'
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontSize: '0.875rem',
+                          color: colors.textSecondary,
+                          userSelect: 'none'
+                        }}
+                      >
+                        Expandir leia mais
+                      </Typography>
+                    </Box>
+
+                    {/* Checkbox selecionar todos */}
+                    <Box
+                      onClick={() => filteredEvolutions.length > 0 && handleSelectAllEvolutions()}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        cursor: filteredEvolutions.length > 0 ? 'pointer' : 'default',
+                        minHeight: '42px'
+                      }}
+                    >
+                      <Checkbox
+                        checked={isAllEvolutionsSelected}
+                        indeterminate={isSomeEvolutionsSelected}
+                        onChange={() => {}}
+                        onClick={(e) => e.preventDefault()}
+                        disabled={filteredEvolutions.length === 0}
+                        inputProps={{ 'aria-label': 'Selecionar todas as evoluções' }}
+                        sx={{
+                          color: colors.primary,
+                          '&.Mui-checked': { color: colors.primary },
+                          '&.MuiCheckbox-indeterminate': { color: colors.primary },
+                          padding: '9px',
+                          '& .MuiSvgIcon-root': {
+                            fontSize: '1.5rem'
+                          },
+                          pointerEvents: 'none'
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontSize: '0.875rem',
+                          color: colors.textSecondary,
+                          userSelect: 'none',
+                          ml: -0.5,
+                          pointerEvents: 'none'
+                        }}
+                      >
+                        Selecionar todos
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
 
@@ -5769,25 +5872,144 @@ const PatientRegister: React.FC = () => {
                           </Box>
 
                           <Box sx={{ flex: 1 }}>
-                            {/* Primeira linha: Data */}
-                            <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.95rem', color: colors.text, mb: 1 }}>
-                              {new Date(evolution.date).toLocaleDateString('pt-BR')}
+                            {/* Primeira linha: Data - Título - Profissional */}
+                            <Typography variant="body2" sx={{ mb: 1.5, fontSize: '0.9rem', color: colors.text }}>
+                              <strong style={{ fontSize: '0.95rem' }}>
+                                {new Date(evolution.date).toLocaleDateString('pt-BR')} {new Date(evolution.date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              </strong>
+                              {' - '}
+                              <span style={{ fontWeight: 600 }}>{evolution.title}</span>
+                              {' - '}
+                              <strong>{evolution.professional}</strong>
                             </Typography>
 
-                            {/* Segunda linha: Título */}
-                            <Typography variant="body2" sx={{ color: colors.text, fontWeight: 600, fontSize: '0.9rem', mb: 1 }}>
-                              {evolution.title}
-                            </Typography>
+                            {/* Segunda linha: Evolução Terapêutica */}
+                            <Box sx={{ mb: 1.5 }}>
+                              <Typography variant="body2" sx={{ color: colors.text, fontWeight: 600, fontSize: '0.85rem', mb: 0.5 }}>
+                                Evolução Terapêutica:
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: colors.textSecondary,
+                                  fontSize: '0.875rem',
+                                  lineHeight: 1.6,
+                                  ...(isTextExpanded(evolution.id, 'therapeutic') ? {} : {
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 1,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                  })
+                                }}
+                              >
+                                {evolution.therapeuticEvolution}
+                              </Typography>
+                              {evolution.therapeuticEvolution && evolution.therapeuticEvolution.length > 80 && !showAllExpanded && (
+                                <Typography
+                                  variant="body2"
+                                  onClick={() => toggleEvolutionText(evolution.id, 'therapeutic')}
+                                  sx={{
+                                    color: colors.primary,
+                                    fontSize: '0.8rem',
+                                    cursor: 'pointer',
+                                    mt: 0.5,
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                      textDecoration: 'underline'
+                                    }
+                                  }}
+                                >
+                                  {isTextExpanded(evolution.id, 'therapeutic') ? 'Ler menos' : 'Leia mais'}
+                                </Typography>
+                              )}
+                            </Box>
 
-                            {/* Terceira linha: Conteúdo */}
-                            <Typography variant="body2" sx={{ color: colors.textSecondary, fontSize: '0.875rem', lineHeight: 1.6, mb: 1.5 }}>
-                              {evolution.content}
-                            </Typography>
+                            {/* Terceira linha: Orientação de Conduta */}
+                            <Box sx={{ mb: 1.5 }}>
+                              <Typography variant="body2" sx={{ color: colors.text, fontWeight: 600, fontSize: '0.85rem', mb: 0.5 }}>
+                                Orientação de Conduta:
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: colors.textSecondary,
+                                  fontSize: '0.875rem',
+                                  lineHeight: 1.6,
+                                  ...(isTextExpanded(evolution.id, 'conduct') ? {} : {
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 1,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                  })
+                                }}
+                              >
+                                {evolution.conductGuidance}
+                              </Typography>
+                              {evolution.conductGuidance && evolution.conductGuidance.length > 80 && !showAllExpanded && (
+                                <Typography
+                                  variant="body2"
+                                  onClick={() => toggleEvolutionText(evolution.id, 'conduct')}
+                                  sx={{
+                                    color: colors.primary,
+                                    fontSize: '0.8rem',
+                                    cursor: 'pointer',
+                                    mt: 0.5,
+                                    fontWeight: 600,
+                                    '&:hover': {
+                                      textDecoration: 'underline'
+                                    }
+                                  }}
+                                >
+                                  {isTextExpanded(evolution.id, 'conduct') ? 'Ler menos' : 'Leia mais'}
+                                </Typography>
+                              )}
+                            </Box>
 
-                            {/* Quarta linha: Profissional */}
-                            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: colors.textSecondary }}>
-                              <strong style={{ color: colors.text }}>{evolution.professional}</strong>
-                            </Typography>
+                            {/* Quarta linha: Observações */}
+                            {evolution.observations && (
+                              <Box sx={{ mb: 1.5 }}>
+                                <Typography variant="body2" sx={{ color: colors.text, fontWeight: 600, fontSize: '0.85rem', mb: 0.5 }}>
+                                  Observações:
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: colors.textSecondary,
+                                    fontSize: '0.875rem',
+                                    lineHeight: 1.6,
+                                    ...(isTextExpanded(evolution.id, 'observations') ? {} : {
+                                      display: '-webkit-box',
+                                      WebkitLineClamp: 1,
+                                      WebkitBoxOrient: 'vertical',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis'
+                                    })
+                                  }}
+                                >
+                                  {evolution.observations}
+                                </Typography>
+                                {evolution.observations && evolution.observations.length > 80 && !showAllExpanded && (
+                                  <Typography
+                                    variant="body2"
+                                    onClick={() => toggleEvolutionText(evolution.id, 'observations')}
+                                    sx={{
+                                      color: colors.primary,
+                                      fontSize: '0.8rem',
+                                      cursor: 'pointer',
+                                      mt: 0.5,
+                                      fontWeight: 600,
+                                      '&:hover': {
+                                        textDecoration: 'underline'
+                                      }
+                                    }}
+                                  >
+                                    {isTextExpanded(evolution.id, 'observations') ? 'Ler menos' : 'Leia mais'}
+                                  </Typography>
+                                )}
+                              </Box>
+                            )}
                           </Box>
 
                           {/* Botões de ação à direita */}
