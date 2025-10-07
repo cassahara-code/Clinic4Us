@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Microfone - Web Speech API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .status.idle {
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+        .status.recording {
+            background-color: #dc3545;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        #startBtn {
+            background-color: #28a745;
+            color: white;
+        }
+        #startBtn:hover {
+            background-color: #218838;
+        }
+        #stopBtn {
+            background-color: #dc3545;
+            color: white;
+        }
+        #stopBtn:hover {
+            background-color: #c82333;
+        }
+        #stopBtn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #clearBtn {
+            background-color: #ffc107;
+            color: #333;
+        }
+        #clearBtn:hover {
+            background-color: #e0a800;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #17a2b8;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc3545;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Teste de Microfone - Web Speech API</h1>
+
+        <div class="info">
+            <strong>ℹ️ Informações:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Use o Chrome ou Edge para melhor compatibilidade</li>
+                <li>Permita o acesso ao microfone quando solicitado</li>
+                <li>Fale em Português do Brasil</li>
+                <li>A transcrição aparecerá em tempo real abaixo</li>
+            </ul>
+        </div>
+
+        <div id="errorMsg" class="error"></div>
+
+        <div id="status" class="status idle">
+            Pronto para começar
+        </div>
+
+        <button id="startBtn">🎙️ Iniciar Gravação</button>
+        <button id="stopBtn" disabled>⏹️ Parar Gravação</button>
+        <button id="clearBtn">🗑️ Limpar Texto</button>
+
+        <h3>Transcrição:</h3>
+        <textarea id="transcript" placeholder="A transcrição aparecerá aqui..."></textarea>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const transcriptArea = document.getElementById('transcript');
+        const statusDiv = document.getElementById('status');
+        const errorMsg = document.getElementById('errorMsg');
+
+        let recognition = null;
+        let isRecording = false;
+
+        // Verificar suporte do navegador
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            errorMsg.textContent = '❌ Seu navegador não suporta Web Speech API. Use Chrome ou Edge.';
+            errorMsg.style.display = 'block';
+            startBtn.disabled = true;
+        } else {
+            // Inicializar Web Speech API
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'pt-BR';
+
+            recognition.onstart = () => {
+                console.log('Gravação iniciada');
+                statusDiv.textContent = '🔴 GRAVANDO... Fale agora!';
+                statusDiv.className = 'status recording';
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    transcriptArea.value += finalTranscript;
+                    console.log('Texto final:', finalTranscript);
+                }
+
+                if (interimTranscript) {
+                    console.log('Texto provisório:', interimTranscript);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Erro:', event.error);
+
+                let errorMessage = 'Erro desconhecido';
+                switch(event.error) {
+                    case 'no-speech':
+                        errorMessage = '❌ Nenhuma fala detectada. Fale mais alto ou verifique seu microfone.';
+                        break;
+                    case 'audio-capture':
+                        errorMessage = '❌ Microfone não encontrado. Verifique suas configurações.';
+                        break;
+                    case 'not-allowed':
+                        errorMessage = '❌ Permissão negada. Permita o acesso ao microfone.';
+                        break;
+                    case 'network':
+                        errorMessage = '❌ Erro de rede. Verifique sua conexão.';
+                        break;
+                    default:
+                        errorMessage = `❌ Erro: ${event.error}`;
+                }
+
+                errorMsg.textContent = errorMessage;
+                errorMsg.style.display = 'block';
+
+                statusDiv.textContent = 'Erro na gravação';
+                statusDiv.className = 'status idle';
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                isRecording = false;
+            };
+
+            recognition.onend = () => {
+                console.log('Gravação encerrada');
+                if (isRecording) {
+                    // Reiniciar automaticamente se ainda estiver no modo de gravação
+                    recognition.start();
+                } else {
+                    statusDiv.textContent = 'Pronto para começar';
+                    statusDiv.className = 'status idle';
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                }
+            };
+        }
+
+        // Botão Iniciar
+        startBtn.addEventListener('click', () => {
+            if (recognition) {
+                errorMsg.style.display = 'none';
+                isRecording = true;
+                recognition.start();
+            }
+        });
+
+        // Botão Parar
+        stopBtn.addEventListener('click', () => {
+            if (recognition) {
+                isRecording = false;
+                recognition.stop();
+            }
+        });
+
+        // Botão Limpar
+        clearBtn.addEventListener('click', () => {
+            transcriptArea.value = '';
+            errorMsg.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

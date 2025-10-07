@@ -4,7 +4,7 @@ import { Lock, ArrowForward } from '@mui/icons-material';
 import { useAuth } from './AuthContext';
 import { colors, typography } from '../theme/designSystem';
 
-type PageType = 'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients' | 'patient-register' | 'page-model' | 'admin-plans' | 'admin-profiles' | 'admin-functionalities' | 'admin-entities' | 'admin-faq' | 'admin-professional-types' | 'faq' | 'user-profile';
+type PageType = 'landing' | 'login' | 'alias-register' | 'dashboard' | 'schedule' | 'patients' | 'patient-register' | 'page-model' | 'admin-plans' | 'admin-profiles' | 'admin-functionalities' | 'admin-entities' | 'admin-faq' | 'admin-professional-types' | 'faq' | 'user-profile' | 'therapy-plan-print' | 'period-report-print' | 'detailed-period-report-print' | 'evaluation-print' | 'evolutions-print';
 
 interface RouterContextType {
   currentPage: PageType;
@@ -180,7 +180,7 @@ export const RouterProvider: React.FC<RouterProviderProps> = ({ children }) => {
     const urlParams = new URLSearchParams(window.location.search);
     const page = urlParams.get('page') as PageType;
 
-    const validPages: PageType[] = ['landing', 'login', 'alias-register', 'dashboard', 'schedule', 'patients', 'patient-register', 'page-model', 'admin-plans', 'admin-profiles', 'admin-functionalities', 'admin-entities', 'admin-faq', 'admin-professional-types', 'faq', 'user-profile'];
+    const validPages: PageType[] = ['landing', 'login', 'alias-register', 'dashboard', 'schedule', 'patients', 'patient-register', 'page-model', 'admin-plans', 'admin-profiles', 'admin-functionalities', 'admin-entities', 'admin-faq', 'admin-professional-types', 'faq', 'user-profile', 'therapy-plan-print', 'period-report-print', 'detailed-period-report-print', 'evaluation-print', 'evolutions-print'];
 
     if (page && validPages.includes(page)) {
       return page;
@@ -241,6 +241,14 @@ export const RouterProvider: React.FC<RouterProviderProps> = ({ children }) => {
     // Se não está autenticado, negar acesso a páginas privadas
     if (!isAuthenticated || !user) {
       return false;
+    }
+
+    // Páginas especiais acessíveis por profissionais e admins
+    const specialPages: PageType[] = ['therapy-plan-print', 'period-report-print', 'detailed-period-report-print', 'evaluation-print', 'evolutions-print'];
+    if (specialPages.includes(page)) {
+      // Permitir acesso para Administrator e Profissional
+      const allowedRoles = ['Administrator', 'Profissional'];
+      return allowedRoles.includes(user.role);
     }
 
     // Verificar se a página está no menu do usuário

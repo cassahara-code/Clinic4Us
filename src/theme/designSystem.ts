@@ -458,6 +458,24 @@ export const actionIcons = {
     hoverBackgroundColor: '#c82333',
     size: 'small' as const,
   },
+
+  // Imprimir
+  print: {
+    color: '#9c27b0',
+    borderColor: '#f3e5f5',
+    hoverBackgroundColor: '#f3e5f5',
+    hoverBorderColor: '#9c27b0',
+    size: 'small' as const,
+  },
+
+  // Exportar Excel
+  excel: {
+    color: '#2e7d32',
+    borderColor: '#e8f5e9',
+    hoverBackgroundColor: '#e8f5e9',
+    hoverBorderColor: '#2e7d32',
+    size: 'small' as const,
+  },
 } as const;
 
 // ============================================================================
