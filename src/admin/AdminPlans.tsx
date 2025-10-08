@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { UserSession } from "../interfaces/UserSession";
 import {
   Box,
   Container,
@@ -12,7 +13,9 @@ import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
 import { Delete, Edit, Settings } from "@mui/icons-material";
-import PlanModal, { PlanData } from "../components/modals/PlanModal";
+import PlanModal from "../components/modals/PlanModal";
+import { PlanData } from "../interfaces/PlanData";
+import { Plano } from "../interfaces/Plano";
 import ConfirmModal from "../components/modals/ConfirmModal";
 import BenefitsModal from "../components/modals/BenefitsModal";
 import { Toast } from "../components/Toast";
@@ -23,35 +26,6 @@ import AddButton from "../components/AddButton";
 import ClearFiltersButton from "../components/ClearFiltersButton";
 import { colors, typography, inputs } from "../theme/designSystem";
 import { planoService } from "../services/planoService";
-
-interface MenuItemProps {
-  label: string;
-  href?: string;
-  onClick?: (e: React.MouseEvent) => void;
-}
-
-interface UserSession {
-  email: string;
-  alias: string;
-  clinicName: string;
-  role: string;
-  permissions: string[];
-  menuItems: MenuItemProps[];
-  loginTime: string;
-}
-
-interface Plan {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  duration: number;
-  maxUsers: number;
-  features: string[];
-  status: "Ativo" | "Inativo";
-  createdAt: string;
-  updatedAt: string;
-}
 
 const AdminPlans: React.FC = () => {
   const [userSession, setUserSession] = useState<UserSession | null>(null);
@@ -72,8 +46,8 @@ const AdminPlans: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [planToDelete, setPlanToDelete] = useState<Plan | null>(null);
-  const [planToEdit, setPlanToEdit] = useState<Plan | null>(null);
+  const [planToDelete, setPlanToDelete] = useState<Plano | null>(null);
+  const [planToEdit, setPlanToEdit] = useState<Plano | null>(null);
 
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [planModalMode, setPlanModalMode] = useState<"create" | "edit">(
@@ -98,23 +72,24 @@ const AdminPlans: React.FC = () => {
   };
 
   // Busca lista de planos do backend
-  const [plans, setPlans] = useState<Plan[]>([]);
+  const [plans, setPlans] = useState<Plano[]>([]);
   useEffect(() => {
     const fetchPlans = async () => {
       try {
         const planos = await planoService.getAllPlanos();
         // Mapear os dados recebidos para o tipo Plan
-        const mappedPlans: Plan[] = planos.map((plano: any) => ({
+        const mappedPlans: Plano[] = planos.map((plano: any) => ({
           id: plano.id,
-          name: plano.planTitle, // Corrigido para usar o campo correto do backend
+          planTitle: plano.planTitle,
           description: plano.description,
-          price: plano.price,
-          duration: plano.duration,
-          maxUsers: plano.maxUsers,
-          features: plano.features ?? [],
-          status: plano.active == 1 ? "Ativo" : "Inativo",
+          monthlyValue: plano.monthlyValue,
+          anualyValue: plano.anualyValue,
           createdAt: plano.createdAt,
           updatedAt: plano.updatedAt,
+          createdBy: plano.createdBy,
+          updatedBy: plano.updatedBy,
+          active: plano.active,
+          plansBenefits: plano.plansBenefits ?? [],
         }));
         console.log("Planos recebidos do backend:", planos);
         console.log("Planos mapeados:", mappedPlans);
@@ -128,17 +103,11 @@ const AdminPlans: React.FC = () => {
 
   const filteredAndSortedPlans = plans
     .filter((plan) => {
-      // Normaliza status para evitar problemas de backend
-      const statusNormalized = (plan.status || "")
-        .toString()
-        .trim()
-        .toLowerCase();
-      const statusFilterNormalized = statusFilter
-        .toString()
-        .trim()
-        .toLowerCase();
+      // Deriva status textual
+      const statusText = plan.active === 1 ? "Ativo" : "Inativo";
+      const statusNormalized = statusText.toLowerCase();
+      const statusFilterNormalized = statusFilter.toLowerCase();
 
-      // Aceita "ativo", "inativo", etc. e ignora acentuação
       const matchesStatus =
         statusFilterNormalized === "todos" ||
         statusNormalized === statusFilterNormalized ||
@@ -154,7 +123,7 @@ const AdminPlans: React.FC = () => {
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
           .toLowerCase();
-      const name = normalize(plan?.name);
+      const name = normalize(plan?.planTitle);
       const description = normalize(plan?.description);
       const search = normalize(searchTerm);
       const matchesSearch =
@@ -163,17 +132,27 @@ const AdminPlans: React.FC = () => {
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
+      // Deriva campos para ordenação
+      const priceA = a.monthlyValue;
+      const priceB = b.monthlyValue;
+      const durationA = a.plansBenefits.length;
+      const durationB = b.plansBenefits.length;
+      const maxUsersA = a.plansBenefits.length; // Ajuste conforme campo real
+      const maxUsersB = b.plansBenefits.length; // Ajuste conforme campo real
+      const statusA = a.active === 1 ? "Ativo" : "Inativo";
+      const statusB = b.active === 1 ? "Ativo" : "Inativo";
+
       let compareValue = 0;
       if (sortField === "name") {
-        compareValue = a.name.localeCompare(b.name, "pt-BR");
+        compareValue = a.planTitle.localeCompare(b.planTitle, "pt-BR");
       } else if (sortField === "price") {
-        compareValue = a.price - b.price;
+        compareValue = priceA - priceB;
       } else if (sortField === "duration") {
-        compareValue = a.duration - b.duration;
+        compareValue = durationA - durationB;
       } else if (sortField === "maxUsers") {
-        compareValue = a.maxUsers - b.maxUsers;
+        compareValue = maxUsersA - maxUsersB;
       } else if (sortField === "status") {
-        compareValue = a.status.localeCompare(b.status, "pt-BR");
+        compareValue = statusA.localeCompare(statusB, "pt-BR");
       } else if (sortField === "createdAt") {
         compareValue =
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -304,37 +283,45 @@ const AdminPlans: React.FC = () => {
   };
 
   const handleSavePlan = (data: PlanData) => {
-    const includedFeatures = data.features
-      .filter((f) => f.included)
-      .map((f) => f.name);
+    const benefits = data.features.map((f) => ({
+      id: crypto.randomUUID(),
+      planId: planToEdit?.id || "",
+      itenDescription: f.name,
+      covered: f.included,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: "system",
+      updatedBy: "system",
+    }));
 
     if (planModalMode === "create") {
-      const newPlan: Plan = {
+      const newPlan: Plano = {
         id: crypto.randomUUID(),
-        name: data.name,
+        planTitle: data.name,
         description: data.description,
-        price: data.price,
-        duration: data.duration,
-        maxUsers: data.maxUsers,
-        features: includedFeatures,
-        status: data.status,
+        monthlyValue: data.price,
+        anualyValue: data.annualPrice,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        createdBy: "system",
+        updatedBy: "system",
+        active: data.status === "Ativo" ? 1 : 0,
+        plansBenefits: benefits,
       };
       console.log("Novo plano criado:", newPlan);
       showToast("Plano criado com sucesso!", "success");
-    } else {
-      console.log("Plano editado:", {
+    } else if (planToEdit) {
+      const updatedPlan: Plano = {
         ...planToEdit,
-        name: data.name,
+        planTitle: data.name,
         description: data.description,
-        price: data.price,
-        duration: data.duration,
-        maxUsers: data.maxUsers,
-        features: includedFeatures,
-        status: data.status,
+        monthlyValue: data.price,
+        anualyValue: data.annualPrice,
         updatedAt: new Date().toISOString(),
-      });
+        active: data.status === "Ativo" ? 1 : 0,
+        plansBenefits: benefits,
+      };
+      console.log("Plano editado:", updatedPlan);
       showToast("Plano editado com sucesso!", "success");
     }
     setIsPlanModalOpen(false);
@@ -353,7 +340,7 @@ const AdminPlans: React.FC = () => {
     if (!planToDelete) return;
     try {
       console.log(
-        `Excluindo plano: ${planToDelete.name} (ID: ${planToDelete.id})`
+        `Excluindo plano: ${planToDelete.planTitle} (ID: ${planToDelete.id})`
       );
 
       setIsDeleteModalOpen(false);
@@ -381,10 +368,10 @@ const AdminPlans: React.FC = () => {
       setPlanToDelete(plan);
       setIsDeleteModalOpen(true);
     } else if (action === "duplicate" && plan) {
-      console.log(`Duplicando plano: ${plan.name}`);
+      console.log(`Duplicando plano: ${plan.planTitle}`);
       alert("Funcionalidade de duplicar plano em desenvolvimento");
     } else if (action === "toggle-status" && plan) {
-      console.log(`Alterando status do plano: ${plan.name}`);
+      console.log(`Alterando status do plano: ${plan.planTitle}`);
       alert("Funcionalidade de alterar status em desenvolvimento");
     }
   };
@@ -764,7 +751,7 @@ const AdminPlans: React.FC = () => {
                           data-label="Nome"
                           sx={{ textAlign: "left" }}
                         >
-                          {plan.name}
+                          {plan.planTitle}
                         </Box>
                         <Box
                           className="admin-plans-cell admin-plans-description"
@@ -778,22 +765,21 @@ const AdminPlans: React.FC = () => {
                           data-label="Preço"
                           sx={{ textAlign: "left" }}
                         >
-                          {formatPrice(plan.price)}
+                          {formatPrice(plan.monthlyValue)}
                         </Box>
                         <Box
                           className="admin-plans-cell admin-plans-duration"
                           data-label="Duração"
                           sx={{ textAlign: "left" }}
                         >
-                          {plan.duration}{" "}
-                          {plan.duration === 1 ? "mês" : "meses"}
+                          {plan.plansBenefits.length} benefícios
                         </Box>
                         <Box
                           className="admin-plans-cell admin-plans-users"
                           data-label="Max Usuários"
                           sx={{ textAlign: "left" }}
                         >
-                          {plan.maxUsers} usuários
+                          {plan.plansBenefits.length} usuários
                         </Box>
                         <Box
                           className="admin-plans-cell admin-plans-status"
@@ -802,10 +788,10 @@ const AdminPlans: React.FC = () => {
                         >
                           <span
                             className={`plan-status-indicator ${
-                              plan.status === "Ativo" ? "active" : "inactive"
+                              plan.active === 1 ? "active" : "inactive"
                             }`}
                           >
-                            {plan.status}
+                            {plan.active === 1 ? "Ativo" : "Inativo"}
                           </span>
                         </Box>
                         <Box
@@ -897,7 +883,7 @@ const AdminPlans: React.FC = () => {
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         title="Confirmar Exclusão"
-        message={`Tem certeza que deseja excluir o plano ${planToDelete?.name}?`}
+        message={`Tem certeza que deseja excluir o plano ${planToDelete?.planTitle}?`}
         warningMessage="Esta ação não poderá ser desfeita e afetará todos os usuários que utilizam este plano."
         confirmButtonText="Excluir Plano"
         cancelButtonText="Cancelar"
@@ -914,17 +900,17 @@ const AdminPlans: React.FC = () => {
         initialData={
           planToEdit
             ? {
-                name: planToEdit.name,
+                name: planToEdit.planTitle,
                 description: planToEdit.description,
-                price: planToEdit.price,
-                annualPrice: planToEdit.price * 12 * 0.9,
-                duration: planToEdit.duration,
-                maxUsers: planToEdit.maxUsers,
-                features: planToEdit.features.map((f) => ({
-                  name: f,
-                  included: true,
+                price: planToEdit.monthlyValue,
+                annualPrice: planToEdit.anualyValue,
+                duration: planToEdit.plansBenefits.length,
+                maxUsers: planToEdit.plansBenefits.length,
+                features: planToEdit.plansBenefits.map((b) => ({
+                  name: b.itenDescription,
+                  included: b.covered,
                 })),
-                status: planToEdit.status,
+                status: planToEdit.active === 1 ? "Ativo" : "Inativo",
               }
             : undefined
         }

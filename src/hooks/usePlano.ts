@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { planoService } from "../services/planoService";
-import { CreatePlanoRequest } from "../types/Plano";
+import { CreatePlanoRequest } from "../interfaces/CreatePlanoRequest";
 
 export const useCreateLegacyPlano = () => {
   return useMutation({

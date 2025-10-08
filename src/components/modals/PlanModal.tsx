@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Stack from "@mui/material/Stack";
 import {
   Dialog,
   DialogTitle,
@@ -16,42 +15,37 @@ import {
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { colors, typography, inputs } from "../../theme/designSystem";
-
-// Interface para os dados do plano
-export interface PlanData {
-  name: string;
-  description: string;
-  price: number;
-  annualPrice: number;
-  duration: number;
-  maxUsers: number;
-  features: PlanFeature[];
-  status: "Ativo" | "Inativo";
-}
-
-// Interface para as funcionalidades do plano
-export interface PlanFeature {
-  name: string;
-  included: boolean;
-}
+import { PlanData } from "../../interfaces/PlanData";
 
 // Lista de funcionalidades disponíveis
 const AVAILABLE_FEATURES = [
   "Agenda básica",
   "Agenda avançada",
-  "Cadastro de pacientes",
-  "Múltiplos profissionais",
-  "Relatórios simples",
-  "Relatórios completos",
-  "Integração WhatsApp",
-  "API personalizada",
-  "Suporte 24/7",
-  "Customizações",
-  "Recursos ilimitados",
-  "Backup automático",
-  "Segurança avançada",
-  "Treinamento da equipe",
+  "Prontuários",
+  "Assinatura digital",
+  "Planos de ação",
+  "Relatórios",
+  "Gestão financeira",
+  "Suporte telefônico",
 ];
+
+// Lista de funcionalidades disponíveis
+// const AVAILABLE_FEATURES = [
+//   "Agenda básica",
+//   "Agenda avançada",
+//   "Cadastro de pacientes",
+//   "Múltiplos profissionais",
+//   "Relatórios simples",
+//   "Relatórios completos",
+//   "Integração WhatsApp",
+//   "API personalizada",
+//   "Suporte 24/7",
+//   "Customizações",
+//   "Recursos ilimitados",
+//   "Backup automático",
+//   "Segurança avançada",
+//   "Treinamento da equipe",
+// ];
 
 // Props do componente
 interface PlanModalProps {
@@ -83,6 +77,8 @@ const PlanModal: React.FC<PlanModalProps> = ({
     annualPrice: 0,
     duration: 12,
     maxUsers: 1,
+    monthlyValue: 0,
+    annuallyValue: 0,
     features: AVAILABLE_FEATURES.map((name) => ({ name, included: false })),
     status: "Ativo",
     ...initialData,
@@ -132,6 +128,8 @@ const PlanModal: React.FC<PlanModalProps> = ({
       annualPrice: 0,
       duration: 12,
       maxUsers: 1,
+      monthlyValue: 0,
+      annuallyValue: 0,
       features: AVAILABLE_FEATURES.map((name) => ({ name, included: false })),
       status: "Ativo",
     });
