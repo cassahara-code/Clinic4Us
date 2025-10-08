@@ -138,7 +138,12 @@ const PlanModal: React.FC<PlanModalProps> = ({
 
   // Salvar dados
   const handleSave = () => {
-    onSave(formData);
+    // Sincroniza features com selectedFeatures
+    const syncedFeatures = AVAILABLE_FEATURES.map((name) => ({
+      name,
+      included: selectedFeatures.some((f) => f.id === name),
+    }));
+    onSave({ ...formData, features: syncedFeatures });
     handleClose();
   };
 
