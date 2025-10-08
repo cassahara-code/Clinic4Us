@@ -103,11 +103,17 @@ const PlanModal: React.FC<PlanModalProps> = ({
         ...initialData,
         features,
       }));
+      // Sincroniza selectedFeatures para mostrar os benefícios já selecionados
+      const selected = features
+        .filter((f) => f.included)
+        .map((f) => ({ id: f.name, label: f.name }));
+      setSelectedFeatures(selected);
     } else {
       setFormData((prev) => ({
         ...prev,
         features: availableFeatures.map((name) => ({ name, included: false })),
       }));
+      setSelectedFeatures([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availableFeatures, initialData]);
@@ -534,10 +540,13 @@ const PlanModal: React.FC<PlanModalProps> = ({
             value={selectedFeatures}
             onChange={(_, newValue) => {
               setSelectedFeatures(newValue);
-              const updatedFeatures = availableFeatures.map((name: string) => ({
-                name,
-                included: newValue.some((v: { id: string }) => v.id === name),
-              }));
+              // Atualiza features apenas com os benefícios selecionados
+              const updatedFeatures = newValue.map(
+                (v: { id: string; label: string }) => ({
+                  name: v.id,
+                  included: true,
+                })
+              );
               setFormData({ ...formData, features: updatedFeatures });
             }}
             getOptionLabel={(option) => option.label}

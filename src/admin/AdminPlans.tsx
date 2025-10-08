@@ -283,16 +283,18 @@ const AdminPlans: React.FC = () => {
   };
 
   const handleSavePlan = (data: PlanData) => {
-    const benefits = data.features.map((f) => ({
-      id: crypto.randomUUID(),
-      planId: planToEdit?.id || "",
-      itenDescription: f.name,
-      covered: f.included,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: crypto.randomUUID(),
-      updatedBy: crypto.randomUUID(),
-    }));
+    const benefits = data.features
+      .filter((f) => f.included)
+      .map((f) => ({
+        id: crypto.randomUUID(),
+        planId: planToEdit?.id || "",
+        itenDescription: f.name,
+        covered: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: crypto.randomUUID(),
+        updatedBy: crypto.randomUUID(),
+      }));
 
     if (planModalMode === "create") {
       const planPayload = {
