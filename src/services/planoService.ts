@@ -18,7 +18,7 @@ export const planoService = {
     return response.data;
   },
   updateLegacyPlano: async (id: string, plano: CreatePlanoRequest): Promise<Plano> => {
-    const response = await api.put(`/Plan/legacy/${id}`, plano);
+    const response = await api.put(`/Plan/legacy`, plano);
     return response.data;
   },
   deleteLegacyPlano: async (id: string): Promise<void> => {

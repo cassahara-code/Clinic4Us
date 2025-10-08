@@ -3,7 +3,6 @@ export interface PlanData {
   name: string;
   description: string;
   price: number;
-  annualPrice: number;
   duration: number;
   maxUsers: number;
   monthlyValue: number;

@@ -16,18 +16,11 @@ import {
 import { Close } from "@mui/icons-material";
 import { colors, typography, inputs } from "../../theme/designSystem";
 import { PlanData } from "../../interfaces/PlanData";
+import { benefitsService } from "../../services/benefitsService";
+import { useQuery } from "@tanstack/react-query";
 
 // Lista de funcionalidades disponíveis
-const AVAILABLE_FEATURES = [
-  "Agenda básica",
-  "Agenda avançada",
-  "Prontuários",
-  "Assinatura digital",
-  "Planos de ação",
-  "Relatórios",
-  "Gestão financeira",
-  "Suporte telefônico",
-];
+// AVAILABLE_FEATURES agora é um estado preenchido pelo backend
 
 // Lista de funcionalidades disponíveis
 // const AVAILABLE_FEATURES = [
@@ -66,7 +59,15 @@ const PlanModal: React.FC<PlanModalProps> = ({
   title,
 }) => {
   // Estado do formulário
-  // Lista de selecionados
+  // Usa react-query para cachear funcionalidades disponíveis
+  const { data: availableFeatures = [] } = useQuery<string[]>({
+    queryKey: ["benefits"],
+    queryFn: async () => {
+      const benefits = await benefitsService.getAll();
+      return benefits.map((b: any) => b.description);
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutos
+  });
   const [selectedFeatures, setSelectedFeatures] = useState<
     { id: string; label: string }[]
   >([]);
@@ -74,20 +75,21 @@ const PlanModal: React.FC<PlanModalProps> = ({
     name: "",
     description: "",
     price: 0,
-    annualPrice: 0,
     duration: 12,
     maxUsers: 1,
     monthlyValue: 0,
     annuallyValue: 0,
-    features: AVAILABLE_FEATURES.map((name) => ({ name, included: false })),
+    features: [],
     status: "Ativo",
     ...initialData,
   });
 
-  // Atualizar form quando initialData mudar
+  // Carrega funcionalidades disponíveis do backend e inicializa features
   useEffect(() => {
+    if (!Array.isArray(availableFeatures) || availableFeatures.length === 0)
+      return;
     if (initialData && Object.keys(initialData).length > 0) {
-      const features = AVAILABLE_FEATURES.map((name) => {
+      const features = availableFeatures.map((name) => {
         const existingFeature = initialData.features?.find((f) =>
           typeof f === "string" ? f === name : f.name === name
         );
@@ -96,14 +98,19 @@ const PlanModal: React.FC<PlanModalProps> = ({
           included: existingFeature ? true : false,
         };
       });
-
       setFormData((prev) => ({
         ...prev,
         ...initialData,
         features,
       }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        features: availableFeatures.map((name) => ({ name, included: false })),
+      }));
     }
-  }, [initialData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableFeatures, initialData]);
 
   // Função para formatar preço
   const formatCurrency = (value: number) => {
@@ -125,12 +132,11 @@ const PlanModal: React.FC<PlanModalProps> = ({
       name: "",
       description: "",
       price: 0,
-      annualPrice: 0,
       duration: 12,
       maxUsers: 1,
       monthlyValue: 0,
       annuallyValue: 0,
-      features: AVAILABLE_FEATURES.map((name) => ({ name, included: false })),
+      features: availableFeatures.map((name) => ({ name, included: false })),
       status: "Ativo",
     });
     onClose();
@@ -139,7 +145,7 @@ const PlanModal: React.FC<PlanModalProps> = ({
   // Salvar dados
   const handleSave = () => {
     // Sincroniza features com selectedFeatures
-    const syncedFeatures = AVAILABLE_FEATURES.map((name) => ({
+    const syncedFeatures = availableFeatures.map((name) => ({
       name,
       included: selectedFeatures.some((f) => f.id === name),
     }));
@@ -407,11 +413,11 @@ const PlanModal: React.FC<PlanModalProps> = ({
             <TextField
               label="Valor anual (R$)"
               fullWidth
-              value={formatCurrency(formData.annualPrice)}
+              value={formatCurrency(formData.annuallyValue)}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  annualPrice: parseCurrency(e.target.value),
+                  annuallyValue: parseCurrency(e.target.value),
                 })
               }
               placeholder="0,00"
@@ -521,16 +527,16 @@ const PlanModal: React.FC<PlanModalProps> = ({
         <Box sx={{ marginBottom: "2rem" }}>
           <Autocomplete
             multiple
-            options={AVAILABLE_FEATURES.map((name) => ({
+            options={availableFeatures.map((name) => ({
               id: name,
               label: name,
             }))}
             value={selectedFeatures}
             onChange={(_, newValue) => {
               setSelectedFeatures(newValue);
-              const updatedFeatures = AVAILABLE_FEATURES.map((name) => ({
+              const updatedFeatures = availableFeatures.map((name: string) => ({
                 name,
-                included: newValue.some((v) => v.id === name),
+                included: newValue.some((v: { id: string }) => v.id === name),
               }));
               setFormData({ ...formData, features: updatedFeatures });
             }}

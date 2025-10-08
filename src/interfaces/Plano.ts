@@ -5,7 +5,7 @@ export interface Plano {
   planTitle: string;
   description: string;
   monthlyValue: number;
-  anualyValue: number;
+  annuallyValue: number;
   createdAt: string;
   updatedAt: string;
   createdBy: string;

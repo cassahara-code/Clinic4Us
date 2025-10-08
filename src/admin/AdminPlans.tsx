@@ -83,7 +83,7 @@ const AdminPlans: React.FC = () => {
           planTitle: plano.planTitle,
           description: plano.description,
           monthlyValue: plano.monthlyValue,
-          anualyValue: plano.anualyValue,
+          annuallyValue: plano.annuallyValue,
           createdAt: plano.createdAt,
           updatedAt: plano.updatedAt,
           createdBy: plano.createdBy,
@@ -290,39 +290,60 @@ const AdminPlans: React.FC = () => {
       covered: f.included,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      createdBy: "system",
-      updatedBy: "system",
+      createdBy: crypto.randomUUID(),
+      updatedBy: crypto.randomUUID(),
     }));
 
     if (planModalMode === "create") {
-      const newPlan: Plano = {
+      const planPayload = {
         id: crypto.randomUUID(),
         planTitle: data.name,
         description: data.description,
+        active: data.status === "Ativo" ? 1 : 0,
         monthlyValue: data.price,
-        anualyValue: data.annualPrice,
+        annuallyValue: data.annuallyValue,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        createdBy: "system",
-        updatedBy: "system",
-        active: data.status === "Ativo" ? 1 : 0,
+        createdBy: crypto.randomUUID(),
+        updatedBy: crypto.randomUUID(),
         plansBenefits: benefits,
       };
-      console.log("Novo plano criado:", newPlan);
-      showToast("Plano criado com sucesso!", "success");
+      planoService
+        .createLegacyPlano(planPayload)
+        .then((createdPlan) => {
+          showToast("Plano criado com sucesso!", "success");
+          setPlans((prev) => [...prev, createdPlan]);
+        })
+        .catch((error) => {
+          showToast("Erro ao criar plano", "error");
+          console.error(error);
+        });
     } else if (planToEdit) {
-      const updatedPlan: Plano = {
-        ...planToEdit,
+      const planPayload = {
+        id: planToEdit.id,
         planTitle: data.name,
         description: data.description,
         monthlyValue: data.price,
-        anualyValue: data.annualPrice,
+        annuallyValue: data.annuallyValue,
+        active: planToEdit.active,
+        createdAt: planToEdit.createdAt,
         updatedAt: new Date().toISOString(),
-        active: data.status === "Ativo" ? 1 : 0,
+        createdBy: planToEdit.createdBy,
+        updatedBy: crypto.randomUUID(),
         plansBenefits: benefits,
       };
-      console.log("Plano editado:", updatedPlan);
-      showToast("Plano editado com sucesso!", "success");
+      planoService
+        .updateLegacyPlano(planToEdit.id, planPayload)
+        .then((updatedPlan) => {
+          showToast("Plano editado com sucesso!", "success");
+          setPlans((prev) =>
+            prev.map((p) => (p.id === updatedPlan.id ? updatedPlan : p))
+          );
+        })
+        .catch((error) => {
+          showToast("Erro ao editar plano", "error");
+          console.error(error);
+        });
     }
     setIsPlanModalOpen(false);
   };
@@ -903,7 +924,7 @@ const AdminPlans: React.FC = () => {
                 name: planToEdit.planTitle,
                 description: planToEdit.description,
                 price: planToEdit.monthlyValue,
-                annualPrice: planToEdit.anualyValue,
+                annuallyValue: planToEdit.annuallyValue,
                 duration: planToEdit.plansBenefits.length,
                 maxUsers: planToEdit.plansBenefits.length,
                 features: planToEdit.plansBenefits.map((b) => ({
