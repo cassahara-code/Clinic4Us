@@ -3,7 +3,7 @@ import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation, useRouter } from "../contexts/RouterContext";
 import { useAuth } from "../contexts/AuthContext";
-import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Check, Warning, MedicalServices, Edit, Delete, Add, FilterAltOff, Close, PriorityHigh, OpenInNew, DateRange, Print, Description, Article, Summarize, ListAlt, FileDownload, ArrowUpward, ArrowDownward } from '@mui/icons-material';
+import { BarChart, CalendarToday, TrendingUp, InsertDriveFile, Person, Assessment, Note, Event, LocalHospital, Assignment, Psychology, Timeline, AttachMoney, LocalPharmacy, Folder, Check, Warning, MedicalServices, Edit, Delete, Add, FilterAltOff, Close, PriorityHigh, OpenInNew, DateRange, Print, Description, Article, Summarize, ListAlt, FileDownload, ArrowUpward, ArrowDownward, ExpandMore } from '@mui/icons-material';
 import { FaqButton } from "../components/FaqButton";
 import PhotoUpload from "../components/PhotoUpload";
 import AppointmentModal, { AppointmentData } from "../components/modals/AppointmentModal";
@@ -302,6 +302,48 @@ const PatientRegister: React.FC = () => {
   const [showAllExpanded, setShowAllExpanded] = useState(false);
   const [evolutionSortOrder, setEvolutionSortOrder] = useState<'asc' | 'desc'>('desc'); // 'desc' = mais recente primeiro
 
+
+  // Estados para aba Financeiro
+  const [financialCompetence, setFinancialCompetence] = useState('OUT/2025');
+  const [financialStartDate, setFinancialStartDate] = useState('01/10/2025');
+  const [financialEndDate, setFinancialEndDate] = useState('31/10/2025');
+  const [financialProfessional, setFinancialProfessional] = useState('');
+  const [financialPaymentDone, setFinancialPaymentDone] = useState('');
+  const [financialSelectedQtd, setFinancialSelectedQtd] = useState(0);
+  const [financialSelectedValue, setFinancialSelectedValue] = useState('0,00');
+  const [financialDiscount, setFinancialDiscount] = useState('');
+  const [financialManualDiscount, setFinancialManualDiscount] = useState('0,00');
+  const [financialDiscountJustification, setFinancialDiscountJustification] = useState('');
+  const [financialTotalValue, setFinancialTotalValue] = useState('0,00');
+  const [financialSectionExpanded, setFinancialSectionExpanded] = useState({
+    pendingPayment: true,
+    healthPlan: false,
+    paymentPeriodicity: false,
+    paymentsRealized: true,
+    serviceDiscounts: true,
+    contracts: false
+  });
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [servicesList] = useState([
+    {
+      id: '1',
+      date: '14/10/2025',
+      type: 'Fonoaudiólogo(a)',
+      service: 'Sessão de Terapia',
+      value: 220.00,
+      discountPackage: 0.00,
+      discountPayment: 0.00,
+      total: 220.00,
+      paymentDate: null
+    }
+  ]);
+  const [paymentsList] = useState([
+    {
+      id: '1',
+      date: '23/09/2025',
+      value: 560.00
+    }
+  ]);
   // Debug: Log quando selectedEvolutionsForPrint mudar
   useEffect(() => {
     console.log('🔄 Estado de seleção atualizado:', selectedEvolutionsForPrint);
@@ -6185,34 +6227,704 @@ const PatientRegister: React.FC = () => {
             {/* Conteúdo da aba Financeiro */}
             {activeTab === 'financeiro' && (
               <div className="tab-content-section">
-                <h3>Financeiro</h3>
-                <div className="financial-section">
-                  <div className="financial-summary">
-                    <div className="financial-card">
-                      <h4>Total Pendente</h4>
-                      <span className="amount pending">R$ 850,00</span>
-                    </div>
-                    <div className="financial-card">
-                      <h4>Total Pago</h4>
-                      <span className="amount paid">R$ 1.200,00</span>
-                    </div>
-                  </div>
-                  <div className="financial-transactions">
-                    <h4>Transações</h4>
-                    <div className="transaction-item">
-                      <div className="transaction-date">22/03/2024</div>
-                      <div className="transaction-description">Consulta Cardiologia</div>
-                      <div className="transaction-amount pending">R$ 200,00</div>
-                      <div className="transaction-status">Pendente</div>
-                    </div>
-                    <div className="transaction-item">
-                      <div className="transaction-date">15/03/2024</div>
-                      <div className="transaction-description">Consulta Inicial</div>
-                      <div className="transaction-amount paid">R$ 200,00</div>
-                      <div className="transaction-status">Pago</div>
-                    </div>
-                  </div>
-                </div>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 3 }}>
+                  {/* Coluna Esquerda - Painéis Colapsáveis */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+
+                    {/* Pendente de pagamento */}
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        border: '1px solid #E0E0E0',
+                        borderRadius: '8px',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          p: 2,
+                          cursor: 'pointer',
+                          bgcolor: financialSectionExpanded.pendingPayment ? '#F8F9FA' : 'white',
+                          borderBottom: financialSectionExpanded.pendingPayment ? '1px solid #E0E0E0' : 'none'
+                        }}
+                        onClick={() => setFinancialSectionExpanded(prev => ({ ...prev, pendingPayment: !prev.pendingPayment }))}
+                      >
+                        <Typography sx={{ fontSize: '0.95rem', fontWeight: 600, color: '#0A2A4A' }}>
+                          Pendente de pagamento: R$ 200,00
+                        </Typography>
+                        <IconButton size="small" sx={{ color: '#03B4C6' }}>
+                          <ExpandMore sx={{
+                            transform: financialSectionExpanded.pendingPayment ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.3s'
+                          }} />
+                        </IconButton>
+                      </Box>
+                      {financialSectionExpanded.pendingPayment && (
+                        <Box sx={{ p: 2 }}>
+                          <Typography sx={{ fontSize: '0.85rem', color: '#E53935', mb: 1 }}>
+                            Pendências de 01/10/2024 até a data atual.
+                          </Typography>
+                          <Typography sx={{ fontSize: '0.85rem', color: '#666', mb: 0.5 }}>
+                            Data último pagamento: 23/09/2025
+                          </Typography>
+                          <Typography sx={{ fontSize: '0.85rem', color: '#666' }}>
+                            Valor último pagamento: R$ 560,00
+                          </Typography>
+                        </Box>
+                      )}
+                    </Paper>
+
+                    {/* Plano de Saúde */}
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        border: '1px solid #E0E0E0',
+                        borderRadius: '8px',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          p: 2,
+                          cursor: 'pointer',
+                          bgcolor: financialSectionExpanded.healthPlan ? '#F8F9FA' : 'white'
+                        }}
+                        onClick={() => setFinancialSectionExpanded(prev => ({ ...prev, healthPlan: !prev.healthPlan }))}
+                      >
+                        <Typography sx={{ fontSize: '0.95rem', fontWeight: 600, color: '#0A2A4A' }}>
+                          Plano de Saúde
+                        </Typography>
+                        <IconButton size="small" sx={{ color: '#03B4C6' }}>
+                          <ExpandMore sx={{
+                            transform: financialSectionExpanded.healthPlan ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.3s'
+                          }} />
+                        </IconButton>
+                      </Box>
+                      {financialSectionExpanded.healthPlan && (
+                        <Box sx={{ p: 2 }}>
+                          <Typography sx={{ fontSize: '0.85rem', color: '#666' }}>
+                            Nenhum plano de saúde cadastrado
+                          </Typography>
+                        </Box>
+                      )}
+                    </Paper>
+
+                    {/* Periodicidade de pagamento */}
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        border: '1px solid #E0E0E0',
+                        borderRadius: '8px',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          p: 2,
+                          cursor: 'pointer',
+                          bgcolor: financialSectionExpanded.paymentPeriodicity ? '#F8F9FA' : 'white'
+                        }}
+                        onClick={() => setFinancialSectionExpanded(prev => ({ ...prev, paymentPeriodicity: !prev.paymentPeriodicity }))}
+                      >
+                        <Typography sx={{ fontSize: '0.95rem', fontWeight: 600, color: '#0A2A4A' }}>
+                          Periodicidade de pagamento
+                        </Typography>
+                        <IconButton size="small" sx={{ color: '#03B4C6' }}>
+                          <ExpandMore sx={{
+                            transform: financialSectionExpanded.paymentPeriodicity ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.3s'
+                          }} />
+                        </IconButton>
+                      </Box>
+                      {financialSectionExpanded.paymentPeriodicity && (
+                        <Box sx={{ p: 2 }}>
+                          <Typography sx={{ fontSize: '0.85rem', color: '#666' }}>
+                            Periodicidade não definida
+                          </Typography>
+                        </Box>
+                      )}
+                    </Paper>
+
+                    {/* Pagamentos realizados */}
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        border: '1px solid #E0E0E0',
+                        borderRadius: '8px',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          p: 2,
+                          cursor: 'pointer',
+                          bgcolor: financialSectionExpanded.paymentsRealized ? '#F8F9FA' : 'white',
+                          borderBottom: financialSectionExpanded.paymentsRealized ? '1px solid #E0E0E0' : 'none'
+                        }}
+                        onClick={() => setFinancialSectionExpanded(prev => ({ ...prev, paymentsRealized: !prev.paymentsRealized }))}
+                      >
+                        <Typography sx={{ fontSize: '0.95rem', fontWeight: 600, color: '#0A2A4A' }}>
+                          Pagamentos realizados
+                        </Typography>
+                        <IconButton size="small" sx={{ color: '#03B4C6' }}>
+                          <ExpandMore sx={{
+                            transform: financialSectionExpanded.paymentsRealized ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.3s'
+                          }} />
+                        </IconButton>
+                      </Box>
+                      {financialSectionExpanded.paymentsRealized && (
+                        <Box sx={{ p: 2 }}>
+                          <Box
+                            sx={{
+                              maxHeight: '150px',
+                              overflowY: 'auto',
+                              '&::-webkit-scrollbar': { width: '8px' },
+                              '&::-webkit-scrollbar-track': { background: '#F1F1F1', borderRadius: '4px' },
+                              '&::-webkit-scrollbar-thumb': { background: '#C1C1C1', borderRadius: '4px' },
+                              '&::-webkit-scrollbar-thumb:hover': { background: '#A8A8A8' }
+                            }}
+                          >
+                            {paymentsList.map((payment) => (
+                              <Box
+                                key={payment.id}
+                                sx={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  py: 1.5,
+                                  borderBottom: '1px solid #F0F0F0',
+                                  '&:last-child': { borderBottom: 'none' }
+                                }}
+                              >
+                                <Typography sx={{ fontSize: '0.85rem', color: '#666' }}>
+                                  {payment.date}
+                                </Typography>
+                                <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: '#0A2A4A' }}>
+                                  R$ {payment.value.toFixed(2).replace('.', ',')}
+                                </Typography>
+                                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                  <Tooltip title="Editar">
+                                    <IconButton size="small" sx={{ color: '#03B4C6' }}>
+                                      <Edit sx={{ fontSize: '1.1rem' }} />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="Excluir">
+                                    <IconButton size="small" sx={{ color: '#E53935' }}>
+                                      <Delete sx={{ fontSize: '1.1rem' }} />
+                                    </IconButton>
+                                  </Tooltip>
+                                  <Tooltip title="Imprimir">
+                                    <IconButton size="small" sx={{ color: '#666' }}>
+                                      <Print sx={{ fontSize: '1.1rem' }} />
+                                    </IconButton>
+                                  </Tooltip>
+                                </Box>
+                              </Box>
+                            ))}
+                          </Box>
+                        </Box>
+                      )}
+                    </Paper>
+
+                    {/* Descontos em serviços */}
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        border: '1px solid #E0E0E0',
+                        borderRadius: '8px',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          p: 2,
+                          cursor: 'pointer',
+                          bgcolor: financialSectionExpanded.serviceDiscounts ? '#F8F9FA' : 'white',
+                          borderBottom: financialSectionExpanded.serviceDiscounts ? '1px solid #E0E0E0' : 'none'
+                        }}
+                        onClick={() => setFinancialSectionExpanded(prev => ({ ...prev, serviceDiscounts: !prev.serviceDiscounts }))}
+                      >
+                        <Typography sx={{ fontSize: '0.95rem', fontWeight: 600, color: '#0A2A4A' }}>
+                          Descontos em serviços
+                        </Typography>
+                        <IconButton size="small" sx={{ color: '#03B4C6' }}>
+                          <ExpandMore sx={{
+                            transform: financialSectionExpanded.serviceDiscounts ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.3s'
+                          }} />
+                        </IconButton>
+                      </Box>
+                      {financialSectionExpanded.serviceDiscounts && (
+                        <Box sx={{ p: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+                            <Button
+                              variant="text"
+                              sx={{
+                                color: '#03B4C6',
+                                textTransform: 'none',
+                                fontSize: '0.85rem',
+                                fontWeight: 500,
+                                '&:hover': { bgcolor: 'rgba(3, 180, 198, 0.08)' }
+                              }}
+                            >
+                              Adicionar
+                            </Button>
+                          </Box>
+                          <Box
+                            sx={{
+                              minHeight: '100px',
+                              maxHeight: '200px',
+                              overflowY: 'auto',
+                              border: '1px solid #E0E0E0',
+                              borderRadius: '4px',
+                              bgcolor: '#FAFAFA',
+                              '&::-webkit-scrollbar': { width: '8px' },
+                              '&::-webkit-scrollbar-track': { background: '#F1F1F1', borderRadius: '4px' },
+                              '&::-webkit-scrollbar-thumb': { background: '#C1C1C1', borderRadius: '4px' },
+                              '&::-webkit-scrollbar-thumb:hover': { background: '#A8A8A8' }
+                            }}
+                          >
+                            <Typography sx={{ fontSize: '0.85rem', color: '#999', p: 2, textAlign: 'center' }}>
+                              Nenhum desconto cadastrado
+                            </Typography>
+                          </Box>
+                        </Box>
+                      )}
+                    </Paper>
+
+                    {/* Contratos */}
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        border: '1px solid #E0E0E0',
+                        borderRadius: '8px',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          p: 2,
+                          cursor: 'pointer',
+                          bgcolor: financialSectionExpanded.contracts ? '#F8F9FA' : 'white'
+                        }}
+                        onClick={() => setFinancialSectionExpanded(prev => ({ ...prev, contracts: !prev.contracts }))}
+                      >
+                        <Typography sx={{ fontSize: '0.95rem', fontWeight: 600, color: '#0A2A4A' }}>
+                          Contratos (Tipo/Validade)
+                        </Typography>
+                        <IconButton size="small" sx={{ color: '#03B4C6' }}>
+                          <ExpandMore sx={{
+                            transform: financialSectionExpanded.contracts ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.3s'
+                          }} />
+                        </IconButton>
+                      </Box>
+                      {financialSectionExpanded.contracts && (
+                        <Box sx={{ p: 2 }}>
+                          <Typography sx={{ fontSize: '0.85rem', color: '#666' }}>
+                            Nenhum contrato cadastrado
+                          </Typography>
+                        </Box>
+                      )}
+                    </Paper>
+
+                  </Box>
+
+                  {/* Coluna Direita - Serviços realizados */}
+                  <Box>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        border: '1px solid #E0E0E0',
+                        borderRadius: '8px',
+                        p: 3
+                      }}
+                    >
+                      <Typography sx={{ fontSize: '1rem', fontWeight: 600, color: '#0A2A4A', mb: 3 }}>
+                        Serviços realizados
+                      </Typography>
+
+                      {/* Filtros */}
+                      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 2, mb: 3 }}>
+                        <TextField
+                          select
+                          label="Competência"
+                          InputLabelProps={{ shrink: true }}
+                          value={financialCompetence}
+                          onChange={(e) => setFinancialCompetence(e.target.value)}
+                          size="small"
+                          fullWidth
+                          sx={{
+                            '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E0E0E0' },
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#03B4C6' },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#03B4C6' }
+                          }}
+                        >
+                          <MenuItem value="OUT/2025">OUT/2025</MenuItem>
+                          <MenuItem value="SET/2025">SET/2025</MenuItem>
+                          <MenuItem value="AGO/2025">AGO/2025</MenuItem>
+                        </TextField>
+
+                        <TextField
+                          type="text"
+                          label="Data inicial"
+                          InputLabelProps={{ shrink: true }}
+                          value={financialStartDate}
+                          onChange={(e) => setFinancialStartDate(e.target.value)}
+                          size="small"
+                          fullWidth
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '& fieldset': { borderColor: '#E0E0E0' },
+                              '&:hover fieldset': { borderColor: '#03B4C6' },
+                              '&.Mui-focused fieldset': { borderColor: '#03B4C6' }
+                            }
+                          }}
+                        />
+
+                        <TextField
+                          type="text"
+                          label="Data final"
+                          InputLabelProps={{ shrink: true }}
+                          value={financialEndDate}
+                          onChange={(e) => setFinancialEndDate(e.target.value)}
+                          size="small"
+                          fullWidth
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              '& fieldset': { borderColor: '#E0E0E0' },
+                              '&:hover fieldset': { borderColor: '#03B4C6' },
+                              '&.Mui-focused fieldset': { borderColor: '#03B4C6' }
+                            }
+                          }}
+                        />
+
+                        <TextField
+                          select
+                          label="Nome do Profissional"
+                          InputLabelProps={{ shrink: true }}
+                          value={financialProfessional}
+                          onChange={(e) => setFinancialProfessional(e.target.value)}
+                          size="small"
+                          fullWidth
+                          SelectProps={{
+                            displayEmpty: true,
+                            renderValue: (value) => {
+                              if (value === "") return "Selecione";
+                              return value as string;
+                            }
+                          }}
+                          sx={{
+                            '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E0E0E0' },
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#03B4C6' },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#03B4C6' }
+                          }}
+                        >
+                          <MenuItem value="">Selecione</MenuItem>
+                          <MenuItem value="prof1">Dr. Silva</MenuItem>
+                          <MenuItem value="prof2">Dra. Santos</MenuItem>
+                        </TextField>
+
+                        <TextField
+                          select
+                          label="Pagamento realizado"
+                          InputLabelProps={{ shrink: true }}
+                          value={financialPaymentDone}
+                          onChange={(e) => setFinancialPaymentDone(e.target.value)}
+                          size="small"
+                          fullWidth
+                          SelectProps={{
+                            displayEmpty: true,
+                            renderValue: (value) => {
+                              if (value === "") return "Selecione";
+                              return value as string;
+                            }
+                          }}
+                          sx={{
+                            '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E0E0E0' },
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#03B4C6' },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#03B4C6' }
+                          }}
+                        >
+                          <MenuItem value="">Não</MenuItem>
+                          <MenuItem value="sim">Sim</MenuItem>
+                        </TextField>
+                      </Box>
+
+                      {/* Dados para pagamento */}
+                      <Box sx={{ mb: 3 }}>
+                        <Typography sx={{ fontSize: '0.95rem', fontWeight: 600, color: '#0A2A4A', mb: 2 }}>
+                          Dados para pagamento
+                        </Typography>
+
+                        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2, mb: 2 }}>
+                          <TextField
+                            type="text"
+                            label="Qtde selecionada"
+                            InputLabelProps={{ shrink: true }}
+                            value={financialSelectedQtd}
+                            size="small"
+                            fullWidth
+                            disabled
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                bgcolor: '#F5F5F5',
+                                '& fieldset': { borderColor: '#E0E0E0' }
+                              }
+                            }}
+                          />
+
+                          <TextField
+                            type="text"
+                            label="Valor selec. (R$)"
+                            InputLabelProps={{ shrink: true }}
+                            value={financialSelectedValue}
+                            size="small"
+                            fullWidth
+                            disabled
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                bgcolor: '#F5F5F5',
+                                '& fieldset': { borderColor: '#E0E0E0' }
+                              }
+                            }}
+                          />
+
+                          <TextField
+                            select
+                            label="Aplicar desconto"
+                            InputLabelProps={{ shrink: true }}
+                            value={financialDiscount}
+                            onChange={(e) => setFinancialDiscount(e.target.value)}
+                            size="small"
+                            fullWidth
+                            SelectProps={{
+                              displayEmpty: true,
+                              renderValue: (value) => {
+                                if (value === "") return "Selecione";
+                                return value as string;
+                              }
+                            }}
+                            sx={{
+                              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E0E0E0' },
+                              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#03B4C6' },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#03B4C6' }
+                            }}
+                          >
+                            <MenuItem value="">Selecione</MenuItem>
+                            <MenuItem value="5">5%</MenuItem>
+                            <MenuItem value="10">10%</MenuItem>
+                            <MenuItem value="15">15%</MenuItem>
+                          </TextField>
+                        </Box>
+
+                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: 2 }}>
+                          <TextField
+                            type="text"
+                            label="Desc. Manual (R$)"
+                            InputLabelProps={{ shrink: true }}
+                            value={financialManualDiscount}
+                            onChange={(e) => setFinancialManualDiscount(e.target.value)}
+                            size="small"
+                            fullWidth
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#E0E0E0' },
+                                '&:hover fieldset': { borderColor: '#03B4C6' },
+                                '&.Mui-focused fieldset': { borderColor: '#03B4C6' }
+                              }
+                            }}
+                          />
+
+                          <TextField
+                            type="text"
+                            label="Valor total (R$)"
+                            InputLabelProps={{ shrink: true }}
+                            value={financialTotalValue}
+                            size="small"
+                            fullWidth
+                            disabled
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                bgcolor: '#F5F5F5',
+                                '& fieldset': { borderColor: '#E0E0E0' }
+                              }
+                            }}
+                          />
+
+                          <TextField
+                            type="text"
+                            label="Justificativa do Desconto Manual"
+                            InputLabelProps={{ shrink: true }}
+                            value={financialDiscountJustification}
+                            onChange={(e) => setFinancialDiscountJustification(e.target.value)}
+                            size="small"
+                            fullWidth
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                '& fieldset': { borderColor: '#E0E0E0' },
+                                '&:hover fieldset': { borderColor: '#03B4C6' },
+                                '&.Mui-focused fieldset': { borderColor: '#03B4C6' }
+                              }
+                            }}
+                          />
+                        </Box>
+
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                          <Button
+                            variant="contained"
+                            sx={{
+                              bgcolor: '#9E9E9E',
+                              color: 'white',
+                              textTransform: 'none',
+                              borderRadius: '8px',
+                              px: 3,
+                              '&:hover': { bgcolor: '#757575' }
+                            }}
+                          >
+                            Pagamento
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            sx={{
+                              borderColor: '#E0E0E0',
+                              color: '#666',
+                              textTransform: 'none',
+                              borderRadius: '8px',
+                              px: 3,
+                              '&:hover': {
+                                borderColor: '#03B4C6',
+                                bgcolor: 'rgba(3, 180, 198, 0.04)'
+                              }
+                            }}
+                          >
+                            Limpar
+                          </Button>
+                        </Box>
+                      </Box>
+
+                      {/* Tabela de serviços */}
+                      <Box>
+                        <Typography sx={{ fontSize: '0.85rem', color: '#666', mb: 2 }}>
+                          Selecione os atendimentos abaixo para visualizar o valor para pagamento.
+                        </Typography>
+
+                        <Box
+                          sx={{
+                            border: '1px solid #E0E0E0',
+                            borderRadius: '8px',
+                            overflow: 'hidden'
+                          }}
+                        >
+                          {/* Cabeçalho da tabela */}
+                          <Box
+                            sx={{
+                              display: 'grid',
+                              gridTemplateColumns: '100px 120px 1fr 100px 100px 100px 100px 100px 50px',
+                              bgcolor: '#F8F9FA',
+                              borderBottom: '1px solid #E0E0E0',
+                              '& > div': {
+                                p: 1.5,
+                                fontSize: '0.8rem',
+                                fontWeight: 600,
+                                color: '#666'
+                              }
+                            }}
+                          >
+                            <Box>Data</Box>
+                            <Box>Tipo - Serviço</Box>
+                            <Box></Box>
+                            <Box>Valor (R$)</Box>
+                            <Box>D. Pac...</Box>
+                            <Box>D. Pag...</Box>
+                            <Box>Total (R$)</Box>
+                            <Box>Data pag.</Box>
+                            <Box></Box>
+                          </Box>
+
+                          {/* Corpo da tabela com scroll */}
+                          <Box
+                            sx={{
+                              maxHeight: '300px',
+                              overflowY: 'auto',
+                              '&::-webkit-scrollbar': { width: '8px' },
+                              '&::-webkit-scrollbar-track': { background: '#F1F1F1' },
+                              '&::-webkit-scrollbar-thumb': { background: '#C1C1C1', borderRadius: '4px' },
+                              '&::-webkit-scrollbar-thumb:hover': { background: '#A8A8A8' }
+                            }}
+                          >
+                            {servicesList.map((service) => (
+                              <Box
+                                key={service.id}
+                                sx={{
+                                  display: 'grid',
+                                  gridTemplateColumns: '100px 120px 1fr 100px 100px 100px 100px 100px 50px',
+                                  borderBottom: '1px solid #F0F0F0',
+                                  '&:last-child': { borderBottom: 'none' },
+                                  '&:hover': { bgcolor: '#FAFAFA' },
+                                  '& > div': {
+                                    p: 1.5,
+                                    fontSize: '0.8rem',
+                                    color: '#333',
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                  }
+                                }}
+                              >
+                                <Box>{service.date}</Box>
+                                <Box>{service.type}</Box>
+                                <Box>{service.service}</Box>
+                                <Box>{service.value.toFixed(2).replace('.', ',')}</Box>
+                                <Box>{service.discountPackage.toFixed(2).replace('.', ',')}</Box>
+                                <Box>{service.discountPayment.toFixed(2).replace('.', ',')}</Box>
+                                <Box>{service.total.toFixed(2).replace('.', ',')}</Box>
+                                <Box>{service.paymentDate || '-'}</Box>
+                                <Box sx={{ justifyContent: 'center' }}>
+                                  <Checkbox
+                                    size="small"
+                                    checked={selectedServices.includes(service.id)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedServices(prev => [...prev, service.id]);
+                                      } else {
+                                        setSelectedServices(prev => prev.filter(id => id !== service.id));
+                                      }
+                                    }}
+                                    sx={{
+                                      color: '#03B4C6',
+                                      '&.Mui-checked': { color: '#03B4C6' }
+                                    }}
+                                  />
+                                </Box>
+                              </Box>
+                            ))}
+                          </Box>
+                        </Box>
+                      </Box>
+
+                    </Paper>
+                  </Box>
+                </Box>
               </div>
             )}
 
