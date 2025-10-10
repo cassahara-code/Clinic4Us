@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation, useRouter } from "../contexts/RouterContext";
@@ -305,8 +305,8 @@ const PatientRegister: React.FC = () => {
 
   // Estados para aba Financeiro
   const [financialCompetence, setFinancialCompetence] = useState('OUT/2025');
-  const [financialStartDate, setFinancialStartDate] = useState('01/10/2025');
-  const [financialEndDate, setFinancialEndDate] = useState('31/10/2025');
+  const [financialStartDate, setFinancialStartDate] = useState('2025-10-01');
+  const [financialEndDate, setFinancialEndDate] = useState('2025-10-31');
   const [financialProfessional, setFinancialProfessional] = useState('');
   const [financialPaymentDone, setFinancialPaymentDone] = useState('');
   const [financialSelectedQtd, setFinancialSelectedQtd] = useState(0);
@@ -324,9 +324,54 @@ const PatientRegister: React.FC = () => {
     contracts: false
   });
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [selectedPayments, setSelectedPayments] = useState<string[]>([]);
   const [servicesList] = useState([
     {
       id: '1',
+      date: '01/10/2025',
+      type: 'Fonoaudiólogo(a)',
+      service: 'Sessão de Terapia',
+      value: 220.00,
+      discountPackage: 0.00,
+      discountPayment: 0.00,
+      total: 220.00,
+      paymentDate: null
+    },
+    {
+      id: '2',
+      date: '03/10/2025',
+      type: 'Psicólogo(a)',
+      service: 'Consulta Inicial',
+      value: 180.00,
+      discountPackage: 10.00,
+      discountPayment: 5.00,
+      total: 165.00,
+      paymentDate: null
+    },
+    {
+      id: '3',
+      date: '07/10/2025',
+      type: 'Fonoaudiólogo(a)',
+      service: 'Sessão de Terapia',
+      value: 220.00,
+      discountPackage: 0.00,
+      discountPayment: 0.00,
+      total: 220.00,
+      paymentDate: null
+    },
+    {
+      id: '4',
+      date: '10/10/2025',
+      type: 'Fisioterapeuta',
+      service: 'Avaliação Fisioterapêutica',
+      value: 200.00,
+      discountPackage: 0.00,
+      discountPayment: 10.00,
+      total: 190.00,
+      paymentDate: null
+    },
+    {
+      id: '5',
       date: '14/10/2025',
       type: 'Fonoaudiólogo(a)',
       service: 'Sessão de Terapia',
@@ -335,6 +380,94 @@ const PatientRegister: React.FC = () => {
       discountPayment: 0.00,
       total: 220.00,
       paymentDate: null
+    },
+    {
+      id: '6',
+      date: '17/10/2025',
+      type: 'Psicólogo(a)',
+      service: 'Sessão de Psicoterapia',
+      value: 180.00,
+      discountPackage: 10.00,
+      discountPayment: 0.00,
+      total: 170.00,
+      paymentDate: null
+    },
+    {
+      id: '7',
+      date: '21/10/2025',
+      type: 'Fonoaudiólogo(a)',
+      service: 'Sessão de Terapia',
+      value: 220.00,
+      discountPackage: 0.00,
+      discountPayment: 0.00,
+      total: 220.00,
+      paymentDate: null
+    },
+    {
+      id: '8',
+      date: '24/10/2025',
+      type: 'Terapeuta Ocupacional',
+      service: 'Avaliação de TO',
+      value: 210.00,
+      discountPackage: 0.00,
+      discountPayment: 15.00,
+      total: 195.00,
+      paymentDate: null
+    },
+    {
+      id: '9',
+      date: '28/10/2025',
+      type: 'Fonoaudiólogo(a)',
+      service: 'Sessão de Terapia',
+      value: 220.00,
+      discountPackage: 0.00,
+      discountPayment: 0.00,
+      total: 220.00,
+      paymentDate: null
+    },
+    {
+      id: '10',
+      date: '31/10/2025',
+      type: 'Psicólogo(a)',
+      service: 'Sessão de Psicoterapia',
+      value: 180.00,
+      discountPackage: 10.00,
+      discountPayment: 5.00,
+      total: 165.00,
+      paymentDate: null
+    },
+    {
+      id: '11',
+      date: '02/09/2025',
+      type: 'Nutricionista',
+      service: 'Consulta Nutricional',
+      value: 160.00,
+      discountPackage: 0.00,
+      discountPayment: 0.00,
+      total: 160.00,
+      paymentDate: '15/09/2025'
+    },
+    {
+      id: '12',
+      date: '05/09/2025',
+      type: 'Fonoaudiólogo(a)',
+      service: 'Sessão de Terapia',
+      value: 220.00,
+      discountPackage: 0.00,
+      discountPayment: 0.00,
+      total: 220.00,
+      paymentDate: '23/09/2025'
+    },
+    {
+      id: '13',
+      date: '09/09/2025',
+      type: 'Fisioterapeuta',
+      service: 'Sessão de Fisioterapia',
+      value: 190.00,
+      discountPackage: 0.00,
+      discountPayment: 10.00,
+      total: 180.00,
+      paymentDate: '23/09/2025'
     }
   ]);
   const [paymentsList] = useState([
@@ -342,6 +475,82 @@ const PatientRegister: React.FC = () => {
       id: '1',
       date: '23/09/2025',
       value: 560.00
+    },
+    {
+      id: '2',
+      date: '15/09/2025',
+      value: 160.00
+    },
+    {
+      id: '3',
+      date: '30/08/2025',
+      value: 880.00
+    },
+    {
+      id: '4',
+      date: '15/08/2025',
+      value: 750.00
+    },
+    {
+      id: '5',
+      date: '31/07/2025',
+      value: 920.00
+    },
+    {
+      id: '6',
+      date: '20/07/2025',
+      value: 440.00
+    },
+    {
+      id: '7',
+      date: '28/06/2025',
+      value: 1100.00
+    },
+    {
+      id: '8',
+      date: '15/06/2025',
+      value: 665.00
+    }
+  ]);
+
+  // Lista mockada de descontos cadastrados na base de dados
+  // TODO: Substituir por chamada à API para buscar descontos cadastrados
+  const [availableDiscounts] = useState([
+    {
+      id: '1',
+      name: 'Desconto Pacote 4 Sessões',
+      percentage: 5,
+      description: 'Desconto para pagamento de 4 sessões'
+    },
+    {
+      id: '2',
+      name: 'Desconto Pacote 8 Sessões',
+      percentage: 10,
+      description: 'Desconto para pagamento de 8 sessões'
+    },
+    {
+      id: '3',
+      name: 'Desconto Pacote 12 Sessões',
+      percentage: 15,
+      description: 'Desconto para pagamento de 12 sessões'
+    },
+    {
+      id: '4',
+      name: 'Desconto Pagamento Antecipado',
+      percentage: 7,
+      description: 'Desconto para pagamento antecipado do mês'
+    },
+    {
+      id: '5',
+      name: 'Desconto Família',
+      percentage: 20,
+      description: 'Desconto para múltiplos membros da família'
+    },
+    {
+      id: '6',
+      name: 'Desconto Social',
+      percentage: 30,
+      description: 'Desconto para pacientes em situação de vulnerabilidade social'
     }
   ]);
   // Debug: Log quando selectedEvolutionsForPrint mudar
@@ -353,6 +562,93 @@ const PatientRegister: React.FC = () => {
   useEffect(() => {
     console.log('📖 Expandir todos alterado:', showAllExpanded);
   }, [showAllExpanded]);
+
+  // Lista de serviços com desconto aplicado (computada)
+  const servicesListWithDiscount = useMemo(() => {
+    if (financialDiscount && selectedServices.length > 0) {
+      const selectedDiscount = availableDiscounts.find(d => d.id === financialDiscount);
+      if (selectedDiscount) {
+        return servicesList.map(service => {
+          if (selectedServices.includes(service.id)) {
+            const discountValue = (service.value * selectedDiscount.percentage) / 100;
+            const newTotal = service.value - service.discountPackage - discountValue;
+            return {
+              ...service,
+              discountPayment: discountValue,
+              total: newTotal
+            };
+          }
+          return service;
+        });
+      }
+    }
+    return servicesList;
+  }, [financialDiscount, selectedServices, availableDiscounts, servicesList]);
+
+  // Função para filtrar serviços realizados
+  const filteredServicesList = useMemo(() => {
+    return servicesListWithDiscount.filter(service => {
+      // Filtro por data inicial
+      if (financialStartDate) {
+        const [dayService, monthService, yearService] = service.date.split('/');
+        const serviceDate = new Date(parseInt(yearService), parseInt(monthService) - 1, parseInt(dayService));
+        const startDate = new Date(financialStartDate);
+        if (serviceDate < startDate) return false;
+      }
+
+      // Filtro por data final
+      if (financialEndDate) {
+        const [dayService, monthService, yearService] = service.date.split('/');
+        const serviceDate = new Date(parseInt(yearService), parseInt(monthService) - 1, parseInt(dayService));
+        const endDate = new Date(financialEndDate);
+        if (serviceDate > endDate) return false;
+      }
+
+      // Filtro por profissional
+      if (financialProfessional && !service.type.toLowerCase().includes(financialProfessional.toLowerCase())) {
+        return false;
+      }
+
+      // Filtro por status de pagamento
+      if (financialPaymentDone === 'Sim' && !service.paymentDate) return false;
+      if (financialPaymentDone === 'Não' && service.paymentDate) return false;
+
+      return true;
+    });
+  }, [servicesListWithDiscount, financialStartDate, financialEndDate, financialProfessional, financialPaymentDone]);
+
+  // Funções para gerenciar seleção de serviços
+  const handleToggleServiceSelection = (serviceId: string) => {
+    setSelectedServices(prev => {
+      const isSelected = prev.includes(serviceId);
+      if (isSelected) {
+        return prev.filter(id => id !== serviceId);
+      } else {
+        return [...prev, serviceId];
+      }
+    });
+  };
+
+  const handleSelectAllServices = () => {
+    const filteredIds = filteredServicesList.map(s => s.id);
+    const allCurrentSelected = filteredIds.length > 0 && filteredIds.every(id => selectedServices.includes(id));
+
+    if (allCurrentSelected) {
+      // Desmarcar todos os itens filtrados
+      setSelectedServices(prev => prev.filter(id => !filteredIds.includes(id)));
+    } else {
+      // Marcar todos os itens filtrados
+      setSelectedServices(prev => {
+        const allIds = new Set([...prev, ...filteredIds]);
+        return Array.from(allIds);
+      });
+    }
+  };
+
+  // Verificar se todos os itens filtrados estão selecionados
+  const filteredServiceIds = filteredServicesList.map(s => s.id);
+  const isAllServicesSelected = filteredServicesList.length > 0 && filteredServiceIds.every(id => selectedServices.includes(id));
+  const isSomeServicesSelected = filteredServicesList.length > 0 && filteredServiceIds.some(id => selectedServices.includes(id)) && !isAllServicesSelected;
 
   // Lista mock de avaliações
   const [evaluationsList, setEvaluationsList] = useState([
@@ -6390,7 +6686,7 @@ const PatientRegister: React.FC = () => {
                         <Box sx={{ p: 2 }}>
                           <Box
                             sx={{
-                              maxHeight: '150px',
+                              maxHeight: '650px',
                               overflowY: 'auto',
                               '&::-webkit-scrollbar': { width: '8px' },
                               '&::-webkit-scrollbar-track': { background: '#F1F1F1', borderRadius: '4px' },
@@ -6586,7 +6882,7 @@ const PatientRegister: React.FC = () => {
                         </TextField>
 
                         <TextField
-                          type="text"
+                          type="date"
                           label="Data inicial"
                           InputLabelProps={{ shrink: true }}
                           value={financialStartDate}
@@ -6603,7 +6899,7 @@ const PatientRegister: React.FC = () => {
                         />
 
                         <TextField
-                          type="text"
+                          type="date"
                           label="Data final"
                           InputLabelProps={{ shrink: true }}
                           value={financialEndDate}
@@ -6679,6 +6975,87 @@ const PatientRegister: React.FC = () => {
 
                         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2, mb: 2 }}>
                           <TextField
+                            select
+                            label="Aplicar desconto"
+                            InputLabelProps={{ shrink: true }}
+                            value={financialDiscount}
+                            onChange={(e) => setFinancialDiscount(e.target.value)}
+                            size="small"
+                            fullWidth
+                            disabled={financialManualDiscount !== '0,00' || financialDiscountJustification !== ''}
+                            SelectProps={{
+                              displayEmpty: true,
+                              renderValue: (value) => {
+                                if (value === "") return "Selecione";
+                                const selectedDiscount = availableDiscounts.find(d => d.id === value);
+                                return selectedDiscount ? `${selectedDiscount.name} (${selectedDiscount.percentage}%)` : value as string;
+                              }
+                            }}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                bgcolor: (financialManualDiscount !== '0,00' || financialDiscountJustification !== '') ? '#F5F5F5' : 'white'
+                              },
+                              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E0E0E0' },
+                              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: (financialManualDiscount !== '0,00' || financialDiscountJustification !== '') ? '#E0E0E0' : '#03B4C6' },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#03B4C6' }
+                            }}
+                          >
+                            <MenuItem value="">Selecione</MenuItem>
+                            {availableDiscounts.map((discount) => (
+                              <MenuItem key={discount.id} value={discount.id}>
+                                {discount.name} ({discount.percentage}%)
+                              </MenuItem>
+                            ))}
+                          </TextField>
+
+                          <TextField
+                            type="text"
+                            label="Desc. Manual (R$)"
+                            InputLabelProps={{ shrink: true }}
+                            value={financialManualDiscount}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              // Permite apenas números, vírgula e ponto
+                              const regex = /^[0-9]*[,.]?[0-9]{0,2}$/;
+                              if (regex.test(value) || value === '') {
+                                setFinancialManualDiscount(value);
+                              }
+                            }}
+                            size="small"
+                            fullWidth
+                            disabled={financialDiscount !== ''}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                bgcolor: financialDiscount !== '' ? '#F5F5F5' : 'white',
+                                '& fieldset': { borderColor: '#E0E0E0' },
+                                '&:hover fieldset': { borderColor: financialDiscount !== '' ? '#E0E0E0' : '#03B4C6' },
+                                '&.Mui-focused fieldset': { borderColor: '#03B4C6' }
+                              }
+                            }}
+                          />
+
+                          <TextField
+                            type="text"
+                            label="Justificativa do Desconto Manual"
+                            InputLabelProps={{ shrink: true }}
+                            value={financialDiscountJustification}
+                            onChange={(e) => setFinancialDiscountJustification(e.target.value)}
+                            size="small"
+                            fullWidth
+                            disabled={financialDiscount !== ''}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                bgcolor: financialDiscount !== '' ? '#F5F5F5' : 'white',
+                                '& fieldset': { borderColor: '#E0E0E0' },
+                                '&:hover fieldset': { borderColor: financialDiscount !== '' ? '#E0E0E0' : '#03B4C6' },
+                                '&.Mui-focused fieldset': { borderColor: '#03B4C6' }
+                              }
+                            }}
+                          />
+                        </Box>
+
+                        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
+                          <TextField
                             type="text"
                             label="Qtde selecionada"
                             InputLabelProps={{ shrink: true }}
@@ -6711,52 +7088,6 @@ const PatientRegister: React.FC = () => {
                           />
 
                           <TextField
-                            select
-                            label="Aplicar desconto"
-                            InputLabelProps={{ shrink: true }}
-                            value={financialDiscount}
-                            onChange={(e) => setFinancialDiscount(e.target.value)}
-                            size="small"
-                            fullWidth
-                            SelectProps={{
-                              displayEmpty: true,
-                              renderValue: (value) => {
-                                if (value === "") return "Selecione";
-                                return value as string;
-                              }
-                            }}
-                            sx={{
-                              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E0E0E0' },
-                              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#03B4C6' },
-                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#03B4C6' }
-                            }}
-                          >
-                            <MenuItem value="">Selecione</MenuItem>
-                            <MenuItem value="5">5%</MenuItem>
-                            <MenuItem value="10">10%</MenuItem>
-                            <MenuItem value="15">15%</MenuItem>
-                          </TextField>
-                        </Box>
-
-                        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: 2 }}>
-                          <TextField
-                            type="text"
-                            label="Desc. Manual (R$)"
-                            InputLabelProps={{ shrink: true }}
-                            value={financialManualDiscount}
-                            onChange={(e) => setFinancialManualDiscount(e.target.value)}
-                            size="small"
-                            fullWidth
-                            sx={{
-                              '& .MuiOutlinedInput-root': {
-                                '& fieldset': { borderColor: '#E0E0E0' },
-                                '&:hover fieldset': { borderColor: '#03B4C6' },
-                                '&.Mui-focused fieldset': { borderColor: '#03B4C6' }
-                              }
-                            }}
-                          />
-
-                          <TextField
                             type="text"
                             label="Valor total (R$)"
                             InputLabelProps={{ shrink: true }}
@@ -6768,23 +7099,6 @@ const PatientRegister: React.FC = () => {
                               '& .MuiOutlinedInput-root': {
                                 bgcolor: '#F5F5F5',
                                 '& fieldset': { borderColor: '#E0E0E0' }
-                              }
-                            }}
-                          />
-
-                          <TextField
-                            type="text"
-                            label="Justificativa do Desconto Manual"
-                            InputLabelProps={{ shrink: true }}
-                            value={financialDiscountJustification}
-                            onChange={(e) => setFinancialDiscountJustification(e.target.value)}
-                            size="small"
-                            fullWidth
-                            sx={{
-                              '& .MuiOutlinedInput-root': {
-                                '& fieldset': { borderColor: '#E0E0E0' },
-                                '&:hover fieldset': { borderColor: '#03B4C6' },
-                                '&.Mui-focused fieldset': { borderColor: '#03B4C6' }
                               }
                             }}
                           />
@@ -6825,9 +7139,55 @@ const PatientRegister: React.FC = () => {
 
                       {/* Tabela de serviços */}
                       <Box>
-                        <Typography sx={{ fontSize: '0.85rem', color: '#666', mb: 2 }}>
-                          Selecione os atendimentos abaixo para visualizar o valor para pagamento.
-                        </Typography>
+                        <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Typography sx={{ fontSize: '0.85rem', color: '#666' }}>
+                            Selecione os atendimentos abaixo para visualizar o valor para pagamento.
+                          </Typography>
+
+                          {/* Checkbox Selecionar Todos */}
+                          <Box
+                            onClick={handleSelectAllServices}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              cursor: 'pointer',
+                              userSelect: 'none',
+                              '&:hover': {
+                                opacity: 0.8
+                              }
+                            }}
+                          >
+                            <Checkbox
+                              checked={isAllServicesSelected}
+                              indeterminate={isSomeServicesSelected}
+                              onChange={() => {}}
+                              onClick={(e) => e.preventDefault()}
+                              disabled={filteredServicesList.length === 0}
+                              sx={{
+                                color: '#03B4C6',
+                                '&.Mui-checked': { color: '#03B4C6' },
+                                '&.MuiCheckbox-indeterminate': { color: '#03B4C6' },
+                                padding: '9px',
+                                '& .MuiSvgIcon-root': {
+                                  fontSize: '1.5rem'
+                                },
+                                pointerEvents: 'none'
+                              }}
+                            />
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontSize: '0.875rem',
+                                color: '#666',
+                                userSelect: 'none',
+                                ml: -0.5,
+                                pointerEvents: 'none'
+                              }}
+                            >
+                              Selecionar todos
+                            </Typography>
+                          </Box>
+                        </Box>
 
                         <Box
                           sx={{
@@ -6847,25 +7207,27 @@ const PatientRegister: React.FC = () => {
                                 p: 1.5,
                                 fontSize: '0.8rem',
                                 fontWeight: 600,
-                                color: '#666'
+                                color: '#666',
+                                display: 'flex',
+                                alignItems: 'center'
                               }
                             }}
                           >
                             <Box>Data</Box>
                             <Box>Tipo - Serviço</Box>
                             <Box></Box>
-                            <Box>Valor (R$)</Box>
-                            <Box>D. Pac...</Box>
-                            <Box>D. Pag...</Box>
-                            <Box>Total (R$)</Box>
-                            <Box>Data pag.</Box>
+                            <Box sx={{ justifyContent: 'flex-end' }}>Valor (R$)</Box>
+                            <Box sx={{ justifyContent: 'flex-end' }}>D. Pac...</Box>
+                            <Box sx={{ justifyContent: 'flex-end' }}>D. Pag...</Box>
+                            <Box sx={{ justifyContent: 'flex-end' }}>Total (R$)</Box>
+                            <Box sx={{ justifyContent: 'flex-end' }}>Data pag.</Box>
                             <Box></Box>
                           </Box>
 
                           {/* Corpo da tabela com scroll */}
                           <Box
                             sx={{
-                              maxHeight: '300px',
+                              maxHeight: '800px',
                               overflowY: 'auto',
                               '&::-webkit-scrollbar': { width: '8px' },
                               '&::-webkit-scrollbar-track': { background: '#F1F1F1' },
@@ -6873,7 +7235,7 @@ const PatientRegister: React.FC = () => {
                               '&::-webkit-scrollbar-thumb:hover': { background: '#A8A8A8' }
                             }}
                           >
-                            {servicesList.map((service) => (
+                            {filteredServicesList.map((service) => (
                               <Box
                                 key={service.id}
                                 sx={{
@@ -6892,27 +7254,32 @@ const PatientRegister: React.FC = () => {
                                 }}
                               >
                                 <Box>{service.date}</Box>
-                                <Box>{service.type}</Box>
-                                <Box>{service.service}</Box>
-                                <Box>{service.value.toFixed(2).replace('.', ',')}</Box>
-                                <Box>{service.discountPackage.toFixed(2).replace('.', ',')}</Box>
-                                <Box>{service.discountPayment.toFixed(2).replace('.', ',')}</Box>
-                                <Box>{service.total.toFixed(2).replace('.', ',')}</Box>
-                                <Box>{service.paymentDate || '-'}</Box>
-                                <Box sx={{ justifyContent: 'center' }}>
+                                <Box sx={{ whiteSpace: 'nowrap' }}>{service.type} - {service.service}</Box>
+                                <Box></Box>
+                                <Box sx={{ justifyContent: 'flex-end' }}>{service.value.toFixed(2).replace('.', ',')}</Box>
+                                <Box sx={{ justifyContent: 'flex-end' }}>{service.discountPackage.toFixed(2).replace('.', ',')}</Box>
+                                <Box sx={{ justifyContent: 'flex-end' }}>{service.discountPayment.toFixed(2).replace('.', ',')}</Box>
+                                <Box sx={{ justifyContent: 'flex-end' }}>{service.total.toFixed(2).replace('.', ',')}</Box>
+                                <Box sx={{ justifyContent: 'flex-end' }}>{service.paymentDate || '-'}</Box>
+                                <Box
+                                  onClick={() => handleToggleServiceSelection(service.id)}
+                                  sx={{
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      bgcolor: 'rgba(3, 180, 198, 0.08)'
+                                    }
+                                  }}
+                                >
                                   <Checkbox
                                     size="small"
                                     checked={selectedServices.includes(service.id)}
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        setSelectedServices(prev => [...prev, service.id]);
-                                      } else {
-                                        setSelectedServices(prev => prev.filter(id => id !== service.id));
-                                      }
-                                    }}
+                                    onChange={() => {}}
+                                    onClick={(e) => e.preventDefault()}
                                     sx={{
                                       color: '#03B4C6',
-                                      '&.Mui-checked': { color: '#03B4C6' }
+                                      '&.Mui-checked': { color: '#03B4C6' },
+                                      pointerEvents: 'none'
                                     }}
                                   />
                                 </Box>
