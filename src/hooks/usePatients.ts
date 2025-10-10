@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Patient } from '../types';
+import { Patient } from '../interfaces/Patient';
 
 const mockPatients: Patient[] = [
   { id: 1, name: 'Maria Silva', email: 'maria@email.com', phone: '(11) 99999-9999' },

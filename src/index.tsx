@@ -1,5 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+// import App from "./App";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
 import "./global.css";
 import reportWebVitals from "./reportWebVitals";
@@ -42,13 +44,13 @@ const globalTheme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          '&:not(.MuiInputBase-multiline)': {
+          "&:not(.MuiInputBase-multiline)": {
             height: inputs.default.height,
           },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
+          "&:hover .MuiOutlinedInput-notchedOutline": {
             borderColor: inputs.default.focus.borderColor,
           },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
             borderColor: inputs.default.focus.borderColor,
             boxShadow: inputs.default.focus.boxShadow,
           },
@@ -58,7 +60,7 @@ const globalTheme = createTheme({
     MuiInputLabel: {
       styleOverrides: {
         root: {
-          '&.Mui-focused': {
+          "&.Mui-focused": {
             color: inputs.default.focus.labelColor,
           },
         },
@@ -67,20 +69,20 @@ const globalTheme = createTheme({
     MuiSelect: {
       styleOverrides: {
         select: {
-          '&:focus': {
-            backgroundColor: 'transparent',
+          "&:focus": {
+            backgroundColor: "transparent",
           },
-          '&.Mui-disabled': {
+          "&.Mui-disabled": {
             WebkitTextFillColor: inputs.default.textColor,
             opacity: 0.6,
-            '& + .MuiSelect-nativeInput': {
-              display: 'none',
+            "& + .MuiSelect-nativeInput": {
+              display: "none",
             },
           },
         },
         nativeInput: {
-          '&:disabled': {
-            display: 'none',
+          "&:disabled": {
+            display: "none",
           },
         },
       },
@@ -88,7 +90,7 @@ const globalTheme = createTheme({
     MuiMenuItem: {
       styleOverrides: {
         root: {
-          '&.Mui-selected.Mui-disabled': {
+          "&.Mui-selected.Mui-disabled": {
             opacity: 1,
           },
         },
@@ -97,6 +99,8 @@ const globalTheme = createTheme({
   },
 });
 
+const queryClient = new QueryClient();
+
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
@@ -104,14 +108,16 @@ const root = ReactDOM.createRoot(
 // Função auxiliar para renderizar a página de impressão
 const renderTherapyPlanPrint = () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const planData = urlParams.get('planData');
-  const patientData = urlParams.get('patientData');
+  const planData = urlParams.get("planData");
+  const patientData = urlParams.get("patientData");
 
   if (planData && patientData) {
-    return <TherapyPlanPrint
-      plan={JSON.parse(decodeURIComponent(planData))}
-      patient={JSON.parse(decodeURIComponent(patientData))}
-    />;
+    return (
+      <TherapyPlanPrint
+        plan={JSON.parse(decodeURIComponent(planData))}
+        patient={JSON.parse(decodeURIComponent(patientData))}
+      />
+    );
   }
   return <Login />;
 };
@@ -119,16 +125,18 @@ const renderTherapyPlanPrint = () => {
 // Função auxiliar para renderizar o relatório de período
 const renderPeriodReportPrint = () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const patientData = urlParams.get('patientData');
-  const periodData = urlParams.get('periodData');
-  const plansData = urlParams.get('plansData');
+  const patientData = urlParams.get("patientData");
+  const periodData = urlParams.get("periodData");
+  const plansData = urlParams.get("plansData");
 
   if (patientData && periodData && plansData) {
-    return <PeriodReportPrint
-      patient={JSON.parse(decodeURIComponent(patientData))}
-      period={JSON.parse(decodeURIComponent(periodData))}
-      plans={JSON.parse(decodeURIComponent(plansData))}
-    />;
+    return (
+      <PeriodReportPrint
+        patient={JSON.parse(decodeURIComponent(patientData))}
+        period={JSON.parse(decodeURIComponent(periodData))}
+        plans={JSON.parse(decodeURIComponent(plansData))}
+      />
+    );
   }
   return <Login />;
 };
@@ -136,16 +144,18 @@ const renderPeriodReportPrint = () => {
 // Função auxiliar para renderizar o relatório detalhado de período
 const renderDetailedPeriodReportPrint = () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const patientData = urlParams.get('patientData');
-  const periodData = urlParams.get('periodData');
-  const plansData = urlParams.get('plansData');
+  const patientData = urlParams.get("patientData");
+  const periodData = urlParams.get("periodData");
+  const plansData = urlParams.get("plansData");
 
   if (patientData && periodData && plansData) {
-    return <DetailedPeriodReportPrint
-      patient={JSON.parse(decodeURIComponent(patientData))}
-      period={JSON.parse(decodeURIComponent(periodData))}
-      plans={JSON.parse(decodeURIComponent(plansData))}
-    />;
+    return (
+      <DetailedPeriodReportPrint
+        patient={JSON.parse(decodeURIComponent(patientData))}
+        period={JSON.parse(decodeURIComponent(periodData))}
+        plans={JSON.parse(decodeURIComponent(plansData))}
+      />
+    );
   }
   return <Login />;
 };
@@ -153,14 +163,16 @@ const renderDetailedPeriodReportPrint = () => {
 // Função auxiliar para renderizar a impressão de avaliação
 const renderEvaluationPrint = () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const patientData = urlParams.get('patientData');
-  const evaluationData = urlParams.get('evaluationData');
+  const patientData = urlParams.get("patientData");
+  const evaluationData = urlParams.get("evaluationData");
 
   if (patientData && evaluationData) {
-    return <EvaluationPrint
-      patient={JSON.parse(decodeURIComponent(patientData))}
-      evaluation={JSON.parse(decodeURIComponent(evaluationData))}
-    />;
+    return (
+      <EvaluationPrint
+        patient={JSON.parse(decodeURIComponent(patientData))}
+        evaluation={JSON.parse(decodeURIComponent(evaluationData))}
+      />
+    );
   }
   return <Login />;
 };
@@ -168,14 +180,16 @@ const renderEvaluationPrint = () => {
 // Função auxiliar para renderizar a impressão de evoluções
 const renderEvolutionsPrint = () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const patientData = urlParams.get('patientData');
-  const evolutionsData = urlParams.get('evolutionsData');
+  const patientData = urlParams.get("patientData");
+  const evolutionsData = urlParams.get("evolutionsData");
 
   if (patientData && evolutionsData) {
-    return <EvolutionsPrint
-      patient={JSON.parse(decodeURIComponent(patientData))}
-      evolutions={JSON.parse(decodeURIComponent(evolutionsData))}
-    />;
+    return (
+      <EvolutionsPrint
+        patient={JSON.parse(decodeURIComponent(patientData))}
+        evolutions={JSON.parse(decodeURIComponent(evolutionsData))}
+      />
+    );
   }
   return <Login />;
 };
@@ -188,34 +202,38 @@ const AppContent = () => {
 
   // Lista de páginas que requerem autenticação (admin e clients)
   const protectedPages: string[] = [
-    'dashboard',
-    'schedule',
-    'patients',
-    'patient-register',
-    'page-model',
-    'admin-plans',
-    'admin-profiles',
-    'admin-functionalities',
-    'admin-entities',
-    'admin-faq',
-    'admin-professional-types',
-    'user-profile',
-    'therapy-plan-print',
-    'period-report-print',
-    'detailed-period-report-print',
-    'evaluation-print',
-    'evolutions-print'
+    "dashboard",
+    "schedule",
+    "patients",
+    "patient-register",
+    "page-model",
+    "admin-plans",
+    "admin-profiles",
+    "admin-functionalities",
+    "admin-entities",
+    "admin-faq",
+    "admin-professional-types",
+    "user-profile",
+    "therapy-plan-print",
+    "period-report-print",
+    "detailed-period-report-print",
+    "evaluation-print",
+    "evolutions-print",
   ];
 
   // Verificar se a página atual requer autenticação
   React.useEffect(() => {
-    if (!isLoading && protectedPages.includes(currentPage) && !isAuthenticated) {
+    if (
+      !isLoading &&
+      protectedPages.includes(currentPage) &&
+      !isAuthenticated
+    ) {
       // Obter parâmetro clinic da URL se existir
       const urlParams = new URLSearchParams(window.location.search);
-      const clinic = urlParams.get('clinic') || 'ninho';
+      const clinic = urlParams.get("clinic") || "ninho";
 
       // Redirecionar para login
-      navigateTo('login', { clinic });
+      navigateTo("login", { clinic });
     }
 
     // Marcar inicialização como completa após processar a primeira vez
@@ -227,61 +245,63 @@ const AppContent = () => {
   // Mostrar loading enquanto verifica autenticação ou inicializa
   if (isLoading || isInitializing) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        fontSize: '1.2rem',
-        color: '#6c757d'
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          fontSize: "1.2rem",
+          color: "#6c757d",
+        }}
+      >
         Carregando...
       </div>
     );
   }
 
   switch (currentPage) {
-    case 'login':
+    case "login":
       return <Login />;
-    case 'alias-register':
+    case "alias-register":
       return <AliasRegister />;
-    case 'dashboard':
+    case "dashboard":
       return isAuthenticated ? <Dashboard /> : <Login />;
-    case 'schedule':
+    case "schedule":
       return isAuthenticated ? <ProfessionalSchedule /> : <Login />;
-    case 'patients':
+    case "patients":
       return isAuthenticated ? <PatientsList /> : <Login />;
-    case 'patient-register':
+    case "patient-register":
       return isAuthenticated ? <PatientRegister /> : <Login />;
-    case 'page-model':
+    case "page-model":
       return isAuthenticated ? <PageModel /> : <Login />;
-    case 'admin-plans':
+    case "admin-plans":
       return isAuthenticated ? <AdminPlans /> : <Login />;
-    case 'admin-profiles':
+    case "admin-profiles":
       return isAuthenticated ? <AdminProfiles /> : <Login />;
-    case 'admin-functionalities':
+    case "admin-functionalities":
       return isAuthenticated ? <AdminFunctionalities /> : <Login />;
-    case 'admin-entities':
+    case "admin-entities":
       return isAuthenticated ? <AdminEntities /> : <Login />;
-    case 'admin-faq':
+    case "admin-faq":
       return isAuthenticated ? <AdminFaq /> : <Login />;
-    case 'admin-professional-types':
+    case "admin-professional-types":
       return isAuthenticated ? <AdminProfessionalTypes /> : <Login />;
-    case 'faq':
+    case "faq":
       return <Faq />;
-    case 'user-profile':
+    case "user-profile":
       return isAuthenticated ? <UserProfile /> : <Login />;
-    case 'therapy-plan-print':
+    case "therapy-plan-print":
       return isAuthenticated ? renderTherapyPlanPrint() : <Login />;
-    case 'period-report-print':
+    case "period-report-print":
       return isAuthenticated ? renderPeriodReportPrint() : <Login />;
-    case 'detailed-period-report-print':
+    case "detailed-period-report-print":
       return isAuthenticated ? renderDetailedPeriodReportPrint() : <Login />;
-    case 'evaluation-print':
+    case "evaluation-print":
       return isAuthenticated ? renderEvaluationPrint() : <Login />;
-    case 'evolutions-print':
+    case "evolutions-print":
       return isAuthenticated ? renderEvolutionsPrint() : <Login />;
-    case 'landing':
+    case "landing":
     default:
       return <LandingPage />;
   }
@@ -302,7 +322,9 @@ const App = () => {
 
 root.render(
   <React.StrictMode>
-    <App />
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
   </React.StrictMode>
 );
 

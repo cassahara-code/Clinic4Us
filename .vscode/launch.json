@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0",
+  "inputs": [
+    {
+      "id": "close-terminals-input",
+      "type": "command",
+      "command": "workbench.action.closeAllEditors"
+    }
+  ],
+  "configurations": [
+    {
+<<<<<<< HEAD
+=======
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Node.js Backend",
+      "program": "${workspaceFolder}/src/index.ts",
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["-r", "ts-node/register"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug React Frontend",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMaps": true
+    },
+    {
+>>>>>>> b07711ae8751771a7ac0030cf7609b329b8202da
+      "name": "Dev Web",
+      "type": "msedge",
+      "request": "launch",
+      "preLaunchTask": "npm: start:local",
+      "postDebugTask": "close-terminals-input",
+      "url": "http://localhost:3000/",
+      "cwd": "${workspaceFolder}",
+      "webRoot": "${workspaceFolder}"
+    }
+  ]
+}
