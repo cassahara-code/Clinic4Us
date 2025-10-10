@@ -188,7 +188,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
                 }
               }}
             >
-              {editingCategoryId ? 'Salvar' : 'Cadastrar'}
+              Salvar
             </Button>
           </Box>
         </Box>

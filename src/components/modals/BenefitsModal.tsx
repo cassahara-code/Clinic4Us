@@ -216,7 +216,7 @@ const BenefitsModal: React.FC<BenefitsModalProps> = ({
                 },
               }}
             >
-              {editingBenefitId ? "Salvar" : "Cadastrar"}
+              Salvar
             </Button>
           </Box>
         </Box>

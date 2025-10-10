@@ -7,8 +7,7 @@ import {
   Button,
   Typography,
   IconButton,
-  Box,
-  Alert
+  Box
 } from '@mui/material';
 import { Warning, Close } from '@mui/icons-material';
 import { colors, typography } from '../../theme/designSystem';
@@ -110,12 +109,12 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ padding: '2rem' }}>
+      <DialogContent sx={{ padding: '1.5rem !important', paddingTop: '2rem !important' }}>
         <Typography
           sx={{
             fontSize: '1rem',
             color: colors.text,
-            marginBottom: warningMessage ? '1rem' : 0,
+            marginBottom: warningMessage ? '1.5rem' : 0,
             lineHeight: 1.5,
           }}
         >
@@ -123,18 +122,23 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
         </Typography>
 
         {warningMessage && (
-          <Alert
-            severity="warning"
-            icon={<Warning fontSize="small" />}
+          <Box
             sx={{
-              marginTop: '1rem',
-              '& .MuiAlert-icon': {
-                marginTop: '0.1rem',
-              }
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.875rem 1rem',
+              backgroundColor: '#fff3cd',
+              color: '#856404',
+              borderRadius: '6px',
+              border: '1px solid #ffeaa7',
             }}
           >
-            {warningMessage}
-          </Alert>
+            <Warning sx={{ fontSize: '1.25rem', color: '#f59e0b' }} />
+            <Typography sx={{ fontSize: '0.875rem', color: '#856404', lineHeight: 1.5 }}>
+              {warningMessage}
+            </Typography>
+          </Box>
         )}
       </DialogContent>
 

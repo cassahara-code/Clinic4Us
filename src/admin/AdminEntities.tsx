@@ -5,7 +5,8 @@ import {
   Typography,
   TextField,
   IconButton,
-  Paper
+  Paper,
+  Button
 } from '@mui/material';
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
@@ -14,6 +15,7 @@ import { Delete, Edit, Person, ViewModule } from '@mui/icons-material';
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
 import EntityModal, { EntityData } from "../components/modals/EntityModal";
+import ConfirmModal from "../components/modals/ConfirmModal";
 import { FaqButton } from "../components/FaqButton";
 import StandardPagination from "../components/Pagination/StandardPagination";
 import AddButton from "../components/AddButton";
@@ -58,6 +60,8 @@ const AdminEntities: React.FC = () => {
   const [entityModalMode, setEntityModalMode] = useState<'create' | 'edit'>('create');
   const [entityToEdit, setEntityToEdit] = useState<Entity | null>(null);
   const [hasFilterChanges, setHasFilterChanges] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [entityToDelete, setEntityToDelete] = useState<Entity | null>(null);
 
   // Valores iniciais dos filtros
   const initialFilters = {
@@ -249,11 +253,25 @@ const AdminEntities: React.FC = () => {
         setIsEntityModalOpen(true);
         break;
       case 'delete':
-        showToast(`Entidade ${entity.fantasyName} removida com sucesso`, 'success');
+        setEntityToDelete(entity);
+        setIsDeleteModalOpen(true);
         break;
       default:
         break;
     }
+  };
+
+  const handleConfirmDelete = () => {
+    if (entityToDelete) {
+      showToast(`Entidade ${entityToDelete.fantasyName} removida com sucesso`, 'success');
+      setIsDeleteModalOpen(false);
+      setEntityToDelete(null);
+    }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setEntityToDelete(null);
   };
 
   const handleSaveEntity = (data: EntityData) => {
@@ -396,18 +414,12 @@ const AdminEntities: React.FC = () => {
               </Box>
             </Box>
 
-            {/* Paginação */}
-            <StandardPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredAndSortedEntities.length}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
+            {/* Contador de registros */}
+            <Box sx={{ mb: 2, px: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                <strong>{filteredAndSortedEntities.length}</strong> entidades encontradas
+              </Typography>
+            </Box>
 
             {/* Lista de Entidades */}
             <Box className="admin-plans-list-container" sx={{ mt: 2 }}>
@@ -570,6 +582,21 @@ const AdminEntities: React.FC = () => {
         type={toast.type}
         isVisible={toast.isVisible}
         onClose={hideToast}
+      />
+
+      {/* Modal de Confirmação de Exclusão */}
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        title="Excluir Entidade"
+        message={entityToDelete
+          ? `Tem certeza que deseja excluir a entidade "${entityToDelete.fantasyName}" (${entityToDelete.cnpjCpf})?`
+          : "Tem certeza que deseja excluir esta entidade?"}
+        warningMessage="Esta ação não poderá ser desfeita."
+        confirmButtonText="Excluir"
+        cancelButtonText="Cancelar"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCloseDeleteModal}
+        type="danger"
       />
 
       <EntityModal

@@ -218,7 +218,7 @@ const ProfessionalTypeModal: React.FC<ProfessionalTypeModalProps> = ({
           Cancelar
         </Button>
         <Button onClick={handleSave} variant="contained" sx={{ padding: '0.75rem 1.5rem', borderRadius: '6px', backgroundColor: colors.primary, color: colors.white, fontSize: '1rem', fontWeight: typography.fontWeight.medium, textTransform: 'none', boxShadow: 'none', '&:hover': { backgroundColor: '#029AAB', boxShadow: 'none', transform: 'translateY(-1px)' } }}>
-          {mode === 'create' ? 'Criar Tipo de Profissional' : 'Salvar Alterações'}
+          Salvar
         </Button>
       </DialogActions>
     </Dialog>

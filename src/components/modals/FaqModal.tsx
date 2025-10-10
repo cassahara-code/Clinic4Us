@@ -448,7 +448,7 @@ const FaqModal: React.FC<FaqModalProps> = ({ isOpen, onClose, onSave, faqData, m
             }
           }}
         >
-          {mode === 'create' ? 'Criar' : 'Salvar'}
+          Salvar
         </Button>
       </DialogActions>
     </Dialog>

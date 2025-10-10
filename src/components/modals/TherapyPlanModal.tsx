@@ -1,0 +1,952 @@
+import React, { useState } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Button,
+  TextField,
+  Typography,
+  IconButton,
+  Box,
+  MenuItem,
+  FormControlLabel,
+  Checkbox,
+  FormControl,
+  InputLabel,
+  Select,
+  OutlinedInput,
+  Chip
+} from '@mui/material';
+import { Close } from '@mui/icons-material';
+import { colors, typography, inputs } from '../../theme/designSystem';
+import type { SelectChangeEvent } from '@mui/material/Select';
+
+interface TherapyPlanFormData {
+  title: string;
+  justification: string;
+  qualityLevel: string;
+  objective: string;
+  qualityLevelPreferred: string;
+  sessionsQuantity: string;
+  metric: string;
+  observations: string;
+  period: string;
+  priority: string;
+  startDate: string;
+  endDate: string;
+  cid: string;
+  disregardCid: boolean;
+  team: string;
+  professional: string;
+  specialty: string;
+  responsibles: string[];
+}
+
+interface TherapyPlanModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (planData: TherapyPlanFormData) => void;
+  editData?: TherapyPlanFormData | null;
+  mode: 'add' | 'edit' | 'delete';
+}
+
+const TherapyPlanModal: React.FC<TherapyPlanModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  editData,
+  mode
+}) => {
+  const [formData, setFormData] = useState<TherapyPlanFormData>(
+    editData || {
+      title: '',
+      justification: '',
+      qualityLevel: '',
+      objective: '',
+      qualityLevelPreferred: '',
+      sessionsQuantity: '',
+      metric: '',
+      observations: '',
+      period: '',
+      priority: '',
+      startDate: '',
+      endDate: '',
+      cid: '',
+      disregardCid: false,
+      team: '',
+      professional: '',
+      specialty: '',
+      responsibles: []
+    }
+  );
+
+  // Mock data para os selects
+  const qualityLevels = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+  const priorities = ['Baixa', 'Média', 'Alta'];
+  const periods = ['Período 01', 'Período 02'];
+  const cids = ['CID 1', 'CID 2', 'CID 3'];
+  const teams = ['Equipe 1', 'Equipe 2', 'Equipe 3'];
+  const professionals = ['Profissional 1', 'Profissional 2', 'Profissional 3'];
+  const specialties = ['Especialidade 1', 'Especialidade 2', 'Especialidade 3'];
+
+  // Mock de responsáveis disponíveis
+  const availableResponsibles = [
+    'Dr. Silva - Coordenação',
+    'Dra. Oliveira - Supervisão',
+    'Dr. Santos - Gestão',
+    'Dra. Costa - Administração',
+    'Dr. Pereira - Técnico'
+  ];
+
+  const handleSave = () => {
+    if (formData.title.trim()) {
+      onSave(formData);
+      handleClose();
+    }
+  };
+
+  const handleClose = () => {
+    setFormData({
+      title: '',
+      justification: '',
+      qualityLevel: '',
+      objective: '',
+      qualityLevelPreferred: '',
+      sessionsQuantity: '',
+      metric: '',
+      observations: '',
+      period: '',
+      priority: '',
+      startDate: '',
+      endDate: '',
+      cid: '',
+      disregardCid: false,
+      team: '',
+      professional: '',
+      specialty: '',
+      responsibles: []
+    });
+    onClose();
+  };
+
+  const handleDelete = () => {
+    if (editData) {
+      onSave(formData);
+      handleClose();
+    }
+  };
+
+  const getTitle = () => {
+    switch (mode) {
+      case 'add':
+        return 'Cadastrar Plano Terapêutico';
+      case 'edit':
+        return 'Editar Plano Terapêutico';
+      case 'delete':
+        return 'Excluir Plano Terapêutico';
+      default:
+        return 'Plano Terapêutico';
+    }
+  };
+
+  const renderDeleteContent = () => (
+    <Box sx={{ padding: '1.5rem 0' }}>
+      <Typography sx={{ fontSize: '1rem', color: colors.textPrimary, mb: 2 }}>
+        Tem certeza que deseja excluir o plano terapêutico <strong>{editData?.title}</strong>?
+      </Typography>
+      <Typography sx={{ fontSize: '0.875rem', color: colors.textSecondary }}>
+        Esta ação não poderá ser desfeita.
+      </Typography>
+    </Box>
+  );
+
+  const renderFormContent = () => (
+    <Box sx={{ display: 'flex', gap: '1.5rem' }}>
+      {/* Coluna esquerda */}
+      <Box sx={{ flex: '1' }}>
+        <TextField
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          placeholder="Título do plano"
+          fullWidth
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiOutlinedInput-root': {
+              height: inputs.default.height,
+              '& fieldset': { borderColor: colors.border },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary }
+            }
+          }}
+        />
+
+        <TextField
+          label="Justificativa*"
+          value={formData.justification}
+          onChange={(e) => setFormData({ ...formData, justification: e.target.value })}
+          placeholder="Justificativa"
+          fullWidth
+          multiline
+          rows={4}
+          InputLabelProps={{
+            shrink: inputs.multiline.labelShrink,
+            sx: {
+              fontSize: inputs.multiline.labelFontSize,
+              color: inputs.multiline.labelColor,
+              backgroundColor: inputs.multiline.labelBackground,
+              padding: inputs.multiline.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiOutlinedInput-root': {
+              position: inputs.multiline.position,
+              opacity: inputs.multiline.opacity,
+              alignItems: inputs.multiline.alignItems,
+              fontSize: inputs.multiline.fontSize,
+              minHeight: inputs.multiline.minHeight,
+              maxHeight: inputs.multiline.maxHeight,
+              overflow: inputs.multiline.overflow,
+              padding: 0,
+              '& fieldset': { borderColor: inputs.multiline.borderColor },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary },
+              '& textarea': {
+                height: inputs.multiline.textareaHeight,
+                maxHeight: inputs.multiline.textareaMaxHeight,
+                overflow: inputs.multiline.textareaOverflow,
+                boxSizing: inputs.multiline.textareaBoxSizing,
+                padding: inputs.multiline.inputPadding,
+                '&::-webkit-scrollbar': {
+                  width: inputs.multiline.scrollbarWidth
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: inputs.multiline.scrollbarTrackColor
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: inputs.multiline.scrollbarThumbColor,
+                  borderRadius: '4px'
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: inputs.multiline.scrollbarThumbHoverColor
+                }
+              }
+            }
+          }}
+        />
+
+        <TextField
+          label="Nível de qualidade*"
+          value={formData.qualityLevel}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            setFormData((prev) => {
+              // Se o novo nível da justificativa for maior que o pretendido, limpar o pretendido
+              if (prev.qualityLevelPreferred && parseInt(newValue) > parseInt(prev.qualityLevelPreferred)) {
+                return { ...prev, qualityLevel: newValue, qualityLevelPreferred: '' };
+              }
+              return { ...prev, qualityLevel: newValue };
+            });
+          }}
+          select
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiOutlinedInput-root': {
+              height: inputs.default.height,
+              '& fieldset': { borderColor: colors.border },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary }
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: inputs.default.labelFontSize,
+              color: colors.textSecondary,
+              backgroundColor: colors.white,
+              padding: inputs.default.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
+        >
+          <MenuItem value="">Selecione</MenuItem>
+          {qualityLevels.map((level) => (
+            <MenuItem key={level} value={level.toString()}>{level}</MenuItem>
+          ))}
+        </TextField>
+
+        <TextField
+          label="Objetivo*"
+          value={formData.objective}
+          onChange={(e) => setFormData({ ...formData, objective: e.target.value })}
+          placeholder="Objetivo"
+          fullWidth
+          multiline
+          rows={4}
+          InputLabelProps={{
+            shrink: inputs.multiline.labelShrink,
+            sx: {
+              fontSize: inputs.multiline.labelFontSize,
+              color: inputs.multiline.labelColor,
+              backgroundColor: inputs.multiline.labelBackground,
+              padding: inputs.multiline.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiOutlinedInput-root': {
+              position: inputs.multiline.position,
+              opacity: inputs.multiline.opacity,
+              alignItems: inputs.multiline.alignItems,
+              fontSize: inputs.multiline.fontSize,
+              minHeight: inputs.multiline.minHeight,
+              maxHeight: inputs.multiline.maxHeight,
+              overflow: inputs.multiline.overflow,
+              padding: 0,
+              '& fieldset': { borderColor: inputs.multiline.borderColor },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary },
+              '& textarea': {
+                height: inputs.multiline.textareaHeight,
+                maxHeight: inputs.multiline.textareaMaxHeight,
+                overflow: inputs.multiline.textareaOverflow,
+                boxSizing: inputs.multiline.textareaBoxSizing,
+                padding: inputs.multiline.inputPadding,
+                '&::-webkit-scrollbar': {
+                  width: inputs.multiline.scrollbarWidth
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: inputs.multiline.scrollbarTrackColor
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: inputs.multiline.scrollbarThumbColor,
+                  borderRadius: '4px'
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: inputs.multiline.scrollbarThumbHoverColor
+                }
+              }
+            }
+          }}
+        />
+
+        <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+          <TextField
+            label="Nível pretendido*"
+            value={formData.qualityLevelPreferred}
+            onChange={(e) => setFormData({ ...formData, qualityLevelPreferred: e.target.value })}
+            select
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          >
+            <MenuItem value="">Selecione</MenuItem>
+            {qualityLevels
+              .filter((level) => {
+                // Se houver nível da justificativa selecionado, mostrar apenas os maiores ou iguais
+                if (formData.qualityLevel) {
+                  return level >= parseInt(formData.qualityLevel);
+                }
+                return true;
+              })
+              .map((level) => (
+                <MenuItem key={level} value={level.toString()}>{level}</MenuItem>
+              ))}
+          </TextField>
+
+          <TextField
+            label="Qtd. de sessões*"
+            value={formData.sessionsQuantity}
+            onChange={(e) => setFormData({ ...formData, sessionsQuantity: e.target.value })}
+            select
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          >
+            <MenuItem value="">Selecione</MenuItem>
+            {[5, 10, 15, 20, 25, 30].map((num) => (
+              <MenuItem key={num} value={num.toString()}>{num}</MenuItem>
+            ))}
+          </TextField>
+        </Box>
+
+        <TextField
+          label="Métrica"
+          value={formData.metric}
+          onChange={(e) => setFormData({ ...formData, metric: e.target.value })}
+          placeholder="Métrica"
+          fullWidth
+          multiline
+          rows={4}
+          InputLabelProps={{
+            shrink: inputs.multiline.labelShrink,
+            sx: {
+              fontSize: inputs.multiline.labelFontSize,
+              color: inputs.multiline.labelColor,
+              backgroundColor: inputs.multiline.labelBackground,
+              padding: inputs.multiline.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiOutlinedInput-root': {
+              position: inputs.multiline.position,
+              opacity: inputs.multiline.opacity,
+              alignItems: inputs.multiline.alignItems,
+              fontSize: inputs.multiline.fontSize,
+              minHeight: inputs.multiline.minHeight,
+              maxHeight: inputs.multiline.maxHeight,
+              overflow: inputs.multiline.overflow,
+              padding: 0,
+              '& fieldset': { borderColor: inputs.multiline.borderColor },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary },
+              '& textarea': {
+                height: inputs.multiline.textareaHeight,
+                maxHeight: inputs.multiline.textareaMaxHeight,
+                overflow: inputs.multiline.textareaOverflow,
+                boxSizing: inputs.multiline.textareaBoxSizing,
+                padding: inputs.multiline.inputPadding,
+                '&::-webkit-scrollbar': {
+                  width: inputs.multiline.scrollbarWidth
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: inputs.multiline.scrollbarTrackColor
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: inputs.multiline.scrollbarThumbColor,
+                  borderRadius: '4px'
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: inputs.multiline.scrollbarThumbHoverColor
+                }
+              }
+            }
+          }}
+        />
+
+        <TextField
+          label="Observações"
+          value={formData.observations}
+          onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+          placeholder="Observações"
+          fullWidth
+          multiline
+          rows={4}
+          InputLabelProps={{
+            shrink: inputs.multiline.labelShrink,
+            sx: {
+              fontSize: inputs.multiline.labelFontSize,
+              color: inputs.multiline.labelColor,
+              backgroundColor: inputs.multiline.labelBackground,
+              padding: inputs.multiline.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiOutlinedInput-root': {
+              position: inputs.multiline.position,
+              opacity: inputs.multiline.opacity,
+              alignItems: inputs.multiline.alignItems,
+              fontSize: inputs.multiline.fontSize,
+              minHeight: inputs.multiline.minHeight,
+              maxHeight: inputs.multiline.maxHeight,
+              overflow: inputs.multiline.overflow,
+              padding: 0,
+              '& fieldset': { borderColor: inputs.multiline.borderColor },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary },
+              '& textarea': {
+                height: inputs.multiline.textareaHeight,
+                maxHeight: inputs.multiline.textareaMaxHeight,
+                overflow: inputs.multiline.textareaOverflow,
+                boxSizing: inputs.multiline.textareaBoxSizing,
+                padding: inputs.multiline.inputPadding,
+                '&::-webkit-scrollbar': {
+                  width: inputs.multiline.scrollbarWidth
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: inputs.multiline.scrollbarTrackColor
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: inputs.multiline.scrollbarThumbColor,
+                  borderRadius: '4px'
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: inputs.multiline.scrollbarThumbHoverColor
+                }
+              }
+            }
+          }}
+        />
+      </Box>
+
+      {/* Coluna direita */}
+      <Box sx={{ flex: '1' }}>
+        <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+          <TextField
+            label="Período"
+            value={formData.period}
+            onChange={(e) => setFormData({ ...formData, period: e.target.value })}
+            select
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          >
+            <MenuItem value="">Selecione</MenuItem>
+            {periods.map((period) => (
+              <MenuItem key={period} value={period}>{period}</MenuItem>
+            ))}
+          </TextField>
+
+          <TextField
+            label="Prioridade"
+            value={formData.priority}
+            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+            select
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          >
+            <MenuItem value="">Baixa</MenuItem>
+            {priorities.map((priority) => (
+              <MenuItem key={priority} value={priority}>{priority}</MenuItem>
+            ))}
+          </TextField>
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+          <TextField
+            label="Data Inicial"
+            type="date"
+            value={formData.startDate}
+            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          />
+
+          <TextField
+            label="Data Final"
+            type="date"
+            value={formData.endDate}
+            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                height: inputs.default.height,
+                '& fieldset': { borderColor: colors.border },
+                '&:hover fieldset': { borderColor: colors.border },
+                '&.Mui-focused fieldset': { borderColor: colors.primary }
+              },
+              '& .MuiInputLabel-root': {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                '&.Mui-focused': { color: colors.primary }
+              }
+            }}
+          />
+        </Box>
+
+        <TextField
+          label="Selecione o CID"
+          value={formData.cid}
+          onChange={(e) => setFormData({ ...formData, cid: e.target.value })}
+          select
+          fullWidth
+          disabled={formData.disregardCid}
+          InputLabelProps={{ shrink: true }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              height: inputs.default.height,
+              '& fieldset': { borderColor: colors.border },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary }
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: inputs.default.labelFontSize,
+              color: colors.textSecondary,
+              backgroundColor: colors.white,
+              padding: inputs.default.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
+        >
+          <MenuItem value="">CID</MenuItem>
+          {cids.map((cid) => (
+            <MenuItem key={cid} value={cid}>{cid}</MenuItem>
+          ))}
+        </TextField>
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={formData.disregardCid}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setFormData({
+                  ...formData,
+                  disregardCid: checked,
+                  cid: checked ? '' : formData.cid
+                });
+              }}
+              sx={{
+                color: colors.primary,
+                '&.Mui-checked': { color: colors.primary }
+              }}
+            />
+          }
+          label="Desconsiderar CID"
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiFormControlLabel-label': {
+              fontSize: '0.875rem',
+              color: colors.textSecondary
+            }
+          }}
+        />
+
+        <TextField
+          label="Equipe"
+          value={formData.team}
+          onChange={(e) => setFormData({ ...formData, team: e.target.value })}
+          select
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiOutlinedInput-root': {
+              height: inputs.default.height,
+              '& fieldset': { borderColor: colors.border },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary }
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: inputs.default.labelFontSize,
+              color: colors.textSecondary,
+              backgroundColor: colors.white,
+              padding: inputs.default.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
+        >
+          <MenuItem value="">Equipe</MenuItem>
+          {teams.map((team) => (
+            <MenuItem key={team} value={team}>{team}</MenuItem>
+          ))}
+        </TextField>
+
+        <TextField
+          label="Profissional"
+          value={formData.professional}
+          onChange={(e) => setFormData({ ...formData, professional: e.target.value })}
+          select
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiOutlinedInput-root': {
+              height: inputs.default.height,
+              '& fieldset': { borderColor: colors.border },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary }
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: inputs.default.labelFontSize,
+              color: colors.textSecondary,
+              backgroundColor: colors.white,
+              padding: inputs.default.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
+        >
+          <MenuItem value="">Profissional</MenuItem>
+          {professionals.map((professional) => (
+            <MenuItem key={professional} value={professional}>{professional}</MenuItem>
+          ))}
+        </TextField>
+
+        <TextField
+          label="Especialidade"
+          value={formData.specialty}
+          onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
+          select
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+          sx={{
+            marginBottom: '1.5rem',
+            '& .MuiOutlinedInput-root': {
+              height: inputs.default.height,
+              '& fieldset': { borderColor: colors.border },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary }
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: inputs.default.labelFontSize,
+              color: colors.textSecondary,
+              backgroundColor: colors.white,
+              padding: inputs.default.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }
+          }}
+        >
+          <MenuItem value="">Especialidade</MenuItem>
+          {specialties.map((specialty) => (
+            <MenuItem key={specialty} value={specialty}>{specialty}</MenuItem>
+          ))}
+        </TextField>
+
+        <FormControl
+          fullWidth
+        >
+          <InputLabel
+            id="responsibles-label"
+            sx={{
+              fontSize: inputs.default.labelFontSize,
+              color: colors.textSecondary,
+              backgroundColor: colors.white,
+              padding: inputs.default.labelPadding,
+              '&.Mui-focused': { color: colors.primary }
+            }}
+          >
+            Responsáveis
+          </InputLabel>
+          <Select
+            labelId="responsibles-label"
+            id="responsibles-select"
+            multiple
+            value={formData.responsibles}
+            onChange={(event: SelectChangeEvent<string[]>) => {
+              const value = event.target.value;
+              setFormData({
+                ...formData,
+                responsibles: typeof value === 'string' ? value.split(',') : value
+              });
+            }}
+            input={<OutlinedInput label="Responsáveis" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value) => (
+                  <Chip
+                    key={value}
+                    label={value}
+                    sx={{
+                      backgroundColor: colors.backgroundAlt,
+                      height: '24px',
+                      fontSize: '0.8125rem'
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
+            sx={{
+              minHeight: '96px',
+              maxHeight: '96px',
+              '& .MuiSelect-select': {
+                minHeight: '96px !important',
+                maxHeight: '96px !important',
+                overflowY: 'auto !important',
+                padding: '8px',
+                alignItems: 'flex-start',
+                display: 'flex',
+                flexWrap: 'wrap'
+              },
+              '& fieldset': { borderColor: colors.border },
+              '&:hover fieldset': { borderColor: colors.border },
+              '&.Mui-focused fieldset': { borderColor: colors.primary }
+            }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 48 * 4.5 + 8,
+                  width: 250,
+                },
+              },
+            }}
+          >
+            {availableResponsibles.map((responsible) => (
+              <MenuItem
+                key={responsible}
+                value={responsible}
+                sx={{
+                  fontWeight: formData.responsibles.includes(responsible)
+                    ? typography.fontWeight.semibold
+                    : typography.fontWeight.normal
+                }}
+              >
+                {responsible}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+    </Box>
+  );
+
+  return (
+    <Dialog
+      open={isOpen}
+      onClose={handleClose}
+      maxWidth="lg"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: '12px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+          maxHeight: '90vh',
+        }
+      }}
+    >
+      <DialogTitle
+        sx={{
+          backgroundColor: colors.primary,
+          color: colors.white,
+          padding: '1.5rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Typography variant="h6" component="h3" sx={{ fontSize: '1.4rem', fontWeight: typography.fontWeight.semibold, margin: 0 }}>
+          {getTitle()}
+        </Typography>
+        <IconButton onClick={handleClose} sx={{ color: colors.white, padding: '0.25rem', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' } }}>
+          <Close />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent sx={{ padding: '1.5rem !important', paddingTop: '2rem !important' }}>
+        {mode === 'delete' ? renderDeleteContent() : renderFormContent()}
+      </DialogContent>
+
+      <Box sx={{
+        padding: '1rem 1.5rem',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        gap: '0.5rem',
+        borderTop: `1px solid ${colors.border}`
+      }}>
+        <Button
+          onClick={handleClose}
+          variant="outlined"
+          sx={{
+            padding: '0.75rem 1.5rem',
+            border: `1px solid ${colors.border}`,
+            borderRadius: '6px',
+            backgroundColor: colors.white,
+            color: colors.textSecondary,
+            fontSize: '1rem',
+            fontWeight: typography.fontWeight.semibold,
+            textTransform: 'none',
+            '&:hover': {
+              backgroundColor: colors.background,
+              borderColor: '#adb5bd',
+            }
+          }}
+        >
+          Cancelar
+        </Button>
+        <Button
+          onClick={mode === 'delete' ? handleDelete : handleSave}
+          variant="contained"
+          sx={{
+            padding: '0.75rem 1.5rem',
+            borderRadius: '6px',
+            backgroundColor: mode === 'delete' ? '#dc3545' : colors.primary,
+            color: colors.white,
+            fontSize: '1rem',
+            fontWeight: typography.fontWeight.semibold,
+            textTransform: 'none',
+            boxShadow: 'none',
+            '&:hover': {
+              backgroundColor: mode === 'delete' ? '#c82333' : '#029AAB',
+              boxShadow: 'none',
+              transform: 'translateY(-1px)',
+            }
+          }}
+        >
+          {mode === 'delete' ? 'Excluir' : 'Salvar'}
+        </Button>
+      </Box>
+    </Dialog>
+  );
+};
+
+export default TherapyPlanModal;

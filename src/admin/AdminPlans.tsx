@@ -617,18 +617,12 @@ const AdminPlans: React.FC = () => {
               </Box>
             </Box>
 
-            {/* Paginação */}
-            <StandardPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredAndSortedPlans.length}
-              onPageChange={(page) => {
-                setCurrentPage(page);
-                setTimeout(scrollToTop, 100);
-              }}
-              onItemsPerPageChange={handleItemsPerPageChange}
-            />
+            {/* Contador de registros */}
+            <Box sx={{ mb: 2, px: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                <strong>{filteredAndSortedPlans.length}</strong> planos encontrados
+              </Typography>
+            </Box>
 
             {/* Lista de Planos */}
             <Box className="admin-plans-list-container" sx={{ mt: 2 }}>
@@ -908,7 +902,7 @@ const AdminPlans: React.FC = () => {
         title="Confirmar Exclusão"
         message={`Tem certeza que deseja excluir o plano ${planToDelete?.planTitle}?`}
         warningMessage="Esta ação não poderá ser desfeita e afetará todos os usuários que utilizam este plano."
-        confirmButtonText="Excluir Plano"
+        confirmButtonText="Excluir"
         cancelButtonText="Cancelar"
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}

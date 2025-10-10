@@ -23,8 +23,13 @@ import AdminFunctionalities from "./admin/AdminFunctionalities";
 import AdminEntities from "./admin/AdminEntities";
 import AdminFaq from "./admin/AdminFaq";
 import AdminProfessionalTypes from "./admin/AdminProfessionalTypes";
-import Faq from "./clients/Faq";
 import UserProfile from "./clients/UserProfile";
+import Faq from "./clients/Faq";
+import TherapyPlanPrint from "./components/TherapyPlanPrint";
+import PeriodReportPrint from "./components/PeriodReportPrint";
+import DetailedPeriodReportPrint from "./components/DetailedPeriodReportPrint";
+import EvaluationPrint from "./components/EvaluationPrint";
+import EvolutionsPrint from "./components/EvolutionsPrint";
 
 // Tema global do Material-UI
 const globalTheme = createTheme({
@@ -100,6 +105,95 @@ const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
+// Função auxiliar para renderizar a página de impressão
+const renderTherapyPlanPrint = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const planData = urlParams.get("planData");
+  const patientData = urlParams.get("patientData");
+
+  if (planData && patientData) {
+    return (
+      <TherapyPlanPrint
+        plan={JSON.parse(decodeURIComponent(planData))}
+        patient={JSON.parse(decodeURIComponent(patientData))}
+      />
+    );
+  }
+  return <Login />;
+};
+
+// Função auxiliar para renderizar o relatório de período
+const renderPeriodReportPrint = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const patientData = urlParams.get("patientData");
+  const periodData = urlParams.get("periodData");
+  const plansData = urlParams.get("plansData");
+
+  if (patientData && periodData && plansData) {
+    return (
+      <PeriodReportPrint
+        patient={JSON.parse(decodeURIComponent(patientData))}
+        period={JSON.parse(decodeURIComponent(periodData))}
+        plans={JSON.parse(decodeURIComponent(plansData))}
+      />
+    );
+  }
+  return <Login />;
+};
+
+// Função auxiliar para renderizar o relatório detalhado de período
+const renderDetailedPeriodReportPrint = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const patientData = urlParams.get("patientData");
+  const periodData = urlParams.get("periodData");
+  const plansData = urlParams.get("plansData");
+
+  if (patientData && periodData && plansData) {
+    return (
+      <DetailedPeriodReportPrint
+        patient={JSON.parse(decodeURIComponent(patientData))}
+        period={JSON.parse(decodeURIComponent(periodData))}
+        plans={JSON.parse(decodeURIComponent(plansData))}
+      />
+    );
+  }
+  return <Login />;
+};
+
+// Função auxiliar para renderizar a impressão de avaliação
+const renderEvaluationPrint = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const patientData = urlParams.get("patientData");
+  const evaluationData = urlParams.get("evaluationData");
+
+  if (patientData && evaluationData) {
+    return (
+      <EvaluationPrint
+        patient={JSON.parse(decodeURIComponent(patientData))}
+        evaluation={JSON.parse(decodeURIComponent(evaluationData))}
+      />
+    );
+  }
+  return <Login />;
+};
+
+// Função auxiliar para renderizar a impressão de evoluções
+const renderEvolutionsPrint = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const patientData = urlParams.get("patientData");
+  const evolutionsData = urlParams.get("evolutionsData");
+
+  if (patientData && evolutionsData) {
+    return (
+      <EvolutionsPrint
+        patient={JSON.parse(decodeURIComponent(patientData))}
+        evolutions={JSON.parse(decodeURIComponent(evolutionsData))}
+      />
+    );
+  }
+  return <Login />;
+};
+
 // Main app component with routing
 const AppContent = () => {
   const { currentPage, navigateTo } = useRouter();
@@ -120,6 +214,11 @@ const AppContent = () => {
     "admin-faq",
     "admin-professional-types",
     "user-profile",
+    "therapy-plan-print",
+    "period-report-print",
+    "detailed-period-report-print",
+    "evaluation-print",
+    "evolutions-print",
   ];
 
   // Verificar se a página atual requer autenticação
@@ -192,6 +291,16 @@ const AppContent = () => {
       return <Faq />;
     case "user-profile":
       return isAuthenticated ? <UserProfile /> : <Login />;
+    case "therapy-plan-print":
+      return isAuthenticated ? renderTherapyPlanPrint() : <Login />;
+    case "period-report-print":
+      return isAuthenticated ? renderPeriodReportPrint() : <Login />;
+    case "detailed-period-report-print":
+      return isAuthenticated ? renderDetailedPeriodReportPrint() : <Login />;
+    case "evaluation-print":
+      return isAuthenticated ? renderEvaluationPrint() : <Login />;
+    case "evolutions-print":
+      return isAuthenticated ? renderEvolutionsPrint() : <Login />;
     case "landing":
     default:
       return <LandingPage />;

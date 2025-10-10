@@ -611,7 +611,7 @@ const EntityModal: React.FC<EntityModalProps> = ({
           Cancelar
         </Button>
         <Button onClick={handleSave} variant="contained" sx={{ padding: '0.75rem 1.5rem', borderRadius: '6px', backgroundColor: colors.primary, color: colors.white, fontSize: '1rem', fontWeight: typography.fontWeight.medium, textTransform: 'none', boxShadow: 'none', '&:hover': { backgroundColor: '#029AAB', boxShadow: 'none', transform: 'translateY(-1px)' } }}>
-          Cadastrar
+          Salvar
         </Button>
       </DialogActions>
     </Dialog>

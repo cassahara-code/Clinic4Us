@@ -584,12 +584,12 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
             value={revalidatePassword}
             onChange={(e) => setRevalidatePassword(e.target.value)}
             placeholder="Digite sua senha para continuar"
-            autoComplete="off"
+            autoComplete="current-password"
             autoFocus
             fullWidth
             error={!!revalidateError}
             helperText={revalidateError}
-            onKeyPress={(e) => {
+            onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 handleSessionExpiredRevalidate();
               }
@@ -600,6 +600,7 @@ const HeaderInternal: React.FC<HeaderInternalProps> = ({
                   <IconButton
                     onClick={() => setShowRevalidatePassword(!showRevalidatePassword)}
                     edge="end"
+                    tabIndex={-1}
                   >
                     {showRevalidatePassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
