@@ -12,6 +12,11 @@ import {
   Autocomplete,
   Chip,
   MenuItem,
+  FormControl,
+  FormLabel,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { colors, typography, inputs } from "../../theme/designSystem";
@@ -88,34 +93,32 @@ const PlanModal: React.FC<PlanModalProps> = ({
   useEffect(() => {
     if (!Array.isArray(availableFeatures) || availableFeatures.length === 0)
       return;
-    if (initialData && Object.keys(initialData).length > 0) {
-      const features = availableFeatures.map((name) => {
-        const existingFeature = initialData.features?.find((f) =>
-          typeof f === "string" ? f === name : f.name === name
+    // Inicializa o estado dos checkboxes apenas uma vez por mudança de availableFeatures ou initialData
+    const initialState: { [key: string]: boolean } = {};
+    availableFeatures.forEach((name) => {
+      const label = typeof name === "string" ? name : (name as any).description;
+      let included = false;
+      if (initialData && initialData.features) {
+        const existing = initialData.features.find((f) =>
+          typeof f === "string" ? f === label : f.name === label
         );
-        return {
-          name,
-          included: existingFeature ? true : false,
-        };
-      });
-      setFormData((prev) => ({
-        ...prev,
-        ...initialData,
-        features,
-      }));
-      // Sincroniza selectedFeatures para mostrar os benefícios já selecionados
-      const selected = features
-        .filter((f) => f.included)
-        .map((f) => ({ id: f.name, label: f.name }));
-      setSelectedFeatures(selected);
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        features: availableFeatures.map((name) => ({ name, included: false })),
-      }));
-      setSelectedFeatures([]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        included = !!(
+          existing && (typeof existing === "string" ? true : existing.included)
+        );
+      }
+      initialState[label] = included;
+    });
+    // setFeaturesState(initialState);
+    setFormData((prev) => ({
+      ...prev,
+      ...initialData,
+      features: availableFeatures.map((name) => {
+        const label =
+          typeof name === "string" ? name : (name as any).description;
+        return { name: label, included: initialState[label] };
+      }),
+    }));
+    // O array de dependências está correto: só roda quando availableFeatures ou initialData mudam
   }, [availableFeatures, initialData]);
 
   // Função para formatar preço
@@ -531,7 +534,7 @@ const PlanModal: React.FC<PlanModalProps> = ({
 
         {/* Funcionalidades */}
         <Box sx={{ marginBottom: "2rem" }}>
-          <Autocomplete
+          {/* <Autocomplete
             multiple
             options={availableFeatures.map((name) => ({
               id: name,
@@ -612,10 +615,76 @@ const PlanModal: React.FC<PlanModalProps> = ({
                 }}
               />
             )}
-          />
+          /> */}
+          {/* Lista de funcionalidades com checkboxes */}
+          <FormControl component="fieldset" sx={{ mt: 3 }}>
+            <FormLabel
+              component="legend"
+              sx={{ color: colors.textSecondary, fontWeight: 500 }}
+            >
+              Selecionar funcionalidades do plano
+            </FormLabel>
+            <FormGroup
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 2,
+                alignItems: "start",
+              }}
+            >
+              {availableFeatures.map((feature) => {
+                const label =
+                  typeof feature === "string"
+                    ? feature
+                    : (feature as any).description;
+                const idx = formData.features.findIndex(
+                  (f) => f.name === label
+                );
+                const checked =
+                  idx !== -1 ? !!formData.features[idx].included : false;
+                return (
+                  <FormControlLabel
+                    key={label}
+                    control={
+                      <Checkbox
+                        checked={checked}
+                        onChange={(e) => {
+                          setFormData((prev) => {
+                            const updatedFeatures = prev.features.map((f) =>
+                              f.name === label
+                                ? { ...f, included: e.target.checked }
+                                : f
+                            );
+                            // Sincroniza chips
+                            const selected = updatedFeatures
+                              .filter((f) => f.included)
+                              .map((f) => ({ id: f.name, label: f.name }));
+                            setSelectedFeatures(selected);
+                            return {
+                              ...prev,
+                              features: updatedFeatures,
+                            };
+                          });
+                        }}
+                        color="primary"
+                      />
+                    }
+                    label={label}
+                    sx={{
+                      textAlign: "left",
+                      justifyContent: "flex-start",
+                      m: 0,
+                    }}
+                  />
+                );
+              })}
+            </FormGroup>
+          </FormControl>
         </Box>
       </DialogContent>
+      {/* INICIO */}
 
+      {/* FIM */}
       <DialogActions
         sx={{
           padding: "1.5rem 2rem",
