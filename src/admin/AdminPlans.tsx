@@ -73,31 +73,31 @@ const AdminPlans: React.FC = () => {
 
   // Busca lista de planos do backend
   const [plans, setPlans] = useState<Plano[]>([]);
+  // Torna fetchPlans acessível para handleSavePlan
+  const fetchPlans = async () => {
+    try {
+      const planos = await planoService.getAllPlanos();
+      const mappedPlans: Plano[] = planos.map((plano: any) => ({
+        id: plano.id,
+        planTitle: plano.planTitle,
+        description: plano.description,
+        monthlyValue: plano.monthlyValue,
+        annuallyValue: plano.annuallyValue,
+        createdAt: plano.createdAt,
+        updatedAt: plano.updatedAt,
+        createdBy: plano.createdBy,
+        updatedBy: plano.updatedBy,
+        active: plano.active,
+        plansBenefits: plano.plansBenefits ?? [],
+      }));
+      console.log("Planos recebidos do backend:", planos);
+      console.log("Planos mapeados:", mappedPlans);
+      setPlans(mappedPlans);
+    } catch (error) {
+      console.error("Erro ao buscar planos:", error);
+    }
+  };
   useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const planos = await planoService.getAllPlanos();
-        // Mapear os dados recebidos para o tipo Plan
-        const mappedPlans: Plano[] = planos.map((plano: any) => ({
-          id: plano.id,
-          planTitle: plano.planTitle,
-          description: plano.description,
-          monthlyValue: plano.monthlyValue,
-          annuallyValue: plano.annuallyValue,
-          createdAt: plano.createdAt,
-          updatedAt: plano.updatedAt,
-          createdBy: plano.createdBy,
-          updatedBy: plano.updatedBy,
-          active: plano.active,
-          plansBenefits: plano.plansBenefits ?? [],
-        }));
-        console.log("Planos recebidos do backend:", planos);
-        console.log("Planos mapeados:", mappedPlans);
-        setPlans(mappedPlans);
-      } catch (error) {
-        console.error("Erro ao buscar planos:", error);
-      }
-    };
     fetchPlans();
   }, []);
 
@@ -314,7 +314,7 @@ const AdminPlans: React.FC = () => {
         .createLegacyPlano(planPayload)
         .then((createdPlan) => {
           showToast("Plano criado com sucesso!", "success");
-          setPlans((prev) => [...prev, createdPlan]);
+          fetchPlans();
         })
         .catch((error) => {
           showToast("Erro ao criar plano", "error");
@@ -338,9 +338,7 @@ const AdminPlans: React.FC = () => {
         .updateLegacyPlano(planToEdit.id, planPayload)
         .then((updatedPlan) => {
           showToast("Plano editado com sucesso!", "success");
-          setPlans((prev) =>
-            prev.map((p) => (p.id === updatedPlan.id ? updatedPlan : p))
-          );
+          fetchPlans();
         })
         .catch((error) => {
           showToast("Erro ao editar plano", "error");
@@ -619,8 +617,12 @@ const AdminPlans: React.FC = () => {
 
             {/* Contador de registros */}
             <Box sx={{ mb: 2, px: 1 }}>
-              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
-                <strong>{filteredAndSortedPlans.length}</strong> planos encontrados
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", fontSize: "0.875rem" }}
+              >
+                <strong>{filteredAndSortedPlans.length}</strong> planos
+                encontrados
               </Typography>
             </Box>
 
