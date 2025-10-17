@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { entityService } from "../services/entityService";
 import {
   Box,
@@ -16,48 +16,32 @@ import { useNavigation } from "../contexts/RouterContext";
 import { Delete, Edit, Person, ViewModule } from "@mui/icons-material";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
-import EntityModal, { EntityData } from "../components/modals/EntityModal";
+import EntityModal from "../components/modals/EntityModal";
+import { EntityData } from "../interfaces/EntityData";
 import ConfirmModal from "../components/modals/ConfirmModal";
 import { FaqButton } from "../components/FaqButton";
 import StandardPagination from "../components/Pagination/StandardPagination";
 import AddButton from "../components/AddButton";
 import ClearFiltersButton from "../components/ClearFiltersButton";
 import { colors, typography, inputs } from "../theme/designSystem";
+import { Entity, UserSession } from "../interfaces/adminEntities";
+import { EntityRequest, EntityResponse } from "../types/entity";
 
-interface UserSession {
-  email: string;
-  alias: string;
-  clinicName: string;
-  role: string;
-  permissions: string[];
-  loginTime: string;
-}
-
-interface Entity {
-  id: string;
-  fantasyName: string;
-  cnpjCpf: string;
-  socialName: string;
-  workingHours: string;
-}
-
-const AdminEntities: React.FC = () => {
-  const [userSession, setUserSession] = useState<UserSession | null>(null);
+const AdminEntities: React.FC<{}> = () => {
+  const queryClient = useQueryClient();
   const { goToDashboard } = useNavigation();
   const { toast, showToast, hideToast } = useToast();
+  const [userSession, setUserSession] = useState<UserSession | null>(null);
 
-  // Estados dos filtros
+  // Estados dos filtros e paginação
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Estados da paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
-
-  // Estado da ordenação
   const [sortField, setSortField] = useState<
     "fantasyName" | "cnpjCpf" | "socialName"
   >("fantasyName");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [hasFilterChanges, setHasFilterChanges] = useState(false);
 
   // Estados dos modais
   const [isEntityModalOpen, setIsEntityModalOpen] = useState(false);
@@ -65,68 +49,120 @@ const AdminEntities: React.FC = () => {
     "create"
   );
   const [entityToEdit, setEntityToEdit] = useState<Entity | null>(null);
-  const [hasFilterChanges, setHasFilterChanges] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [entityToDelete, setEntityToDelete] = useState<Entity | null>(null);
 
-  // Valores iniciais dos filtros
-  const initialFilters = {
-    searchTerm: "",
-    sortField: "fantasyName" as "fantasyName" | "cnpjCpf" | "socialName",
-    sortOrder: "asc" as "asc" | "desc",
+  // Funções de manipulação de eventos do Header
+  const handleNotificationClick = () => {
+    console.log("Notificações clicadas");
   };
+
+  const handleUserClick = () => {
+    console.log("Menu do usuário clicado");
+  };
+
+  // Valores iniciais dos filtros
+  const initialFilters = useMemo(
+    () => ({
+      searchTerm: "",
+      sortField: "fantasyName" as const,
+      sortOrder: "asc" as const,
+    }),
+    []
+  );
 
   // Buscar entidades do backend usando react-query
   const {
-    data,
-    isLoading: isEntitiesLoading,
+    data: entitiesResponse,
+    isLoading,
     isError: isEntitiesError,
     refetch: refetchEntities,
-  } = useQuery({
+  } = useQuery<EntityResponse[]>({
     queryKey: ["entities"],
     queryFn: entityService.getAllEntities,
     staleTime: 1000 * 60 * 5, // 5 minutos
   });
 
-  const entities: Entity[] = Array.isArray(data)
-    ? data.map((item: any) => ({
+  // Converter a resposta da API para o formato usado no componente
+  const entities = useMemo(() => {
+    if (!entitiesResponse) return [];
+    return entitiesResponse.map((item: EntityResponse) => {
+      // Log para debug dos dados recebidos da API
+      console.log("Dados recebidos da API:", {
+        item,
+        endereco: {
+          cep: item.addressZipcode,
+          addressCity: item.addressCity,
+          street: item.addressStreet,
+          number: item.addressNumber,
+          complement: item.addressComplement,
+          neighborhood: item.addressNeighborhood,
+          state: item.addressState,
+        },
+      });
+
+      const entity = {
         id: item.id,
-        fantasyName: item.entityNickName ?? "",
-        cnpjCpf: item.document ?? "",
-        socialName: item.companyName ?? "",
+        fantasyName: item.entityNickName,
+        cnpjCpf: item.document,
+        socialName: item.companyName,
+        entityType: item.personType,
+        inscricaoEstadual: item.inscricaoEstadual,
+        inscricaoMunicipal: item.inscricaoMunicipal,
+        ddd: item.phoneCodeArea,
+        phone: item.phone,
+        email: item.email,
+
+        // Campos de endereço - mantendo os valores exatamente como vêm da API
+        addressZipcode: item.addressZipcode,
+        addressStreet: item.addressStreet,
+        addressNumber: item.addressNumber,
+        addressComplement: item.addressComplement,
+        addressNeighborhood: item.addressNeighborhood,
+        addressCity: item.addressCity,
+        addressState: item.addressState,
+
+        // Campos de horário
         workingHours:
-          (item.initialWorkHour ?? "") +
-          (item.finalWorkHour ? " - " + item.finalWorkHour : ""),
-      }))
-    : [];
+          item.initialWorkHour && item.finalWorkHour
+            ? `${item.initialWorkHour} - ${item.finalWorkHour}`
+            : "08:00 - 18:00",
+        startTime: item.initialWorkHour || "08:00",
+        endTime: item.finalWorkHour || "18:00",
+      };
 
-  // Lógica de filtragem e ordenação
-  const filteredAndSortedEntities = entities
-    .filter((entity) => {
-      const matchesSearch =
-        searchTerm === "" ||
-        entity.fantasyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entity.cnpjCpf.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entity.socialName.toLowerCase().includes(searchTerm.toLowerCase());
-
-      return matchesSearch;
-    })
-    .sort((a, b) => {
-      let compareValue = 0;
-
-      if (sortField === "fantasyName") {
-        compareValue = a.fantasyName.localeCompare(b.fantasyName, "pt-BR");
-      } else if (sortField === "cnpjCpf") {
-        compareValue = a.cnpjCpf.localeCompare(b.cnpjCpf);
-      } else if (sortField === "socialName") {
-        compareValue = a.socialName.localeCompare(b.socialName, "pt-BR");
-      }
-
-      return sortOrder === "asc" ? compareValue : -compareValue;
+      console.log("Entidade mapeada:", entity);
+      return entity;
     });
+  }, [entitiesResponse]);
 
-  // Lógica de paginação
-  const totalPages = Math.ceil(filteredAndSortedEntities.length / itemsPerPage);
+  // Filtrar e ordenar entidades
+  const filteredAndSortedEntities = useMemo(() => {
+    return entities
+      .filter((entity) => {
+        return (
+          searchTerm === "" ||
+          entity.fantasyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          entity.cnpjCpf.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          entity.socialName.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      })
+      .sort((a, b) => {
+        let compareValue = 0;
+        if (sortField === "fantasyName") {
+          compareValue = a.fantasyName.localeCompare(b.fantasyName);
+        } else if (sortField === "cnpjCpf") {
+          compareValue = a.cnpjCpf.localeCompare(b.cnpjCpf);
+        } else if (sortField === "socialName") {
+          compareValue = a.socialName.localeCompare(b.socialName);
+        }
+        return sortOrder === "asc" ? compareValue : -compareValue;
+      });
+  }, [entities, searchTerm, sortField, sortOrder]);
+
+  // Calcular paginação
+  const totalItems = filteredAndSortedEntities.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedEntities = filteredAndSortedEntities.slice(
@@ -134,16 +170,57 @@ const AdminEntities: React.FC = () => {
     endIndex
   );
 
+  // Handler para salvar/editar entidade
+  const handleSaveEntity = async (data: Entity) => {
+    try {
+      const entityRequest: EntityRequest = {
+        active: true,
+        id: data.id || "",
+        addressCity: data.addressCity || "",
+        addressComplement: data.addressComplement || "",
+        addressNeighborhood: data.addressNeighborhood || "",
+        addressNumber: data.addressNumber || "",
+        addressState: data.addressState || "",
+        addressStreet: data.addressStreet || "",
+        addressZipcode: data.addressZipcode || "",
+        companyName: data.socialName || "",
+        defaultEntity: false,
+        document: data.cnpjCpf || "",
+        email: data.email || "",
+        entityNickName: data.fantasyName || "",
+        finalWorkHour: data.endTime || "",
+        initialWorkHour: data.startTime || "",
+        inscricaoEstadual: data.inscricaoEstadual || "",
+        inscricaoMunicipal: data.inscricaoMunicipal || "",
+        entityType: data.entityType || "juridica",
+        phone: data.phone || "",
+        phoneCodeArea: data.ddd || "",
+        whatsappNumber: 0,
+        slug: data.fantasyName?.toLowerCase().replace(/ /g, "-") || "entity",
+      };
+
+      if (entityModalMode === "create") {
+        await entityService.createEntity(entityRequest);
+        showToast("Entidade cadastrada com sucesso", "success");
+      } else if (entityToEdit) {
+        entityRequest.id = entityToEdit.id;
+        await entityService.updateEntity(entityToEdit.id, entityRequest);
+        showToast("Entidade atualizada com sucesso", "success");
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["entities"] });
+      setIsEntityModalOpen(false);
+      setEntityToEdit(null);
+    } catch (error) {
+      console.error("Erro ao salvar entidade:", error);
+      showToast(
+        "Erro ao salvar entidade. Por favor, tente novamente.",
+        "error"
+      );
+    }
+  };
   const handleRevalidateLogin = () => {
     console.log("Revalidando login...");
-  };
-
-  const handleNotificationClick = () => {
-    console.log("Notificações clicadas");
-  };
-
-  const handleUserClick = () => {
-    console.log("Perfil de usuário clicado");
   };
 
   const handleLogoClick = () => {
@@ -151,19 +228,7 @@ const AdminEntities: React.FC = () => {
   };
 
   const scrollToTop = () => {
-    const listContainer = document.querySelector(".admin-plans-list-container");
-    if (listContainer) {
-      const containerRect = listContainer.getBoundingClientRect();
-      const offset = 100;
-      const targetPosition = window.pageYOffset + containerRect.top - offset;
-
-      window.scrollTo({
-        top: targetPosition,
-        behavior: "smooth",
-      });
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
@@ -182,26 +247,6 @@ const AdminEntities: React.FC = () => {
     setCurrentPage(1);
   };
 
-  // Gerar opções para o seletor de itens por página
-  const itemsPerPageOptions = [];
-  for (let i = 50; i <= 200; i += 10) {
-    itemsPerPageOptions.push(i);
-  }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    const simulatedUserSession: UserSession = {
-      email: "admin@clinic4us.com",
-      alias: "Admin Demo",
-      clinicName: "Admin Dashboard",
-      role: "Administrator",
-      permissions: ["admin_access", "manage_entities", "view_all"],
-      loginTime: new Date().toISOString(),
-    };
-
-    setUserSession(simulatedUserSession);
-  }, []);
-
   // Reset página quando filtros mudarem
   useEffect(() => {
     setCurrentPage(1);
@@ -215,7 +260,7 @@ const AdminEntities: React.FC = () => {
       sortOrder !== initialFilters.sortOrder;
 
     setHasFilterChanges(hasChanges);
-  }, [searchTerm, sortField, sortOrder]);
+  }, [searchTerm, sortField, sortOrder, initialFilters]);
 
   const clearFilters = () => {
     setSearchTerm(initialFilters.searchTerm);
@@ -259,29 +304,31 @@ const AdminEntities: React.FC = () => {
     }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (entityToDelete) {
-      showToast(
-        `Entidade ${entityToDelete.fantasyName} removida com sucesso`,
-        "success"
-      );
-      setIsDeleteModalOpen(false);
-      setEntityToDelete(null);
+      try {
+        await entityService.deleteEntity(entityToDelete.id);
+        showToast(
+          `Entidade ${entityToDelete.fantasyName} removida com sucesso`,
+          "success"
+        );
+        // Atualizar a lista de entidades
+        await queryClient.invalidateQueries({ queryKey: ["entities"] });
+        setIsDeleteModalOpen(false);
+        setEntityToDelete(null);
+      } catch (error) {
+        console.error("Erro ao remover entidade:", error);
+        showToast(
+          "Erro ao remover entidade. Por favor, tente novamente.",
+          "error"
+        );
+      }
     }
   };
 
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setEntityToDelete(null);
-  };
-
-  const handleSaveEntity = (data: EntityData) => {
-    if (entityModalMode === "create") {
-      showToast("Entidade cadastrada com sucesso", "success");
-    } else {
-      showToast("Entidade atualizada com sucesso", "success");
-    }
-    setIsEntityModalOpen(false);
   };
 
   const handleEntityRowClick = (entityId: string) => {
@@ -294,7 +341,7 @@ const AdminEntities: React.FC = () => {
     }
   };
 
-  if (!userSession || isEntitiesLoading) {
+  if (isLoading) {
     return (
       <Box
         sx={{
@@ -339,9 +386,9 @@ const AdminEntities: React.FC = () => {
         showCTAButton={false}
         className="login-header"
         isLoggedIn={true}
-        userEmail={userSession.email}
-        userProfile={userSession.role}
-        clinicName={userSession.clinicName}
+        userEmail={userSession?.email || "admin@exemplo.com"}
+        userProfile={userSession?.role || "admin"}
+        clinicName={userSession?.clinicName || "Clínica"}
         notificationCount={5}
         onRevalidateLogin={handleRevalidateLogin}
         onNotificationClick={handleNotificationClick}
@@ -748,24 +795,33 @@ const AdminEntities: React.FC = () => {
         initialData={
           entityToEdit
             ? {
-                entityType: "juridica",
-                cnpj: entityToEdit.cnpjCpf,
-                inscEstadual: "",
-                inscMunicipal: "",
+                id: entityToEdit.id,
                 fantasyName: entityToEdit.fantasyName,
+                cnpjCpf: entityToEdit.cnpjCpf,
                 socialName: entityToEdit.socialName,
-                ddd: "",
-                phone: "",
-                email: "",
-                cep: "",
-                street: "",
-                number: "",
-                complement: "",
-                neighborhood: "",
-                city: "",
-                state: "",
-                startTime: entityToEdit.workingHours.split(" - ")[0] || "08:00",
-                endTime: entityToEdit.workingHours.split(" - ")[1] || "18:00",
+                entityType: entityToEdit.entityType || "juridica",
+                inscricaoEstadual: entityToEdit.inscricaoEstadual,
+                inscricaoMunicipal: entityToEdit.inscricaoMunicipal,
+
+                // Campos de contato
+                ddd: entityToEdit.ddd,
+                phone: entityToEdit.phone,
+                email: entityToEdit.email,
+
+                // Campos de endereço - SEM valores padrão para preservar os valores reais
+                addressZipcode: entityToEdit.addressZipcode,
+                addressStreet: entityToEdit.addressStreet,
+                addressNumber: entityToEdit.addressNumber,
+                addressComplement: entityToEdit.addressComplement,
+                addressNeighborhood: entityToEdit.addressNeighborhood,
+                addressCity: entityToEdit.addressCity,
+                addressState: entityToEdit.addressState,
+
+                // Campos de horário
+                workingHours: entityToEdit.workingHours || "08:00 - 18:00",
+                startTime:
+                  entityToEdit.workingHours?.split(" - ")[0] || "08:00",
+                endTime: entityToEdit.workingHours?.split(" - ")[1] || "18:00",
               }
             : undefined
         }

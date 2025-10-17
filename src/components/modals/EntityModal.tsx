@@ -19,35 +19,16 @@ import { Close } from "@mui/icons-material";
 import { colors, typography, inputs } from "../../theme/designSystem";
 import { entityService } from "../../services/entityService";
 import { EntityRequest } from "../../types/entity";
-import { Toast } from "../Toast";
 
-export interface EntityData {
-  entityType: "juridica" | "fisica";
-  cnpj: string;
-  inscEstadual: string;
-  inscMunicipal: string;
-  fantasyName: string;
-  socialName: string;
-  ddd: string;
-  phone: string;
-  email: string;
-  cep: string;
-  street: string;
-  number: string;
-  complement: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-  startTime: string;
-  endTime: string;
-}
+// import { EntityData } from "../../interfaces/EntityData";
+import { Entity } from "../../interfaces/adminEntities";
 
 interface EntityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: EntityData) => void;
+  onSave: (data: Entity) => void;
   mode: "create" | "edit";
-  initialData?: Partial<EntityData>;
+  initialData?: Partial<Entity> & { id?: string };
   title?: string;
 }
 
@@ -59,55 +40,129 @@ const EntityModal: React.FC<EntityModalProps> = ({
   initialData = {},
   title,
 }) => {
-  const [formData, setFormData] = useState<EntityData>({
-    entityType: "juridica",
-    cnpj: "",
-    inscEstadual: "",
-    inscMunicipal: "",
+  // default form values; don't spread initialData here to avoid overwriting while user types
+  const defaultFormValues: Entity = {
+    // entityType: "juridica",
+    // id: "",
+    // cnpjCpf: "",
+    // inscricaoEstadual: "",
+    // inscricaoMunicipal: "",
+    // fantasyName: "",
+    // socialName: "",
+    // ddd: "",
+    // phone: "",
+    // email: "",
+    // cep: "",
+    // street: "",
+    // number: "",
+    // complement: "",
+    // neighborhood: "",
+    // city: "",
+    // state: "",
+    // startTime: "08:00",
+    // endTime: "18:00",
+    id: "",
     fantasyName: "",
+    cnpjCpf: "",
     socialName: "",
+    workingHours: "",
+    entityType: "juridica",
+    inscricaoEstadual: "",
+    inscricaoMunicipal: "",
     ddd: "",
     phone: "",
     email: "",
-    cep: "",
-    street: "",
-    number: "",
-    complement: "",
-    neighborhood: "",
-    city: "",
-    state: "",
-    startTime: "08:00",
-    endTime: "18:00",
-    ...initialData,
-  });
+    addressZipcode: "",
+    addressStreet: "",
+    addressNumber: "",
+    addressComplement: "",
+    addressNeighborhood: "",
+    addressCity: "",
+    addressState: "",
+    startTime: "",
+    endTime: "",
+  };
 
+  const [formData, setFormData] = useState<Entity>(defaultFormValues);
+
+  // Initialize the form only when the modal opens. This avoids overwriting the form
+  // while the user is typing if the parent passes a new initialData reference.
   useEffect(() => {
-    if (initialData && Object.keys(initialData).length > 0) {
-      setFormData((prev) => ({
-        ...prev,
-        ...initialData,
-      }));
+    if (!isOpen) return;
+
+    if (mode === "edit" && initialData && Object.keys(initialData).length > 0) {
+      console.log("Dados recebidos no modal:", initialData);
+
+      // Extrair horário de funcionamento
+      const [startTime = "08:00", endTime = "18:00"] =
+        initialData.workingHours?.split(" - ") ?? [];
+
+      console.log("InitialData no mapeamento:", initialData);
+
+      const mappedData: Entity = {
+        // Dados principais - campos obrigatórios
+        id: initialData.id || "",
+        fantasyName: initialData.fantasyName || "",
+        cnpjCpf: initialData.cnpjCpf || "",
+        socialName: initialData.socialName || "",
+        workingHours: initialData.workingHours || `${startTime} - ${endTime}`,
+        entityType: initialData.entityType || "juridica",
+
+        // Campos opcionais - mantendo os valores originais mesmo que vazios
+        inscricaoEstadual: initialData.inscricaoEstadual || "",
+        inscricaoMunicipal: initialData.inscricaoMunicipal || "",
+
+        // Campos de contato - mantendo os valores originais mesmo que vazios
+        ddd: initialData.ddd || "",
+        phone: initialData.phone || "",
+        email: initialData.email || "",
+
+        // Campos de endereço - mantendo os valores originais mesmo que vazios
+        addressZipcode: initialData.addressZipcode || "",
+        addressStreet: initialData.addressStreet || "",
+        addressNumber: initialData.addressNumber || "",
+        addressComplement: initialData.addressComplement || "",
+        addressNeighborhood: initialData.addressNeighborhood || "",
+        addressCity: initialData.addressCity || "",
+        addressState: initialData.addressState || "",
+
+        // Campos de horário - usando os valores padrão apenas se necessário
+        startTime: startTime || "08:00",
+        endTime: endTime || "18:00",
+      };
+
+      setFormData(mappedData);
+      return;
     }
-  }, [initialData]);
+
+    // create mode: reset to defaults when opening
+    if (mode === "create") {
+      setFormData(defaultFormValues);
+    }
+    // intentionally not including initialData in deps to avoid overwriting while open
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, mode]);
 
   const handleClose = () => {
     setFormData({
       entityType: "juridica",
-      cnpj: "",
-      inscEstadual: "",
-      inscMunicipal: "",
+      id: "",
+      cnpjCpf: "",
+      inscricaoEstadual: "",
+      inscricaoMunicipal: "",
       fantasyName: "",
       socialName: "",
       ddd: "",
       phone: "",
       email: "",
-      cep: "",
-      street: "",
-      number: "",
-      complement: "",
-      neighborhood: "",
-      city: "",
-      state: "",
+      addressZipcode: "",
+      addressStreet: "",
+      addressNumber: "",
+      addressComplement: "",
+      addressNeighborhood: "",
+      addressCity: "",
+      addressState: "",
+      workingHours: "08:00 - 18:00",
       startTime: "08:00",
       endTime: "18:00",
     });
@@ -117,41 +172,49 @@ const EntityModal: React.FC<EntityModalProps> = ({
   const handleSave = () => {
     // Monta o payload para a API
     const payload: EntityRequest = {
+      id: (initialData as any)?.id || "",
       active: true,
-      addressCity: formData.city,
-      addressComplement: formData.complement,
-      addressDistrict: formData.neighborhood,
-      addressNumber: formData.number,
-      addressState: formData.state,
-      addressStreet: formData.street,
-      addressZipcode: formData.cep,
-      companyName: formData.socialName,
+      addressCity: formData.addressCity ?? "",
+      addressComplement: formData.addressComplement ?? "",
+      addressNeighborhood: formData.addressNeighborhood ?? "",
+      addressNumber: formData.addressNumber ?? "",
+      addressState: formData.addressState ?? "",
+      addressStreet: formData.addressStreet ?? "",
+      addressZipcode: formData.addressZipcode ?? "",
+      companyName: formData.socialName ?? "",
       defaultEntity: true,
-      document: formData.cnpj,
-      email: formData.email,
-      entityNickName: formData.fantasyName,
-      finalWorkHour: new Date().toISOString(), // ou formData.endTime formatado
-      initialWorkHour: new Date().toISOString(), // ou formData.startTime formatado
-      inscricaoEstadual: formData.inscEstadual,
-      inscricaoMunicipal: formData.inscMunicipal,
-      personType: formData.entityType,
-      phone: formData.phone,
-      phoneCodeArea: formData.ddd,
+      document: formData.cnpjCpf ?? (formData as any).cnpj ?? "",
+      email: formData.email ?? "",
+      entityNickName: formData.fantasyName ?? "",
+      finalWorkHour: formData.endTime ?? "",
+      initialWorkHour: formData.startTime ?? "",
+      inscricaoEstadual:
+        formData.inscricaoEstadual ?? (formData as any).inscEstadual ?? "",
+      inscricaoMunicipal:
+        formData.inscricaoMunicipal ?? (formData as any).inscMunicipal ?? "",
+      entityType: formData.entityType ?? "juridica",
+      phone: formData.phone ?? "",
+      phoneCodeArea: formData.ddd ?? "",
       whatsappNumber: 0,
       slug: "string",
     };
-    entityService
-      .createEntity(payload)
-      .then(() => {
+    (async () => {
+      try {
+        const id = (initialData as any)?.id as string | undefined;
+        if (mode === "edit" && id) {
+          await entityService.updateEntity(id, payload);
+        } else {
+          await entityService.createEntity(payload);
+        }
+
         onSave(formData);
         handleClose();
-      })
-      .catch((error) => {
+      } catch (error: any) {
         // TODO: tratar erro
-        debugger;
-        console.log(error.message);
+        console.error(error?.message || error);
         handleClose();
-      });
+      }
+    })();
   };
 
   const timeOptions = Array.from({ length: 24 }, (_, i) => {
@@ -263,8 +326,10 @@ const EntityModal: React.FC<EntityModalProps> = ({
 
         <TextField
           label={formData.entityType === "juridica" ? "CNPJ" : "CPF"}
-          value={formData.cnpj}
-          onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
+          value={formData.cnpjCpf}
+          onChange={(e) =>
+            setFormData({ ...formData, cnpjCpf: e.target.value })
+          }
           placeholder={formData.entityType === "juridica" ? "CNPJ" : "CPF"}
           fullWidth
           margin="dense"
@@ -297,9 +362,9 @@ const EntityModal: React.FC<EntityModalProps> = ({
         >
           <TextField
             label="Insc. Estadual"
-            value={formData.inscEstadual}
+            value={formData.inscricaoEstadual}
             onChange={(e) =>
-              setFormData({ ...formData, inscEstadual: e.target.value })
+              setFormData({ ...formData, inscricaoEstadual: e.target.value })
             }
             placeholder="Insc. Estadual"
             InputLabelProps={{ shrink: true }}
@@ -321,9 +386,9 @@ const EntityModal: React.FC<EntityModalProps> = ({
           />
           <TextField
             label="Insc. Municipal"
-            value={formData.inscMunicipal}
+            value={formData.inscricaoMunicipal}
             onChange={(e) =>
-              setFormData({ ...formData, inscMunicipal: e.target.value })
+              setFormData({ ...formData, inscricaoMunicipal: e.target.value })
             }
             placeholder="Insc. Municipal"
             InputLabelProps={{ shrink: true }}
@@ -487,8 +552,10 @@ const EntityModal: React.FC<EntityModalProps> = ({
 
         <TextField
           label="CEP"
-          value={formData.cep}
-          onChange={(e) => setFormData({ ...formData, cep: e.target.value })}
+          value={formData.addressZipcode}
+          onChange={(e) =>
+            setFormData({ ...formData, addressZipcode: e.target.value })
+          }
           placeholder="CEP"
           margin="dense"
           InputLabelProps={{ shrink: true }}
@@ -521,9 +588,9 @@ const EntityModal: React.FC<EntityModalProps> = ({
         >
           <TextField
             label="Logradouro (Rua, Avenida, etc.)"
-            value={formData.street}
+            value={formData.addressStreet}
             onChange={(e) =>
-              setFormData({ ...formData, street: e.target.value })
+              setFormData({ ...formData, addressStreet: e.target.value })
             }
             placeholder="Logradouro (Rua, Avenida, etc.)"
             InputLabelProps={{ shrink: true }}
@@ -545,9 +612,33 @@ const EntityModal: React.FC<EntityModalProps> = ({
           />
           <TextField
             label="Número"
-            value={formData.number}
+            value={formData.addressNumber}
             onChange={(e) =>
-              setFormData({ ...formData, number: e.target.value })
+              setFormData({ ...formData, addressNumber: e.target.value })
+            }
+            placeholder="Nº"
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                height: inputs.default.height,
+                "& fieldset": { borderColor: colors.border },
+                "&:hover fieldset": { borderColor: colors.border },
+                "&.Mui-focused fieldset": { borderColor: colors.primary },
+              },
+              "& .MuiInputLabel-root": {
+                fontSize: inputs.default.labelFontSize,
+                color: colors.textSecondary,
+                backgroundColor: colors.white,
+                padding: inputs.default.labelPadding,
+                "&.Mui-focused": { color: colors.primary },
+              },
+            }}
+          />
+          <TextField
+            label="Número"
+            value={formData.addressNumber}
+            onChange={(e) =>
+              setFormData({ ...formData, addressNumber: e.target.value })
             }
             placeholder="Nº"
             InputLabelProps={{ shrink: true }}
@@ -579,9 +670,9 @@ const EntityModal: React.FC<EntityModalProps> = ({
         >
           <TextField
             label="Complemento"
-            value={formData.complement}
+            value={formData.addressComplement}
             onChange={(e) =>
-              setFormData({ ...formData, complement: e.target.value })
+              setFormData({ ...formData, addressComplement: e.target.value })
             }
             placeholder="Complemento"
             InputLabelProps={{ shrink: true }}
@@ -603,9 +694,9 @@ const EntityModal: React.FC<EntityModalProps> = ({
           />
           <TextField
             label="Bairro"
-            value={formData.neighborhood}
+            value={formData.addressNeighborhood}
             onChange={(e) =>
-              setFormData({ ...formData, neighborhood: e.target.value })
+              setFormData({ ...formData, addressNeighborhood: e.target.value })
             }
             placeholder="Bairro"
             InputLabelProps={{ shrink: true }}
@@ -637,8 +728,10 @@ const EntityModal: React.FC<EntityModalProps> = ({
         >
           <TextField
             label="Cidade"
-            value={formData.city}
-            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+            value={formData.addressCity}
+            onChange={(e) =>
+              setFormData({ ...formData, addressCity: e.target.value })
+            }
             placeholder="Cidade"
             InputLabelProps={{ shrink: true }}
             sx={{
@@ -659,9 +752,9 @@ const EntityModal: React.FC<EntityModalProps> = ({
           />
           <TextField
             label="UF"
-            value={formData.state}
+            value={formData.addressState}
             onChange={(e) =>
-              setFormData({ ...formData, state: e.target.value })
+              setFormData({ ...formData, addressState: e.target.value })
             }
             placeholder="UF"
             inputProps={{ maxLength: 2 }}
@@ -695,10 +788,17 @@ const EntityModal: React.FC<EntityModalProps> = ({
           <TextField
             select
             label="Hora Inicial"
-            value={formData.startTime}
-            onChange={(e) =>
-              setFormData({ ...formData, startTime: e.target.value })
-            }
+            value={formData.startTime || "08:00"}
+            onChange={(e) => {
+              const newStartTime = e.target.value;
+              setFormData({
+                ...formData,
+                startTime: newStartTime,
+                workingHours: `${newStartTime} - ${
+                  formData.endTime || "18:00"
+                }`,
+              });
+            }}
             InputLabelProps={{ shrink: true }}
             sx={{
               "& .MuiOutlinedInput-root": {
@@ -725,10 +825,17 @@ const EntityModal: React.FC<EntityModalProps> = ({
           <TextField
             select
             label="Hora Final"
-            value={formData.endTime}
-            onChange={(e) =>
-              setFormData({ ...formData, endTime: e.target.value })
-            }
+            value={formData.endTime || "18:00"}
+            onChange={(e) => {
+              const newEndTime = e.target.value;
+              setFormData({
+                ...formData,
+                endTime: newEndTime,
+                workingHours: `${
+                  formData.startTime || "08:00"
+                } - ${newEndTime}`,
+              });
+            }}
             InputLabelProps={{ shrink: true }}
             sx={{
               "& .MuiOutlinedInput-root": {
