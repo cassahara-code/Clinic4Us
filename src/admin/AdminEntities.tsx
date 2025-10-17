@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { entityService } from "../services/entityService";
 import {
   Box,
   Container,
@@ -6,150 +8,219 @@ import {
   TextField,
   IconButton,
   Paper,
-  Button
-} from '@mui/material';
+  Button,
+} from "@mui/material";
 import HeaderInternal from "../components/Header/HeaderInternal";
 import { FooterInternal } from "../components/Footer";
 import { useNavigation } from "../contexts/RouterContext";
-import { Delete, Edit, Person, ViewModule } from '@mui/icons-material';
+import { Delete, Edit, Person, ViewModule } from "@mui/icons-material";
 import { Toast } from "../components/Toast";
 import { useToast } from "../hooks/useToast";
-import EntityModal, { EntityData } from "../components/modals/EntityModal";
+import EntityModal from "../components/modals/EntityModal";
+import { EntityData } from "../interfaces/EntityData";
 import ConfirmModal from "../components/modals/ConfirmModal";
 import { FaqButton } from "../components/FaqButton";
 import StandardPagination from "../components/Pagination/StandardPagination";
 import AddButton from "../components/AddButton";
 import ClearFiltersButton from "../components/ClearFiltersButton";
 import { colors, typography, inputs } from "../theme/designSystem";
+import { Entity, UserSession } from "../interfaces/adminEntities";
+import { EntityRequest, EntityResponse } from "../types/entity";
 
-interface UserSession {
-  email: string;
-  alias: string;
-  clinicName: string;
-  role: string;
-  permissions: string[];
-  loginTime: string;
-}
-
-interface Entity {
-  id: string;
-  fantasyName: string;
-  cnpjCpf: string;
-  socialName: string;
-  workingHours: string;
-}
-
-const AdminEntities: React.FC = () => {
-  const [userSession, setUserSession] = useState<UserSession | null>(null);
+const AdminEntities: React.FC<{}> = () => {
+  const queryClient = useQueryClient();
   const { goToDashboard } = useNavigation();
   const { toast, showToast, hideToast } = useToast();
+  const [userSession, setUserSession] = useState<UserSession | null>(null);
 
-  // Estados dos filtros
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // Estados da paginação
+  // Estados dos filtros e paginação
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
-
-  // Estado da ordenação
-  const [sortField, setSortField] = useState<'fantasyName' | 'cnpjCpf' | 'socialName'>('fantasyName');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortField, setSortField] = useState<
+    "fantasyName" | "cnpjCpf" | "socialName"
+  >("fantasyName");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [hasFilterChanges, setHasFilterChanges] = useState(false);
 
   // Estados dos modais
   const [isEntityModalOpen, setIsEntityModalOpen] = useState(false);
-  const [entityModalMode, setEntityModalMode] = useState<'create' | 'edit'>('create');
+  const [entityModalMode, setEntityModalMode] = useState<"create" | "edit">(
+    "create"
+  );
   const [entityToEdit, setEntityToEdit] = useState<Entity | null>(null);
-  const [hasFilterChanges, setHasFilterChanges] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [entityToDelete, setEntityToDelete] = useState<Entity | null>(null);
 
-  // Valores iniciais dos filtros
-  const initialFilters = {
-    searchTerm: '',
-    sortField: 'fantasyName' as 'fantasyName' | 'cnpjCpf' | 'socialName',
-    sortOrder: 'asc' as 'asc' | 'desc'
-  };
-
-  // Dados de exemplo das entidades
-  const [entities] = useState<Entity[]>(() => {
-    const baseEntities = [
-      {
-        id: '1',
-        fantasyName: 'Instituto Ninho',
-        cnpjCpf: '44594155000179',
-        socialName: 'Azevedo Marinho Fonoaudiologia',
-        workingHours: '08:00 - 20:00'
-      },
-      {
-        id: '2',
-        fantasyName: 'Clínica Saúde Total',
-        cnpjCpf: '12345678000190',
-        socialName: 'Clínica Saúde Total Ltda',
-        workingHours: '07:00 - 19:00'
-      },
-      {
-        id: '3',
-        fantasyName: 'Centro Médico Esperança',
-        cnpjCpf: '98765432000111',
-        socialName: 'Centro Médico Esperança SA',
-        workingHours: '08:00 - 18:00'
-      }
-    ];
-
-    // Gerar mais entidades para teste de paginação
-    const entities: Entity[] = [];
-    for (let i = 0; i < 5; i++) {
-      baseEntities.forEach((entity, index) => {
-        entities.push({
-          ...entity,
-          id: `${i * baseEntities.length + index + 1}`,
-          fantasyName: `${entity.fantasyName} ${i > 0 ? i + 1 : ''}`.trim()
-        });
-      });
-    }
-    return entities;
-  });
-
-  // Lógica de filtragem e ordenação
-  const filteredAndSortedEntities = entities
-    .filter(entity => {
-      const matchesSearch = searchTerm === '' ||
-        entity.fantasyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entity.cnpjCpf.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entity.socialName.toLowerCase().includes(searchTerm.toLowerCase());
-
-      return matchesSearch;
-    })
-    .sort((a, b) => {
-      let compareValue = 0;
-
-      if (sortField === 'fantasyName') {
-        compareValue = a.fantasyName.localeCompare(b.fantasyName, 'pt-BR');
-      } else if (sortField === 'cnpjCpf') {
-        compareValue = a.cnpjCpf.localeCompare(b.cnpjCpf);
-      } else if (sortField === 'socialName') {
-        compareValue = a.socialName.localeCompare(b.socialName, 'pt-BR');
-      }
-
-      return sortOrder === 'asc' ? compareValue : -compareValue;
-    });
-
-  // Lógica de paginação
-  const totalPages = Math.ceil(filteredAndSortedEntities.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedEntities = filteredAndSortedEntities.slice(startIndex, endIndex);
-
-  const handleRevalidateLogin = () => {
-    console.log('Revalidando login...');
-  };
-
+  // Funções de manipulação de eventos do Header
   const handleNotificationClick = () => {
-    console.log('Notificações clicadas');
+    console.log("Notificações clicadas");
   };
 
   const handleUserClick = () => {
-    console.log('Perfil de usuário clicado');
+    console.log("Menu do usuário clicado");
+  };
+
+  // Valores iniciais dos filtros
+  const initialFilters = useMemo(
+    () => ({
+      searchTerm: "",
+      sortField: "fantasyName" as const,
+      sortOrder: "asc" as const,
+    }),
+    []
+  );
+
+  // Buscar entidades do backend usando react-query
+  const {
+    data: entitiesResponse,
+    isLoading,
+    isError: isEntitiesError,
+    refetch: refetchEntities,
+  } = useQuery<EntityResponse[]>({
+    queryKey: ["entities"],
+    queryFn: entityService.getAllEntities,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  });
+
+  // Converter a resposta da API para o formato usado no componente
+  const entities = useMemo(() => {
+    if (!entitiesResponse) return [];
+    return entitiesResponse.map((item: EntityResponse) => {
+      // Log para debug dos dados recebidos da API
+      console.log("Dados recebidos da API:", {
+        item,
+        endereco: {
+          cep: item.addressZipcode,
+          addressCity: item.addressCity,
+          street: item.addressStreet,
+          number: item.addressNumber,
+          complement: item.addressComplement,
+          neighborhood: item.addressNeighborhood,
+          state: item.addressState,
+        },
+      });
+
+      const entity = {
+        id: item.id,
+        fantasyName: item.entityNickName,
+        cnpjCpf: item.document,
+        socialName: item.companyName,
+        entityType: item.personType,
+        inscricaoEstadual: item.inscricaoEstadual,
+        inscricaoMunicipal: item.inscricaoMunicipal,
+        ddd: item.phoneCodeArea,
+        phone: item.phone,
+        email: item.email,
+
+        // Campos de endereço - mantendo os valores exatamente como vêm da API
+        addressZipcode: item.addressZipcode,
+        addressStreet: item.addressStreet,
+        addressNumber: item.addressNumber,
+        addressComplement: item.addressComplement,
+        addressNeighborhood: item.addressNeighborhood,
+        addressCity: item.addressCity,
+        addressState: item.addressState,
+
+        // Campos de horário
+        workingHours:
+          item.initialWorkHour && item.finalWorkHour
+            ? `${item.initialWorkHour} - ${item.finalWorkHour}`
+            : "08:00 - 18:00",
+        startTime: item.initialWorkHour || "08:00",
+        endTime: item.finalWorkHour || "18:00",
+      };
+
+      console.log("Entidade mapeada:", entity);
+      return entity;
+    });
+  }, [entitiesResponse]);
+
+  // Filtrar e ordenar entidades
+  const filteredAndSortedEntities = useMemo(() => {
+    return entities
+      .filter((entity) => {
+        return (
+          searchTerm === "" ||
+          entity.fantasyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          entity.cnpjCpf.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          entity.socialName.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      })
+      .sort((a, b) => {
+        let compareValue = 0;
+        if (sortField === "fantasyName") {
+          compareValue = a.fantasyName.localeCompare(b.fantasyName);
+        } else if (sortField === "cnpjCpf") {
+          compareValue = a.cnpjCpf.localeCompare(b.cnpjCpf);
+        } else if (sortField === "socialName") {
+          compareValue = a.socialName.localeCompare(b.socialName);
+        }
+        return sortOrder === "asc" ? compareValue : -compareValue;
+      });
+  }, [entities, searchTerm, sortField, sortOrder]);
+
+  // Calcular paginação
+  const totalItems = filteredAndSortedEntities.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedEntities = filteredAndSortedEntities.slice(
+    startIndex,
+    endIndex
+  );
+
+  // Handler para salvar/editar entidade
+  const handleSaveEntity = async (data: Entity) => {
+    try {
+      const entityRequest: EntityRequest = {
+        active: true,
+        id: data.id || "",
+        addressCity: data.addressCity || "",
+        addressComplement: data.addressComplement || "",
+        addressNeighborhood: data.addressNeighborhood || "",
+        addressNumber: data.addressNumber || "",
+        addressState: data.addressState || "",
+        addressStreet: data.addressStreet || "",
+        addressZipcode: data.addressZipcode || "",
+        companyName: data.socialName || "",
+        defaultEntity: false,
+        document: data.cnpjCpf || "",
+        email: data.email || "",
+        entityNickName: data.fantasyName || "",
+        finalWorkHour: data.endTime || "",
+        initialWorkHour: data.startTime || "",
+        inscricaoEstadual: data.inscricaoEstadual || "",
+        inscricaoMunicipal: data.inscricaoMunicipal || "",
+        entityType: data.entityType || "juridica",
+        phone: data.phone || "",
+        phoneCodeArea: data.ddd || "",
+        whatsappNumber: 0,
+        slug: data.fantasyName?.toLowerCase().replace(/ /g, "-") || "entity",
+      };
+
+      if (entityModalMode === "create") {
+        await entityService.createEntity(entityRequest);
+        showToast("Entidade cadastrada com sucesso", "success");
+      } else if (entityToEdit) {
+        entityRequest.id = entityToEdit.id;
+        await entityService.updateEntity(entityToEdit.id, entityRequest);
+        showToast("Entidade atualizada com sucesso", "success");
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["entities"] });
+      setIsEntityModalOpen(false);
+      setEntityToEdit(null);
+    } catch (error) {
+      console.error("Erro ao salvar entidade:", error);
+      showToast(
+        "Erro ao salvar entidade. Por favor, tente novamente.",
+        "error"
+      );
+    }
+  };
+  const handleRevalidateLogin = () => {
+    console.log("Revalidando login...");
   };
 
   const handleLogoClick = () => {
@@ -157,19 +228,7 @@ const AdminEntities: React.FC = () => {
   };
 
   const scrollToTop = () => {
-    const listContainer = document.querySelector('.admin-plans-list-container');
-    if (listContainer) {
-      const containerRect = listContainer.getBoundingClientRect();
-      const offset = 100;
-      const targetPosition = window.pageYOffset + containerRect.top - offset;
-
-      window.scrollTo({
-        top: targetPosition,
-        behavior: 'smooth'
-      });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
@@ -178,34 +237,15 @@ const AdminEntities: React.FC = () => {
     setTimeout(scrollToTop, 100);
   };
 
-  const handleSort = (field: 'fantasyName' | 'cnpjCpf' | 'socialName') => {
+  const handleSort = (field: "fantasyName" | "cnpjCpf" | "socialName") => {
     if (sortField === field) {
-      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
       setSortField(field);
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setCurrentPage(1);
   };
-
-  // Gerar opções para o seletor de itens por página
-  const itemsPerPageOptions = [];
-  for (let i = 50; i <= 200; i += 10) {
-    itemsPerPageOptions.push(i);
-  }
-
-  useEffect(() => {
-    const simulatedUserSession: UserSession = {
-      email: "admin@clinic4us.com",
-      alias: "Admin Demo",
-      clinicName: "Admin Dashboard",
-      role: "Administrator",
-      permissions: ["admin_access", "manage_entities", "view_all"],
-      loginTime: new Date().toISOString()
-    };
-
-    setUserSession(simulatedUserSession);
-  }, []);
 
   // Reset página quando filtros mudarem
   useEffect(() => {
@@ -220,7 +260,7 @@ const AdminEntities: React.FC = () => {
       sortOrder !== initialFilters.sortOrder;
 
     setHasFilterChanges(hasChanges);
-  }, [searchTerm, sortField, sortOrder]);
+  }, [searchTerm, sortField, sortOrder, initialFilters]);
 
   const clearFilters = () => {
     setSearchTerm(initialFilters.searchTerm);
@@ -231,28 +271,31 @@ const AdminEntities: React.FC = () => {
   };
 
   const handleAddEntity = () => {
-    setEntityModalMode('create');
+    setEntityModalMode("create");
     setEntityToEdit(null);
     setIsEntityModalOpen(true);
   };
 
   const handleEntityAction = (action: string, entityId: string) => {
-    const entity = entities.find(e => e.id === entityId);
+    const entity = entities.find((e: Entity) => e.id === entityId);
     if (!entity) return;
 
     switch (action) {
-      case 'view':
-        showToast(`Visualizando entidade: ${entity.fantasyName}`, 'info');
+      case "view":
+        showToast(`Visualizando entidade: ${entity.fantasyName}`, "info");
         break;
-      case 'user':
-        showToast(`Gerenciar usuários da entidade: ${entity.fantasyName}`, 'info');
+      case "user":
+        showToast(
+          `Gerenciar usuários da entidade: ${entity.fantasyName}`,
+          "info"
+        );
         break;
-      case 'edit':
-        setEntityModalMode('edit');
+      case "edit":
+        setEntityModalMode("edit");
         setEntityToEdit(entity);
         setIsEntityModalOpen(true);
         break;
-      case 'delete':
+      case "delete":
         setEntityToDelete(entity);
         setIsDeleteModalOpen(true);
         break;
@@ -261,11 +304,25 @@ const AdminEntities: React.FC = () => {
     }
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (entityToDelete) {
-      showToast(`Entidade ${entityToDelete.fantasyName} removida com sucesso`, 'success');
-      setIsDeleteModalOpen(false);
-      setEntityToDelete(null);
+      try {
+        await entityService.deleteEntity(entityToDelete.id);
+        showToast(
+          `Entidade ${entityToDelete.fantasyName} removida com sucesso`,
+          "success"
+        );
+        // Atualizar a lista de entidades
+        await queryClient.invalidateQueries({ queryKey: ["entities"] });
+        setIsDeleteModalOpen(false);
+        setEntityToDelete(null);
+      } catch (error) {
+        console.error("Erro ao remover entidade:", error);
+        showToast(
+          "Erro ao remover entidade. Por favor, tente novamente.",
+          "error"
+        );
+      }
     }
   };
 
@@ -274,39 +331,64 @@ const AdminEntities: React.FC = () => {
     setEntityToDelete(null);
   };
 
-  const handleSaveEntity = (data: EntityData) => {
-    if (entityModalMode === 'create') {
-      showToast('Entidade cadastrada com sucesso', 'success');
-    } else {
-      showToast('Entidade atualizada com sucesso', 'success');
-    }
-    setIsEntityModalOpen(false);
-  };
-
   const handleEntityRowClick = (entityId: string) => {
-    const entity = entities.find(e => e.id === entityId);
+    const entity = entities.find((e: Entity) => e.id === entityId);
     if (entity) {
-      showToast(`Visualizando detalhes da entidade: ${entity.fantasyName}`, 'info');
+      showToast(
+        `Visualizando detalhes da entidade: ${entity.fantasyName}`,
+        "info"
+      );
     }
   };
 
-  if (!userSession) {
+  if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
         <Typography>Carregando...</Typography>
       </Box>
     );
   }
 
+  if (isEntitiesError) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <Typography color="error">
+          Erro ao carregar entidades. Tente novamente.
+        </Typography>
+        <Button
+          onClick={() => refetchEntities()}
+          variant="contained"
+          sx={{ ml: 2 }}
+        >
+          Tentar novamente
+        </Button>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <HeaderInternal
         showCTAButton={false}
         className="login-header"
         isLoggedIn={true}
-        userEmail={userSession.email}
-        userProfile={userSession.role}
-        clinicName={userSession.clinicName}
+        userEmail={userSession?.email || "admin@exemplo.com"}
+        userProfile={userSession?.role || "admin"}
+        clinicName={userSession?.clinicName || "Clínica"}
         notificationCount={5}
         onRevalidateLogin={handleRevalidateLogin}
         onNotificationClick={handleNotificationClick}
@@ -317,30 +399,32 @@ const AdminEntities: React.FC = () => {
       <Box
         component="main"
         sx={{
-          padding: '1rem',
-          minHeight: 'calc(100vh - 120px)',
+          padding: "1rem",
+          minHeight: "calc(100vh - 120px)",
           background: colors.background,
-          marginTop: '85px',
-          flex: 1
+          marginTop: "85px",
+          flex: 1,
         }}
       >
         <Container maxWidth={false} disableGutters>
           {/* Título da Página */}
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            mb: 1,
-            gap: 2
-          }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              mb: 1,
+              gap: 2,
+            }}
+          >
             <Box>
               <Typography
                 variant="h4"
                 sx={{
-                  fontSize: '1.3rem',
+                  fontSize: "1.3rem",
                   mb: 1,
                   fontWeight: typography.fontWeight.semibold,
-                  color: colors.textPrimary
+                  color: colors.textPrimary,
                 }}
               >
                 Entidades
@@ -350,15 +434,18 @@ const AdminEntities: React.FC = () => {
                 sx={{
                   fontSize: typography.fontSize.sm,
                   color: colors.textSecondary,
-                  pb: '15px'
+                  pb: "15px",
                 }}
               >
                 Gestão de clínicas e unidades cadastradas no sistema.
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <FaqButton />
-              <AddButton onClick={handleAddEntity} title="Adicionar nova entidade" />
+              <AddButton
+                onClick={handleAddEntity}
+                title="Adicionar nova entidade"
+              />
             </Box>
           </Box>
 
@@ -366,192 +453,294 @@ const AdminEntities: React.FC = () => {
           <Paper
             elevation={0}
             sx={{
-              padding: '1.5rem',
+              padding: "1.5rem",
               mb: 2,
-              borderRadius: '12px',
-              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+              borderRadius: "12px",
+              boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
               border: `1px solid ${colors.backgroundAlt}`,
             }}
           >
             {/* Filtros */}
             <Box sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-              <TextField
-                label="Busca por palavra"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar"
-                InputLabelProps={{ shrink: true }}
+              <Box
                 sx={{
-                  flex: '2 1 300px',
-                  '& .MuiOutlinedInput-root': {
-                    height: inputs.default.height,
-                    '& fieldset': {
-                      borderColor: colors.border,
-                    },
-                    '&:hover fieldset': {
-                      borderColor: colors.border,
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: colors.primary,
-                    },
-                  },
-                  '& .MuiInputLabel-root': {
-                    fontSize: inputs.default.labelFontSize,
-                    color: colors.textSecondary,
-                    backgroundColor: colors.white,
-                    padding: inputs.default.labelPadding,
-                    '&.Mui-focused': {
-                      color: colors.primary,
-                    },
-                  },
+                  display: "flex",
+                  gap: 2,
+                  alignItems: "flex-end",
+                  flexWrap: "wrap",
                 }}
-              />
+              >
+                <TextField
+                  label="Busca por palavra"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Buscar"
+                  InputLabelProps={{ shrink: true }}
+                  sx={{
+                    flex: "2 1 300px",
+                    "& .MuiOutlinedInput-root": {
+                      height: inputs.default.height,
+                      "& fieldset": {
+                        borderColor: colors.border,
+                      },
+                      "&:hover fieldset": {
+                        borderColor: colors.border,
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: colors.primary,
+                      },
+                    },
+                    "& .MuiInputLabel-root": {
+                      fontSize: inputs.default.labelFontSize,
+                      color: colors.textSecondary,
+                      backgroundColor: colors.white,
+                      padding: inputs.default.labelPadding,
+                      "&.Mui-focused": {
+                        color: colors.primary,
+                      },
+                    },
+                  }}
+                />
 
-              <Box sx={{ opacity: hasFilterChanges ? 1 : 0.5, pointerEvents: hasFilterChanges ? 'auto' : 'none' }}>
-                <ClearFiltersButton onClick={clearFilters} />
-              </Box>
+                <Box
+                  sx={{
+                    opacity: hasFilterChanges ? 1 : 0.5,
+                    pointerEvents: hasFilterChanges ? "auto" : "none",
+                  }}
+                >
+                  <ClearFiltersButton onClick={clearFilters} />
+                </Box>
               </Box>
             </Box>
 
             {/* Contador de registros */}
             <Box sx={{ mb: 2, px: 1 }}>
-              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
-                <strong>{filteredAndSortedEntities.length}</strong> entidades encontradas
+              <Typography
+                variant="body2"
+                sx={{ color: "text.secondary", fontSize: "0.875rem" }}
+              >
+                <strong>{filteredAndSortedEntities.length}</strong> entidades
+                encontradas
               </Typography>
             </Box>
 
             {/* Lista de Entidades */}
             <Box className="admin-plans-list-container" sx={{ mt: 2 }}>
-            <Box className="admin-plans-table">
-              <Box className="admin-plans-table-header" style={{
-                display: 'flex',
-                gridTemplateColumns: 'unset'
-              }}>
+              <Box className="admin-plans-table">
                 <Box
-                  className="admin-plans-header-cell"
-                  sx={{ flex: '0 0 250px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
-                  onClick={() => handleSort('fantasyName')}
-                  title="Ordenar por nome fantasia"
+                  className="admin-plans-table-header"
+                  style={{
+                    display: "flex",
+                    gridTemplateColumns: "unset",
+                  }}
                 >
-                  N.Fantasia/Apelido {sortField === 'fantasyName' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </Box>
-                <Box
-                  className="admin-plans-header-cell"
-                  sx={{ flex: '0 0 180px', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
-                  onClick={() => handleSort('cnpjCpf')}
-                  title="Ordenar por CNPJ/CPF"
-                >
-                  CNPJ/CPF {sortField === 'cnpjCpf' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </Box>
-                <Box
-                  className="admin-plans-header-cell"
-                  sx={{ flex: '1 1 auto', textAlign: 'left', cursor: 'pointer', userSelect: 'none' }}
-                  onClick={() => handleSort('socialName')}
-                  title="Ordenar por razão social"
-                >
-                  Razão Social/Nome {sortField === 'socialName' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
-                </Box>
-                <Box className="admin-plans-header-cell" sx={{ flex: '0 0 180px', textAlign: 'left' }}>Horário de funcionamento</Box>
-                <Box className="admin-plans-header-cell" sx={{ flex: '0 0 200px', justifyContent: 'flex-end' }}>Ações</Box>
-              </Box>
-
-              <Box className="admin-plans-table-body">
-                {paginatedEntities.map((entity) => (
                   <Box
-                    key={entity.id}
-                    className="admin-plans-table-row"
-                    onClick={() => handleEntityRowClick(entity.id)}
+                    className="admin-plans-header-cell"
                     sx={{
-                      cursor: 'pointer',
-                      display: 'flex',
-                      gridTemplateColumns: 'unset'
+                      flex: "0 0 250px",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
                     }}
+                    onClick={() => handleSort("fantasyName")}
+                    title="Ordenar por nome fantasia"
                   >
-                    <Box className="admin-plans-cell" sx={{ flex: '0 0 250px', textAlign: 'left' }} data-label="N.Fantasia/Apelido">
-                      {entity.fantasyName}
-                    </Box>
-                    <Box className="admin-plans-cell" sx={{ flex: '0 0 180px', textAlign: 'left' }} data-label="CNPJ/CPF">
-                      {entity.cnpjCpf}
-                    </Box>
-                    <Box className="admin-plans-cell" sx={{ flex: '1 1 auto', textAlign: 'left', whiteSpace: 'normal', wordBreak: 'break-word' }} data-label="Razão Social/Nome">
-                      {entity.socialName}
-                    </Box>
-                    <Box className="admin-plans-cell" sx={{ flex: '0 0 180px', textAlign: 'left' }} data-label="Horário de funcionamento">
-                      {entity.workingHours}
-                    </Box>
-                    <Box className="admin-plans-cell admin-plans-actions" sx={{ flex: '0 0 200px', textAlign: 'right' }} data-label="Ações">
-                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => { e.stopPropagation(); handleEntityAction('view', entity.id); }}
-                          title="Visualizar entidade"
+                    N.Fantasia/Apelido{" "}
+                    {sortField === "fantasyName"
+                      ? sortOrder === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </Box>
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{
+                      flex: "0 0 180px",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }}
+                    onClick={() => handleSort("cnpjCpf")}
+                    title="Ordenar por CNPJ/CPF"
+                  >
+                    CNPJ/CPF{" "}
+                    {sortField === "cnpjCpf"
+                      ? sortOrder === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </Box>
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{
+                      flex: "1 1 auto",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      userSelect: "none",
+                    }}
+                    onClick={() => handleSort("socialName")}
+                    title="Ordenar por razão social"
+                  >
+                    Razão Social/Nome{" "}
+                    {sortField === "socialName"
+                      ? sortOrder === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </Box>
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{ flex: "0 0 180px", textAlign: "left" }}
+                  >
+                    Horário de funcionamento
+                  </Box>
+                  <Box
+                    className="admin-plans-header-cell"
+                    sx={{ flex: "0 0 200px", justifyContent: "flex-end" }}
+                  >
+                    Ações
+                  </Box>
+                </Box>
+
+                <Box className="admin-plans-table-body">
+                  {paginatedEntities.map((entity: Entity) => (
+                    <Box
+                      key={entity.id}
+                      className="admin-plans-table-row"
+                      onClick={() => handleEntityRowClick(entity.id)}
+                      sx={{
+                        cursor: "pointer",
+                        display: "flex",
+                        gridTemplateColumns: "unset",
+                      }}
+                    >
+                      <Box
+                        className="admin-plans-cell"
+                        sx={{ flex: "0 0 250px", textAlign: "left" }}
+                        data-label="N.Fantasia/Apelido"
+                      >
+                        {entity.fantasyName}
+                      </Box>
+                      <Box
+                        className="admin-plans-cell"
+                        sx={{ flex: "0 0 180px", textAlign: "left" }}
+                        data-label="CNPJ/CPF"
+                      >
+                        {entity.cnpjCpf}
+                      </Box>
+                      <Box
+                        className="admin-plans-cell"
+                        sx={{
+                          flex: "1 1 auto",
+                          textAlign: "left",
+                          whiteSpace: "normal",
+                          wordBreak: "break-word",
+                        }}
+                        data-label="Razão Social/Nome"
+                      >
+                        {entity.socialName}
+                      </Box>
+                      <Box
+                        className="admin-plans-cell"
+                        sx={{ flex: "0 0 180px", textAlign: "left" }}
+                        data-label="Horário de funcionamento"
+                      >
+                        {entity.workingHours}
+                      </Box>
+                      <Box
+                        className="admin-plans-cell admin-plans-actions"
+                        sx={{ flex: "0 0 200px", textAlign: "right" }}
+                        data-label="Ações"
+                      >
+                        <Box
                           sx={{
-                            backgroundColor: '#6c757d',
-                            color: 'white',
-                            width: '32px',
-                            height: '32px',
-                            '&:hover': {
-                              backgroundColor: '#5a6268',
-                            }
+                            display: "flex",
+                            gap: 1,
+                            justifyContent: "flex-end",
                           }}
                         >
-                          <ViewModule sx={{ fontSize: '1rem' }} />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => { e.stopPropagation(); handleEntityAction('user', entity.id); }}
-                          title="Gerenciar usuários"
-                          sx={{
-                            backgroundColor: '#28a745',
-                            color: 'white',
-                            width: '32px',
-                            height: '32px',
-                            '&:hover': {
-                              backgroundColor: '#218838',
-                            }
-                          }}
-                        >
-                          <Person sx={{ fontSize: '1rem' }} />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => { e.stopPropagation(); handleEntityAction('edit', entity.id); }}
-                          title="Editar entidade"
-                          sx={{
-                            backgroundColor: '#03B4C6',
-                            color: 'white',
-                            width: '32px',
-                            height: '32px',
-                            '&:hover': {
-                              backgroundColor: '#029AAB',
-                            }
-                          }}
-                        >
-                          <Edit sx={{ fontSize: '1rem' }} />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => { e.stopPropagation(); handleEntityAction('delete', entity.id); }}
-                          title="Excluir entidade"
-                          sx={{
-                            backgroundColor: '#dc3545',
-                            color: 'white',
-                            width: '32px',
-                            height: '32px',
-                            '&:hover': {
-                              backgroundColor: '#c82333',
-                            }
-                          }}
-                        >
-                          <Delete sx={{ fontSize: '1rem' }} />
-                        </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEntityAction("view", entity.id);
+                            }}
+                            title="Visualizar entidade"
+                            sx={{
+                              backgroundColor: "#6c757d",
+                              color: "white",
+                              width: "32px",
+                              height: "32px",
+                              "&:hover": {
+                                backgroundColor: "#5a6268",
+                              },
+                            }}
+                          >
+                            <ViewModule sx={{ fontSize: "1rem" }} />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEntityAction("user", entity.id);
+                            }}
+                            title="Gerenciar usuários"
+                            sx={{
+                              backgroundColor: "#28a745",
+                              color: "white",
+                              width: "32px",
+                              height: "32px",
+                              "&:hover": {
+                                backgroundColor: "#218838",
+                              },
+                            }}
+                          >
+                            <Person sx={{ fontSize: "1rem" }} />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEntityAction("edit", entity.id);
+                            }}
+                            title="Editar entidade"
+                            sx={{
+                              backgroundColor: "#03B4C6",
+                              color: "white",
+                              width: "32px",
+                              height: "32px",
+                              "&:hover": {
+                                backgroundColor: "#029AAB",
+                              },
+                            }}
+                          >
+                            <Edit sx={{ fontSize: "1rem" }} />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEntityAction("delete", entity.id);
+                            }}
+                            title="Excluir entidade"
+                            sx={{
+                              backgroundColor: "#dc3545",
+                              color: "white",
+                              width: "32px",
+                              height: "32px",
+                              "&:hover": {
+                                backgroundColor: "#c82333",
+                              },
+                            }}
+                          >
+                            <Delete sx={{ fontSize: "1rem" }} />
+                          </IconButton>
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                ))}
+                  ))}
+                </Box>
               </Box>
-            </Box>
             </Box>
 
             {/* Paginação Inferior */}
@@ -572,10 +761,7 @@ const AdminEntities: React.FC = () => {
         </Container>
       </Box>
 
-      <FooterInternal
-        simplified={true}
-        className="login-footer-component"
-      />
+      <FooterInternal simplified={true} className="login-footer-component" />
 
       <Toast
         message={toast.message}
@@ -588,9 +774,11 @@ const AdminEntities: React.FC = () => {
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         title="Excluir Entidade"
-        message={entityToDelete
-          ? `Tem certeza que deseja excluir a entidade "${entityToDelete.fantasyName}" (${entityToDelete.cnpjCpf})?`
-          : "Tem certeza que deseja excluir esta entidade?"}
+        message={
+          entityToDelete
+            ? `Tem certeza que deseja excluir a entidade "${entityToDelete.fantasyName}" (${entityToDelete.cnpjCpf})?`
+            : "Tem certeza que deseja excluir esta entidade?"
+        }
         warningMessage="Esta ação não poderá ser desfeita."
         confirmButtonText="Excluir"
         cancelButtonText="Cancelar"
@@ -604,26 +792,39 @@ const AdminEntities: React.FC = () => {
         onClose={() => setIsEntityModalOpen(false)}
         onSave={handleSaveEntity}
         mode={entityModalMode}
-        initialData={entityToEdit ? {
-          entityType: 'juridica',
-          cnpj: entityToEdit.cnpjCpf,
-          inscEstadual: '',
-          inscMunicipal: '',
-          fantasyName: entityToEdit.fantasyName,
-          socialName: entityToEdit.socialName,
-          ddd: '',
-          phone: '',
-          email: '',
-          cep: '',
-          street: '',
-          number: '',
-          complement: '',
-          neighborhood: '',
-          city: '',
-          state: '',
-          startTime: entityToEdit.workingHours.split(' - ')[0] || '08:00',
-          endTime: entityToEdit.workingHours.split(' - ')[1] || '18:00'
-        } : undefined}
+        initialData={
+          entityToEdit
+            ? {
+                id: entityToEdit.id,
+                fantasyName: entityToEdit.fantasyName,
+                cnpjCpf: entityToEdit.cnpjCpf,
+                socialName: entityToEdit.socialName,
+                entityType: entityToEdit.entityType || "juridica",
+                inscricaoEstadual: entityToEdit.inscricaoEstadual,
+                inscricaoMunicipal: entityToEdit.inscricaoMunicipal,
+
+                // Campos de contato
+                ddd: entityToEdit.ddd,
+                phone: entityToEdit.phone,
+                email: entityToEdit.email,
+
+                // Campos de endereço - SEM valores padrão para preservar os valores reais
+                addressZipcode: entityToEdit.addressZipcode,
+                addressStreet: entityToEdit.addressStreet,
+                addressNumber: entityToEdit.addressNumber,
+                addressComplement: entityToEdit.addressComplement,
+                addressNeighborhood: entityToEdit.addressNeighborhood,
+                addressCity: entityToEdit.addressCity,
+                addressState: entityToEdit.addressState,
+
+                // Campos de horário
+                workingHours: entityToEdit.workingHours || "08:00 - 18:00",
+                startTime:
+                  entityToEdit.workingHours?.split(" - ")[0] || "08:00",
+                endTime: entityToEdit.workingHours?.split(" - ")[1] || "18:00",
+              }
+            : undefined
+        }
       />
     </Box>
   );
